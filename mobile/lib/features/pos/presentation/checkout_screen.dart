@@ -47,9 +47,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     super.dispose();
   }
 
+  /// The explicitly chosen customer — never defaulted, so a credit sale
+  /// can't silently land on the wrong account.
   CustomerAccount? _customer(List<CustomerAccount> all) {
-    if (all.isEmpty) return null;
-    return all.firstWhere((c) => c.id == _customerId, orElse: () => all.first);
+    for (final c in all) {
+      if (c.id == _customerId) return c;
+    }
+    return null;
+  }
+
+  /// Why confirming is blocked (shown under the button), or null if allowed.
+  String? _blockReason(Cart cart, CustomerAccount? customer) {
+    if (cart.isEmpty) return null; // nothing to hint; button just disabled
+    if (_method == PaymentMethod.debt && customer == null) return 'အကြွေးရောင်းရန် ဖောက်သည် ရွေးပါ';
+    if (_method == PaymentMethod.cash && _received.text.isNotEmpty && parseMoney(_received.text) < cart.total) {
+      return 'လက်ခံရရှိငွေ စုစုပေါင်းထက် နည်းနေပါသည်';
+    }
+    return null;
   }
 
   Future<void> _pickCustomer(List<CustomerAccount> all) async {
@@ -109,6 +123,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final customer = _customer(customers);
     final received = parseMoney(_received.text);
     final change = received > cart.total ? received - cart.total : 0;
+    final blockReason = _blockReason(cart, customer);
 
     return Scaffold(
       body: Column(
@@ -181,7 +196,27 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       ),
                     ),
                   PaymentMethod.debt => customer == null
-                      ? const SizedBox()
+                      ? AppCard(
+                          padding: const EdgeInsets.all(14),
+                          color: AppColors.debtBg,
+                          borderColor: AppColors.debtBorder,
+                          child: InkWell(
+                            onTap: () => _pickCustomer(customers),
+                            child: Row(
+                              children: [
+                                const InitialAvatar(
+                                    initial: '?', bg: AppColors.debtAvatar, fg: AppColors.debtInk, size: 40),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text('ဖောက်သည် ရွေးပါ',
+                                      style: AppText.s(14, weight: AppText.w700)),
+                                ),
+                                Text('ရွေးရန်',
+                                    style: AppText.s(13, weight: AppText.w600, color: AppColors.debtInk)),
+                              ],
+                            ),
+                          ),
+                        )
                       : AppCard(
                           padding: const EdgeInsets.all(14),
                           color: AppColors.debtBg,
@@ -258,8 +293,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 const SizedBox(height: 12),
                 PrimaryButton(
                   label: 'အတည်ပြုပြီး ပြေစာထုတ်မယ်',
-                  onPressed: cart.isEmpty ? null : () => _confirm(cart, customer),
+                  dimWhenDisabled: blockReason != null,
+                  onPressed: cart.isEmpty || blockReason != null ? null : () => _confirm(cart, customer),
                 ),
+                if (blockReason != null) ...[
+                  const SizedBox(height: 8),
+                  Text(blockReason,
+                      textAlign: TextAlign.center, style: AppText.s(12, weight: AppText.w600, color: AppColors.danger)),
+                ],
               ],
             ),
           ),

@@ -6,6 +6,7 @@ import 'package:zaypos_app/app/fake_seed.dart';
 import 'package:zaypos_app/core/features/features_providers.dart';
 import 'package:zaypos_app/core/features/shop_template.dart';
 import 'package:zaypos_app/core/router/app_router.dart';
+import 'package:zaypos_app/features/sales/data/sales_providers.dart';
 import 'package:zaypos_app/main.dart';
 
 import 'helpers.dart';
@@ -112,8 +113,14 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('အကြွေး'));
     await tester.pumpAndSettle();
-    // Default customer is the first one (ဦးသန်းထွန်း, 96,000).
+    // No customer chosen yet: confirm is blocked with a hint.
+    expect(find.text('အကြွေးရောင်းရန် ဖောက်သည် ရွေးပါ'), findsOneWidget);
+    await tester.tap(find.text('ရွေးရန်'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('ဦးသန်းထွန်း'));
+    await tester.pumpAndSettle();
     expect(find.text('ယခင်အကြွေး 96,000 Ks'), findsOneWidget);
+    expect(find.text('အကြွေးရောင်းရန် ဖောက်သည် ရွေးပါ'), findsNothing);
     await tester.tap(find.text('အတည်ပြုပြီး ပြေစာထုတ်မယ်'));
     await tester.pumpAndSettle();
     router.go('/customers/${SeedIds.thanHtun}');
@@ -151,5 +158,46 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('28,000 Ks'), findsOneWidget);
     expect(find.text('void'), findsNothing);
+  });
+
+  Future<void> toCheckout(WidgetTester tester, GoRouter router) async {
+    router.go('/pos');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('ပစ္စည်းများ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('ရေသန့် 1L'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('ငွေရှင်းမယ်'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('debt checkout without a customer cannot be confirmed', (tester) async {
+    final (c, router) = await boot(tester);
+    await toCheckout(tester, router);
+    await tester.tap(find.text('အကြွေး'));
+    await tester.pumpAndSettle();
+    final before = c.read(salesProvider).length;
+    await tester.tap(find.text('အတည်ပြုပြီး ပြေစာထုတ်မယ်'));
+    await tester.pumpAndSettle();
+    expect(find.text('ရောင်းပြီးပါပြီ'), findsNothing);
+    expect(c.read(salesProvider).length, before);
+  });
+
+  testWidgets('cash received below total blocks confirm; enough unblocks', (tester) async {
+    final (_, router) = await boot(tester);
+    await toCheckout(tester, router); // total 600
+    await tester.enterText(find.byType(TextFormField), '500');
+    await tester.pumpAndSettle();
+    expect(find.text('လက်ခံရရှိငွေ စုစုပေါင်းထက် နည်းနေပါသည်'), findsOneWidget);
+    await tester.tap(find.text('အတည်ပြုပြီး ပြေစာထုတ်မယ်'));
+    await tester.pumpAndSettle();
+    expect(find.text('ရောင်းပြီးပါပြီ'), findsNothing);
+    await tester.enterText(find.byType(TextFormField), '1000');
+    await tester.pumpAndSettle();
+    expect(find.text('လက်ခံရရှိငွေ စုစုပေါင်းထက် နည်းနေပါသည်'), findsNothing);
+    expect(find.text('400 Ks'), findsOneWidget); // change
+    await tester.tap(find.text('အတည်ပြုပြီး ပြေစာထုတ်မယ်'));
+    await tester.pumpAndSettle();
+    expect(find.text('ရောင်းပြီးပါပြီ'), findsOneWidget);
   });
 }

@@ -45,6 +45,7 @@ class PrimaryButton extends StatelessWidget {
     this.borderWidth = 1.5,
     this.fontWeight = AppText.w700,
     this.horizontalPadding = 12,
+    this.dimWhenDisabled = false,
   });
 
   final String label;
@@ -61,6 +62,9 @@ class PrimaryButton extends StatelessWidget {
   final double borderWidth;
   final FontWeight fontWeight;
   final double horizontalPadding;
+
+  /// Render at 50% opacity when [onPressed] is null.
+  final bool dimWhenDisabled;
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +100,7 @@ class PrimaryButton extends StatelessWidget {
           ? BorderSide.none
           : BorderSide(color: b, width: borderWidth),
     );
-    return SizedBox(
+    final button = SizedBox(
       height: height,
       child: Material(
         color: bg,
@@ -147,5 +151,8 @@ class PrimaryButton extends StatelessWidget {
         ),
       ),
     );
+    return dimWhenDisabled && onPressed == null
+        ? Opacity(opacity: 0.5, child: button)
+        : button;
   }
 }
