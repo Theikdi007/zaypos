@@ -13,7 +13,8 @@ import '../../../core/widgets/common.dart';
 import '../../../core/widgets/money_text.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../customers/data/customer_providers.dart';
-import '../../products/data/product_providers.dart';
+import '../../inventory/data/stock_providers.dart';
+import '../../inventory/domain/stock_movement.dart';
 import '../data/sales_providers.dart';
 import '../domain/sale.dart';
 import 'sale_ui.dart';
@@ -27,9 +28,10 @@ class SaleDetailScreen extends ConsumerWidget {
     final voiding = !sale.voided;
     final sign = voiding ? 1 : -1;
     ref.read(salesProvider.notifier).setVoided(sale.id, voiding);
-    for (final l in sale.lines) {
-      if (l.productId != null) ref.read(productsProvider.notifier).adjustStock(l.productId!, sign * l.qtyMilli);
-    }
+    final stock = ref.read(stockLedgerProvider.notifier);
+    stock.record(voiding
+        ? stock.forSale(sale, StockMovementType.voidReturn, sign: 1)
+        : stock.forSale(sale, StockMovementType.sale, sign: -1, note: 'unvoid'));
     if (sale.method == PaymentMethod.debt && sale.customerId != null) {
       // Append-only ledger: reverse (or re-apply) the credit sale.
       ref.read(debtLedgerProvider.notifier).adjustment(

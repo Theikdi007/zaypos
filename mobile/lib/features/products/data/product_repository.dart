@@ -7,7 +7,6 @@ abstract interface class ProductRepository {
   List<Product> list();
   List<ProductVariant> variantsOf(String productId);
   void add(Product product, {List<ProductVariant> variants = const []});
-  void adjustStock(String productId, int deltaMilli);
 }
 
 /// Bound at the composition root (lib/app/fake_overrides.dart).

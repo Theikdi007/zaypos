@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/features/features_providers.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -17,7 +16,8 @@ import '../../../core/widgets/primary_button.dart';
 import '../../customers/data/customer_providers.dart';
 import '../../customers/domain/customer_account.dart';
 import '../../customers/presentation/widgets/customer_row.dart';
-import '../../products/data/product_providers.dart';
+import '../../inventory/data/stock_providers.dart';
+import '../../inventory/domain/stock_movement.dart';
 import '../../sales/data/sales_providers.dart';
 import '../../sales/domain/sale.dart';
 import '../../sales/presentation/sale_ui.dart';
@@ -104,11 +104,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           customerName: isDebt ? customer?.name : null,
           received: _method == PaymentMethod.cash && _received.text.isNotEmpty ? parseMoney(_received.text) : null,
         );
-    if (ref.read(tenantFeaturesProvider).stock) {
-      for (final l in cart.lines) {
-        if (l.productId != null) ref.read(productsProvider.notifier).adjustStock(l.productId!, -l.qtyMilli);
-      }
-    }
+    final stock = ref.read(stockLedgerProvider.notifier);
+    stock.record(stock.forSale(sale, StockMovementType.sale, sign: -1));
     if (isDebt && customer != null) {
       ref.read(debtLedgerProvider.notifier).creditSale(customer.id, sale);
     }

@@ -6,7 +6,6 @@ class Product {
     required this.name,
     required this.cost,
     required this.price,
-    required this.stockMilli,
     required this.category,
     required this.tint,
     required this.initial,
@@ -32,7 +31,8 @@ class Product {
   /// Kyats (contractor / wholesale; TenantFeatures.quotation).
   final int? wholesalePrice;
 
-  final int stockMilli;
+  /// Low-stock alert threshold (milli-units). Stock itself lives in the
+  /// stock ledger (StockMovement), not here.
   final int lowAlertMilli;
   final String category;
   final String unit;
@@ -47,15 +47,12 @@ class Product {
   final DateTime? deletedAt;
 
   bool get isDeleted => deletedAt != null;
-  bool get isOut => stockMilli <= 0;
-  bool get isLow => stockMilli > 0 && stockMilli <= lowAlertMilli;
 
   Product copyWith({
     String? name,
     int? cost,
     int? price,
     int? Function()? wholesalePrice,
-    int? stockMilli,
     int? lowAlertMilli,
     String? category,
     String? unit,
@@ -72,7 +69,6 @@ class Product {
         cost: cost ?? this.cost,
         price: price ?? this.price,
         wholesalePrice: wholesalePrice != null ? wholesalePrice() : this.wholesalePrice,
-        stockMilli: stockMilli ?? this.stockMilli,
         lowAlertMilli: lowAlertMilli ?? this.lowAlertMilli,
         category: category ?? this.category,
         unit: unit ?? this.unit,
@@ -85,7 +81,8 @@ class Product {
       );
 }
 
-/// Size × color variant of a product (TenantFeatures.variants).
+/// Size × color variant of a product (TenantFeatures.variants). Its stock
+/// is the sum of StockMovements with this variantId.
 class ProductVariant {
   const ProductVariant({
     required this.id,
@@ -93,7 +90,6 @@ class ProductVariant {
     required this.productId,
     required this.size,
     required this.color,
-    required this.stockMilli,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -104,7 +100,6 @@ class ProductVariant {
   final String productId;
   final String size;
   final String color;
-  final int stockMilli;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -112,13 +107,12 @@ class ProductVariant {
   /// "M · အနက်"
   String get label => '$size · $color';
 
-  ProductVariant copyWith({int? stockMilli, DateTime? updatedAt, DateTime? Function()? deletedAt}) => ProductVariant(
+  ProductVariant copyWith({DateTime? updatedAt, DateTime? Function()? deletedAt}) => ProductVariant(
         id: id,
         tenantId: tenantId,
         productId: productId,
         size: size,
         color: color,
-        stockMilli: stockMilli ?? this.stockMilli,
         createdAt: createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt != null ? deletedAt() : this.deletedAt,

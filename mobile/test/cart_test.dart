@@ -12,7 +12,6 @@ Product _product(String id, int price) {
     name: id,
     cost: 0,
     price: price,
-    stockMilli: 0,
     category: '',
     tint: 0,
     initial: '',

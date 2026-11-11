@@ -18,6 +18,8 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/qty.dart';
 import '../../auth/data/session.dart';
+import '../../inventory/data/stock_providers.dart';
+import '../../inventory/domain/stock_movement.dart';
 import '../data/product_providers.dart';
 import '../domain/product.dart';
 import 'sections/feature_sections.dart';
@@ -81,32 +83,34 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     final t = nowUtc();
     final productId = newId();
     final variants = <ProductVariant>[];
-    var stockMilli = 0;
+    final movements = <StockMovement>[];
+    final stock = ref.read(stockLedgerProvider.notifier);
     if (features.stock && _track) {
       if (features.variants) {
         for (final e in _sizes.entries.where((e) => e.value)) {
           for (final c in _colors.entries.where((c) => c.value)) {
             final s = _variantStock['${e.key} · ${c.key}'] ?? 0;
-            stockMilli += s;
+            final variantId = newId();
+            if (s != 0) movements.add(stock.restock(productId, s, variantId: variantId, note: 'initial'));
             variants.add(ProductVariant(
-              id: newId(),
+              id: variantId,
               tenantId: tenantId,
               productId: productId,
               size: e.key,
               color: c.key,
-              stockMilli: s,
               createdAt: t,
               updatedAt: t,
             ));
           }
         }
       } else if (features.serialWarranty && _serial) {
-        stockMilli = Qty.units(_imeis.length);
+        if (_imeis.isNotEmpty) movements.add(stock.restock(productId, Qty.units(_imeis.length), note: 'initial'));
       } else {
-        stockMilli = Qty.parse(_stock.text, decimal: features.decimalQty) ?? 0;
+        final q = Qty.parse(_stock.text, decimal: features.decimalQty) ?? 0;
+        if (q != 0) movements.add(stock.restock(productId, q, note: 'initial'));
       }
     }
-    ref.read(productsProvider.notifier).add(
+    ref.read(catalogProvider.notifier).add(
           Product(
             id: productId,
             tenantId: tenantId,
@@ -114,7 +118,6 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             cost: int.tryParse(_cost.text) ?? 0,
             price: price,
             wholesalePrice: features.quotation ? int.tryParse(_wholesale.text) : null,
-            stockMilli: stockMilli,
             lowAlertMilli: Qty.parse(_alert.text, decimal: features.decimalQty) ?? Qty.units(5),
             category: _category ?? '',
             unit: _unit ?? '',
@@ -126,6 +129,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
           ),
           variants: variants,
         );
+    stock.record(movements);
     context.pop();
   }
 

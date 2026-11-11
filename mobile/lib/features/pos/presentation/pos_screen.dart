@@ -152,7 +152,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           stockLabel: features.stock ? (low ? 'ကျန် ${Qty.format(p.stockMilli)} ခု' : 'Stock ${Qty.format(p.stockMilli)}') : null,
           stockLow: low,
           qtyMilli: cart.qtyOf(p.id),
-          onTap: () => ref.read(cartProvider.notifier).addProduct(p),
+          onTap: () => ref.read(cartProvider.notifier).addProduct(p.product),
         );
       },
     );

@@ -11,7 +11,7 @@ import '../../../core/utils/money_format.dart';
 import '../../../core/utils/qty.dart';
 import '../../../core/widgets/common.dart';
 import '../data/product_providers.dart';
-import '../domain/product.dart';
+import '../domain/product_view.dart';
 
 enum _StockFilter { all, low, out }
 
@@ -113,7 +113,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 class _ProductRow extends StatelessWidget {
   const _ProductRow({required this.product, required this.showStock});
 
-  final Product product;
+  final ProductView product;
   final bool showStock;
 
   @override
