@@ -1,0 +1,283 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/features/features_providers.dart';
+import '../../../core/router/routes.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text.dart';
+import '../../../core/utils/money_format.dart';
+import '../../../core/utils/qty.dart';
+import '../../../core/widgets/app_icons.dart';
+import '../../../core/widgets/common.dart';
+import '../../../core/widgets/money_text.dart';
+import '../../../core/widgets/numeric_keypad.dart';
+import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/product_tile.dart';
+import '../../../core/widgets/segmented_tabs.dart';
+import '../../products/data/product_providers.dart';
+import '../../sales/data/sales_providers.dart';
+import '../domain/cart.dart';
+
+enum PosMode { products, quick }
+
+class PosScreen extends ConsumerStatefulWidget {
+  const PosScreen({super.key});
+
+  @override
+  ConsumerState<PosScreen> createState() => _PosScreenState();
+}
+
+class _PosScreenState extends ConsumerState<PosScreen> {
+  PosMode? _mode;
+  String? _cat; // null = all
+  String _query = '';
+  String _amount = '';
+  final _quickName = TextEditingController();
+
+  @override
+  void dispose() {
+    _quickName.dispose();
+    super.dispose();
+  }
+
+  void _onKey(String v) {
+    setState(() {
+      if (v == NumericKeypad.backspace) {
+        if (_amount.isNotEmpty) _amount = _amount.substring(0, _amount.length - 1);
+      } else if (_amount.length < 9) {
+        if (_amount.isEmpty && (v == '0' || v == '00')) return;
+        _amount += v;
+      }
+    });
+  }
+
+  void _addQuick() {
+    final n = int.tryParse(_amount) ?? 0;
+    if (n <= 0) return;
+    ref.read(cartProvider.notifier).addQuick(n, _quickName.text);
+    _quickName.clear();
+    setState(() => _amount = '');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final features = ref.watch(tenantFeaturesProvider);
+    final cart = ref.watch(cartProvider);
+    final nextNo = ref.watch(salesProvider.notifier).nextNumber();
+    ref.watch(salesProvider); // rebuild number after a sale
+    final mode = features.quickSale ? (_mode ?? PosMode.quick) : PosMode.products;
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ScreenHeader(
+                title: 'ရောင်းမယ်',
+                onBack: () => context.canPop() ? context.pop() : context.go(Routes.dashboard),
+                trailing: Text('#$nextNo', style: AppText.s(13, color: AppColors.muted)),
+                bottom: [
+                  if (features.quickSale)
+                    SegmentedTabs<PosMode>(
+                      options: const [(PosMode.products, 'ပစ္စည်းများ'), (PosMode.quick, 'Quick Sale')],
+                      selected: mode,
+                      onChanged: (m) => setState(() => _mode = m),
+                    ),
+                  if (mode == PosMode.products) ..._productFilters(),
+                ],
+              ),
+              Expanded(child: mode == PosMode.products ? _productGrid(cart) : _quickSale(cart)),
+            ],
+          ),
+          Positioned(left: 12, right: 12, bottom: 16 + MediaQuery.paddingOf(context).bottom, child: _CartBar(cart: cart)),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _productFilters() {
+    final products = ref.watch(productsProvider);
+    final cats = <String>[];
+    for (final p in products) {
+      if (!cats.contains(p.category)) cats.add(p.category);
+    }
+    return [
+      Row(
+        children: [
+          Expanded(
+            child: SearchField(
+              hint: 'ပစ္စည်းအမည် ရှာရန်',
+              semanticLabel: 'ပစ္စည်းရှာရန်',
+              onChanged: (q) => setState(() => _query = q.trim()),
+            ),
+          ),
+          const SizedBox(width: 10),
+          const _ScanButton(),
+        ],
+      ),
+      FilterChips<String?>(
+        scrollable: true,
+        options: [(null, 'အားလုံး'), for (final c in cats) (c, c)],
+        selected: _cat,
+        onChanged: (c) => setState(() => _cat = c),
+      ),
+    ];
+  }
+
+  Widget _productGrid(Cart cart) {
+    final features = ref.watch(tenantFeaturesProvider);
+    final items = ref
+        .watch(productsProvider)
+        .where((p) => _cat == null || p.category == _cat)
+        .where((p) => _query.isEmpty || p.name.contains(_query))
+        .toList();
+    return GridView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 120),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        mainAxisExtent: 160,
+      ),
+      itemCount: items.length,
+      itemBuilder: (_, i) {
+        final p = items[i];
+        final low = p.stockMilli <= Qty.units(3);
+        return ProductTile(
+          name: p.name,
+          initial: p.initial,
+          tint: Color(p.tint),
+          price: p.price,
+          stockLabel: features.stock ? (low ? 'ကျန် ${Qty.format(p.stockMilli)} ခု' : 'Stock ${Qty.format(p.stockMilli)}') : null,
+          stockLow: low,
+          qtyMilli: cart.qtyOf(p.id),
+          onTap: () => ref.read(cartProvider.notifier).addProduct(p),
+        );
+      },
+    );
+  }
+
+  Widget _quickSale(Cart cart) {
+    final quick = cart.quickLines;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('ဈေးနှုန်း', style: AppText.s(12, color: AppColors.muted)),
+              const SizedBox(height: 6),
+              MoneyText(
+                _amount.isEmpty ? 0 : int.parse(_amount),
+                size: 36,
+                letterSpacing: -0.5,
+                unitSize: 16,
+                unitColor: AppColors.muted,
+                textAlign: TextAlign.right,
+              ),
+              const SizedBox(height: 6),
+              Text('ပစ္စည်းအမည် (မထည့်လည်းရ)', style: AppText.s(12, color: AppColors.muted)),
+              const SizedBox(height: 6),
+              AppInput(
+                controller: _quickName,
+                height: 40,
+                radius: 10,
+                fontSize: 14,
+                horizontalPadding: 10,
+                borderColor: AppColors.border,
+                hint: 'ဥပမာ - ဆပ်ပြာ',
+                semanticLabel: 'ပစ္စည်းအမည်',
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        NumericKeypad(onKey: _onKey),
+        const SizedBox(height: 10),
+        PrimaryButton(
+          label: '+ ခြင်းထဲထည့်မယ်',
+          variant: ButtonVariant.soft,
+          height: 48,
+          radius: 14,
+          fontSize: 15,
+          borderWidth: 2,
+          onPressed: _addQuick,
+        ),
+        if (quick.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Text('ထည့်ပြီး: ${quick.map((l) => formatMoney(l.price)).join(' + ')} Ks',
+              style: AppText.s(12, color: AppColors.muted)),
+        ],
+      ],
+    );
+  }
+}
+
+class _ScanButton extends StatelessWidget {
+  const _ScanButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Barcode scan',
+      excludeSemantics: true,
+      child: Material(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () {},
+          child: const SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(child: AppIcon(AppIcons.barcode, color: AppColors.surface)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CartBar extends StatelessWidget {
+  const _CartBar({required this.cart});
+  final Cart cart;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 10, 10, 10),
+      decoration: BoxDecoration(color: AppColors.text, borderRadius: BorderRadius.circular(18)),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('ပစ္စည်း ${Qty.format(cart.countMilli)} ခု',
+                    style: AppText.s(12, color: AppColors.surface.withValues(alpha: 0.8))),
+                MoneyText(cart.total, size: 20, color: AppColors.surface),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          PrimaryButton(
+            label: 'ငွေရှင်းမယ်',
+            height: 52,
+            radius: 14,
+            fontSize: 15,
+            horizontalPadding: 20,
+            trailingIcon: AppIcons.chevronRight,
+            iconStroke: 2.2,
+            onPressed: cart.isEmpty ? null : () => context.push(Routes.checkout),
+          ),
+        ],
+      ),
+    );
+  }
+}
