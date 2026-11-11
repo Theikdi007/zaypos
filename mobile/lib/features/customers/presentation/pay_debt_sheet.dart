@@ -9,7 +9,7 @@ import '../../../core/utils/money_format.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../sales/domain/sale.dart';
-import '../data/customer_providers.dart';
+import '../application/customer_service.dart';
 import '../domain/customer_account.dart';
 
 /// Opens the "ငွေပြန်ဆပ်" modal bottom sheet for [customer].
@@ -53,11 +53,16 @@ class _PayDebtSheetState extends ConsumerState<PayDebtSheet> {
     _amount.selection = TextSelection.collapsed(offset: _amount.text.length);
   }
 
-  void _confirm(int amount) {
+  Future<void> _confirm(int amount) async {
     if (amount > 0) {
-      ref.read(debtLedgerProvider.notifier).payment(widget.customer.id, amount, _method);
+      await ref.read(customerServiceProvider).recordPayment(
+            tenantId: widget.customer.customer.tenantId,
+            customerId: widget.customer.id,
+            amount: amount,
+            method: _method,
+          );
     }
-    Navigator.pop(context);
+    if (mounted) Navigator.pop(context);
   }
 
   @override

@@ -34,9 +34,13 @@ class FakeStockRepository implements StockRepository {
   final FakeDatabase db;
 
   @override
-  List<StockMovement> list() =>
-      List.unmodifiable(db.stock.where((m) => m.deletedAt == null));
+  Stream<List<StockMovement>> watchAll() =>
+      db.watch({FakeTable.stock}, () => List.unmodifiable(db.stock.where((m) => m.deletedAt == null)));
 
   @override
-  void addAll(List<StockMovement> movements) => db.stock.addAll(movements);
+  Future<void> addAll(List<StockMovement> movements) async {
+    if (movements.isEmpty) return;
+    db.stock.addAll(movements);
+    db.touch({FakeTable.stock});
+  }
 }

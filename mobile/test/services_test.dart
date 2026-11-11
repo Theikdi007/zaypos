@@ -25,20 +25,21 @@ import 'helpers.dart';
 
 class _FailingDebtRepository implements DebtRepository {
   @override
-  List<DebtEntry> list() => const [];
+  Stream<List<DebtEntry>> watchAll() => Stream.value(const []);
   @override
-  void add(DebtEntry entry) => throw StateError('disk full');
+  Future<void> add(DebtEntry entry) async => throw StateError('disk full');
 }
 
 void main() {
   final water = draft(productId: SeedIds.water, name: 'ရေသန့် 1L', qtyMilli: Qty.units(2), price: 600, cost: 450);
-  int stockOfWater(ProviderContainer c) => c.read(productsProvider).firstWhere((p) => p.id == SeedIds.water).stockMilli;
+  Future<int> stockOfWater(ProviderContainer c) async =>
+      (await val(c, productsProvider)).firstWhere((p) => p.id == SeedIds.water).stockMilli;
 
   group('CheckoutService validation', () {
     test('credit sale without a customer is rejected and nothing is stored', () async {
       final c = makeContainer();
       addTearDown(c.dispose);
-      final salesBefore = c.read(salesProvider).length;
+      final salesBefore = (await val(c, salesProvider)).length;
       await expectLater(
         sell(c, [water], method: PaymentMethod.debt),
         throwsA(isA<CheckoutException>().having((e) => e.error, 'error', CheckoutError.customerRequired)),
@@ -47,8 +48,8 @@ void main() {
         sell(c, [water], method: PaymentMethod.debt, customerId: 'no-such-customer'),
         throwsA(isA<CheckoutException>().having((e) => e.error, 'error', CheckoutError.customerRequired)),
       );
-      expect(c.read(salesProvider).length, salesBefore);
-      expect(stockOfWater(c), Qty.units(48));
+      expect((await val(c, salesProvider)).length, salesBefore);
+      expect(await stockOfWater(c), Qty.units(48));
     });
 
     test('cash below total and empty cart are rejected', () async {
@@ -67,37 +68,37 @@ void main() {
     test('void restores stock and reverses debt; un-void re-applies both', () async {
       final c = makeContainer();
       addTearDown(c.dispose);
-      int balance() => c.read(customerAccountProvider(SeedIds.aungKyaw))!.balance;
-      expect(balance(), 52000);
+      Future<int> balance() async => (await val(c, customerAccountProvider(SeedIds.aungKyaw)))!.balance;
+      expect(await balance(), 52000);
 
       final sale = await sell(c, [water], method: PaymentMethod.debt, customerId: SeedIds.aungKyaw);
-      expect(stockOfWater(c), Qty.units(46));
-      expect(balance(), 53200);
+      expect(await stockOfWater(c), Qty.units(46));
+      expect(await balance(), 53200);
 
       final svc = c.read(voidSaleServiceProvider);
       await svc.setVoided(sale.id, true);
-      expect(c.read(saleByIdProvider(sale.id))!.voided, isTrue);
-      expect(stockOfWater(c), Qty.units(48));
-      expect(balance(), 52000);
+      expect((await val(c, saleByIdProvider(sale.id)))!.voided, isTrue);
+      expect(await stockOfWater(c), Qty.units(48));
+      expect(await balance(), 52000);
       // Ledger is append-only: the credit sale is still there, reversed by an adjustment.
-      final forSale = c.read(debtLedgerProvider).where((e) => e.saleId == sale.id).toList();
+      final forSale = (await val(c, debtLedgerProvider)).where((e) => e.saleId == sale.id).toList();
       expect(forSale.map((e) => e.type).toSet(), {DebtEntryType.creditSale, DebtEntryType.adjustment});
 
       await svc.setVoided(sale.id, true); // idempotent
-      expect(stockOfWater(c), Qty.units(48));
+      expect(await stockOfWater(c), Qty.units(48));
 
       await svc.setVoided(sale.id, false);
-      expect(stockOfWater(c), Qty.units(46));
-      expect(balance(), 53200);
+      expect(await stockOfWater(c), Qty.units(46));
+      expect(await balance(), 53200);
     });
 
     test('voiding the seeded credit sale A-1030 returns its stock', () async {
       final c = makeContainer();
       addTearDown(c.dispose);
-      final ricesBefore = c.read(productsProvider).firstWhere((p) => p.id == SeedIds.rice).stockMilli;
+      final ricesBefore = (await val(c, productsProvider)).firstWhere((p) => p.id == SeedIds.rice).stockMilli;
       await c.read(voidSaleServiceProvider).setVoided(SeedIds.sale1030, true);
-      expect(c.read(productsProvider).firstWhere((p) => p.id == SeedIds.rice).stockMilli, ricesBefore + Qty.units(2));
-      expect(c.read(customerAccountProvider(SeedIds.aungKyaw))!.balance, 28000);
+      expect((await val(c, productsProvider)).firstWhere((p) => p.id == SeedIds.rice).stockMilli, ricesBefore + Qty.units(2));
+      expect((await val(c, customerAccountProvider(SeedIds.aungKyaw)))!.balance, 28000);
     });
   });
 
@@ -153,7 +154,7 @@ void main() {
       createdAt: t,
       updatedAt: t,
     );
-    repo.add(repo.list().first.copyWith(), serials: [serial]);
+    await repo.add((await repo.watchAll().first).first.copyWith(), serials: [serial]);
     final line = (
       productId: SeedIds.water,
       variantId: null,
@@ -165,11 +166,12 @@ void main() {
       cost: 50,
     );
     final sale = await sell(c, [line]);
-    ProductSerial current() => repo.serialsOf(SeedIds.water).firstWhere((s) => s.id == serial.id);
-    expect(current().status, SerialStatus.sold);
-    expect(current().saleLineId, sale.lines.single.id);
+    Future<ProductSerial> current() async =>
+        (await repo.watchSerials(SeedIds.water).first).firstWhere((s) => s.id == serial.id);
+    expect((await current()).status, SerialStatus.sold);
+    expect((await current()).saleLineId, sale.lines.single.id);
     await c.read(voidSaleServiceProvider).setVoided(sale.id, true);
-    expect(current().status, SerialStatus.inStock);
-    expect(current().saleLineId, isNull);
+    expect((await current()).status, SerialStatus.inStock);
+    expect((await current()).saleLineId, isNull);
   });
 }

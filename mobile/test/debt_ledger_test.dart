@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaypos_app/app/fake_seed.dart';
+import 'package:zaypos_app/features/customers/application/customer_service.dart';
 import 'package:zaypos_app/features/customers/data/customer_providers.dart';
 import 'package:zaypos_app/features/customers/domain/customer.dart';
 import 'package:zaypos_app/features/customers/domain/customer_account.dart';
@@ -86,10 +87,10 @@ void main() {
   });
 
   group('DebtLedgerNotifier (fake repositories)', () {
-    test('seeded ဦးအောင်ကျော် balance is the design 52,000', () {
+    test('seeded ဦးအောင်ကျော် balance is the design 52,000', () async {
       final c = makeContainer();
       addTearDown(c.dispose);
-      expect(c.read(customerAccountProvider(SeedIds.aungKyaw))!.balance, 52000);
+      expect((await val(c, customerAccountProvider(SeedIds.aungKyaw)))!.balance, 52000);
     });
 
     test('credit sale + payment update the balance through the ledger', () async {
@@ -97,23 +98,24 @@ void main() {
       addTearDown(c.dispose);
       final sale = await sell(c, [draft(qtyMilli: 2000, price: 3000)],
           method: PaymentMethod.debt, customerId: SeedIds.aungKyaw);
-      final ledger = c.read(debtLedgerProvider.notifier);
-      final credit = c.read(debtLedgerProvider).firstWhere((e) => e.saleId == sale.id);
+      final credit = (await val(c, debtLedgerProvider)).firstWhere((e) => e.saleId == sale.id);
       expect(credit.type, DebtEntryType.creditSale);
       expect(credit.saleNo, sale.no);
       expect(credit.saleId, sale.id);
       expect(credit.amount, 6000);
-      expect(c.read(customerAccountProvider(SeedIds.aungKyaw))!.balance, 58000);
+      expect((await val(c, customerAccountProvider(SeedIds.aungKyaw)))!.balance, 58000);
 
-      final pay = ledger.payment(SeedIds.aungKyaw, 20000, PaymentMethod.kbz);
+      final pay = await c.read(customerServiceProvider).recordPayment(
+          tenantId: credit.tenantId, customerId: SeedIds.aungKyaw, amount: 20000, method: PaymentMethod.kbz);
       expect(pay.title, 'ငွေပြန်ဆပ် · KBZPay');
-      expect(c.read(customerAccountProvider(SeedIds.aungKyaw))!.balance, 38000);
+      expect((await val(c, customerAccountProvider(SeedIds.aungKyaw)))!.balance, 38000);
     });
 
-    test('entries carry tenant id and UUID v7 ids', () {
+    test('entries carry tenant id and UUID v7 ids', () async {
       final c = makeContainer();
       addTearDown(c.dispose);
-      final e = c.read(debtLedgerProvider.notifier).payment(SeedIds.aungKyaw, 1000, PaymentMethod.cash);
+      final e = await c.read(customerServiceProvider).recordPayment(
+          tenantId: 'shop-1', customerId: SeedIds.aungKyaw, amount: 1000, method: PaymentMethod.cash);
       expect(e.tenantId, isNotEmpty);
       expect(e.id, matches(RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')));
     });

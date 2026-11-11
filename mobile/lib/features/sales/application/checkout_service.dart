@@ -3,18 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/data/unit_of_work.dart';
 import '../../../core/utils/ids.dart';
 import '../../auth/data/session.dart';
-import '../../customers/data/customer_providers.dart';
 import '../../customers/data/customer_repository.dart';
 import '../../customers/data/debt_repository.dart';
 import '../../customers/domain/debt_entry.dart';
-import '../../devices/data/device_providers.dart';
 import '../../devices/data/device_repository.dart';
-import '../../inventory/data/stock_providers.dart';
 import '../../inventory/data/stock_repository.dart';
 import '../../inventory/domain/stock_movement.dart';
 import '../../products/data/product_repository.dart';
 import '../../products/domain/product_modules.dart';
-import '../data/sales_providers.dart';
+import '../data/sales_providers.dart' show SaleLineDraft;
 import '../data/sales_repository.dart';
 import '../domain/sale.dart';
 
@@ -63,7 +60,6 @@ class CheckoutService {
     required this.customers,
     required this.devices,
     required this.products,
-    this.onCommitted,
   });
 
   final UnitOfWork uow;
@@ -75,21 +71,18 @@ class CheckoutService {
   final DeviceRepository devices;
   final ProductRepository products;
 
-  /// Called after a successful commit (refreshes read models).
-  final void Function()? onCommitted;
-
   Future<Sale> checkout(CheckoutRequest r) async {
     if (r.lines.isEmpty) throw const CheckoutException(CheckoutError.emptyCart);
     final isDebt = r.method == PaymentMethod.debt;
     String? customerName;
     if (isDebt) {
       final id = r.customerId;
-      final match = id == null ? null : customers.list().where((c) => c.id == id).firstOrNull;
+      final match = id == null ? null : await customers.watchById(id).first;
       if (match == null) throw const CheckoutException(CheckoutError.customerRequired);
       customerName = match.name;
     }
 
-    final sale = await uow.run(() async {
+    return uow.run(() async {
       final id = newId();
       final t = nowUtc();
       final lines = [
@@ -117,7 +110,7 @@ class CheckoutService {
       final sale = Sale(
         id: id,
         tenantId: tenantId,
-        no: devices.issueReceiptNo(),
+        no: await devices.issueReceiptNo(),
         method: r.method,
         lines: lines,
         payments: isDebt
@@ -139,13 +132,13 @@ class CheckoutService {
         createdAt: t,
         updatedAt: t,
       );
-      sales.add(sale);
-      stock.addAll(movementsForSale(sale, StockMovementType.sale, sign: -1));
+      await sales.add(sale);
+      await stock.addAll(movementsForSale(sale, StockMovementType.sale, sign: -1));
       for (final l in lines) {
-        if (l.serialId != null) products.setSerialStatus(l.serialId!, SerialStatus.sold, saleLineId: l.id);
+        if (l.serialId != null) await products.setSerialStatus(l.serialId!, SerialStatus.sold, saleLineId: l.id);
       }
       if (isDebt) {
-        debt.add(DebtEntry(
+        await debt.add(DebtEntry(
           id: newId(),
           tenantId: tenantId,
           customerId: r.customerId!,
@@ -159,17 +152,7 @@ class CheckoutService {
       }
       return sale;
     });
-    onCommitted?.call();
-    return sale;
   }
-}
-
-/// Refreshes every read model a checkout/void touches.
-void refreshSalesReadModels(Ref ref) {
-  ref.read(salesProvider.notifier).refresh();
-  ref.read(stockLedgerProvider.notifier).refresh();
-  ref.read(debtLedgerProvider.notifier).refresh();
-  ref.read(deviceProvider.notifier).refresh();
 }
 
 final checkoutServiceProvider = Provider<CheckoutService>((ref) => CheckoutService(
@@ -181,5 +164,4 @@ final checkoutServiceProvider = Provider<CheckoutService>((ref) => CheckoutServi
       customers: ref.read(customerRepositoryProvider),
       devices: ref.read(deviceRepositoryProvider),
       products: ref.read(productRepositoryProvider),
-      onCommitted: () => refreshSalesReadModels(ref),
     ));

@@ -42,9 +42,18 @@ class FakeCustomerRepository implements CustomerRepository {
   final FakeDatabase db;
 
   @override
-  List<Customer> list() =>
-      List.unmodifiable(db.customers.where((c) => c.deletedAt == null));
+  Stream<List<Customer>> watchAll() =>
+      db.watch({FakeTable.customers}, () => List.unmodifiable(db.customers.where((c) => c.deletedAt == null)));
 
   @override
-  void add(Customer customer) => db.customers.add(customer);
+  Stream<Customer?> watchById(String id) => db.watch(
+        {FakeTable.customers},
+        () => db.customers.where((c) => c.id == id && c.deletedAt == null).firstOrNull,
+      );
+
+  @override
+  Future<void> add(Customer customer) async {
+    db.customers.add(customer);
+    db.touch({FakeTable.customers});
+  }
 }

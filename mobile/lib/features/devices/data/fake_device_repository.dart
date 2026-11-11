@@ -21,13 +21,14 @@ class FakeDeviceRepository implements DeviceRepository {
   }
 
   @override
-  Device current() => db.devices[_i];
+  Stream<Device> watchCurrent() => db.watch({FakeTable.devices}, () => db.devices[_i]);
 
   @override
-  String issueReceiptNo() {
+  Future<String> issueReceiptNo() async {
     final i = _i;
     final d = db.devices[i].copyWith(lastSeq: db.devices[i].lastSeq + 1, updatedAt: nowUtc());
     db.devices[i] = d;
+    db.touch({FakeTable.devices});
     return formatReceiptNo(d.code, d.lastSeq);
   }
 }

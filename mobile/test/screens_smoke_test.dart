@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:zaypos_app/app/fake_overrides.dart';
 import 'package:zaypos_app/app/fake_seed.dart';
 import 'package:zaypos_app/core/features/features_providers.dart';
 import 'package:zaypos_app/core/features/shop_template.dart';
 import 'package:zaypos_app/core/router/app_router.dart';
-import 'package:zaypos_app/features/sales/data/sales_providers.dart';
 import 'package:zaypos_app/main.dart';
 
 import 'helpers.dart';
@@ -176,11 +176,11 @@ void main() {
     await toCheckout(tester, router);
     await tester.tap(find.text('အကြွေး'));
     await tester.pumpAndSettle();
-    final before = c.read(salesProvider).length;
+    final before = c.read(fakeDatabaseProvider).sales.length;
     await tester.tap(find.text('အတည်ပြုပြီး ပြေစာထုတ်မယ်'));
     await tester.pumpAndSettle();
     expect(find.text('ရောင်းပြီးပါပြီ'), findsNothing);
-    expect(c.read(salesProvider).length, before);
+    expect(c.read(fakeDatabaseProvider).sales.length, before);
   });
 
   testWidgets('cash received below total blocks confirm; enough unblocks', (tester) async {

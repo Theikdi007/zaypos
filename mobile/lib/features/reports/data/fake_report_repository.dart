@@ -1,7 +1,6 @@
 import '../../../core/utils/myanmar.dart';
 import '../../../core/utils/qty.dart';
-import '../../products/data/product_repository.dart';
-import '../../sales/data/sales_repository.dart';
+import '../../../app/fake_database.dart';
 import '../../sales/domain/sale.dart';
 import '../domain/report.dart';
 import 'report_repository.dart';
@@ -9,14 +8,17 @@ import 'report_repository.dart';
 /// Computes reports from the (fake) sales store, the way a Drift query
 /// would. Profit uses each line's costSnapshot, never the current cost.
 class FakeReportRepository implements ReportRepository {
-  FakeReportRepository({required this.sales, required this.products});
+  FakeReportRepository(this.db);
 
-  final SalesRepository sales;
-  final ProductRepository products;
+  final FakeDatabase db;
+
+  @override
+  Stream<ReportSnapshot> watchReport(ReportPeriod period) =>
+      db.watch({FakeTable.sales, FakeTable.products}, () => report(period));
 
   static const _weekday = {1: 'တနင်္လာ', 2: 'အင်္ဂါ', 3: 'ဗုဒ္ဓ', 4: 'ကြာ', 5: 'သော', 6: 'စနေ', 7: 'တနင်္ဂ'};
 
-  @override
+  /// Synchronous query (also used directly by tests with a fixed [now]).
   ReportSnapshot report(ReportPeriod period, {DateTime? now}) {
     final n = (now ?? DateTime.now()).toLocal();
     final today = DateTime(n.year, n.month, n.day);
@@ -25,7 +27,7 @@ class FakeReportRepository implements ReportRepository {
       ReportPeriod.week => today.subtract(const Duration(days: 6)),
       ReportPeriod.month => DateTime(n.year, n.month, 1),
     };
-    final live = sales.list().where((s) => !s.voided).toList();
+    final live = db.sales.where((s) => s.deletedAt == null && !s.voided).toList();
     List<Sale> between(DateTime a, DateTime b) =>
         live.where((s) => !s.createdAt.toLocal().isBefore(a) && s.createdAt.toLocal().isBefore(b)).toList();
     final tomorrow = today.add(const Duration(days: 1));
@@ -59,7 +61,7 @@ class FakeReportRepository implements ReportRepository {
     final shares = _percentages(byMethod);
 
     // Top products by amount.
-    final units = {for (final p in products.list()) p.id: p.unit};
+    final units = {for (final p in db.products) p.id: p.unit};
     final agg = <String, (String, int, int, String)>{}; // key -> (name, qtyMilli, amount, unit)
     for (final s in inPeriod) {
       for (final l in s.lines) {

@@ -10,6 +10,7 @@ import '../../../core/widgets/common.dart';
 import '../../../core/widgets/money_text.dart';
 import '../data/customer_providers.dart';
 import 'widgets/customer_row.dart';
+import '../../../core/widgets/async_view.dart';
 
 enum _Tab { debt, overdue, all }
 
@@ -26,7 +27,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final all = ref.watch(customerAccountsProvider);
+    final async = ref.watch(customerAccountsProvider);
+    if (!async.hasValue) return AsyncView(value: async, data: (_) => const SizedBox());
+    final all = async.requireValue;
     final now = DateTime.now();
     final debtors = all.where((c) => c.hasDebt).toList();
     final total = debtors.fold(0, (a, c) => a + c.balance);

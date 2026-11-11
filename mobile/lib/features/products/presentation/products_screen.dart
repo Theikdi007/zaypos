@@ -12,6 +12,7 @@ import '../../../core/utils/qty.dart';
 import '../../../core/widgets/common.dart';
 import '../data/product_providers.dart';
 import '../domain/product_view.dart';
+import '../../../core/widgets/async_view.dart';
 
 enum _StockFilter { all, low, out }
 
@@ -29,7 +30,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   @override
   Widget build(BuildContext context) {
     final features = ref.watch(tenantFeaturesProvider);
-    final all = ref.watch(productsProvider);
+    final async = ref.watch(productsProvider);
+    if (!async.hasValue) return AsyncView(value: async, data: (_) => const SizedBox());
+    final all = async.requireValue;
     final lowCount = all.where((p) => p.isLow).length;
     final filter = features.stock ? _filter : _StockFilter.all;
     final rows = all

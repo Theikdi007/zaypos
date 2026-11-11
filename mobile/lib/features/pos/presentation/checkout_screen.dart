@@ -116,7 +116,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final cart = ref.watch(cartProvider);
-    final customers = ref.watch(customerAccountsProvider);
+    final customers = ref.watch(customerAccountsProvider).value ?? const [];
     final customer = _customer(customers);
     final received = parseMoney(_received.text);
     final change = received > cart.total ? received - cart.total : 0;

@@ -21,6 +21,8 @@ import '../../products/data/product_providers.dart';
 import '../../sales/data/sales_providers.dart';
 import '../../sales/presentation/widgets/sale_row.dart';
 import '../domain/today_summary.dart';
+import '../../../core/widgets/async_view.dart';
+import '../../../core/utils/async_combine.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -28,11 +30,17 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(sessionProvider);
-    final today = ref.watch(todaySummaryProvider);
+    final todayA = ref.watch(todaySummaryProvider);
     final features = ref.watch(tenantFeaturesProvider);
-    final accounts = ref.watch(customerAccountsProvider);
-    final products = ref.watch(productsProvider);
-    final recent = ref.watch(salesProvider).take(3).toList();
+    final accountsA = ref.watch(customerAccountsProvider);
+    final productsA = ref.watch(productsProvider);
+    final salesA = ref.watch(salesProvider);
+    final ready = allReady([todayA, accountsA, productsA, salesA]);
+    if (!ready.hasValue) return AsyncView(value: ready, data: (_) => const SizedBox());
+    final today = todayA.requireValue;
+    final accounts = accountsA.requireValue;
+    final products = productsA.requireValue;
+    final recent = salesA.requireValue.take(3).toList();
 
     final debtors = accounts.where((a) => a.hasDebt);
     final debtTotal = debtors.fold(0, (a, c) => a + c.balance);

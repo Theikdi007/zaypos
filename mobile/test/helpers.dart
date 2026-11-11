@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 import 'package:zaypos_app/app/fake_overrides.dart';
 import 'package:zaypos_app/features/sales/application/checkout_service.dart';
 import 'package:zaypos_app/features/sales/data/sales_providers.dart';
@@ -40,3 +41,19 @@ Future<Sale> sell(ProviderContainer c, List<SaleLineDraft> lines,
     c.read(checkoutServiceProvider).checkout(
           CheckoutRequest(lines: lines, method: method, customerId: customerId, received: received),
         );
+
+/// Latest value of an async (stream-backed) provider: subscribes, lets the
+/// fake streams deliver, then returns the current data (throws on error).
+Future<T> val<T>(ProviderContainer c, ProviderListenable<AsyncValue<T>> p) async {
+  final sub = c.listen<AsyncValue<T>>(p, (_, _) {});
+  try {
+    for (var i = 0; i < 20; i++) {
+      await Future<void>.delayed(Duration.zero);
+    }
+    final v = sub.read();
+    if (v.hasError) throw v.error!;
+    return v.requireValue;
+  } finally {
+    sub.close();
+  }
+}

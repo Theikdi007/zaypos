@@ -13,6 +13,8 @@ import '../../dashboard/domain/today_summary.dart';
 import '../data/sales_providers.dart';
 import '../domain/sale.dart';
 import 'widgets/sale_row.dart';
+import '../../../core/widgets/async_view.dart';
+import '../../../core/utils/async_combine.dart';
 
 class SalesHistoryScreen extends ConsumerStatefulWidget {
   const SalesHistoryScreen({super.key});
@@ -26,11 +28,14 @@ class _SalesHistoryScreenState extends ConsumerState<SalesHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final today = ref.watch(todaySummaryProvider);
+    final todayA = ref.watch(todaySummaryProvider);
+    final salesA = ref.watch(salesProvider);
+    final ready = allReady([todayA, salesA]);
+    if (!ready.hasValue) return Scaffold(body: AsyncView(value: ready, data: (_) => const SizedBox()));
+    final today = todayA.requireValue;
     final now = DateTime.now();
     // The header date chip is "ယနေ့": list today's sales.
-    final sales = ref
-        .watch(salesProvider)
+    final sales = salesA.requireValue
         .where((s) => daysAgo(s.createdAt, now) == 0)
         .where((s) => _filter == null || s.method == _filter)
         .toList();

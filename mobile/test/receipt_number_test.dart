@@ -14,28 +14,29 @@ void main() {
     expect(formatReceiptNo('A', 12345), 'A-12345');
   });
 
-  test('each device issues its own unique, increasing sequence', () {
+  test('each device issues its own unique, increasing sequence', () async {
     final db = FakeDatabase()
       ..devices.addAll([seedDevice('t', code: 'A', lastSeq: 0), seedDevice('t', code: 'B', lastSeq: 0)]);
     final a = FakeDeviceRepository(db, deviceId: db.devices[0].id);
     final b = FakeDeviceRepository(db, deviceId: db.devices[1].id);
     final issued = [
-      for (var i = 0; i < 50; i++) ...[a.issueReceiptNo(), b.issueReceiptNo()],
+      for (var i = 0; i < 50; i++) ...[await a.issueReceiptNo(), await b.issueReceiptNo()],
     ];
     expect(issued.toSet(), hasLength(100)); // no collisions across devices
     expect(issued.take(4), ['A-0001', 'B-0001', 'A-0002', 'B-0002']);
-    expect(a.current().lastSeq, 50);
-    expect(b.current().nextReceiptNo, 'B-0051');
+    expect((await a.watchCurrent().first).lastSeq, 50);
+    expect((await b.watchCurrent().first).nextReceiptNo, 'B-0051');
   });
 
   test('sales get consecutive numbers from the current device', () async {
     final c = makeContainer();
     addTearDown(c.dispose);
-    expect(c.read(deviceProvider).nextReceiptNo, 'A-1033');
+    expect((await val(c, deviceProvider)).nextReceiptNo, 'A-1033');
     final s1 = await sell(c, [draft()]);
     final s2 = await sell(c, [draft()]);
     expect([s1.no, s2.no], ['A-1033', 'A-1034']);
-    expect(c.read(deviceProvider).nextReceiptNo, 'A-1035');
-    expect(c.read(salesProvider).map((s) => s.no).toSet(), hasLength(c.read(salesProvider).length));
+    expect((await val(c, deviceProvider)).nextReceiptNo, 'A-1035');
+    final all = await val(c, salesProvider);
+    expect(all.map((s) => s.no).toSet(), hasLength(all.length));
   });
 }

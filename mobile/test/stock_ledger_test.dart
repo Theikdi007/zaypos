@@ -51,10 +51,11 @@ void main() {
   });
 
   group('ProductView (cached stock in the read model only)', () {
-    test('seeded stock equals the design figures', () {
+    test('seeded stock equals the design figures', () async {
       final c = makeContainer();
       addTearDown(c.dispose);
-      ProductView v(String id) => c.read(productsProvider).firstWhere((p) => p.id == id);
+      final views = await val(c, productsProvider);
+      ProductView v(String id) => views.firstWhere((p) => p.id == id);
       expect(v(SeedIds.water).stockMilli, Qty.units(48));
       expect(v(SeedIds.oil).isLow, isTrue);
       expect(v(SeedIds.coffee).isOut, isTrue);
@@ -64,11 +65,11 @@ void main() {
       final c = makeContainer();
       addTearDown(c.dispose);
       final sale = await sell(c, [draft(productId: SeedIds.water, name: 'ရေသန့် 1L', qtyMilli: Qty.units(2), price: 600, cost: 450)]);
-      int water() => c.read(productsProvider).firstWhere((p) => p.id == SeedIds.water).stockMilli;
-      expect(water(), Qty.units(46));
+      Future<int> water() async => (await val(c, productsProvider)).firstWhere((p) => p.id == SeedIds.water).stockMilli;
+      expect(await water(), Qty.units(46));
       await c.read(voidSaleServiceProvider).setVoided(sale.id, true);
-      expect(water(), Qty.units(48));
-      expect(stockOf(c.read(stockLedgerProvider).where((m) => m.productId == SeedIds.water)), Qty.units(48));
+      expect(await water(), Qty.units(48));
+      expect(stockOf((await val(c, stockMovementsProvider)).where((m) => m.productId == SeedIds.water)), Qty.units(48));
     });
   });
 }

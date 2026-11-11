@@ -10,7 +10,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/form_section.dart';
 import '../../../core/utils/ids.dart';
 import '../../auth/data/session.dart';
-import '../data/customer_providers.dart';
+import '../application/customer_service.dart';
 import '../domain/customer.dart';
 
 class AddCustomerScreen extends ConsumerStatefulWidget {
@@ -45,7 +45,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
     super.dispose();
   }
 
-  void _save() {
+  Future<void> _save() async {
     final name = _name.text.trim();
     if (name.isEmpty) {
       setState(() => _showErrors = true);
@@ -63,13 +63,9 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
       createdAt: t,
       updatedAt: t,
     );
-    ref.read(customersProvider.notifier).add(customer);
-    // Opening balance from the paper book goes into the ledger.
-    final opening = int.tryParse(_opening.text) ?? 0;
-    if (opening != 0) {
-      ref.read(debtLedgerProvider.notifier).adjustment(customer.id, opening, note: 'ယခင်အကြွေး');
-    }
-    context.pop();
+    // Opening balance from the paper book goes into the ledger (same unit of work).
+    await ref.read(customerServiceProvider).create(customer, openingBalance: int.tryParse(_opening.text) ?? 0);
+    if (mounted) context.pop();
   }
 
   @override

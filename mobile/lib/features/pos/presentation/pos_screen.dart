@@ -18,6 +18,7 @@ import '../../../core/widgets/segmented_tabs.dart';
 import '../../products/data/product_providers.dart';
 import '../../devices/data/device_providers.dart';
 import '../domain/cart.dart';
+import '../../../core/widgets/async_view.dart';
 
 enum PosMode { products, quick }
 
@@ -64,7 +65,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   Widget build(BuildContext context) {
     final features = ref.watch(tenantFeaturesProvider);
     final cart = ref.watch(cartProvider);
-    final nextNo = ref.watch(deviceProvider).nextReceiptNo;
+    final nextNo = ref.watch(deviceProvider).value?.nextReceiptNo ?? '';
     final mode = features.quickSale ? (_mode ?? PosMode.quick) : PosMode.products;
 
     return Scaffold(
@@ -97,7 +98,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   }
 
   List<Widget> _productFilters() {
-    final products = ref.watch(productsProvider);
+    final products = ref.watch(productsProvider).value ?? const [];
     final cats = <String>[];
     for (final p in products) {
       if (!cats.contains(p.category)) cats.add(p.category);
@@ -127,8 +128,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
   Widget _productGrid(Cart cart) {
     final features = ref.watch(tenantFeaturesProvider);
-    final items = ref
-        .watch(productsProvider)
+    final async = ref.watch(productsProvider);
+    if (!async.hasValue) return AsyncView(value: async, data: (_) => const SizedBox());
+    final items = async.requireValue
         .where((p) => _cat == null || p.category == _cat)
         .where((p) => _query.isEmpty || p.name.contains(_query))
         .toList();

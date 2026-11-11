@@ -15,6 +15,7 @@ import '../../auth/data/session.dart';
 import '../../../core/utils/qty.dart';
 import '../data/sales_providers.dart';
 import '../domain/sale.dart';
+import '../../../core/widgets/async_view.dart';
 
 class SaleReceiptScreen extends ConsumerWidget {
   const SaleReceiptScreen({super.key, required this.id});
@@ -23,8 +24,10 @@ class SaleReceiptScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sale = ref.watch(saleByIdProvider(id));
+    final async = ref.watch(saleByIdProvider(id));
     final shop = ref.watch(sessionProvider).shopName;
+    if (!async.hasValue) return Scaffold(body: AsyncView(value: async, data: (_) => const SizedBox()));
+    final sale = async.requireValue;
     if (sale == null) return const Scaffold();
     final pad = MediaQuery.paddingOf(context);
     final date = mmReceiptDate(sale.createdAt);

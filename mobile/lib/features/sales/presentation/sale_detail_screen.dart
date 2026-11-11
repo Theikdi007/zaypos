@@ -16,6 +16,7 @@ import '../application/void_sale_service.dart';
 import '../data/sales_providers.dart';
 import '../domain/sale.dart';
 import 'sale_ui.dart';
+import '../../../core/widgets/async_view.dart';
 
 class SaleDetailScreen extends ConsumerWidget {
   const SaleDetailScreen({super.key, required this.id});
@@ -28,7 +29,9 @@ class SaleDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sale = ref.watch(saleByIdProvider(id));
+    final async = ref.watch(saleByIdProvider(id));
+    if (!async.hasValue) return Scaffold(body: AsyncView(value: async, data: (_) => const SizedBox()));
+    final sale = async.requireValue;
     if (sale == null) return const Scaffold();
 
     final (badge, badgeBg, badgeFg) = sale.voided

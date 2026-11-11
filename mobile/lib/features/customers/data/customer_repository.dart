@@ -4,8 +4,9 @@ import '../domain/customer.dart';
 
 abstract interface class CustomerRepository {
   /// Live (not soft-deleted) customers.
-  List<Customer> list();
-  void add(Customer customer);
+  Stream<List<Customer>> watchAll();
+  Stream<Customer?> watchById(String id);
+  Future<void> add(Customer customer);
 }
 
 /// Bound at the composition root (lib/app/fake_overrides.dart).

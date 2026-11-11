@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaypos_app/app/fake_overrides.dart';
 import 'package:zaypos_app/core/features/features_providers.dart';
 import 'package:zaypos_app/core/router/app_router.dart';
 import 'package:zaypos_app/core/utils/qty.dart';
-import 'package:zaypos_app/features/inventory/data/stock_providers.dart';
 import 'package:zaypos_app/features/products/data/product_providers.dart';
-import 'package:zaypos_app/features/products/data/product_repository.dart';
 import 'package:zaypos_app/features/products/domain/product_modules.dart';
 import 'package:zaypos_app/main.dart';
 
@@ -45,14 +44,15 @@ void main() {
     await tester.pumpAndSettle();
     await save(tester);
 
-    final p = c.read(catalogProvider).firstWhere((p) => p.name == 'Paracetamol 500mg');
+    final db = c.read(fakeDatabaseProvider);
+    final p = db.products.firstWhere((p) => p.name == 'Paracetamol 500mg');
     expect(p.expiryAlertDays, 30);
-    final batches = c.read(productRepositoryProvider).batchesOf(p.id);
+    final batches = db.batches.where((b) => b.productId == p.id).toList();
     expect(batches.single.batchNo, 'B2406A');
     expect(batches.single.qtyMilli, Qty.units(40));
-    final moves = c.read(stockLedgerProvider).where((m) => m.productId == p.id).toList();
+    final moves = db.stock.where((m) => m.productId == p.id).toList();
     expect(moves.single.batchId, batches.single.id);
-    expect(c.read(productsProvider).firstWhere((v) => v.id == p.id).stockMilli, Qty.units(40));
+    expect(c.read(productsProvider).requireValue.firstWhere((v) => v.id == p.id).stockMilli, Qty.units(40));
   });
 
   testWidgets('phone: saves IMEI serials (inStock), warranty, and stock = IMEI count', (tester) async {
@@ -66,11 +66,12 @@ void main() {
     }
     await save(tester);
 
-    final p = c.read(catalogProvider).firstWhere((p) => p.name == 'Galaxy A15');
+    final db = c.read(fakeDatabaseProvider);
+    final p = db.products.firstWhere((p) => p.name == 'Galaxy A15');
     expect(p.warrantyMonths, 6); // design default "၆ လ"
-    final serials = c.read(productRepositoryProvider).serialsOf(p.id);
+    final serials = db.serials.where((s) => s.productId == p.id).toList();
     expect(serials.map((s) => s.serial), ['356984102231457', '356984102231465']);
     expect(serials.every((s) => s.status == SerialStatus.inStock && s.saleLineId == null), isTrue);
-    expect(c.read(productsProvider).firstWhere((v) => v.id == p.id).stockMilli, Qty.units(2));
+    expect(c.read(productsProvider).requireValue.firstWhere((v) => v.id == p.id).stockMilli, Qty.units(2));
   });
 }

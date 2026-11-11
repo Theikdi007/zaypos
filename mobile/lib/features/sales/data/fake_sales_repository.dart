@@ -167,28 +167,25 @@ class FakeSalesRepository implements SalesRepository {
   final FakeDatabase db;
 
   @override
-  List<Sale> list() =>
-      List.unmodifiable(db.sales.where((s) => s.deletedAt == null));
+  Stream<List<Sale>> watchAll() =>
+      db.watch({FakeTable.sales}, () => List.unmodifiable(db.sales.where((s) => s.deletedAt == null)));
 
   @override
-  Sale? byId(String id) {
-    for (final s in db.sales) {
-      if (s.id == id) return s;
-    }
-    return null;
+  Stream<Sale?> watchById(String id) =>
+      db.watch({FakeTable.sales}, () => db.sales.where((s) => s.id == id && s.deletedAt == null).firstOrNull);
+
+  @override
+  Future<void> add(Sale sale) async {
+    db.sales.insert(0, sale);
+    db.touch({FakeTable.sales});
   }
 
   @override
-  void add(Sale sale) => db.sales.insert(0, sale);
-
-  @override
-  void setVoided(String id, bool voided) {
+  Future<void> setVoided(String id, bool voided) async {
     final i = db.sales.indexWhere((s) => s.id == id);
     if (i < 0) throw StateError('Unknown sale $id');
     final t = nowUtc();
-    db.sales[i] = db.sales[i].copyWith(
-      voidedAt: () => voided ? t : null,
-      updatedAt: t,
-    );
+    db.sales[i] = db.sales[i].copyWith(voidedAt: () => voided ? t : null, updatedAt: t);
+    db.touch({FakeTable.sales});
   }
 }

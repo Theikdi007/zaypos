@@ -5,8 +5,8 @@ import '../domain/debt_entry.dart';
 /// Append-only debt ledger.
 abstract interface class DebtRepository {
   /// Live entries, all customers, newest first.
-  List<DebtEntry> list();
-  void add(DebtEntry entry);
+  Stream<List<DebtEntry>> watchAll();
+  Future<void> add(DebtEntry entry);
 }
 
 /// Bound at the composition root (lib/app/fake_overrides.dart).

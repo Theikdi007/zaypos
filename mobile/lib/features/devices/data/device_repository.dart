@@ -4,11 +4,11 @@ import '../domain/device.dart';
 
 abstract interface class DeviceRepository {
   /// This device (registered on first launch).
-  Device current();
+  Stream<Device> watchCurrent();
 
-  /// Atomically advances this device's sequence and returns the new
-  /// receipt number ("A-1033").
-  String issueReceiptNo();
+  /// Advances this device's sequence and returns the new receipt number
+  /// ("A-1033"). Run inside the checkout unit of work.
+  Future<String> issueReceiptNo();
 }
 
 /// Bound at the composition root (lib/app/fake_overrides.dart).

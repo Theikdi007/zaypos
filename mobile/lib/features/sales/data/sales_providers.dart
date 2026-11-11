@@ -15,22 +15,8 @@ typedef SaleLineDraft = ({
   int cost,
 });
 
-/// Read side for sales. Writes go through CheckoutService / VoidSaleService.
-class SalesNotifier extends Notifier<List<Sale>> {
-  SalesRepository get _repo => ref.read(salesRepositoryProvider);
+/// All sales (live). Writes go through CheckoutService / VoidSaleService.
+final salesProvider = StreamProvider<List<Sale>>((ref) => ref.watch(salesRepositoryProvider).watchAll());
 
-  @override
-  List<Sale> build() => _repo.list();
-
-  /// Re-read after a service committed writes.
-  void refresh() => state = _repo.list();
-}
-
-final salesProvider = NotifierProvider<SalesNotifier, List<Sale>>(SalesNotifier.new);
-
-final saleByIdProvider = Provider.family<Sale?, String>((ref, id) {
-  for (final s in ref.watch(salesProvider)) {
-    if (s.id == id) return s;
-  }
-  return null;
-});
+final saleByIdProvider =
+    StreamProvider.family<Sale?, String>((ref, id) => ref.watch(salesRepositoryProvider).watchById(id));

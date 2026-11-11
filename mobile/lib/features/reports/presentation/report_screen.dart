@@ -13,6 +13,7 @@ import '../../../core/widgets/stat_card.dart';
 import '../../sales/presentation/sale_ui.dart';
 import '../data/report_providers.dart';
 import '../domain/report.dart';
+import '../../../core/widgets/async_view.dart';
 
 class ReportScreen extends ConsumerStatefulWidget {
   const ReportScreen({super.key});
@@ -26,7 +27,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final report = ref.watch(reportProvider(_period));
+    final async = ref.watch(reportProvider(_period));
+    if (!async.hasValue) return AsyncView(value: async, data: (_) => const SizedBox());
+    final report = async.requireValue;
     final s = report.summary;
     final top = MediaQuery.paddingOf(context).top;
 

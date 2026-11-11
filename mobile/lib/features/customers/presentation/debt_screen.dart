@@ -14,6 +14,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../data/customer_providers.dart';
 import '../domain/debt_entry.dart';
 import 'pay_debt_sheet.dart';
+import '../../../core/widgets/async_view.dart';
 
 class DebtScreen extends ConsumerWidget {
   const DebtScreen({super.key, required this.id});
@@ -22,7 +23,9 @@ class DebtScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final c = ref.watch(customerAccountProvider(id));
+    final async = ref.watch(customerAccountProvider(id));
+    if (!async.hasValue) return Scaffold(body: AsyncView(value: async, data: (_) => const SizedBox()));
+    final c = async.requireValue;
     if (c == null) return const Scaffold();
     final now = DateTime.now();
     final sub = [c.customer.phone, ?c.customer.address].where((s) => s.isNotEmpty).join(' · ');

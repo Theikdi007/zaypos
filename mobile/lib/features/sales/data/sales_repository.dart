@@ -4,11 +4,10 @@ import '../domain/sale.dart';
 
 abstract interface class SalesRepository {
   /// Live sales, newest first.
-  List<Sale> list();
-  Sale? byId(String id);
-
-  void add(Sale sale);
-  void setVoided(String id, bool voided);
+  Stream<List<Sale>> watchAll();
+  Stream<Sale?> watchById(String id);
+  Future<void> add(Sale sale);
+  Future<void> setVoided(String id, bool voided);
 }
 
 /// Bound at the composition root (lib/app/fake_overrides.dart).

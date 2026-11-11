@@ -118,12 +118,15 @@ class FakeDebtRepository implements DebtRepository {
   final FakeDatabase db;
 
   @override
-  List<DebtEntry> list() {
-    final live = db.debt.where((e) => e.deletedAt == null).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return List.unmodifiable(live);
-  }
+  Stream<List<DebtEntry>> watchAll() => db.watch({FakeTable.debt}, () {
+        final live = db.debt.where((e) => e.deletedAt == null).toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        return List<DebtEntry>.unmodifiable(live);
+      });
 
   @override
-  void add(DebtEntry entry) => db.debt.add(entry);
+  Future<void> add(DebtEntry entry) async {
+    db.debt.add(entry);
+    db.touch({FakeTable.debt});
+  }
 }

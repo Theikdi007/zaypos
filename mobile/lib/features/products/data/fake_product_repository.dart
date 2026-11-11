@@ -31,37 +31,50 @@ class FakeProductRepository implements ProductRepository {
   final FakeDatabase db;
 
   @override
-  List<Product> list() => List.unmodifiable(db.products.where((p) => !p.isDeleted));
+  Stream<List<Product>> watchAll() =>
+      db.watch({FakeTable.products}, () => List.unmodifiable(db.products.where((p) => !p.isDeleted)));
 
   @override
-  List<ProductVariant> variantsOf(String productId) =>
-      List.unmodifiable(db.variants.where((v) => v.productId == productId && v.deletedAt == null));
+  Stream<Product?> watchById(String id) =>
+      db.watch({FakeTable.products}, () => db.products.where((p) => p.id == id && !p.isDeleted).firstOrNull);
 
   @override
-  List<ProductBatch> batchesOf(String productId) =>
-      List.unmodifiable(db.batches.where((b) => b.productId == productId && b.deletedAt == null));
+  Stream<List<ProductVariant>> watchVariants(String productId) => db.watch(
+        {FakeTable.variants},
+        () => List.unmodifiable(db.variants.where((v) => v.productId == productId && v.deletedAt == null)),
+      );
 
   @override
-  List<ProductSerial> serialsOf(String productId) =>
-      List.unmodifiable(db.serials.where((s) => s.productId == productId && s.deletedAt == null));
+  Stream<List<ProductBatch>> watchBatches(String productId) => db.watch(
+        {FakeTable.batches},
+        () => List.unmodifiable(db.batches.where((b) => b.productId == productId && b.deletedAt == null)),
+      );
 
   @override
-  void add(
+  Stream<List<ProductSerial>> watchSerials(String productId) => db.watch(
+        {FakeTable.serials},
+        () => List.unmodifiable(db.serials.where((s) => s.productId == productId && s.deletedAt == null)),
+      );
+
+  @override
+  Future<void> add(
     Product product, {
     List<ProductVariant> variants = const [],
     List<ProductBatch> batches = const [],
     List<ProductSerial> serials = const [],
-  }) {
+  }) async {
     db.products.insert(0, product);
     db.variants.addAll(variants);
     db.batches.addAll(batches);
     db.serials.addAll(serials);
+    db.touch({FakeTable.products, FakeTable.variants, FakeTable.batches, FakeTable.serials});
   }
 
   @override
-  void setSerialStatus(String serialId, SerialStatus status, {String? saleLineId}) {
+  Future<void> setSerialStatus(String serialId, SerialStatus status, {String? saleLineId}) async {
     final i = db.serials.indexWhere((s) => s.id == serialId);
     if (i < 0) throw StateError('Unknown serial $serialId');
     db.serials[i] = db.serials[i].copyWith(status: status, saleLineId: () => saleLineId, updatedAt: nowUtc());
+    db.touch({FakeTable.serials});
   }
 }

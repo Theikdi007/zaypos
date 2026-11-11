@@ -99,3 +99,27 @@ List<StockMovement> movementsForSale(Sale sale, StockMovementType type, {require
         ),
   ];
 }
+
+/// Goods received (initial stock, supplier delivery).
+StockMovement restockMovement({
+  required String tenantId,
+  required String productId,
+  required int qtyMilli,
+  String? variantId,
+  String? batchId,
+  String note = '',
+}) {
+  final t = nowUtc();
+  return StockMovement(
+    id: newId(),
+    tenantId: tenantId,
+    productId: productId,
+    variantId: variantId,
+    batchId: batchId,
+    type: StockMovementType.restock,
+    qtyMilli: qtyMilli,
+    note: note,
+    createdAt: t,
+    updatedAt: t,
+  );
+}

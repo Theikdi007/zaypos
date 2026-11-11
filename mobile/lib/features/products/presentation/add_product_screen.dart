@@ -18,9 +18,8 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/qty.dart';
 import '../../auth/data/session.dart';
-import '../../inventory/data/stock_providers.dart';
 import '../../inventory/domain/stock_movement.dart';
-import '../data/product_providers.dart';
+import '../application/product_service.dart';
 import '../domain/product.dart';
 import '../domain/product_modules.dart';
 import 'sections/feature_sections.dart';
@@ -76,7 +75,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     super.dispose();
   }
 
-  void _save() {
+  Future<void> _save() async {
     final features = ref.read(tenantFeaturesProvider);
     final name = _name.text.trim();
     final price = int.tryParse(_price.text) ?? 0;
@@ -91,14 +90,21 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     final batches = <ProductBatch>[];
     final serials = <ProductSerial>[];
     final movements = <StockMovement>[];
-    final stock = ref.read(stockLedgerProvider.notifier);
+    StockMovement restock(int qty, {String? variantId, String? batchId}) => restockMovement(
+          tenantId: tenantId,
+          productId: productId,
+          qtyMilli: qty,
+          variantId: variantId,
+          batchId: batchId,
+          note: 'initial',
+        );
     if (features.stock && _track) {
       if (features.variants) {
         for (final e in _sizes.entries.where((e) => e.value)) {
           for (final c in _colors.entries.where((c) => c.value)) {
             final s = _variantStock['${e.key} · ${c.key}'] ?? 0;
             final variantId = newId();
-            if (s != 0) movements.add(stock.restock(productId, s, variantId: variantId, note: 'initial'));
+            if (s != 0) movements.add(restock(s, variantId: variantId));
             variants.add(ProductVariant(
               id: variantId,
               tenantId: tenantId,
@@ -111,7 +117,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
           }
         }
       } else if (features.serialWarranty && _serial) {
-        if (_imeis.isNotEmpty) movements.add(stock.restock(productId, Qty.units(_imeis.length), note: 'initial'));
+        if (_imeis.isNotEmpty) movements.add(restock(Qty.units(_imeis.length)));
       } else {
         final q = Qty.parse(_stock.text, decimal: features.decimalQty) ?? 0;
         // Expiry-tracked shops receive stock into a batch.
@@ -129,7 +135,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             updatedAt: t,
           ));
         }
-        if (q != 0) movements.add(stock.restock(productId, q, batchId: batchId, note: 'initial'));
+        if (q != 0) movements.add(restock(q, batchId: batchId));
       }
     }
     if (features.serialWarranty && _serial) {
@@ -145,7 +151,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         ));
       }
     }
-    ref.read(catalogProvider.notifier).add(
+    // Product + module rows + initial stock: one unit of work.
+    await ref.read(productServiceProvider).create(
           Product(
             id: productId,
             tenantId: tenantId,
@@ -167,9 +174,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
           variants: variants,
           batches: batches,
           serials: serials,
+          initialStock: movements,
         );
-    stock.record(movements);
-    context.pop();
+    if (mounted) context.pop();
   }
 
   @override

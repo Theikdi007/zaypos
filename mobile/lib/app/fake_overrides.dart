@@ -44,10 +44,5 @@ final List<Override> fakeRepositoryOverrides = [
     final db = ref.read(fakeDatabaseProvider);
     return FakeDeviceRepository(db, deviceId: db.devices.first.id);
   }),
-  reportRepositoryProvider.overrideWith(
-    (ref) => FakeReportRepository(
-      sales: ref.read(salesRepositoryProvider),
-      products: ref.read(productRepositoryProvider),
-    ),
-  ),
+  reportRepositoryProvider.overrideWith((ref) => FakeReportRepository(ref.read(fakeDatabaseProvider))),
 ];

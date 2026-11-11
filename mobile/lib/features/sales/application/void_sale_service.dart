@@ -10,7 +10,6 @@ import '../../products/data/product_repository.dart';
 import '../../products/domain/product_modules.dart';
 import '../data/sales_repository.dart';
 import '../domain/sale.dart';
-import 'checkout_service.dart';
 
 /// Voids (or un-voids) a sale as ONE unit of work. Nothing is deleted:
 /// the sale is flagged, stock gets compensating movements, serials go back
@@ -22,7 +21,6 @@ class VoidSaleService {
     required this.stock,
     required this.debt,
     required this.products,
-    this.onCommitted,
   });
 
   final UnitOfWork uow;
@@ -30,22 +28,21 @@ class VoidSaleService {
   final StockRepository stock;
   final DebtRepository debt;
   final ProductRepository products;
-  final void Function()? onCommitted;
 
   /// Sets the sale's voided state. No-op if it is already in that state.
   Future<void> setVoided(String saleId, bool voided) async {
-    final sale = sales.byId(saleId);
+    final sale = await sales.watchById(saleId).first;
     if (sale == null) throw StateError('Unknown sale $saleId');
     if (sale.voided == voided) return;
 
     await uow.run(() async {
-      sales.setVoided(sale.id, voided);
-      stock.addAll(voided
+      await sales.setVoided(sale.id, voided);
+      await stock.addAll(voided
           ? movementsForSale(sale, StockMovementType.voidReturn, sign: 1)
           : movementsForSale(sale, StockMovementType.sale, sign: -1, note: 'unvoid'));
       for (final l in sale.lines) {
         if (l.serialId == null) continue;
-        products.setSerialStatus(
+        await products.setSerialStatus(
           l.serialId!,
           voided ? SerialStatus.inStock : SerialStatus.sold,
           saleLineId: voided ? null : l.id,
@@ -53,7 +50,7 @@ class VoidSaleService {
       }
       if (sale.method == PaymentMethod.debt && sale.customerId != null) {
         final t = nowUtc();
-        debt.add(DebtEntry(
+        await debt.add(DebtEntry(
           id: newId(),
           tenantId: sale.tenantId,
           customerId: sale.customerId!,
@@ -67,7 +64,6 @@ class VoidSaleService {
         ));
       }
     });
-    onCommitted?.call();
   }
 }
 
@@ -77,5 +73,4 @@ final voidSaleServiceProvider = Provider<VoidSaleService>((ref) => VoidSaleServi
       stock: ref.read(stockRepositoryProvider),
       debt: ref.read(debtRepositoryProvider),
       products: ref.read(productRepositoryProvider),
-      onCommitted: () => refreshSalesReadModels(ref),
     ));
