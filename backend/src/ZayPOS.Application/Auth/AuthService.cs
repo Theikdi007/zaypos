@@ -117,7 +117,13 @@ public sealed class AuthService(
     {
         var phone = PhoneNumbers.Normalize(req.Phone) ?? throw AuthException.InvalidCredentials();
         var deviceName = RequireDevice(req.Device);
-        var user = await repo.FindUserByPhoneAsync(phone, ct) ?? throw AuthException.InvalidCredentials();
+        var user = await repo.FindUserByPhoneAsync(phone, ct);
+        if (user is null)
+        {
+            // Same PBKDF2 cost as a real user, so response time does not reveal which phones exist.
+            if (Pins.IsValid(req.Pin)) pins.VerifyDummy(req.Pin);
+            throw AuthException.InvalidCredentials();
+        }
         var now = Now;
 
         if (user.LockedUntil is { } until && until > now)
@@ -200,32 +206,59 @@ public sealed class AuthService(
     public async Task<AuthResponse> RefreshAsync(RefreshRequest req, CancellationToken ct)
     {
         var hash = HashRefreshToken(req.RefreshToken) ?? throw AuthException.InvalidRefreshToken();
-        var current = await repo.FindRefreshTokenAsync(hash, ct) ?? throw AuthException.InvalidRefreshToken();
-        var now = Now;
 
-        if (current.RevokedAt is not null)
+        // Re-decide from fresh DB state if a concurrent refresh wins the race for the same token.
+        for (var attempt = 1; attempt <= 3; attempt++)
         {
-            // A revoked token came back: it was stolen or replayed. End every session on that device.
-            await repo.RevokeRefreshTokensAsync(current.UserId, current.DeviceId, now, ct);
-            throw AuthException.InvalidRefreshToken();
+            var presented = await repo.FindRefreshTokenAsync(hash, ct) ?? throw AuthException.InvalidRefreshToken();
+            var now = Now;
+
+            RefreshToken rotate;
+            if (presented.RevokedAt is null)
+            {
+                if (presented.ExpiresAt <= now) throw AuthException.InvalidRefreshToken();
+                rotate = presented;
+            }
+            else
+            {
+                rotate = await GraceRetryTargetAsync(presented, now, ct);
+            }
+
+            var user = await repo.FindUserAsync(rotate.UserId, ct);
+            var device = await repo.FindDeviceAsync(rotate.DeviceId, ct);
+            if (user is null || user.DeletedAt is not null || device is null) throw AuthException.InvalidRefreshToken();
+            if (device.DeletedAt is not null) throw DeviceRevoked();
+            var tenant = await repo.FindTenantAsync(user.TenantId, ct) ?? throw AuthException.InvalidRefreshToken();
+
+            var (refresh, next) = NewRefreshToken(user, device, now);
+            await using var tx = await repo.BeginTransactionAsync(ct);
+            if (!await repo.TryRevokeRefreshTokenAsync(rotate.Id, next.Id, now, ct))
+                continue; // someone rotated it first: look again (usually ends in the grace path)
+            repo.Add(next);
+            await repo.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+
+            return Respond(user, tenant, device, refresh, next, now);
         }
-        if (current.ExpiresAt <= now) throw AuthException.InvalidRefreshToken();
+        throw AuthException.InvalidRefreshToken();
+    }
 
-        var user = await repo.FindUserAsync(current.UserId, ct);
-        var device = await repo.FindDeviceAsync(current.DeviceId, ct);
-        if (user is null || user.DeletedAt is not null || device is null) throw AuthException.InvalidRefreshToken();
-        if (device.DeletedAt is not null) throw DeviceRevoked();
-        var tenant = await repo.FindTenantAsync(user.TenantId, ct) ?? throw AuthException.InvalidRefreshToken();
+    /// <summary>
+    /// A revoked token came back. If it was rotated less than <see cref="AuthRules.RefreshRetryGrace"/> ago
+    /// and its replacement was never used, the phone simply lost the response (flaky network) or sent two
+    /// refreshes at once: rotate the replacement instead. Anything else is replay → end the device's sessions.
+    /// </summary>
+    private async Task<RefreshToken> GraceRetryTargetAsync(RefreshToken presented, DateTime now, CancellationToken ct)
+    {
+        if (presented.ReplacedById is { } replacementId && now - presented.RevokedAt < AuthRules.RefreshRetryGrace)
+        {
+            var replacement = await repo.FindRefreshTokenByIdAsync(replacementId, ct);
+            if (replacement is { RevokedAt: null } && replacement.ExpiresAt > now)
+                return replacement;
+        }
 
-        var (refresh, next) = NewRefreshToken(user, device, now);
-        await using var tx = await repo.BeginTransactionAsync(ct);
-        if (!await repo.TryRevokeRefreshTokenAsync(current.Id, next.Id, now, ct))
-            throw AuthException.InvalidRefreshToken(); // lost a race with a concurrent refresh
-        repo.Add(next);
-        await repo.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
-
-        return Respond(user, tenant, device, refresh, next, now);
+        await repo.RevokeRefreshTokensAsync(presented.UserId, presented.DeviceId, now, ct);
+        throw AuthException.InvalidRefreshToken();
     }
 
     // ---------------------------------------------------------------- PIN reset

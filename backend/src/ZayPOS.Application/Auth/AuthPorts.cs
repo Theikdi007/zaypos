@@ -21,7 +21,9 @@ public interface IAuthRepository
     /// <summary>Newest challenge that is unconsumed, unexpired and has attempts left.</summary>
     Task<OtpChallenge?> FindOpenOtpAsync(string phone, OtpPurpose purpose, DateTime now, int maxAttempts, CancellationToken ct);
 
+    /// <summary>Untracked: always the current DB state (rotation races re-read it).</summary>
     Task<RefreshToken?> FindRefreshTokenAsync(byte[] tokenHash, CancellationToken ct);
+    Task<RefreshToken?> FindRefreshTokenByIdAsync(Guid tokenId, CancellationToken ct);
     /// <summary>Atomically revokes one token if it is still active. False = someone else already did.</summary>
     Task<bool> TryRevokeRefreshTokenAsync(Guid tokenId, Guid? replacedById, DateTime now, CancellationToken ct);
     /// <summary>Revokes every active token of the user (optionally only on one device).</summary>
@@ -49,6 +51,8 @@ public interface IPinHasher
 {
     string Hash(User user, string pin);
     PinCheck Verify(User user, string hash, string pin);
+    /// <summary>Burns the same time as <see cref="Verify"/> against a fixed dummy hash (unknown phone).</summary>
+    void VerifyDummy(string pin);
 }
 
 public enum PinCheck { Failed, Success, SuccessRehashNeeded }

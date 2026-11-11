@@ -4,6 +4,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using ZayPOS.Infrastructure.Auth;
 using Microsoft.IdentityModel.JsonWebTokens;
 using ZayPOS.Application.Auth;
 using ZayPOS.Domain.Common;
@@ -212,7 +215,7 @@ public class AuthTests(SqlServerFixture sql)
     // ------------------------------------------------------------ refresh
 
     [Fact]
-    public async Task Refresh_rotates_the_token_and_revokes_the_old_one()
+    public async Task Refresh_rotates_the_token_and_the_new_one_keeps_working()
     {
         var first = await Register(NewPhone());
 
@@ -220,18 +223,93 @@ public class AuthTests(SqlServerFixture sql)
         second.RefreshToken.Should().NotBe(first.RefreshToken);
         second.Device.Id.Should().Be(first.Device.Id);
         new JsonWebToken(second.AccessToken).GetClaim("tid").Value.Should().Be(first.Tenant.Id.ToString());
+        var third = await RefreshOk(second.RefreshToken);
 
-        // The old token is dead...
+        var tokens = await DeviceTokens(first);
+        tokens.Should().HaveCount(3);
+        tokens[0].ReplacedById.Should().Be(tokens[1].Id);
+        tokens[1].ReplacedById.Should().Be(tokens[2].Id);
+        tokens.Count(t => t.RevokedAt == null).Should().Be(1);
+        (await RefreshOk(third.RefreshToken)).Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Retry_within_2_minutes_of_rotation_rotates_the_unseen_replacement_instead()
+    {
+        var first = await Register(NewPhone());
+        await RefreshOk(first.RefreshToken);              // response "lost" on a flaky network
+
+        var retried = await RefreshOk(first.RefreshToken); // phone retries with the old token
+
+        var tokens = await DeviceTokens(first);
+        tokens.Should().HaveCount(3);
+        tokens[0].ReplacedById.Should().Be(tokens[1].Id);
+        tokens[1].RevokedAt.Should().NotBeNull("the replacement the phone never received is revoked");
+        tokens[1].ReplacedById.Should().Be(tokens[2].Id);
+        tokens[2].RevokedAt.Should().BeNull("the device chain is NOT revoked");
+        (await RefreshOk(retried.RefreshToken)).Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Reuse_more_than_2_minutes_after_rotation_revokes_the_device_chain()
+    {
+        var first = await Register(NewPhone());
+        var second = await RefreshOk(first.RefreshToken);
+        await using (var db = sql.CreateContext(first.Tenant.Id))
+        {
+            var old = await db.RefreshTokens.SingleAsync(t => t.DeviceId == first.Device.Id && t.ReplacedById != null);
+            old.RevokedAt = DateTime.UtcNow.AddMinutes(-3);
+            await db.SaveChangesAsync();
+        }
+
         await ShouldBeProblem(await Post("/api/v1/auth/refresh", new RefreshRequest(first.RefreshToken)),
             HttpStatusCode.Unauthorized, "invalid_refresh_token");
-        // ...and replaying it counts as theft: the whole device session chain is revoked.
         await ShouldBeProblem(await Post("/api/v1/auth/refresh", new RefreshRequest(second.RefreshToken)),
             HttpStatusCode.Unauthorized, "invalid_refresh_token");
+        (await DeviceTokens(first)).Should().OnlyContain(t => t.RevokedAt != null);
+    }
 
-        await using var db = sql.CreateContext(first.Tenant.Id);
-        var tokens = await db.RefreshTokens.Where(t => t.DeviceId == first.Device.Id).OrderBy(t => t.CreatedAt).ToListAsync();
-        tokens.Should().HaveCount(2).And.OnlyContain(t => t.RevokedAt != null);
-        tokens[0].ReplacedById.Should().Be(tokens[1].Id);
+    [Fact]
+    public async Task Reuse_of_a_token_revoked_without_replacement_revokes_the_device_chain()
+    {
+        var phone = NewPhone();
+        var first = await Register(phone);
+        var again = await LoginOk(phone, first.Device.Id); // re-login revokes first's token (no replacement)
+
+        await ShouldBeProblem(await Post("/api/v1/auth/refresh", new RefreshRequest(first.RefreshToken)),
+            HttpStatusCode.Unauthorized, "invalid_refresh_token");
+        await ShouldBeProblem(await Post("/api/v1/auth/refresh", new RefreshRequest(again.RefreshToken)),
+            HttpStatusCode.Unauthorized, "invalid_refresh_token");
+        (await DeviceTokens(first)).Should().OnlyContain(t => t.RevokedAt != null);
+    }
+
+    [Fact]
+    public async Task Reuse_after_the_replacement_was_already_used_revokes_the_device_chain()
+    {
+        var first = await Register(NewPhone());
+        var second = await RefreshOk(first.RefreshToken);
+        await RefreshOk(second.RefreshToken); // the phone clearly got `second`
+
+        await ShouldBeProblem(await Post("/api/v1/auth/refresh", new RefreshRequest(first.RefreshToken)),
+            HttpStatusCode.Unauthorized, "invalid_refresh_token");
+        (await DeviceTokens(first)).Should().OnlyContain(t => t.RevokedAt != null);
+    }
+
+    [Fact]
+    public async Task Two_concurrent_refreshes_with_the_same_token_both_succeed_and_leave_one_session()
+    {
+        var first = await Register(NewPhone());
+        var other = sql.Api.CreateClient();
+
+        var results = await Task.WhenAll(
+            _http.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(first.RefreshToken), Json),
+            other.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(first.RefreshToken), Json));
+
+        foreach (var r in results)
+            r.StatusCode.Should().Be(HttpStatusCode.OK, await r.Content.ReadAsStringAsync());
+        var tokens = await DeviceTokens(first);
+        tokens.Should().HaveCount(3);
+        tokens.Count(t => t.RevokedAt == null).Should().Be(1);
     }
 
     [Fact]
@@ -276,15 +354,102 @@ public class AuthTests(SqlServerFixture sql)
     // ------------------------------------------------------------ rate limiting
 
     [Fact]
-    public async Task Auth_endpoints_are_rate_limited_per_client()
+    public async Task Auth_endpoints_are_rate_limited_per_client_ip()
     {
-        await using var api = new ApiFactory(sql.ConnectionString, authPerMinute: 2);
+        await using var api = new ApiFactory(sql.ConnectionString, authPerIp: 2);
         var http = api.CreateClient();
-        var body = new LoginRequest(NewPhone(), Pin, new DeviceInfo(Guid.CreateVersion7(), null));
+        var body = new RefreshRequest("garbage");
 
-        (await http.PostAsJsonAsync("/api/v1/auth/login", body, Json)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        (await http.PostAsJsonAsync("/api/v1/auth/login", body, Json)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        (await http.PostAsJsonAsync("/api/v1/auth/login", body, Json)).StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+        (await http.PostAsJsonAsync("/api/v1/auth/refresh", body, Json)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        (await http.PostAsJsonAsync("/api/v1/auth/refresh", body, Json)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        var third = await http.PostAsJsonAsync("/api/v1/auth/refresh", body, Json);
+        await ShouldBeProblem(third, HttpStatusCode.TooManyRequests, "rate_limited");
+        third.Headers.RetryAfter.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Otp_login_and_pin_reset_are_also_limited_per_normalized_phone()
+    {
+        await using var api = new ApiFactory(sql.ConnectionString, authPerPhone: 2);
+        var http = api.CreateClient();
+        var d = NextDigits(8);
+        var e164 = $"+9597{d}";
+        var local = $"09 7{d[..2]} {d[2..5]} {d[5..]}";
+        LoginRequest Login(string phone) => new(phone, Pin, new DeviceInfo(Guid.CreateVersion7(), null));
+
+        (await http.PostAsJsonAsync("/api/v1/auth/login", Login(e164), Json)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        (await http.PostAsJsonAsync("/api/v1/auth/login", Login(local), Json)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        // Same number in either format, any of the three endpoints: one bucket.
+        await ShouldBeProblem(await http.PostAsJsonAsync("/api/v1/auth/otp", new OtpRequest(local, OtpPurpose.Reset), Json),
+            HttpStatusCode.TooManyRequests, "rate_limited");
+        await ShouldBeProblem(await http.PostAsJsonAsync("/api/v1/auth/login", Login(e164), Json),
+            HttpStatusCode.TooManyRequests, "rate_limited");
+        // Another phone from the same IP is unaffected.
+        (await http.PostAsJsonAsync("/api/v1/auth/login", Login(NewPhone()), Json)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task CF_Connecting_IP_is_trusted_only_from_cloudflare_addresses()
+    {
+        var body = new RefreshRequest("garbage");
+        HttpRequestMessage Req(string clientIp)
+        {
+            var m = new HttpRequestMessage(HttpMethod.Post, "/api/v1/auth/refresh") { Content = JsonContent.Create(body, options: Json) };
+            m.Headers.Add("CF-Connecting-IP", clientIp);
+            return m;
+        }
+
+        // From a Cloudflare edge: each real client IP gets its own bucket.
+        await using (var api = new ApiFactory(sql.ConnectionString, authPerIp: 1, remoteIp: IPAddress.Parse("173.245.48.10")))
+        {
+            var http = api.CreateClient();
+            (await http.SendAsync(Req("203.0.113.1"))).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            (await http.SendAsync(Req("203.0.113.2"))).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            (await http.SendAsync(Req("203.0.113.1"))).StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+        }
+
+        // From anywhere else the header is ignored: spoofing it does not buy new buckets.
+        await using (var api = new ApiFactory(sql.ConnectionString, authPerIp: 1, remoteIp: IPAddress.Parse("198.51.100.7")))
+        {
+            var http = api.CreateClient();
+            (await http.SendAsync(Req("203.0.113.1"))).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            (await http.SendAsync(Req("203.0.113.2"))).StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+        }
+    }
+
+    // ------------------------------------------------------------ timing
+
+    [Fact]
+    public async Task Unknown_phone_still_pays_for_one_pin_hash()
+    {
+        var counter = new CountingPinHasher(new PinHasher());
+        await using var api = new ApiFactory(sql.ConnectionString,
+            services: s => { s.RemoveAll<IPinHasher>(); s.AddSingleton<IPinHasher>(counter); });
+        var http = api.CreateClient();
+
+        var res = await http.PostAsJsonAsync("/api/v1/auth/login",
+            new LoginRequest(NewPhone(), Pin, new DeviceInfo(Guid.CreateVersion7(), null)), Json);
+
+        await ShouldBeProblem(res, HttpStatusCode.Unauthorized, "invalid_credentials");
+        counter.DummyVerifications.Should().Be(1);
+        counter.RealVerifications.Should().Be(0);
+    }
+
+    private sealed class CountingPinHasher(IPinHasher inner) : IPinHasher
+    {
+        public int DummyVerifications;
+        public int RealVerifications;
+        public string Hash(ZayPOS.Domain.Tenancy.User user, string pin) => inner.Hash(user, pin);
+        public PinCheck Verify(ZayPOS.Domain.Tenancy.User user, string hash, string pin)
+        {
+            Interlocked.Increment(ref RealVerifications);
+            return inner.Verify(user, hash, pin);
+        }
+        public void VerifyDummy(string pin)
+        {
+            Interlocked.Increment(ref DummyVerifications);
+            inner.VerifyDummy(pin);
+        }
     }
 
     // ------------------------------------------------------------ helpers
@@ -334,6 +499,13 @@ public class AuthTests(SqlServerFixture sql)
         var res = await Post("/api/v1/auth/refresh", new RefreshRequest(refreshToken));
         res.StatusCode.Should().Be(HttpStatusCode.OK, await res.Content.ReadAsStringAsync());
         return (await res.Content.ReadFromJsonAsync<AuthResponse>(Json))!;
+    }
+
+    private async Task<List<ZayPOS.Domain.Tenancy.RefreshToken>> DeviceTokens(AuthResponse auth)
+    {
+        await using var db = sql.CreateContext(auth.Tenant.Id);
+        return await db.RefreshTokens.AsNoTracking().Where(t => t.DeviceId == auth.Device.Id)
+            .OrderBy(t => t.CreatedAt).ThenBy(t => t.Id).ToListAsync();
     }
 
     private static async Task ShouldBeProblem(HttpResponseMessage res, HttpStatusCode status, string code)

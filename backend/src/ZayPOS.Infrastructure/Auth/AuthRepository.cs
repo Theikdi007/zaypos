@@ -41,7 +41,10 @@ internal sealed class AuthRepository(ZayPosDbContext db) : IAuthRepository
             .FirstOrDefaultAsync(ct);
 
     public Task<RefreshToken?> FindRefreshTokenAsync(byte[] tokenHash, CancellationToken ct) =>
-        db.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == tokenHash, ct);
+        db.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(t => t.TokenHash == tokenHash, ct);
+
+    public Task<RefreshToken?> FindRefreshTokenByIdAsync(Guid tokenId, CancellationToken ct) =>
+        db.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(t => t.Id == tokenId, ct);
 
     public async Task<bool> TryRevokeRefreshTokenAsync(Guid tokenId, Guid? replacedById, DateTime now, CancellationToken ct) =>
         await db.RefreshTokens

@@ -67,9 +67,16 @@ internal sealed class JwtAccessTokenIssuer(IOptions<JwtOptions> options) : IAcce
 }
 
 /// <summary>ASP.NET Core <see cref="PasswordHasher{TUser}"/> (PBKDF2) for 6-digit PINs.</summary>
-internal sealed class PinHasher : IPinHasher
+public sealed class PinHasher : IPinHasher
 {
+    private static readonly User DummyUser = new() { Id = Guid.Empty };
     private readonly PasswordHasher<User> _hasher = new();
+    private readonly string _dummyHash;
+
+    public PinHasher() =>
+        _dummyHash = _hasher.HashPassword(DummyUser, Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(16)));
+
+    public void VerifyDummy(string pin) => _hasher.VerifyHashedPassword(DummyUser, _dummyHash, pin);
 
     public string Hash(User user, string pin) => _hasher.HashPassword(user, pin);
 

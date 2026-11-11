@@ -4,14 +4,11 @@ namespace ZayPOS.Api.Endpoints;
 
 public static class AuthEndpoints
 {
-    public const string RateLimitPolicy = "auth";
-
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
         var auth = app.MapGroup("/api/v1/auth")
             .WithTags("Auth")
-            .AllowAnonymous()
-            .RequireRateLimiting(RateLimitPolicy);
+            .AllowAnonymous(); // rate limited globally, see AuthRateLimiting
 
         auth.MapPost("/otp", async (OtpRequest req, AuthService svc, CancellationToken ct) =>
                 Results.Accepted(value: await svc.RequestOtpAsync(req, ct)))

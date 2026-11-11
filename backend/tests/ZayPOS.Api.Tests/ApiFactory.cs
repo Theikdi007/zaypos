@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Net;
+using Microsoft.AspNetCore.Builder;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -10,7 +12,12 @@ using ZayPOS.Application.Abstractions;
 namespace ZayPOS.Api.Tests;
 
 /// <summary>The real API against the test container. SMS is captured instead of logged.</summary>
-public sealed class ApiFactory(string connectionString, int authPerMinute = 10_000) : WebApplicationFactory<Program>
+public sealed class ApiFactory(
+    string connectionString,
+    int authPerIp = 10_000,
+    int authPerPhone = 10_000,
+    IPAddress? remoteIp = null,
+    Action<IServiceCollection>? services = null) : WebApplicationFactory<Program>
 {
     /// <summary>Test-only key; the real one lives in user-secrets / env.</summary>
     public const string SigningKey = "test-signing-key-0123456789-abcdefghijklmnopqrstuvwxyz";
@@ -22,12 +29,29 @@ public sealed class ApiFactory(string connectionString, int authPerMinute = 10_0
         builder.UseEnvironment("Testing");
         builder.UseSetting("ConnectionStrings:ZayPOS", connectionString);
         builder.UseSetting("Jwt:SigningKey", SigningKey);
-        builder.UseSetting("RateLimiting:AuthPerMinute", authPerMinute.ToString());
+        builder.UseSetting("RateLimiting:AuthPerIpPerMinute", authPerIp.ToString());
+        builder.UseSetting("RateLimiting:AuthPerPhonePerMinute", authPerPhone.ToString());
         builder.ConfigureTestServices(s =>
         {
             s.RemoveAll<ISmsSender>();
             s.AddSingleton<ISmsSender>(Sms);
+            if (remoteIp is not null) s.AddSingleton<IStartupFilter>(new RemoteIpStartupFilter(remoteIp));
+            services?.Invoke(s);
         });
+    }
+
+    /// <summary>TestServer has no TCP peer; pretend the request came from <paramref name="ip"/>.</summary>
+    private sealed class RemoteIpStartupFilter(IPAddress ip) : IStartupFilter
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
+        {
+            app.Use((http, nxt) =>
+            {
+                http.Connection.RemoteIpAddress = ip;
+                return nxt(http);
+            });
+            next(app);
+        };
     }
 }
 

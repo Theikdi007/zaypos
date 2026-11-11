@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -43,18 +42,13 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
     });
 builder.Services.AddAuthorization();
 
-// /auth/* per client IP. The per-phone OTP limit (3/hour) lives in AuthService.
-var authPerMinute = builder.Configuration.GetValue("RateLimiting:AuthPerMinute", 20);
-builder.Services.AddRateLimiter(o =>
-{
-    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    o.AddPolicy(AuthEndpoints.RateLimitPolicy, http => RateLimitPartition.GetFixedWindowLimiter(
-        http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-        _ => new FixedWindowRateLimiterOptions { PermitLimit = authPerMinute, Window = TimeSpan.FromMinutes(1) }));
-});
+// /auth/*: per client IP + per phone. The OTP limit (3/hour/phone) also lives in AuthService.
+builder.Services.AddAuthRateLimiting(builder.Configuration);
+var useForwarding = builder.Services.AddCloudflareForwarding(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
+if (useForwarding) app.UseForwardedHeaders(); // before anything reads RemoteIpAddress
 app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
@@ -64,6 +58,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAuthPhonePartition();
 app.UseRateLimiter();
 
 app.MapGet("/api/v1/health", () => Results.Ok(new { status = "ok" }));

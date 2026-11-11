@@ -11,6 +11,8 @@ public static class AuthRules
     public const int PinMaxFailures = 5;
     public static readonly TimeSpan PinLockout = TimeSpan.FromMinutes(15);
     public static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(90);
+    /// <summary>A just-rotated token presented again within this window is a retry, not theft.</summary>
+    public static readonly TimeSpan RefreshRetryGrace = TimeSpan.FromMinutes(2);
 }
 
 public static partial class PhoneNumbers
