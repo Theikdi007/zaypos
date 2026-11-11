@@ -41,28 +41,33 @@ class ScanSquare extends StatelessWidget {
 }
 
 // ── expiryBatch ────────────────────────────────────────────────────────────
-class ExpiryBatchSection extends StatefulWidget {
-  const ExpiryBatchSection({super.key});
+class ExpiryBatchSection extends StatelessWidget {
+  const ExpiryBatchSection({
+    super.key,
+    required this.batchNo,
+    required this.expiry,
+    required this.onExpiry,
+    required this.warnDays,
+    required this.onWarnDays,
+  });
 
-  @override
-  State<ExpiryBatchSection> createState() => _ExpiryBatchSectionState();
-}
+  final TextEditingController batchNo;
+  final DateTime? expiry;
+  final ValueChanged<DateTime> onExpiry;
+  final int warnDays;
+  final ValueChanged<int> onWarnDays;
 
-class _ExpiryBatchSectionState extends State<ExpiryBatchSection> {
-  DateTime? _expiry;
-  int _warnDays = 30;
+  static const warnOptions = [(30, 'ရက် ၃၀ အလို'), (60, 'ရက် ၆၀ အလို'), (90, 'ရက် ၉၀ အလို')];
 
-  static const _warnOptions = [(30, 'ရက် ၃၀ အလို'), (60, 'ရက် ၆၀ အလို'), (90, 'ရက် ၉၀ အလို')];
-
-  Future<void> _pickDate() async {
+  Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();
     final d = await showDatePicker(
       context: context,
-      initialDate: _expiry ?? now,
+      initialDate: expiry ?? now,
       firstDate: DateTime(now.year - 1),
       lastDate: DateTime(now.year + 10),
     );
-    if (d != null) setState(() => _expiry = d);
+    if (d != null) onExpiry(d);
   }
 
   @override
@@ -72,7 +77,11 @@ class _ExpiryBatchSectionState extends State<ExpiryBatchSection> {
       borderColor: AppColors.pharmacyBorder,
       children: [
         TwoCol(
-          const LabeledField(label: 'Batch နံပါတ်', small: true, child: AppInput(semanticLabel: 'Batch နံပါတ်')),
+          LabeledField(
+            label: 'Batch နံပါတ်',
+            small: true,
+            child: AppInput(key: const ValueKey('batchNo'), controller: batchNo, semanticLabel: 'Batch နံပါတ်'),
+          ),
           LabeledField(
             label: 'သက်တမ်းကုန်ရက်',
             small: true,
@@ -80,7 +89,7 @@ class _ExpiryBatchSectionState extends State<ExpiryBatchSection> {
               button: true,
               label: 'သက်တမ်းကုန်ရက်',
               child: InkWell(
-                onTap: _pickDate,
+                onTap: () => _pickDate(context),
                 borderRadius: AppRadius.inputR,
                 child: Container(
                   height: 48,
@@ -91,7 +100,7 @@ class _ExpiryBatchSectionState extends State<ExpiryBatchSection> {
                     border: Border.all(color: AppColors.inputBorder, width: 1.5),
                   ),
                   child: Text(
-                    _expiry == null ? '' : DateFormat('yyyy-MM-dd').format(_expiry!),
+                    expiry == null ? '' : DateFormat('yyyy-MM-dd').format(expiry!),
                     style: AppText.s(14),
                   ),
                 ),
@@ -104,9 +113,9 @@ class _ExpiryBatchSectionState extends State<ExpiryBatchSection> {
           small: true,
           child: AppSelect<int>(
             label: 'ကုန်ခါနီးရင် သတိပေးမယ်',
-            items: _warnOptions,
-            value: _warnDays,
-            onChanged: (v) => setState(() => _warnDays = v),
+            items: warnOptions,
+            value: warnDays,
+            onChanged: onWarnDays,
           ),
         ),
         Text('Batch တစ်ခုထက်ပိုရင် သက်တမ်းစောတာကို အရင်ရောင်းအောင် ညွှန်ပေးပါမယ် (FEFO)',
@@ -118,12 +127,27 @@ class _ExpiryBatchSectionState extends State<ExpiryBatchSection> {
 
 // ── serialWarranty ─────────────────────────────────────────────────────────
 class SerialWarrantySection extends StatefulWidget {
-  const SerialWarrantySection({super.key, required this.serial, required this.onSerialChanged, required this.imeis, required this.onAddImei});
+  const SerialWarrantySection({
+    super.key,
+    required this.serial,
+    required this.onSerialChanged,
+    required this.imeis,
+    required this.onAddImei,
+    required this.warrantyMonths,
+    required this.onWarrantyChanged,
+  });
 
   final bool serial;
   final ValueChanged<bool> onSerialChanged;
   final List<String> imeis;
   final ValueChanged<String> onAddImei;
+
+  /// 0 = none.
+  final int warrantyMonths;
+  final ValueChanged<int> onWarrantyChanged;
+
+  /// (months, label) as in the design's select.
+  static const warranties = [(0, 'မရှိ'), (3, '၃ လ'), (6, '၆ လ'), (12, '၁ နှစ်')];
 
   @override
   State<SerialWarrantySection> createState() => _SerialWarrantySectionState();
@@ -131,9 +155,6 @@ class SerialWarrantySection extends StatefulWidget {
 
 class _SerialWarrantySectionState extends State<SerialWarrantySection> {
   final _imei = TextEditingController();
-  String _warranty = '၆ လ';
-
-  static const _warranties = ['မရှိ', '၃ လ', '၆ လ', '၁ နှစ်'];
 
   @override
   void dispose() {
@@ -169,6 +190,7 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
                 children: [
                   Expanded(
                     child: AppInput(
+                      key: const ValueKey('imei'),
                       controller: _imei,
                       height: 44,
                       hint: 'IMEI 15 လုံး',
@@ -221,11 +243,11 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
         LabeledField(
           label: 'အာမခံ (ပြေစာပေါ် ပါမယ်)',
           small: true,
-          child: AppSelect<String>(
+          child: AppSelect<int>(
             label: 'အာမခံ',
-            items: [for (final w in _warranties) (w, w)],
-            value: _warranty,
-            onChanged: (v) => setState(() => _warranty = v),
+            items: SerialWarrantySection.warranties,
+            value: widget.warrantyMonths,
+            onChanged: widget.onWarrantyChanged,
           ),
         ),
       ],

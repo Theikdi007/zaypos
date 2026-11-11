@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../inventory/data/stock_providers.dart';
 import '../../inventory/domain/stock_movement.dart';
 import '../domain/product.dart';
+import '../domain/product_modules.dart';
 import '../domain/product_view.dart';
 import 'product_repository.dart';
 
@@ -13,8 +14,13 @@ class CatalogNotifier extends Notifier<List<Product>> {
   @override
   List<Product> build() => _repo.list();
 
-  void add(Product p, {List<ProductVariant> variants = const []}) {
-    _repo.add(p, variants: variants);
+  void add(
+    Product p, {
+    List<ProductVariant> variants = const [],
+    List<ProductBatch> batches = const [],
+    List<ProductSerial> serials = const [],
+  }) {
+    _repo.add(p, variants: variants, batches: batches, serials: serials);
     state = _repo.list();
   }
 }

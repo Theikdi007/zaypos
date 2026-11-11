@@ -22,6 +22,7 @@ import '../../inventory/data/stock_providers.dart';
 import '../../inventory/domain/stock_movement.dart';
 import '../data/product_providers.dart';
 import '../domain/product.dart';
+import '../domain/product_modules.dart';
 import 'sections/feature_sections.dart';
 
 /// One Add Product screen; sections appear according to [TenantFeatures].
@@ -41,6 +42,10 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   final _wholesale = TextEditingController();
   final _stock = TextEditingController();
   final _alert = TextEditingController();
+  final _batchNo = TextEditingController();
+  DateTime? _expiry;
+  int _expiryWarnDays = 30;
+  int _warrantyMonths = 6;
   late String? _category = _t.categories.isEmpty ? null : _t.categories.first;
   late String? _unit = _t.units.isEmpty ? null : _t.units.first;
 
@@ -65,7 +70,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
   @override
   void dispose() {
-    for (final c in [_name, _barcode, _cost, _price, _wholesale, _stock, _alert]) {
+    for (final c in [_name, _barcode, _cost, _price, _wholesale, _stock, _alert, _batchNo]) {
       c.dispose();
     }
     super.dispose();
@@ -83,6 +88,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     final t = nowUtc();
     final productId = newId();
     final variants = <ProductVariant>[];
+    final batches = <ProductBatch>[];
+    final serials = <ProductSerial>[];
     final movements = <StockMovement>[];
     final stock = ref.read(stockLedgerProvider.notifier);
     if (features.stock && _track) {
@@ -107,7 +114,35 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         if (_imeis.isNotEmpty) movements.add(stock.restock(productId, Qty.units(_imeis.length), note: 'initial'));
       } else {
         final q = Qty.parse(_stock.text, decimal: features.decimalQty) ?? 0;
-        if (q != 0) movements.add(stock.restock(productId, q, note: 'initial'));
+        // Expiry-tracked shops receive stock into a batch.
+        final hasBatch = features.expiryBatch && (_batchNo.text.trim().isNotEmpty || _expiry != null);
+        final batchId = hasBatch ? newId() : null;
+        if (hasBatch) {
+          batches.add(ProductBatch(
+            id: batchId!,
+            tenantId: tenantId,
+            productId: productId,
+            batchNo: _batchNo.text.trim(),
+            expiryDate: _expiry == null ? null : DateTime.utc(_expiry!.year, _expiry!.month, _expiry!.day),
+            qtyMilli: q,
+            createdAt: t,
+            updatedAt: t,
+          ));
+        }
+        if (q != 0) movements.add(stock.restock(productId, q, batchId: batchId, note: 'initial'));
+      }
+    }
+    if (features.serialWarranty && _serial) {
+      for (final imei in _imeis) {
+        serials.add(ProductSerial(
+          id: newId(),
+          tenantId: tenantId,
+          productId: productId,
+          serial: imei,
+          status: SerialStatus.inStock,
+          createdAt: t,
+          updatedAt: t,
+        ));
       }
     }
     ref.read(catalogProvider.notifier).add(
@@ -124,10 +159,14 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             barcode: _barcode.text.trim().isEmpty ? null : _barcode.text.trim(),
             tint: _t.tint.toARGB32(),
             initial: String.fromCharCode(name.runes.first),
+            warrantyMonths: features.serialWarranty && _warrantyMonths > 0 ? _warrantyMonths : null,
+            expiryAlertDays: features.expiryBatch ? _expiryWarnDays : null,
             createdAt: t,
             updatedAt: t,
           ),
           variants: variants,
+          batches: batches,
+          serials: serials,
         );
     stock.record(movements);
     context.pop();
@@ -213,6 +252,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                         label: 'ပစ္စည်းအမည်',
                         required: true,
                         child: AppInput(
+                          key: const ValueKey('productName'),
                           controller: _name,
                           hint: _t.namePlaceholder,
                           semanticLabel: 'ပစ္စည်းအမည်',
@@ -303,13 +343,22 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     ),
                   ],
                 ),
-                if (f.expiryBatch) const ExpiryBatchSection(),
+                if (f.expiryBatch)
+                  ExpiryBatchSection(
+                    batchNo: _batchNo,
+                    expiry: _expiry,
+                    onExpiry: (d) => setState(() => _expiry = d),
+                    warnDays: _expiryWarnDays,
+                    onWarnDays: (d) => setState(() => _expiryWarnDays = d),
+                  ),
                 if (f.serialWarranty)
                   SerialWarrantySection(
                     serial: _serial,
                     onSerialChanged: (v) => setState(() => _serial = v),
                     imeis: _imeis,
                     onAddImei: (v) => setState(() => _imeis.add(v)),
+                    warrantyMonths: _warrantyMonths,
+                    onWarrantyChanged: (m) => setState(() => _warrantyMonths = m),
                   ),
                 if (f.variants)
                   VariantsSection(
@@ -337,6 +386,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                             label: 'လက်ရှိ အရေအတွက်',
                             small: true,
                             child: AppInput(
+                              key: const ValueKey('stockQty'),
                               controller: _stock,
                               fontSize: 16,
                               hint: f.decimalQty ? '0.00' : '0',

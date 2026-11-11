@@ -15,6 +15,8 @@ class Product {
     this.barcode,
     this.wholesalePrice,
     this.lowAlertMilli = 5000,
+    this.warrantyMonths,
+    this.expiryAlertDays,
     this.deletedAt,
   });
 
@@ -38,6 +40,12 @@ class Product {
   final String unit;
   final String? barcode;
 
+  /// Warranty printed on the receipt (TenantFeatures.serialWarranty); null = none.
+  final int? warrantyMonths;
+
+  /// Warn this many days before a batch expires (TenantFeatures.expiryBatch).
+  final int? expiryAlertDays;
+
   /// ARGB tile color.
   final int tint;
   final String initial;
@@ -57,6 +65,8 @@ class Product {
     String? category,
     String? unit,
     String? Function()? barcode,
+    int? Function()? warrantyMonths,
+    int? Function()? expiryAlertDays,
     int? tint,
     String? initial,
     DateTime? updatedAt,
@@ -73,6 +83,8 @@ class Product {
         category: category ?? this.category,
         unit: unit ?? this.unit,
         barcode: barcode != null ? barcode() : this.barcode,
+        warrantyMonths: warrantyMonths != null ? warrantyMonths() : this.warrantyMonths,
+        expiryAlertDays: expiryAlertDays != null ? expiryAlertDays() : this.expiryAlertDays,
         tint: tint ?? this.tint,
         initial: initial ?? this.initial,
         createdAt: createdAt,
