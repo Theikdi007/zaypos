@@ -1,5 +1,7 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 
+import '../core/data/unit_of_work.dart';
 import '../features/auth/data/session.dart';
 import '../features/customers/data/customer_repository.dart';
 import '../features/customers/data/debt_repository.dart';
@@ -15,16 +17,33 @@ import '../features/reports/data/fake_report_repository.dart';
 import '../features/reports/data/report_repository.dart';
 import '../features/sales/data/fake_sales_repository.dart';
 import '../features/sales/data/sales_repository.dart';
+import 'fake_database.dart';
 
-/// Composition root: binds every repository interface to its fake.
-/// Swap these for API/Drift implementations later — nothing else changes.
+/// A fake database filled with the design's sample data.
+FakeDatabase seedFakeDatabase(String tenantId) => FakeDatabase()
+  ..products.addAll(seedProducts(tenantId))
+  ..stock.addAll(seedStock(tenantId))
+  ..sales.addAll(seedSales(tenantId))
+  ..customers.addAll(seedCustomers(tenantId))
+  ..debt.addAll(seedDebt(tenantId))
+  ..devices.add(seedDevice(tenantId));
+
+final fakeDatabaseProvider = Provider<FakeDatabase>((ref) => seedFakeDatabase(ref.read(tenantIdProvider)));
+
+/// Composition root: binds every repository interface (and the unit of
+/// work) to the fake database. Swap these for Drift/API implementations
+/// later — nothing else changes.
 final List<Override> fakeRepositoryOverrides = [
-  productRepositoryProvider.overrideWith((ref) => FakeProductRepository(tenantId: ref.read(tenantIdProvider))),
-  salesRepositoryProvider.overrideWith((ref) => FakeSalesRepository(tenantId: ref.read(tenantIdProvider))),
-  customerRepositoryProvider.overrideWith((ref) => FakeCustomerRepository(tenantId: ref.read(tenantIdProvider))),
-  debtRepositoryProvider.overrideWith((ref) => FakeDebtRepository(tenantId: ref.read(tenantIdProvider))),
-  stockRepositoryProvider.overrideWith((ref) => FakeStockRepository(tenantId: ref.read(tenantIdProvider))),
-  deviceRepositoryProvider.overrideWith((ref) => FakeDeviceRepository(tenantId: ref.read(tenantIdProvider))),
+  unitOfWorkProvider.overrideWith((ref) => FakeUnitOfWork(ref.read(fakeDatabaseProvider))),
+  productRepositoryProvider.overrideWith((ref) => FakeProductRepository(ref.read(fakeDatabaseProvider))),
+  stockRepositoryProvider.overrideWith((ref) => FakeStockRepository(ref.read(fakeDatabaseProvider))),
+  salesRepositoryProvider.overrideWith((ref) => FakeSalesRepository(ref.read(fakeDatabaseProvider))),
+  customerRepositoryProvider.overrideWith((ref) => FakeCustomerRepository(ref.read(fakeDatabaseProvider))),
+  debtRepositoryProvider.overrideWith((ref) => FakeDebtRepository(ref.read(fakeDatabaseProvider))),
+  deviceRepositoryProvider.overrideWith((ref) {
+    final db = ref.read(fakeDatabaseProvider);
+    return FakeDeviceRepository(db, deviceId: db.devices.first.id);
+  }),
   reportRepositoryProvider.overrideWith(
     (ref) => FakeReportRepository(
       sales: ref.read(salesRepositoryProvider),

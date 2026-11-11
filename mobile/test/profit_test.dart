@@ -6,8 +6,8 @@ import 'package:zaypos_app/features/reports/data/fake_report_repository.dart';
 import 'package:zaypos_app/features/reports/domain/report.dart';
 import 'package:zaypos_app/features/sales/data/sales_providers.dart';
 import 'package:zaypos_app/features/sales/data/sales_repository.dart';
-import 'package:zaypos_app/features/sales/domain/sale.dart';
 import 'package:zaypos_app/features/products/data/product_repository.dart';
+import 'package:zaypos_app/features/sales/domain/sale.dart';
 
 import 'helpers.dart';
 
@@ -52,14 +52,11 @@ void main() {
     expect(r.summary.count, today.length);
   });
 
-  test('profit uses the snapshot, not the current product cost', () {
+  test('profit uses the snapshot, not the current product cost', () async {
     final c = makeContainer();
     addTearDown(c.dispose);
     final before = c.read(reportProvider(ReportPeriod.today)).summary.profit;
-    c.read(salesProvider.notifier).create(
-      method: PaymentMethod.cash,
-      lines: [draft(productId: SeedIds.water, qtyMilli: Qty.units(3), price: 600, cost: 450)],
-    );
+    await sell(c, [draft(productId: SeedIds.water, qtyMilli: Qty.units(3), price: 600, cost: 450)]);
     // Even if the product's cost changed afterwards, recorded profit stays 3 × 150.
     final report = FakeReportRepository(
       sales: c.read(salesRepositoryProvider),

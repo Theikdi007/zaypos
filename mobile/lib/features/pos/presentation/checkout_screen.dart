@@ -16,9 +16,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../../customers/data/customer_providers.dart';
 import '../../customers/domain/customer_account.dart';
 import '../../customers/presentation/widgets/customer_row.dart';
-import '../../inventory/data/stock_providers.dart';
-import '../../inventory/domain/stock_movement.dart';
-import '../../sales/data/sales_providers.dart';
+import '../../sales/application/checkout_service.dart';
 import '../../sales/domain/sale.dart';
 import '../../sales/presentation/sale_ui.dart';
 import '../domain/cart.dart';
@@ -95,22 +93,24 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (picked != null) setState(() => _customerId = picked);
   }
 
-  void _confirm(Cart cart, CustomerAccount? customer) {
-    final isDebt = _method == PaymentMethod.debt;
-    final sale = ref.read(salesProvider.notifier).create(
-          method: _method,
-          lines: cart.toDrafts(),
-          customerId: isDebt ? customer?.id : null,
-          customerName: isDebt ? customer?.name : null,
-          received: _method == PaymentMethod.cash && _received.text.isNotEmpty ? parseMoney(_received.text) : null,
-        );
-    final stock = ref.read(stockLedgerProvider.notifier);
-    stock.record(stock.forSale(sale, StockMovementType.sale, sign: -1));
-    if (isDebt && customer != null) {
-      ref.read(debtLedgerProvider.notifier).creditSale(customer.id, sale);
+  bool _submitting = false;
+
+  Future<void> _confirm(Cart cart, CustomerAccount? customer) async {
+    setState(() => _submitting = true);
+    try {
+      final sale = await ref.read(checkoutServiceProvider).checkout(CheckoutRequest(
+            lines: cart.toDrafts(),
+            method: _method,
+            customerId: _method == PaymentMethod.debt ? customer?.id : null,
+            received: _method == PaymentMethod.cash && _received.text.isNotEmpty ? parseMoney(_received.text) : null,
+          ));
+      ref.read(cartProvider.notifier).clear();
+      if (mounted) context.go(Routes.receipt(sale.id));
+    } on CheckoutException {
+      // The button is disabled for these cases; nothing was stored.
+    } finally {
+      if (mounted) setState(() => _submitting = false);
     }
-    ref.read(cartProvider.notifier).clear();
-    context.go(Routes.receipt(sale.id));
   }
 
   @override
@@ -291,7 +291,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 PrimaryButton(
                   label: 'အတည်ပြုပြီး ပြေစာထုတ်မယ်',
                   dimWhenDisabled: blockReason != null,
-                  onPressed: cart.isEmpty || blockReason != null ? null : () => _confirm(cart, customer),
+                  onPressed: cart.isEmpty || blockReason != null || _submitting ? null : () => _confirm(cart, customer),
                 ),
                 if (blockReason != null) ...[
                   const SizedBox(height: 8),

@@ -30,6 +30,9 @@ class DebtLedgerNotifier extends Notifier<List<DebtEntry>> {
   @override
   List<DebtEntry> build() => _repo.list();
 
+  /// Re-read after a service committed writes.
+  void refresh() => state = _repo.list();
+
   DebtEntry _record(
     String customerId,
     DebtEntryType type,
@@ -57,10 +60,6 @@ class DebtLedgerNotifier extends Notifier<List<DebtEntry>> {
     state = _repo.list();
     return e;
   }
-
-  /// Checkout with "အကြွေး".
-  DebtEntry creditSale(String customerId, Sale sale) =>
-      _record(customerId, DebtEntryType.creditSale, sale.total, saleId: sale.id, saleNo: sale.no);
 
   /// PayDebt sheet.
   DebtEntry payment(String customerId, int amount, PaymentMethod method) =>

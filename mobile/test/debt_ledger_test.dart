@@ -4,7 +4,6 @@ import 'package:zaypos_app/features/customers/data/customer_providers.dart';
 import 'package:zaypos_app/features/customers/domain/customer.dart';
 import 'package:zaypos_app/features/customers/domain/customer_account.dart';
 import 'package:zaypos_app/features/customers/domain/debt_entry.dart';
-import 'package:zaypos_app/features/sales/data/sales_providers.dart';
 import 'package:zaypos_app/features/sales/domain/sale.dart';
 
 import 'helpers.dart';
@@ -93,17 +92,15 @@ void main() {
       expect(c.read(customerAccountProvider(SeedIds.aungKyaw))!.balance, 52000);
     });
 
-    test('credit sale + payment update the balance through the ledger', () {
+    test('credit sale + payment update the balance through the ledger', () async {
       final c = makeContainer();
       addTearDown(c.dispose);
-      final sale = c.read(salesProvider.notifier).create(
-        method: PaymentMethod.debt,
-        lines: [draft(qtyMilli: 2000, price: 3000)],
-        customerId: SeedIds.aungKyaw,
-      );
+      final sale = await sell(c, [draft(qtyMilli: 2000, price: 3000)],
+          method: PaymentMethod.debt, customerId: SeedIds.aungKyaw);
       final ledger = c.read(debtLedgerProvider.notifier);
-      final credit = ledger.creditSale(SeedIds.aungKyaw, sale);
+      final credit = c.read(debtLedgerProvider).firstWhere((e) => e.saleId == sale.id);
       expect(credit.type, DebtEntryType.creditSale);
+      expect(credit.saleNo, sale.no);
       expect(credit.saleId, sale.id);
       expect(credit.amount, 6000);
       expect(c.read(customerAccountProvider(SeedIds.aungKyaw))!.balance, 58000);

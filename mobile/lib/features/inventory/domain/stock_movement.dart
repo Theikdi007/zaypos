@@ -1,3 +1,6 @@
+import '../../../core/utils/ids.dart';
+import '../../sales/domain/sale.dart';
+
 enum StockMovementType {
   /// Sold (negative qty).
   sale,
@@ -72,4 +75,27 @@ Map<String, int> stockByProduct(Iterable<StockMovement> movements) {
     out[m.productId] = (out[m.productId] ?? 0) + m.qtyMilli;
   }
   return out;
+}
+
+/// One movement per catalog line of [sale] (carrying variant/batch).
+/// [sign] −1 = goods out (sale), +1 = goods back (void).
+List<StockMovement> movementsForSale(Sale sale, StockMovementType type, {required int sign, String note = ''}) {
+  final t = nowUtc();
+  return [
+    for (final l in sale.lines)
+      if (l.productId != null)
+        StockMovement(
+          id: newId(),
+          tenantId: sale.tenantId,
+          productId: l.productId!,
+          variantId: l.variantId,
+          batchId: l.batchId,
+          type: type,
+          qtyMilli: sign * l.qtyMilli,
+          saleId: sale.id,
+          note: note,
+          createdAt: t,
+          updatedAt: t,
+        ),
+  ];
 }

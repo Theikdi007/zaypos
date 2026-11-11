@@ -17,6 +17,9 @@ abstract interface class ProductRepository {
     List<ProductBatch> batches = const [],
     List<ProductSerial> serials = const [],
   });
+
+  /// Marks an IMEI/serial sold (with its sale line) or back in stock.
+  void setSerialStatus(String serialId, SerialStatus status, {String? saleLineId});
 }
 
 /// Bound at the composition root (lib/app/fake_overrides.dart).

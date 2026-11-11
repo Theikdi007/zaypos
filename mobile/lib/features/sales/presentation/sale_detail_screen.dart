@@ -12,9 +12,7 @@ import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/money_text.dart';
 import '../../../core/widgets/primary_button.dart';
-import '../../customers/data/customer_providers.dart';
-import '../../inventory/data/stock_providers.dart';
-import '../../inventory/domain/stock_movement.dart';
+import '../application/void_sale_service.dart';
 import '../data/sales_providers.dart';
 import '../domain/sale.dart';
 import 'sale_ui.dart';
@@ -24,24 +22,9 @@ class SaleDetailScreen extends ConsumerWidget {
 
   final String id;
 
-  void _toggleVoid(WidgetRef ref, Sale sale) {
-    final voiding = !sale.voided;
-    final sign = voiding ? 1 : -1;
-    ref.read(salesProvider.notifier).setVoided(sale.id, voiding);
-    final stock = ref.read(stockLedgerProvider.notifier);
-    stock.record(voiding
-        ? stock.forSale(sale, StockMovementType.voidReturn, sign: 1)
-        : stock.forSale(sale, StockMovementType.sale, sign: -1, note: 'unvoid'));
-    if (sale.method == PaymentMethod.debt && sale.customerId != null) {
-      // Append-only ledger: reverse (or re-apply) the credit sale.
-      ref.read(debtLedgerProvider.notifier).adjustment(
-            sale.customerId!,
-            -sign * sale.total,
-            saleId: sale.id,
-            note: voiding ? 'void' : 'unvoid',
-          );
-    }
-  }
+  /// Void / un-void via the service (sale + stock + serials + debt, atomically).
+  Future<void> _toggleVoid(WidgetRef ref, Sale sale) =>
+      ref.read(voidSaleServiceProvider).setVoided(sale.id, !sale.voided);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

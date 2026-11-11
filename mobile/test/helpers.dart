@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaypos_app/app/fake_overrides.dart';
+import 'package:zaypos_app/features/sales/application/checkout_service.dart';
 import 'package:zaypos_app/features/sales/data/sales_providers.dart';
+import 'package:zaypos_app/features/sales/domain/sale.dart';
 
 /// Container wired exactly like the app (fake repositories).
 ProviderContainer makeContainer() => ProviderContainer(overrides: fakeRepositoryOverrides);
@@ -31,3 +33,10 @@ SaleLineDraft draft({String? productId, String name = 'x', int qtyMilli = 1000, 
       price: price,
       cost: cost,
     );
+
+/// Checks out through the real CheckoutService.
+Future<Sale> sell(ProviderContainer c, List<SaleLineDraft> lines,
+        {PaymentMethod method = PaymentMethod.cash, String? customerId, int? received}) =>
+    c.read(checkoutServiceProvider).checkout(
+          CheckoutRequest(lines: lines, method: method, customerId: customerId, received: received),
+        );
