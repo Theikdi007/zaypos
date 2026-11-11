@@ -16,7 +16,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/product_tile.dart';
 import '../../../core/widgets/segmented_tabs.dart';
 import '../../products/data/product_providers.dart';
-import '../../sales/data/sales_providers.dart';
+import '../../devices/data/device_providers.dart';
 import '../domain/cart.dart';
 
 enum PosMode { products, quick }
@@ -64,8 +64,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   Widget build(BuildContext context) {
     final features = ref.watch(tenantFeaturesProvider);
     final cart = ref.watch(cartProvider);
-    final nextNo = ref.watch(salesProvider.notifier).nextNumber();
-    ref.watch(salesProvider); // rebuild number after a sale
+    final nextNo = ref.watch(deviceProvider).nextReceiptNo;
     final mode = features.quickSale ? (_mode ?? PosMode.quick) : PosMode.products;
 
     return Scaffold(

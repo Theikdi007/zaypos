@@ -153,7 +153,7 @@ class _ReceiptBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(shop, textAlign: TextAlign.center, style: AppText.s(16, weight: AppText.w700)),
-        Text('ပြေစာ #${receiptNo(sale.no)} · $date', textAlign: TextAlign.center, style: AppText.s(12, color: AppColors.muted)),
+        Text('ပြေစာ #${sale.no} · $date', textAlign: TextAlign.center, style: AppText.s(12, color: AppColors.muted)),
         gap(),
         divider(),
         for (final l in sale.lines) ...[

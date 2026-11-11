@@ -126,7 +126,7 @@ void main() {
     router.go('/customers/${SeedIds.thanHtun}');
     await tester.pumpAndSettle();
     expect(find.text('96,600 Ks'), findsOneWidget);
-    expect(find.text('အကြွေးဝယ် · #1033'), findsOneWidget);
+    expect(find.text('အကြွေးဝယ် · #A-1033'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

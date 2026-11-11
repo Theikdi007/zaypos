@@ -52,6 +52,3 @@ String mmReceiptDate(DateTime t) {
   final d = t.toLocal();
   return '${mmDigits(d.day)} ${mmMonths[d.month - 1]} ${mmDigits(d.year)} · ${timeLabel(d)}';
 }
-
-/// Receipt numbers are shown 4-digit: 987 -> "0987".
-String receiptNo(int no) => no.toString().padLeft(4, '0');

@@ -7,8 +7,6 @@ abstract interface class SalesRepository {
   List<Sale> list();
   Sale? byId(String id);
 
-  /// Next receipt number for this device/tenant.
-  int nextNumber();
   void add(Sale sale);
   void setVoided(String id, bool voided);
 }

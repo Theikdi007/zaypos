@@ -1,4 +1,3 @@
-import '../../../core/utils/myanmar.dart';
 import '../../sales/domain/sale.dart';
 
 enum DebtEntryType { creditSale, payment, adjustment }
@@ -30,8 +29,8 @@ class DebtEntry {
   final int amount;
   final String? saleId;
 
-  /// Receipt number snapshot (sale may be outside the local window).
-  final int? saleNo;
+  /// Receipt number snapshot, e.g. "A-1030" (sale may be outside the local window).
+  final String? saleNo;
 
   /// How a payment was received.
   final PaymentMethod? method;
@@ -51,9 +50,9 @@ class DebtEntry {
   /// from the customer's history list.
   bool get isSaleReversal => type == DebtEntryType.adjustment && saleId != null;
 
-  /// History row title ("အကြွေးဝယ် · #1030", "ငွေပြန်ဆပ် · ငွေသား").
+  /// History row title ("အကြွေးဝယ် · #A-1030", "ငွေပြန်ဆပ် · ငွေသား").
   String get title => switch (type) {
-        DebtEntryType.creditSale => 'အကြွေးဝယ် · #${saleNo == null ? '' : receiptNo(saleNo!)}',
+        DebtEntryType.creditSale => 'အကြွေးဝယ် · #${saleNo ?? ''}',
         DebtEntryType.payment => 'ငွေပြန်ဆပ် · ${(method ?? PaymentMethod.cash).label}',
         DebtEntryType.adjustment => note ?? '',
       };

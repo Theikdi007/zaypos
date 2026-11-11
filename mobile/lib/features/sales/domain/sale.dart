@@ -121,8 +121,8 @@ class Sale {
   final String id;
   final String tenantId;
 
-  /// Human receipt number (#1030).
-  final int no;
+  /// Device-scoped receipt number, e.g. "A-1033" (see Device).
+  final String no;
   final PaymentMethod method;
   final List<SaleLine> lines;
   final List<Payment> payments;

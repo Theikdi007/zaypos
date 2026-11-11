@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/ids.dart';
 import '../../auth/data/session.dart';
+import '../../devices/data/device_providers.dart';
 import '../domain/sale.dart';
 import 'sales_repository.dart';
 
@@ -16,8 +17,6 @@ class SalesNotifier extends Notifier<List<Sale>> {
 
   @override
   List<Sale> build() => _repo.list();
-
-  int nextNumber() => _repo.nextNumber();
 
   /// Records a sale. Non-credit sales get a [Payment]; credit sales are
   /// recorded in the debt ledger by the caller.
@@ -49,7 +48,7 @@ class SalesNotifier extends Notifier<List<Sale>> {
     final sale = Sale(
       id: id,
       tenantId: tenantId,
-      no: _repo.nextNumber(),
+      no: ref.read(deviceProvider.notifier).issueReceiptNo(),
       method: method,
       lines: saleLines,
       payments: method == PaymentMethod.debt

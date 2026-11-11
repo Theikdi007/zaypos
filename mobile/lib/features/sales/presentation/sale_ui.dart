@@ -16,8 +16,8 @@ extension PaymentMethodColor on PaymentMethod {
 
 /// Display strings derived from a [Sale].
 extension SaleLabels on Sale {
-  /// "#1030 · အကြွေး (ဦးအောင်ကျော်)"
-  String get title => '#${receiptNo(no)} · ${method.label}${customerName != null ? ' ($customerName)' : ''}';
+  /// "#A-1030 · အကြွေး (ဦးအောင်ကျော်)"
+  String get title => '#$no · ${method.label}${customerName != null ? ' ($customerName)' : ''}';
 
   /// "3:42 PM"
   String get time => timeLabel(createdAt);

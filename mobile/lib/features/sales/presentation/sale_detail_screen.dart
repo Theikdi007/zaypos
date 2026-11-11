@@ -7,7 +7,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text.dart';
 import '../../../core/utils/money_format.dart';
-import '../../../core/utils/myanmar.dart';
 import '../../../core/utils/qty.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
@@ -58,7 +57,7 @@ class SaleDetailScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ScreenHeader(
-            title: 'အရောင်း #${receiptNo(sale.no)}',
+            title: 'အရောင်း #${sale.no}',
             onBack: () => context.pop(),
             trailing: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),

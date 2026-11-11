@@ -7,7 +7,7 @@ import 'debt_repository.dart';
 class FakeDebtRepository implements DebtRepository {
   FakeDebtRepository({required this.tenantId}) {
     DebtEntry e(String customerId, DebtEntryType type, int amount, DateTime at,
-            {String? saleId, int? saleNo, PaymentMethod? method, String? note}) =>
+            {String? saleId, String? saleNo, PaymentMethod? method, String? note}) =>
         DebtEntry(
           id: newId(),
           tenantId: tenantId,
@@ -24,10 +24,10 @@ class FakeDebtRepository implements DebtRepository {
     const opening = 'ယခင်အကြွေး';
     _entries.addAll([
       // ဦးအောင်ကျော် — design history (balance 52,000)
-      e(SeedIds.aungKyaw, DebtEntryType.creditSale, 24000, todayAt(14, 58), saleId: SeedIds.sale1030, saleNo: 1030),
-      e(SeedIds.aungKyaw, DebtEntryType.creditSale, 18500, daysAgoAt(4, 10, 12), saleNo: 987),
+      e(SeedIds.aungKyaw, DebtEntryType.creditSale, 24000, todayAt(14, 58), saleId: SeedIds.sale1030, saleNo: 'A-1030'),
+      e(SeedIds.aungKyaw, DebtEntryType.creditSale, 18500, daysAgoAt(4, 10, 12), saleNo: 'A-0987'),
       e(SeedIds.aungKyaw, DebtEntryType.payment, 30000, daysAgoAt(13, 17, 40), method: PaymentMethod.cash),
-      e(SeedIds.aungKyaw, DebtEntryType.creditSale, 39500, daysAgoAt(17, 9, 5), saleNo: 911),
+      e(SeedIds.aungKyaw, DebtEntryType.creditSale, 39500, daysAgoAt(17, 9, 5), saleNo: 'A-0911'),
       // Opening balances carried over from the paper book
       e(SeedIds.thanHtun, DebtEntryType.adjustment, 96000, daysAgoAt(35, 10, 0), note: opening),
       e(SeedIds.khinMa, DebtEntryType.adjustment, 78000, daysAgoAt(5, 10, 0), note: opening),

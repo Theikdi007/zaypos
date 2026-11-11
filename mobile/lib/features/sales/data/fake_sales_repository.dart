@@ -1,6 +1,7 @@
 import '../../../app/fake_seed.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/qty.dart';
+import '../../devices/domain/device.dart';
 import '../domain/sale.dart';
 import 'sales_repository.dart';
 
@@ -8,7 +9,7 @@ class FakeSalesRepository implements SalesRepository {
   FakeSalesRepository({required this.tenantId}) {
     Sale seed(
       String id,
-      int no,
+      int seq,
       PaymentMethod m,
       DateTime at,
       List<(String?, String, int, int)> lines, {
@@ -35,7 +36,7 @@ class FakeSalesRepository implements SalesRepository {
       return Sale(
         id: id,
         tenantId: tenantId,
-        no: no,
+        no: formatReceiptNo('A', seq),
         method: m,
         lines: sl,
         payments: m == PaymentMethod.debt
@@ -109,9 +110,6 @@ class FakeSalesRepository implements SalesRepository {
     }
     return null;
   }
-
-  @override
-  int nextNumber() => _sales.fold(0, (a, s) => s.no > a ? s.no : a) + 1;
 
   @override
   void add(Sale sale) => _sales.insert(0, sale);

@@ -35,7 +35,7 @@ class DebtLedgerNotifier extends Notifier<List<DebtEntry>> {
     DebtEntryType type,
     int amount, {
     String? saleId,
-    int? saleNo,
+    String? saleNo,
     PaymentMethod? method,
     String? note,
   }) {
