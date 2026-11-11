@@ -5,12 +5,16 @@ using ZayPOS.Infrastructure.Persistence;
 
 namespace ZayPOS.Api.Tests;
 
-/// <summary>One real SQL Server 2022 container per test collection, migrated once.</summary>
+/// <summary>One real SQL Server 2022 container per test run, migrated once, plus the API on top of it.</summary>
 public sealed class SqlServerFixture : IAsyncLifetime
 {
     private readonly MsSqlContainer _container = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest").Build();
+    private ApiFactory? _api;
 
     public string ConnectionString => _container.GetConnectionString();
+
+    /// <summary>Shared API host with a generous rate limit.</summary>
+    public ApiFactory Api => _api ??= new ApiFactory(ConnectionString);
 
     public async Task InitializeAsync()
     {
@@ -19,7 +23,11 @@ public sealed class SqlServerFixture : IAsyncLifetime
         await db.Database.MigrateAsync();
     }
 
-    public Task DisposeAsync() => _container.DisposeAsync().AsTask();
+    public async Task DisposeAsync()
+    {
+        if (_api is not null) await _api.DisposeAsync();
+        await _container.DisposeAsync();
+    }
 
     public ZayPosDbContext CreateContext(Guid? tenantId) =>
         new(new DbContextOptionsBuilder<ZayPosDbContext>().UseSqlServer(ConnectionString).Options,

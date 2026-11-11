@@ -4,6 +4,7 @@ using ZayPOS.Domain.Catalog;
 using ZayPOS.Domain.Common;
 using ZayPOS.Domain.Inventory;
 using ZayPOS.Domain.Tenancy;
+using ZayPOS.Infrastructure.Persistence;
 
 namespace ZayPOS.Api.Tests;
 
@@ -34,7 +35,9 @@ public class SchemaTests(SqlServerFixture sql)
         await using (var anonymous = sql.CreateContext(null))
         {
             (await anonymous.Products.AnyAsync(p => p.Id == pa || p.Id == pb)).Should().BeFalse();
-            (await anonymous.Products.IgnoreQueryFilters().CountAsync(p => p.Id == pa || p.Id == pb)).Should().Be(2);
+            var stored = await anonymous.Database
+                .SqlQuery<int>($"SELECT COUNT(*) AS Value FROM dbo.Products WHERE Id IN ({pa}, {pb})").SingleAsync();
+            stored.Should().Be(2);
         }
     }
 
@@ -67,6 +70,49 @@ public class SchemaTests(SqlServerFixture sql)
             m.Note.Should().BeEmpty();
             m.CreatedAt.Kind.Should().Be(DateTimeKind.Utc);
             m.Version.Should().HaveCount(8);
+        }
+    }
+
+    [Fact]
+    public async Task SaveChanges_refuses_rows_of_another_tenant()
+    {
+        var (a, pa) = await SeedTenantWithProduct("D");
+        var (b, _) = await SeedTenantWithProduct("E");
+        var now = DateTime.UtcNow;
+
+        // Added row for another tenant
+        await using (var dbA = sql.CreateContext(a))
+        {
+            dbA.Products.Add(new Product
+            {
+                Id = Guid.CreateVersion7(), TenantId = b, Name = "x", Category = "x", Unit = "x",
+                Tint = 0, Initial = "x", CreatedAt = now, UpdatedAt = now,
+            });
+            var act = () => dbA.SaveChangesAsync();
+            (await act.Should().ThrowAsync<TenantMismatchException>())
+                .Which.RowTenantId.Should().Be(b);
+        }
+
+        // Modified row moved to another tenant
+        await using (var dbA = sql.CreateContext(a))
+        {
+            var product = await dbA.Products.SingleAsync(p => p.Id == pa);
+            product.TenantId = b;
+            var act = () => dbA.SaveChangesAsync();
+            await act.Should().ThrowAsync<TenantMismatchException>();
+        }
+
+        // Same tenant is fine; no tenant (register/login path) is not guarded.
+        await using (var dbA = sql.CreateContext(a))
+        {
+            var product = await dbA.Products.SingleAsync(p => p.Id == pa);
+            product.Name = "renamed";
+            await dbA.SaveChangesAsync();
+        }
+        await using (var anonymous = sql.CreateContext(null))
+        {
+            anonymous.TenantFeatures.Add(new TenantFeature { TenantId = b, FeatureKey = "quickSale", Enabled = true, UpdatedAt = now });
+            await anonymous.SaveChangesAsync();
         }
     }
 

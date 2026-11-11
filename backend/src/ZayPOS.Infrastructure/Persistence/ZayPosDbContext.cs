@@ -42,6 +42,34 @@ public class ZayPosDbContext(DbContextOptions<ZayPosDbContext> options, ICurrent
     public DbSet<SyncIssue> SyncIssues => Set<SyncIssue>();
     public DbSet<SubscriptionPayment> SubscriptionPayments => Set<SubscriptionPayment>();
 
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        GuardTenant();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        GuardTenant();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    /// <summary>
+    /// Defence in depth for "TenantId comes from the JWT": when a tenant is set,
+    /// no Added/Modified tenant row may carry another tenant's id.
+    /// </summary>
+    private void GuardTenant()
+    {
+        if (CurrentTenantId is not { } current) return;
+
+        foreach (var entry in ChangeTracker.Entries<ITenantOwned>())
+        {
+            if (entry.State is not (EntityState.Added or EntityState.Modified)) continue;
+            if (entry.Entity.TenantId != current)
+                throw new TenantMismatchException(entry.Metadata.ClrType.Name, entry.Entity.TenantId, current);
+        }
+    }
+
     protected override void ConfigureConventions(ModelConfigurationBuilder b)
     {
         // Every time column is datetime2(3), UTC. Values read back are marked Kind=Utc.
