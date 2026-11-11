@@ -98,7 +98,7 @@ void main() {
       addTearDown(c.dispose);
       final sale = c.read(salesProvider.notifier).create(
         method: PaymentMethod.debt,
-        lines: [(productId: null, name: 'x', qtyMilli: 2000, price: 3000)],
+        lines: [draft(qtyMilli: 2000, price: 3000)],
         customerId: SeedIds.aungKyaw,
       );
       final ledger = c.read(debtLedgerProvider.notifier);

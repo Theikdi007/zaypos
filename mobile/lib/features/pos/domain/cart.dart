@@ -7,18 +7,29 @@ import '../../sales/data/sales_providers.dart';
 
 /// In-progress sale line. Not persisted. Money = kyats, qty = milli-units.
 class CartLine {
-  const CartLine({required this.key, required this.name, required this.price, required this.qtyMilli, this.productId});
+  const CartLine({
+    required this.key,
+    required this.name,
+    required this.price,
+    required this.qtyMilli,
+    this.cost = 0,
+    this.productId,
+  });
 
   /// productId for catalog items, a fresh id for Quick Sale items.
   final String key;
   final String? productId;
   final String name;
   final int price;
+
+  /// Unit cost snapshot (kyats); 0 for Quick Sale items (cost unknown).
+  final int cost;
   final int qtyMilli;
 
   int get total => Qty.lineTotal(price, qtyMilli);
 
-  CartLine withQty(int milli) => CartLine(key: key, productId: productId, name: name, price: price, qtyMilli: milli);
+  CartLine withQty(int milli) =>
+      CartLine(key: key, productId: productId, name: name, price: price, cost: cost, qtyMilli: milli);
 }
 
 class Cart {
@@ -42,7 +53,19 @@ class Cart {
   List<CartLine> get quickLines => lines.where((l) => l.productId == null).toList();
 
   List<SaleLineDraft> toDrafts() =>
-      [for (final l in lines) (productId: l.productId, name: l.name, qtyMilli: l.qtyMilli, price: l.price)];
+      [
+        for (final l in lines)
+          (
+            productId: l.productId,
+            variantId: null,
+            batchId: null,
+            serialId: null,
+            name: l.name,
+            qtyMilli: l.qtyMilli,
+            price: l.price,
+            cost: l.cost,
+          ),
+      ];
 }
 
 /// Quick Sale lines without a name are labeled with the mode name.
@@ -60,7 +83,7 @@ class CartNotifier extends Notifier<Cart> {
     if (i >= 0) {
       lines[i] = lines[i].withQty(lines[i].qtyMilli + step);
     } else {
-      lines.add(CartLine(key: p.id, productId: p.id, name: p.name, price: p.price, qtyMilli: step));
+      lines.add(CartLine(key: p.id, productId: p.id, name: p.name, price: p.price, cost: p.cost, qtyMilli: step));
     }
     state = Cart(lines);
   }

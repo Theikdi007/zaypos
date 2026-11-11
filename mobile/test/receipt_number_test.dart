@@ -31,7 +31,7 @@ void main() {
     addTearDown(c.dispose);
     expect(c.read(deviceProvider).nextReceiptNo, 'A-1033');
     final sales = c.read(salesProvider.notifier);
-    final line = (productId: null, name: 'x', qtyMilli: 1000, price: 100);
+    final line = draft();
     final s1 = sales.create(method: PaymentMethod.cash, lines: [line]);
     final s2 = sales.create(method: PaymentMethod.cash, lines: [line]);
     expect([s1.no, s2.no], ['A-1033', 'A-1034']);

@@ -1,5 +1,4 @@
 import '../../../app/fake_seed.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/ids.dart';
 import '../domain/product.dart';
 import 'product_repository.dart';
@@ -8,26 +7,21 @@ import 'product_repository.dart';
 class FakeProductRepository implements ProductRepository {
   FakeProductRepository({required this.tenantId}) {
     final t = nowUtc();
-    Product p(String id, String name, int cost, int price, String cat, int tint, String initial) => Product(
-          id: id,
+    _items.addAll([
+      for (final p in SeedCatalog.items)
+        Product(
+          id: p.id,
           tenantId: tenantId,
-          name: name,
-          cost: cost,
-          price: price,
-          category: cat,
-          tint: tint,
-          initial: initial,
+          name: p.name,
+          cost: p.cost,
+          price: p.price,
+          category: p.category,
+          unit: p.unit,
+          tint: p.tint,
+          initial: p.initial,
           createdAt: t,
           updatedAt: t,
-        );
-    _items.addAll([
-      p(SeedIds.water, 'ရေသန့် 1L', 450, 600, 'အချိုရည်', AppColors.tintBlue.toARGB32(), 'ရ'),
-      p(SeedIds.oil, 'စားသုံးဆီ 1L', 5600, 6200, 'စားသောက်ကုန်', AppColors.tintAmber.toARGB32(), 'ဆီ'),
-      p(SeedIds.rice, 'ဆန် ပေါ်ဆန်း (၁ ပြည်)', 6800, 7400, 'စားသောက်ကုန်', AppColors.tintGrayMid.toARGB32(), 'ဆ'),
-      p(SeedIds.soap, 'ဆပ်ပြာမှုန့် 500g', 2300, 2800, 'အိမ်သုံး', AppColors.tintIndigo.toARGB32(), 'ပ'),
-      p(SeedIds.eggs, 'ကြက်ဥ (၁၀ လုံး)', 4000, 4500, 'စားသောက်ကုန်', AppColors.tintOrange.toARGB32(), 'ဥ'),
-      p(SeedIds.coffee, 'ကော်ဖီမစ် (၁၀ ထုပ်)', 3000, 3500, 'အချိုရည်', AppColors.tintYellow.toARGB32(), 'က'),
-      p(SeedIds.noodles, 'ခေါက်ဆွဲခြောက်', 700, 900, 'မုန့်', AppColors.tintPink.toARGB32(), 'ခ'),
+        ),
     ]);
   }
 

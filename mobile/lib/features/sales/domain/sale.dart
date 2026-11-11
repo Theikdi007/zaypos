@@ -18,9 +18,13 @@ class SaleLine {
     required this.name,
     required this.qtyMilli,
     required this.price,
+    required this.costSnapshot,
     required this.createdAt,
     required this.updatedAt,
     this.productId,
+    this.variantId,
+    this.batchId,
+    this.serialId,
     this.deletedAt,
   });
 
@@ -28,6 +32,9 @@ class SaleLine {
   final String tenantId;
   final String saleId;
   final String? productId;
+  final String? variantId;
+  final String? batchId;
+  final String? serialId;
 
   /// Name snapshot at time of sale.
   final String name;
@@ -35,6 +42,10 @@ class SaleLine {
 
   /// Kyats per unit.
   final int price;
+
+  /// Unit cost (kyats) at the time of sale — profit never changes when the
+  /// product's cost is edited later.
+  final int costSnapshot;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -42,14 +53,21 @@ class SaleLine {
   /// Kyats.
   int get total => Qty.lineTotal(price, qtyMilli);
 
+  /// Kyats: (price − costSnapshot) × qty.
+  int get profit => Qty.lineTotal(price - costSnapshot, qtyMilli);
+
   SaleLine copyWith({int? qtyMilli, int? price, DateTime? updatedAt, DateTime? Function()? deletedAt}) => SaleLine(
         id: id,
         tenantId: tenantId,
         saleId: saleId,
         productId: productId,
+        variantId: variantId,
+        batchId: batchId,
+        serialId: serialId,
         name: name,
         qtyMilli: qtyMilli ?? this.qtyMilli,
         price: price ?? this.price,
+        costSnapshot: costSnapshot,
         createdAt: createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt != null ? deletedAt() : this.deletedAt,
@@ -144,6 +162,9 @@ class Sale {
 
   /// Kyats.
   int get total => lines.fold(0, (a, l) => a + l.total);
+
+  /// Kyats (0 for a voided sale).
+  int get profit => voided ? 0 : lines.fold(0, (a, l) => a + l.profit);
 
   /// Cash received (if any) for the receipt.
   int? get received {

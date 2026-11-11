@@ -4,13 +4,13 @@ import 'package:zaypos_app/core/utils/qty.dart';
 import 'package:zaypos_app/features/pos/domain/cart.dart';
 import 'package:zaypos_app/features/products/domain/product.dart';
 
-Product _product(String id, int price) {
+Product _product(String id, int price, {int cost = 0}) {
   final t = DateTime.utc(2026);
   return Product(
     id: id,
     tenantId: 't',
     name: id,
-    cost: 0,
+    cost: cost,
     price: price,
     category: '',
     tint: 0,
@@ -68,11 +68,15 @@ void main() {
     expect(c.read(cartProvider).total, 3000);
   });
 
-  test('drafts carry productId, qty and price', () {
-    cart.addProduct(_product('water', 600));
+  test('drafts carry productId, qty, price and cost snapshot', () {
+    cart.addProduct(_product('water', 600, cost: 450));
     cart.addQuick(1000, 'ဆပ်ပြာ');
     final d = c.read(cartProvider).toDrafts();
-    expect(d.first, (productId: 'water', name: 'water', qtyMilli: 1000, price: 600));
+    expect(d.first.productId, 'water');
+    expect(d.first.qtyMilli, 1000);
+    expect(d.first.price, 600);
+    expect(d.first.cost, 450);
+    expect(d.last.cost, 0); // quick sale: cost unknown
     expect(d.last.productId, isNull);
     expect(d.last.name, 'ဆပ်ပြာ');
   });

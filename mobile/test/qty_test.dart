@@ -50,5 +50,10 @@ void main() {
       expect(Qty.lineTotal(333, 1500), 500); // 499.5 -> 500
       expect(Qty.lineTotal(333, 1499), 499); // 499.167 -> 499
     });
+    test('negative amounts round symmetrically', () {
+      expect(Qty.lineTotal(-100, 1000), -100);
+      expect(Qty.lineTotal(-333, 1500), -500);
+      expect(Qty.lineTotal(-333, 1499), -499);
+    });
   });
 }

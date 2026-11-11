@@ -67,7 +67,7 @@ void main() {
       final stock = c.read(stockLedgerProvider.notifier);
       final sale = c.read(salesProvider.notifier).create(
         method: PaymentMethod.cash,
-        lines: [(productId: SeedIds.water, name: 'ရေသန့် 1L', qtyMilli: Qty.units(2), price: 600)],
+        lines: [draft(productId: SeedIds.water, name: 'ရေသန့် 1L', qtyMilli: Qty.units(2), price: 600, cost: 450)],
       );
       stock.record(stock.forSale(sale, StockMovementType.sale, sign: -1));
       int water() => c.read(productsProvider).firstWhere((p) => p.id == SeedIds.water).stockMilli;

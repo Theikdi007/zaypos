@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text.dart';
+import '../../../core/utils/myanmar.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/money_text.dart';
@@ -26,7 +27,13 @@ class _SalesHistoryScreenState extends ConsumerState<SalesHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final today = ref.watch(todaySummaryProvider);
-    final sales = ref.watch(salesProvider).where((s) => _filter == null || s.method == _filter).toList();
+    final now = DateTime.now();
+    // The header date chip is "ယနေ့": list today's sales.
+    final sales = ref
+        .watch(salesProvider)
+        .where((s) => daysAgo(s.createdAt, now) == 0)
+        .where((s) => _filter == null || s.method == _filter)
+        .toList();
 
     return Scaffold(
       body: Column(

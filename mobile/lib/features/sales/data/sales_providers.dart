@@ -7,13 +7,19 @@ import '../domain/sale.dart';
 import 'sales_repository.dart';
 
 /// A line to be sold (from the cart).
-typedef SaleLineDraft = ({String? productId, String name, int qtyMilli, int price});
+typedef SaleLineDraft = ({
+  String? productId,
+  String? variantId,
+  String? batchId,
+  String? serialId,
+  String name,
+  int qtyMilli,
+  int price,
+  int cost,
+});
 
 class SalesNotifier extends Notifier<List<Sale>> {
   SalesRepository get _repo => ref.read(salesRepositoryProvider);
-
-  /// Ids of sales recorded during this app session.
-  final Set<String> sessionSaleIds = {};
 
   @override
   List<Sale> build() => _repo.list();
@@ -37,9 +43,13 @@ class SalesNotifier extends Notifier<List<Sale>> {
           tenantId: tenantId,
           saleId: id,
           productId: l.productId,
+          variantId: l.variantId,
+          batchId: l.batchId,
+          serialId: l.serialId,
           name: l.name,
           qtyMilli: l.qtyMilli,
           price: l.price,
+          costSnapshot: l.cost,
           createdAt: t,
           updatedAt: t,
         ),
@@ -71,7 +81,6 @@ class SalesNotifier extends Notifier<List<Sale>> {
       updatedAt: t,
     );
     _repo.add(sale);
-    sessionSaleIds.add(sale.id);
     state = _repo.list();
     return sale;
   }

@@ -34,7 +34,11 @@ abstract final class Qty {
     return whole * scale + int.parse(f);
   }
 
-  /// Money for a quantity: price (kyats per unit) × qty, rounded half-up
-  /// to whole kyats.
-  static int lineTotal(int priceKyats, int qtyMilli) => (priceKyats * qtyMilli + scale ~/ 2) ~/ scale;
+  /// Money for a quantity: price (kyats per unit) × qty, rounded half away
+  /// from zero to whole kyats (negative amounts, e.g. below-cost profit,
+  /// round symmetrically).
+  static int lineTotal(int priceKyats, int qtyMilli) {
+    final p = priceKyats * qtyMilli;
+    return p >= 0 ? (p + scale ~/ 2) ~/ scale : -((-p + scale ~/ 2) ~/ scale);
+  }
 }

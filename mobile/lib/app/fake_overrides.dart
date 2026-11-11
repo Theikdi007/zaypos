@@ -25,5 +25,10 @@ final List<Override> fakeRepositoryOverrides = [
   debtRepositoryProvider.overrideWith((ref) => FakeDebtRepository(tenantId: ref.read(tenantIdProvider))),
   stockRepositoryProvider.overrideWith((ref) => FakeStockRepository(tenantId: ref.read(tenantIdProvider))),
   deviceRepositoryProvider.overrideWith((ref) => FakeDeviceRepository(tenantId: ref.read(tenantIdProvider))),
-  reportRepositoryProvider.overrideWith((ref) => FakeReportRepository()),
+  reportRepositoryProvider.overrideWith(
+    (ref) => FakeReportRepository(
+      sales: ref.read(salesRepositoryProvider),
+      products: ref.read(productRepositoryProvider),
+    ),
+  ),
 ];

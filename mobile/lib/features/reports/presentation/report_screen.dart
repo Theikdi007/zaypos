@@ -11,7 +11,7 @@ import '../../../core/widgets/money_text.dart';
 import '../../../core/widgets/segmented_tabs.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../sales/presentation/sale_ui.dart';
-import '../data/report_repository.dart';
+import '../data/report_providers.dart';
 import '../domain/report.dart';
 
 class ReportScreen extends ConsumerStatefulWidget {
@@ -26,8 +26,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final repo = ref.watch(reportRepositoryProvider);
-    final s = repo.summary(_period);
+    final report = ref.watch(reportProvider(_period));
+    final s = report.summary;
     final top = MediaQuery.paddingOf(context).top;
 
     return ListView(
@@ -101,7 +101,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
         AppCard(
           margin: const EdgeInsets.fromLTRB(20, 14, 20, 0),
           padding: const EdgeInsets.all(16),
-          child: _WeekChart(days: repo.last7Days()),
+          child: _WeekChart(days: report.last7Days),
         ),
         AppCard(
           margin: const EdgeInsets.fromLTRB(20, 14, 20, 0),
@@ -110,7 +110,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text('ငွေပေးချေမှု အမျိုးအစား', style: AppText.s(15, weight: AppText.w700)),
-              for (final p in repo.paymentShares()) ...[
+              for (final p in report.paymentShares) ...[
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -148,7 +148,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                 child: Text('အရောင်းရဆုံး ပစ္စည်းများ', style: AppText.s(15, weight: AppText.w700)),
               ),
               DividedColumn(dividerOnTop: true, children: [
-                for (final (i, t) in repo.topProducts().indexed)
+                for (final (i, t) in report.topProducts.indexed)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     child: Row(

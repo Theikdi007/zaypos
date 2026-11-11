@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaypos_app/app/fake_overrides.dart';
+import 'package:zaypos_app/features/sales/data/sales_providers.dart';
 
 /// Container wired exactly like the app (fake repositories).
 ProviderContainer makeContainer() => ProviderContainer(overrides: fakeRepositoryOverrides);
@@ -18,3 +19,15 @@ Future<void> loadAppFonts() async {
     await (FontLoader(family)..addFont(Future.value(ByteData.sublistView(bytes)))).load();
   }
 }
+
+/// Sale line draft for tests.
+SaleLineDraft draft({String? productId, String name = 'x', int qtyMilli = 1000, int price = 100, int cost = 0}) => (
+      productId: productId,
+      variantId: null,
+      batchId: null,
+      serialId: null,
+      name: name,
+      qtyMilli: qtyMilli,
+      price: price,
+      cost: cost,
+    );
