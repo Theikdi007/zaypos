@@ -418,6 +418,60 @@ public class SyncTests(SqlServerFixture sql)
         page.Changes.TenantFeatures.Should().HaveCount(FeatureKeys.All.Count);
     }
 
+    [Fact]
+    public async Task Owner_resolves_a_sync_issue_once_and_every_phone_pulls_it()
+    {
+        var shop = await NewShop();
+        var product = await AddProduct(shop, stock: 0);
+        await PushOne(shop, Checkout(shop, "A-0001", (product, 1000, 100))); // negative stock issue
+        var cursor = (await PullAll(shop)).Cursor;
+        Guid issueId;
+        await using (var db = sql.CreateContext(shop.TenantId))
+            issueId = (await db.SyncIssues.SingleAsync()).Id;
+
+        var first = await Resolve(shop, issueId);
+        first.StatusCode.Should().Be(HttpStatusCode.OK, await first.Content.ReadAsStringAsync());
+        var resolved = (await first.Content.ReadFromJsonAsync<SyncIssueRow>(Json))!;
+        resolved.ResolvedAt.Should().NotBeNull();
+        resolved.UpdatedAt.Should().Be(resolved.ResolvedAt!.Value);
+
+        var again = await Resolve(shop, issueId);
+        again.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await again.Content.ReadFromJsonAsync<SyncIssueRow>(Json))!.ResolvedAt.Should().Be(resolved.ResolvedAt, "idempotent");
+
+        var page = await Pull(shop, cursor);
+        page.Changes.SyncIssues.Should().ContainSingle(i => i.Id == issueId && i.ResolvedAt == resolved.ResolvedAt);
+        (await Pull(shop, page.Cursor)).Changes.SyncIssues.Should().BeEmpty("the second resolve changed nothing");
+    }
+
+    [Fact]
+    public async Task Resolving_needs_the_owner_and_an_issue_of_this_shop()
+    {
+        var shop = await NewShop();
+        var other = await NewShop();
+        var product = await AddProduct(shop, stock: 0);
+        await PushOne(shop, Checkout(shop, "A-0001", (product, 1000, 100)));
+        Guid issueId;
+        await using (var db = sql.CreateContext(shop.TenantId))
+        {
+            issueId = (await db.SyncIssues.SingleAsync()).Id;
+            (await db.Users.SingleAsync()).Role = UserRole.Staff;
+            await db.SaveChangesAsync();
+        }
+        var staff = await SecondDevice(shop); // signs in after the role change → staff token
+
+        (await Resolve(staff, issueId)).StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        (await Resolve(other, issueId)).StatusCode.Should().Be(HttpStatusCode.NotFound);
+        (await Resolve(shop, Guid.CreateVersion7())).StatusCode.Should().Be(HttpStatusCode.NotFound);
+        (await sql.Api.CreateClient().PostAsync($"/api/v1/sync/issues/{issueId}/resolve", null))
+            .StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        await using (var db = sql.CreateContext(shop.TenantId))
+            (await db.SyncIssues.SingleAsync()).ResolvedAt.Should().BeNull();
+    }
+
+    private static Task<HttpResponseMessage> Resolve(Shop shop, Guid issueId) =>
+        shop.Http.PostAsync($"/api/v1/sync/issues/{issueId}/resolve", null);
+
     // ================================================================ helpers: shops
 
     private sealed record Shop(HttpClient Http, AuthResponse Auth, string Phone)

@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IAppDb>(sp => sp.GetRequiredService<ZayPosDbContext>());
         services.AddSingleton<IDbErrors, SqlServerDbErrors>();
         services.AddScoped<SyncPushService>();
+        services.AddScoped<SyncIssueService>();
         services.AddScoped<ISyncPull, SyncPullService>();
 
         services.TryAddSingleton(TimeProvider.System);

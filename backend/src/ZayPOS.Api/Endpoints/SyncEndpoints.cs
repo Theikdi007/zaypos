@@ -22,6 +22,14 @@ public static class SyncEndpoints
             })
             .Produces<PullResponse>();
 
+        sync.MapPost("/issues/{id:guid}/resolve", async (Guid id, ClaimsPrincipal user, IAppDb db, SyncIssueService svc, CancellationToken ct) =>
+            {
+                await SyncAccess.RequireActiveDeviceAsync(db, Caller.From(user), ct);
+                return Results.Ok(await svc.ResolveAsync(id, ct));
+            })
+            .RequireAuthorization(Caller.OwnerPolicy)
+            .Produces<SyncIssueRow>();
+
         // Static and not secret: the app may read it before signing in.
         sync.MapGet("/limits", (HttpContext http) =>
             {

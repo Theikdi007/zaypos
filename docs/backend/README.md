@@ -233,7 +233,7 @@ All under `/api/v1`, JSON, ProblemDetails for errors, Swagger UI at `/swagger` (
 | Area | Endpoints |
 |---|---|
 | Auth | see §4 |
-| Sync | `POST /sync/push`, `GET /sync/pull`, `GET /sync/limits` (anonymous: every text/number limit the push validator enforces, from `SyncLimits`) |
+| Sync | `POST /sync/push`, `GET /sync/pull`, `GET /sync/limits` (anonymous: every text/number limit the push validator enforces, from `SyncLimits`), `POST /sync/issues/{id}/resolve` (owner: sets `resolvedAt` + `updatedAt`, idempotent; phones see it on the next pull) |
 | Me | `GET /me` (user, tenant, features, plan, devices) |
 | Catalog presets | `GET /catalog/presets?template=grocery` (cached, ETag) |
 | Devices | `GET /devices`, `DELETE /devices/{id}` (owner revokes a lost phone) |
