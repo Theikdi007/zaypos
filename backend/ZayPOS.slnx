@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ZayPOS.Api/ZayPOS.Api.csproj" />
+    <Project Path="src/ZayPOS.Application/ZayPOS.Application.csproj" />
+    <Project Path="src/ZayPOS.Domain/ZayPOS.Domain.csproj" />
+    <Project Path="src/ZayPOS.Infrastructure/ZayPOS.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ZayPOS.Api.Tests/ZayPOS.Api.Tests.csproj" />
+    <Project Path="tests/ZayPOS.Domain.Tests/ZayPOS.Domain.Tests.csproj" />
+  </Folder>
+</Solution>

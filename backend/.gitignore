@@ -1,0 +1,8 @@
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+
+# Local secrets (copy appsettings.Development.example.json)
+src/ZayPOS.Api/appsettings.Development.json
