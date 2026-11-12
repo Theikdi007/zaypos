@@ -4,6 +4,8 @@ abstract final class Routes {
   static const unlock = '/unlock';
   static const firstSync = '/first-sync';
   static const syncReview = '/settings/sync-review';
+  static const devices = '/settings/devices';
+  static const pinReset = '/pin-reset';
   static String rejectedUnit(int seq) => '/settings/sync-review/unit/$seq';
   static const dashboard = '/';
   static const sales = '/sales';

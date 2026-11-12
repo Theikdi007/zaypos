@@ -445,7 +445,7 @@ void main() {
   // ================================================================ first sign-in (§5.4)
 
   group('first download', () {
-    test('no push before the first full pull; progress is reported; the flag is set when hasMore is false', () async {
+    test('no push before the first full pull; progress is reported; the flag is set; then the outbox goes up', () async {
       await db.writeState(SyncStateKeys.initialSyncDone, 'false');
       await sale(); // e.g. a unit restored with the outbox
       final t = DateTime.utc(2026, 11, 12);
@@ -454,19 +454,20 @@ void main() {
         ..add(page({'products': [serverProduct(newId(), 'c', t)]}, cursor: 'C2'));
       final e = engine();
       final progress = <int?>[];
+      var pullsBeforeFirstPush = -1;
+      api.onPush = () => pullsBeforeFirstPush = pullsBeforeFirstPush < 0 ? api.pullCursors.length : pullsBeforeFirstPush;
       final sub = e.changes.listen((s) => progress.add(s.downloadedRows));
 
       await e.syncNow();
       await Future<void>.delayed(Duration.zero);
       await sub.cancel();
 
-      expect(api.pushes, isEmpty, reason: 'an empty phone never pushes on top of a shop it has not seen');
+      expect(pullsBeforeFirstPush, 2, reason: 'an empty phone never pushes on top of a shop it has not seen');
       expect(progress, containsAllInOrder([0, 2, 3]));
       expect(await store.initialSyncDone(), isTrue);
       expect(initialDone, 1);
-
-      await e.syncNow();
-      expect(api.pushes, hasLength(1), reason: 'after the download, the outbox goes up');
+      expect(api.pushes, hasLength(1), reason: 'right after the download, the outbox goes up (same cycle)');
+      expect(await outbox(db), isEmpty);
     });
 
     test('an interrupted first download is not marked done', () async {

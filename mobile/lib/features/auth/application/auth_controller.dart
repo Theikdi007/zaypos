@@ -6,6 +6,10 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_config.dart';
 import '../../../core/api/api_error.dart';
 import '../../../core/db/local_data.dart';
+import '../../../core/features/shop_template.dart';
+import '../../../core/sync/sync_limits.dart';
+import '../../products/application/product_service.dart';
+import '../../products/data/preset_catalog_api.dart';
 import '../../../core/sync/sync_providers.dart';
 import '../../../core/sync/sync_store.dart';
 import '../../../core/utils/ids.dart';
@@ -65,6 +69,9 @@ abstract final class AuthMessages {
       'PIN မှားတာ များသွားလို့ ${mmNumber(minutesUp(left))} မိနစ် ပိတ်ထားပါတယ်။';
 
   static const demoUnavailable = 'Demo ဆိုင်ကို debug build မှာပဲ သုံးလို့ရပါတယ်။';
+
+  static const presetsFailed =
+      'ဆိုင်ဖွင့်ပြီးပါပြီ။ ကြိုတင်ပစ္စည်းစာရင်း ဒေါင်းလို့ မရပါ — ပစ္စည်းတွေကို ကိုယ်တိုင် ထည့်ပါ။';
 }
 
 /// Sign-in, registration, offline PIN unlock and sign-out (§6).
@@ -147,6 +154,7 @@ class AuthController extends Notifier<AuthState> {
     required String shopName,
     required String templateId,
     required String pin,
+    bool importPresets = false,
   }) async {
     final phone = _phone(rawPhone);
     _pin(pin);
@@ -164,13 +172,53 @@ class AuthController extends Notifier<AuthState> {
         deviceName: _deviceName,
       ),
     );
-    await _adopt(r, phone, pin);
+    await _adopt(r, phone, pin, beforeUnlock: importPresets ? () => _importPresets(templateId) : null);
+  }
+
+  /// Forgotten PIN: SMS code → new PIN (`POST /auth/pin/reset`), then signs in
+  /// with it. The server ends every session of this user, so this phone signs
+  /// in again; that replaces the local PIN hash and clears the local lockout.
+  /// Works signed out and while locked out (no unlock needed). The local-data
+  /// guard runs first, exactly as for a sign-in.
+  Future<void> resetPin({required String rawPhone, required String otp, required String newPin}) async {
+    final phone = _phone(rawPhone);
+    _pin(newPin);
+    if (!RegExp(r'^\d{6}$').hasMatch(otp.trim())) throw const AuthFailure('validation', 'SMS ကုဒ် ၆ လုံး ထည့်ပါ။');
+    final check = await _guard(phone);
+    try {
+      await _api.resetPin(phone: phone, otp: otp.trim(), newPin: newPin);
+    } on ApiError catch (e) {
+      throw AuthFailure.fromApi(e);
+    }
+    final r = await _withDevice(
+        check, (id) => _api.login(phone: phone, pin: newPin, deviceId: id, deviceName: _deviceName));
+    await _adopt(r, phone, newPin);
+  }
+
+  /// "ကြိုတင်စာရင်း" (§7): downloads the template's presets and saves them as
+  /// products in ONE upsertProduct unit (pushed after the first download).
+  /// Registration has succeeded already, so a failure only leaves a notice.
+  Future<String?> _importPresets(String templateId) async {
+    try {
+      final items = await ref.read(presetCatalogApiProvider).fetch(templateId);
+      final products = productsFromPresets(
+        items,
+        tenantId: ref.read(tenantIdProvider),
+        tint: ShopTemplate.byId(templateId).tint.toARGB32(),
+        limits: ref.read(syncLimitsProvider),
+      );
+      if (products.isNotEmpty) await ref.read(productServiceProvider).importAll(products);
+      return null;
+    } on ApiError catch (e) {
+      return '${AuthMessages.presetsFailed} (${e.message})';
+    }
   }
 
   /// The server accepted the sign-in: make the local DB this shop's
   /// (wiping other data), then store the session. If the outbox blocks the
-  /// wipe, the tokens are dropped and nothing is stored.
-  Future<void> _adopt(AuthResult r, String phone, String pin) async {
+  /// wipe, the tokens are dropped and nothing is stored. [beforeUnlock] runs
+  /// signed in, before the app opens; its message becomes the notice.
+  Future<void> _adopt(AuthResult r, String phone, String pin, {Future<String?> Function()? beforeUnlock}) async {
     try {
       await _local.adopt(
         tenantId: r.tenantId,
@@ -198,7 +246,8 @@ class AuthController extends Notifier<AuthState> {
           role: r.role,
           startedAt: nowUtc(),
         ));
-    state = const AuthState(AuthStatus.unlocked);
+    final notice = await beforeUnlock?.call();
+    state = AuthState(AuthStatus.unlocked, notice: notice);
   }
 
   /// Time left on the local PIN lockout, if locked.

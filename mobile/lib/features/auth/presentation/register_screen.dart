@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/features/features_providers.dart';
 import '../../../core/features/shop_template.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/sync/sync_limits.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text.dart';
 import '../../../core/widgets/app_icons.dart';
@@ -136,7 +137,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (!_codeSent) return _sendCode();
       if (_otp.text.length != 6) return _fail('SMS ကုဒ် ၆ လုံး ထည့်ပါ။');
     }
-    if (_step == 2 && _shopName.text.trim().isEmpty) return _fail('ဆိုင်အမည် ထည့်ပါ။');
+    if (_step == 2) {
+      final error = ref.read(syncLimitsProvider).checkText('tenants.name', _shopName.text, label: 'ဆိုင်အမည်') ??
+          (_shopName.text.trim().isEmpty ? 'ဆိုင်အမည် ထည့်ပါ။' : null);
+      if (error != null) return _fail(error);
+    }
     if (_step < 4) {
       setState(() {
         _step++;
@@ -152,6 +157,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           shopName: _shopName.text,
           templateId: _type,
           pin: _pin,
+          importPresets: _start == CatalogStart.preset,
         ));
   }
 

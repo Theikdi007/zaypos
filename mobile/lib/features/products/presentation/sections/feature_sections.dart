@@ -49,9 +49,13 @@ class ExpiryBatchSection extends StatelessWidget {
     required this.onExpiry,
     required this.warnDays,
     required this.onWarnDays,
+    this.batchError,
   });
 
   final TextEditingController batchNo;
+
+  /// Validation message for the batch number (server limits).
+  final String? batchError;
   final DateTime? expiry;
   final ValueChanged<DateTime> onExpiry;
   final int warnDays;
@@ -80,6 +84,7 @@ class ExpiryBatchSection extends StatelessWidget {
           LabeledField(
             label: 'Batch နံပါတ်',
             small: true,
+            error: batchError,
             child: AppInput(key: const ValueKey('batchNo'), controller: batchNo, semanticLabel: 'Batch နံပါတ်'),
           ),
           LabeledField(
@@ -140,7 +145,9 @@ class SerialWarrantySection extends StatefulWidget {
   final bool serial;
   final ValueChanged<bool> onSerialChanged;
   final List<String> imeis;
-  final ValueChanged<String> onAddImei;
+
+  /// Adds an IMEI; returns an error message (Burmese) to show instead, or null.
+  final String? Function(String imei) onAddImei;
 
   /// 0 = none.
   final int warrantyMonths;
@@ -155,6 +162,7 @@ class SerialWarrantySection extends StatefulWidget {
 
 class _SerialWarrantySectionState extends State<SerialWarrantySection> {
   final _imei = TextEditingController();
+  String? _error;
 
   @override
   void dispose() {
@@ -165,8 +173,9 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
   void _submit() {
     final v = _imei.text.trim();
     if (v.isEmpty) return;
-    widget.onAddImei(v);
-    _imei.clear();
+    final error = widget.onAddImei(v);
+    setState(() => _error = error);
+    if (error == null) _imei.clear();
   }
 
   @override
@@ -220,6 +229,10 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
                   ),
                 ],
               ),
+              if (_error != null) ...[
+                const SizedBox(height: 6),
+                Semantics(liveRegion: true, child: Text(_error!, style: AppText.s(12, color: AppColors.danger))),
+              ],
               if (widget.imeis.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Wrap(

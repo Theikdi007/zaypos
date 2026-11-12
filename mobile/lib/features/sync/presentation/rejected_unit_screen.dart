@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/db/app_database.dart';
+import '../../../core/sync/sync_limits.dart';
 import '../../../core/sync/sync_providers.dart';
 import '../../../core/sync/sync_store.dart';
 import '../../../core/theme/app_colors.dart';
@@ -58,10 +59,24 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
               if ((r as Map).containsKey(col) && r['id'] is String) _Field(table, r['id'] as String, col, r[col] as String?),
       ];
 
+  /// Field → server-rule message for the current text.
+  Map<_Field, String> _fieldErrors = {};
+
+  Map<_Field, String> _validate() {
+    final limits = ref.read(syncLimitsProvider);
+    return {
+      for (final f in _fields ?? const <_Field>[])
+        f: ?limits.checkText('${f.table}.${f.column}',
+            f.controller.text.trim().isEmpty && f.original == null ? null : f.controller.text,
+            label: fieldLabel(f.column)),
+    };
+  }
+
   UnitEdits _edits() {
+    final limits = ref.read(syncLimitsProvider);
     final out = <String, Map<String, Map<String, String?>>>{};
     for (final f in _fields ?? const <_Field>[]) {
-      final text = f.controller.text.trim();
+      final text = limits.normalize('${f.table}.${f.column}', f.controller.text);
       // Untouched = same text ('' and null count as equal). A cleared field
       // stays '' unless it was null before: required columns are NOT NULL.
       if (text == (f.original ?? '')) continue;
@@ -74,6 +89,9 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
     final engine = ref.read(syncEngineProvider);
     final store = engine.store;
     if (store == null) return;
+    final errors = _validate();
+    setState(() => _fieldErrors = errors);
+    if (errors.isNotEmpty) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -144,6 +162,7 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
                   for (final f in fields) ...[
                     LabeledField(
                       label: '${fieldLabel(f.column)} · ${f.table}',
+                      error: _fieldErrors[f],
                       child: AppInput(controller: f.controller, height: 46, semanticLabel: fieldLabel(f.column)),
                     ),
                     const SizedBox(height: 10),

@@ -32,6 +32,7 @@ class _FirstSyncScreenState extends ConsumerState<FirstSyncScreen> {
     final shop = ref.watch(sessionProvider.select((s) => s.shopName));
     final rows = snap.downloadedRows;
     final failed = !snap.running && snap.lastError != null;
+    final notice = ref.watch(authControllerProvider.select((s) => s.notice));
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
@@ -63,6 +64,10 @@ class _FirstSyncScreenState extends ConsumerState<FirstSyncScreen> {
                 textAlign: TextAlign.center,
                 style: AppText.s(13, color: AppColors.muted),
               ),
+              if (notice != null) ...[
+                const SizedBox(height: 16),
+                AuthMessage(notice, isError: false),
+              ],
               if (failed) ...[
                 const SizedBox(height: 20),
                 AuthMessage(snap.lastError!),

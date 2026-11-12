@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/features/features_providers.dart';
 import '../../../core/features/shop_template.dart';
+import '../../../core/sync/sync_limits.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text.dart';
@@ -75,12 +76,48 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     super.dispose();
   }
 
+  /// Field → message, from the server's rules (/sync/limits).
+  Map<String, String> _errors = {};
+
+  /// Category when the template offers none: the server requires one.
+  static const defaultCategory = 'အထွေထွေ';
+
+  /// IMEI / serial: normalized like the server, checked, de-duplicated.
+  String? _addImei(String raw) {
+    final limits = ref.read(syncLimitsProvider);
+    final v = limits.normalize('productSerials.serial', raw);
+    final error = limits.checkText('productSerials.serial', v, label: 'IMEI / Serial');
+    if (error != null) return error;
+    if (_imeis.contains(v)) return 'ဒီ IMEI ထည့်ပြီးသားပါ။';
+    setState(() => _imeis.add(v));
+    return null;
+  }
+
   Future<void> _save() async {
     final features = ref.read(tenantFeaturesProvider);
+    final limits = ref.read(syncLimitsProvider);
     final name = _name.text.trim();
     final price = int.tryParse(_price.text) ?? 0;
-    if (name.isEmpty || price <= 0) {
-      setState(() => _showErrors = true);
+    final barcode = limits.normalize('products.barcode', _barcode.text);
+    final hasBatchInput = features.expiryBatch && (_batchNo.text.trim().isNotEmpty || _expiry != null);
+    final errors = <String, String>{
+      for (final (key, error) in [
+        ('name', limits.checkText('products.name', name, label: 'ပစ္စည်းအမည်')),
+        ('barcode', limits.checkText('products.barcode', barcode.isEmpty ? null : barcode, label: 'Barcode')),
+        ('category', limits.checkText('products.category', _category ?? defaultCategory, label: 'အမျိုးအစား')),
+        ('unit', limits.checkText('products.unit', _unit ?? '', label: 'ယူနစ်')),
+        ('cost', limits.checkNumber('products.cost', int.tryParse(_cost.text), label: 'ဝယ်ဈေး')),
+        if (hasBatchInput) ('batchNo', limits.checkText('productBatches.batchNo', _batchNo.text, label: 'Batch နံပါတ်')),
+      ])
+        key: ?error,
+    };
+    if (name.isEmpty) errors['name'] ??= 'ပစ္စည်းအမည် ထည့်ပါ။';
+    if (price <= 0) errors['price'] = 'ရောင်းဈေး ထည့်ပါ။';
+    if (errors.isNotEmpty) {
+      setState(() {
+        _showErrors = true;
+        _errors = errors;
+      });
       return;
     }
     final tenantId = ref.read(tenantIdProvider);
@@ -121,7 +158,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       } else {
         final q = Qty.parse(_stock.text, decimal: features.decimalQty) ?? 0;
         // Expiry-tracked shops receive stock into a batch.
-        final hasBatch = features.expiryBatch && (_batchNo.text.trim().isNotEmpty || _expiry != null);
+        final hasBatch = hasBatchInput;
         final batchId = hasBatch ? newId() : null;
         if (hasBatch) {
           batches.add(ProductBatch(
@@ -161,9 +198,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             price: price,
             wholesalePrice: features.quotation ? int.tryParse(_wholesale.text) : null,
             lowAlertMilli: Qty.parse(_alert.text, decimal: features.decimalQty) ?? Qty.units(5),
-            category: _category ?? '',
+            category: _category ?? defaultCategory,
             unit: _unit ?? '',
-            barcode: _barcode.text.trim().isEmpty ? null : _barcode.text.trim(),
+            barcode: barcode.isEmpty ? null : barcode,
             tint: _t.tint.toARGB32(),
             initial: String.fromCharCode(name.runes.first),
             warrantyMonths: features.serialWarranty && _warrantyMonths > 0 ? _warrantyMonths : null,
@@ -258,6 +295,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                       child: LabeledField(
                         label: 'ပစ္စည်းအမည်',
                         required: true,
+                        error: _errors['name'],
                         child: AppInput(
                           key: const ValueKey('productName'),
                           controller: _name,
@@ -274,10 +312,12 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                   children: [
                     LabeledField(
                       label: 'Barcode',
+                      error: _errors['barcode'],
                       child: Row(
                         children: [
                           Expanded(
                             child: AppInput(
+                              key: const ValueKey('barcode'),
                               controller: _barcode,
                               hint: 'Scan ဖတ် သို့မဟုတ် ရိုက်ထည့်',
                               semanticLabel: 'Barcode',
@@ -291,8 +331,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     TwoCol(
                       LabeledField(
                         label: 'အမျိုးအစား',
+                        error: _errors['category'],
                         child: _category == null
-                            ? const AppInput()
+                            ? const AppInput(hint: defaultCategory)
                             : AppSelect<String>(
                                 label: 'အမျိုးအစား',
                                 items: [for (final c in _t.categories) (c, c)],
@@ -323,7 +364,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                         label: 'ရောင်းဈေး (Ks)',
                         small: true,
                         required: true,
-                        child: _moneyInput(_price, 'ရောင်းဈေး', error: _showErrors && price <= 0),
+                        error: _errors['price'],
+                        child: _moneyInput(_price, 'ရောင်းဈေး',
+                            error: _showErrors && price <= 0, key: const ValueKey('price')),
                       ),
                     ),
                     if (f.quotation)
@@ -357,13 +400,14 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     onExpiry: (d) => setState(() => _expiry = d),
                     warnDays: _expiryWarnDays,
                     onWarnDays: (d) => setState(() => _expiryWarnDays = d),
+                    batchError: _errors['batchNo'],
                   ),
                 if (f.serialWarranty)
                   SerialWarrantySection(
                     serial: _serial,
                     onSerialChanged: (v) => setState(() => _serial = v),
                     imeis: _imeis,
-                    onAddImei: (v) => setState(() => _imeis.add(v)),
+                    onAddImei: _addImei,
                     warrantyMonths: _warrantyMonths,
                     onWarrantyChanged: (m) => setState(() => _warrantyMonths = m),
                   ),
@@ -450,7 +494,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     );
   }
 
-  Widget _moneyInput(TextEditingController c, String label, {bool error = false}) => AppInput(
+  Widget _moneyInput(TextEditingController c, String label, {bool error = false, Key? key}) => AppInput(
+        key: key,
         controller: c,
         fontSize: 16,
         fontWeight: AppText.w600,

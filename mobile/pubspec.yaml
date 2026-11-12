@@ -80,10 +80,10 @@ flutter:
       fonts:
         - asset: assets/fonts/NotoSansMyanmar-Variable.ttf
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  # Bundled copy of GET /api/v1/sync/limits (offline fallback for form rules).
+  # Refresh from a running backend: curl -s http://127.0.0.1:5076/api/v1/sync/limits
+  assets:
+    - assets/sync/limits.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

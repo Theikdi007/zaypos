@@ -26,8 +26,12 @@ class FakeSyncApi implements SyncApi {
 
   String _lastCursor = '0';
 
+  /// Called at the start of every push (tests check ordering against pulls).
+  void Function()? onPush;
+
   @override
   Future<List<UnitResult>> push(String deviceId, List<PushUnit> units) async {
+    onPush?.call();
     await Future<void>.delayed(delay);
     pushes.add(units);
     pushDeviceIds.add(deviceId);

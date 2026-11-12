@@ -224,12 +224,20 @@ class SettingsFeaturesScreen extends ConsumerWidget {
                 const _SyncSection(),
                 section('အကောင့်'),
                 AppCard(
-                  child: CardListTile(
-                    title: Text('ထွက်မယ်', style: AppText.s(14, weight: AppText.w600, color: AppColors.danger)),
-                    subtitle: Text('ဒီဖုန်းထဲက စာရင်းတွေ မပျက်ပါ။ ပြန်ဝင်ရင် ဆက်သုံးလို့ရပါတယ်။',
-                        style: AppText.s(12, color: AppColors.muted)),
-                    onTap: () => ref.read(authControllerProvider.notifier).signOut(),
-                  ),
+                  child: DividedColumn(children: [
+                    CardListTile(
+                      title: Text('ဖုန်းများ', style: AppText.s(14, weight: AppText.w600)),
+                      subtitle: Text('ဒီဆိုင်က ဖုန်းတွေ · ပျောက်သွားတဲ့ဖုန်း ဖယ်ရန်', style: AppText.s(12, color: AppColors.muted)),
+                      trailing: const AppIcon(AppIcons.chevronRight, size: 18, color: AppColors.subtle),
+                      onTap: () => context.push(Routes.devices),
+                    ),
+                    CardListTile(
+                      title: Text('ထွက်မယ်', style: AppText.s(14, weight: AppText.w600, color: AppColors.danger)),
+                      subtitle: Text('ဒီဖုန်းထဲက စာရင်းတွေ မပျက်ပါ။ ပြန်ဝင်ရင် ဆက်သုံးလို့ရပါတယ်။',
+                          style: AppText.s(12, color: AppColors.muted)),
+                      onTap: () => ref.read(authControllerProvider.notifier).signOut(),
+                    ),
+                  ]),
                 ),
               ],
             ),

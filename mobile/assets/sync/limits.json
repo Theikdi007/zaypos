@@ -1,0 +1,214 @@
+{
+  "maxUnitsPerPush": 50,
+  "pullDefaultLimit": 500,
+  "pullMaxLimit": 1000,
+  "maxClockAheadSeconds": 300,
+  "text": {
+    "tenants.name": {
+      "maxLength": 120,
+      "required": true,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "tenants.township": {
+      "maxLength": 80,
+      "required": false,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "tenantFeatures.featureKey": {
+      "maxLength": 40,
+      "required": true,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "reject"
+    },
+    "products.name": {
+      "maxLength": 150,
+      "required": true,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "products.category": {
+      "maxLength": 60,
+      "required": true,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "products.unit": {
+      "maxLength": 20,
+      "required": true,
+      "allowEmpty": true,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "products.barcode": {
+      "maxLength": 64,
+      "required": false,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": true,
+      "nonAscii": "reject"
+    },
+    "products.initial": {
+      "maxLength": 4,
+      "required": true,
+      "allowEmpty": true,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "productVariants.size": {
+      "maxLength": 20,
+      "required": true,
+      "allowEmpty": true,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "productVariants.color": {
+      "maxLength": 30,
+      "required": true,
+      "allowEmpty": true,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "productBatches.batchNo": {
+      "maxLength": 40,
+      "required": true,
+      "allowEmpty": true,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "productSerials.serial": {
+      "maxLength": 40,
+      "required": true,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": true,
+      "nonAscii": "reject"
+    },
+    "customers.name": {
+      "maxLength": 100,
+      "required": true,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "customers.phone": {
+      "maxLength": 20,
+      "required": false,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": true,
+      "nonAscii": "drop"
+    },
+    "customers.address": {
+      "maxLength": 200,
+      "required": false,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "customers.note": {
+      "maxLength": 300,
+      "required": false,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "sales.no": {
+      "maxLength": 12,
+      "required": true,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "reject"
+    },
+    "sales.customerName": {
+      "maxLength": 100,
+      "required": false,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "saleLines.name": {
+      "maxLength": 150,
+      "required": true,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "stockMovements.note": {
+      "maxLength": 200,
+      "required": false,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    },
+    "debtEntries.saleNo": {
+      "maxLength": 12,
+      "required": false,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "reject"
+    },
+    "debtEntries.note": {
+      "maxLength": 200,
+      "required": false,
+      "allowEmpty": false,
+      "myanmarDigitsToAscii": false,
+      "nonAscii": "allow"
+    }
+  },
+  "numbers": {
+    "products.cost": {
+      "min": 0,
+      "max": null,
+      "note": null
+    },
+    "products.price": {
+      "min": 0,
+      "max": null,
+      "note": null
+    },
+    "products.wholesalePrice": {
+      "min": 0,
+      "max": null,
+      "note": null
+    },
+    "customers.creditLimit": {
+      "min": 0,
+      "max": null,
+      "note": null
+    },
+    "devices.lastSeq": {
+      "min": 0,
+      "max": 2147483647,
+      "note": null
+    },
+    "saleLines.qtyMilli": {
+      "min": 1,
+      "max": null,
+      "note": null
+    },
+    "saleLines.price": {
+      "min": 0,
+      "max": null,
+      "note": null
+    },
+    "saleLines.costSnapshot": {
+      "min": 0,
+      "max": null,
+      "note": null
+    },
+    "payments.amount": {
+      "min": 0,
+      "max": null,
+      "note": "received, when set, must be >= amount"
+    },
+    "debtEntries.amount": {
+      "min": 1,
+      "max": null,
+      "note": "creditSale and payment only; adjustment may be any sign"
+    }
+  }
+}

@@ -30,7 +30,7 @@ class ApiError implements Exception {
     final code = data is Map ? (data['code'] ?? data['title'])?.toString() : null;
     return ApiError(
       status,
-      code ?? (status >= 500 ? 'server' : 'unknown'),
+      code ?? (status >= 500 ? 'server' : status == 403 ? 'forbidden' : 'unknown'),
       detail: data is Map ? data['detail']?.toString() : null,
       retryAfter: retry == null ? null : Duration(seconds: retry),
     );
@@ -63,6 +63,9 @@ String apiErrorMessage(String code, {Duration? retryAfter}) => switch (code) {
       'rate_limited' => 'ကြိုးစားတာ များသွားပါပြီ။ ခဏနေမှ ပြန်ကြိုးစားပါ။',
       'validation' => 'ထည့်ထားတာ တစ်ခုခု မှားနေပါတယ်။ ပြန်စစ်ပေးပါ။',
       'invalid_refresh_token' || 'invalid_token' => 'အချိန်ကြာသွားလို့ ပြန်ဝင်ပေးပါ။',
+      'cannot_revoke_current_device' => 'ဒီဖုန်းကို ဒီဖုန်းကနေ ဖယ်လို့မရပါ။ တခြားဖုန်းကနေ ဖယ်ပါ (သို့) ထွက်ပါ။',
+      'not_found' => 'မတွေ့ပါ။ ဖယ်ပြီးသား ဖြစ်နိုင်ပါတယ်။',
+      'forbidden' => 'ဆိုင်ပိုင်ရှင်ပဲ လုပ်လို့ရပါတယ်။',
       'network' => 'အင်တာနက် မရပါ။ လိုင်းရမှ ပြန်ကြိုးစားပါ။',
       'server' => 'Server မှာ ပြဿနာ ဖြစ်နေပါတယ်။ ခဏနေမှ ပြန်ကြိုးစားပါ။',
       _ => 'တစ်ခုခု မှားသွားပါတယ်။ ပြန်ကြိုးစားပါ။',

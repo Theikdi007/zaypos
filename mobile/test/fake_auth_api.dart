@@ -83,8 +83,12 @@ class FakeAuthApi implements AuthApi {
     return result('device');
   }
 
+  /// Thrown by resetPin if set.
+  ApiError? resetError;
+
   @override
   Future<void> resetPin({required String phone, required String otp, required String newPin}) async {
     calls.add('reset:$phone');
+    if (resetError != null) throw resetError!;
   }
 }

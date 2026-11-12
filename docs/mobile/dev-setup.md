@@ -23,7 +23,14 @@ Debug builds may talk plain HTTP to the Mac; release builds are HTTPS only
 3. In Xcode: **Window → Devices and Simulators** → select the iPhone →
    tick **Connect via network**. Unplug the cable; the iPhone and the Mac must be
    on the **same Wi-Fi**.
-4. The dev SQL Server container must be running (`docker ps` shows `zaypos-sql`).
+4. The dev SQL Server container must be running (`docker ps` shows `zaypos-sql`), and the
+   database must have every migration (otherwise e.g. the preset catalog is empty):
+   ```sh
+   cd ~/Developer/ZayPOS/backend
+   dotnet tool restore
+   dotnet ef migrations list  --project src/ZayPOS.Infrastructure --startup-project src/ZayPOS.Api   # "(Pending)" = not applied
+   dotnet ef database update  --project src/ZayPOS.Infrastructure --startup-project src/ZayPOS.Api
+   ```
 
 ## Every time
 
@@ -87,4 +94,26 @@ ZAYPOS_LIVE_API=http://127.0.0.1:5076 ZAYPOS_LIVE_PHONE=+959790000123 ZAYPOS_LIV
   flutter test test/live_sync_test.dart      # two phones, one shop (§9 integration)
 ```
 
-`test/live_api_test.dart` (auth round-trip) takes the same variables.
+`test/live_api_test.dart` (auth round-trip) takes the same variables — use a different
+phone number for each file.
+
+STEP 4 (limits = server, preset import, removing a phone, PIN reset) asks for its own
+codes; give it the file the API's console output goes to:
+
+```sh
+dotnet run --project src/ZayPOS.Api --urls http://127.0.0.1:5076 > /tmp/zaypos-api.log   # terminal 1
+ZAYPOS_LIVE_API=http://127.0.0.1:5076 ZAYPOS_LIVE_LOG=/tmp/zaypos-api.log \
+  flutter test test/live_step4_test.dart
+```
+
+## Updating the bundled form rules
+
+`mobile/assets/sync/limits.json` is a copy of `GET /api/v1/sync/limits` (used offline
+before the first refresh). After changing `SyncLimits.cs`:
+
+```sh
+curl -s http://127.0.0.1:5076/api/v1/sync/limits | python3 -m json.tool --indent 2 \
+  > ~/Developer/ZayPOS/mobile/assets/sync/limits.json
+```
+
+`test/live_step4_test.dart` fails if the copy and the server differ.

@@ -159,10 +159,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         Align(
           alignment: Alignment.centerRight,
           child: InkWell(
-            // PIN reset by SMS (POST /auth/pin/reset) gets its screen later.
-            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('PIN ပြန်သတ်မှတ်ခြင်း မကြာမီ ရပါမယ်။')),
-            ),
+            onTap: _busy ? null : () => context.push(Routes.pinReset),
             child: Text('PIN မေ့နေပါသလား?',
                 style: AppText.s(13, weight: AppText.w600, color: AppColors.primary)),
           ),

@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Release builds talk to the API (sync, sign-in). Debug/profile also declare it. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="zaypos_app"
         android:name="${applicationName}"

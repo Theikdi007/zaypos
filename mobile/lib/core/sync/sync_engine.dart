@@ -170,6 +170,13 @@ class SyncEngine {
         if (initial) {
           await store.markInitialSyncDone();
           onInitialSyncDone?.call();
+          // The shop has been seen now: send what was recorded meanwhile
+          // (e.g. the preset catalog of a new shop) in the same cycle.
+          final pushError = await _push(manual);
+          if (pushError != null) {
+            error = pushError.message;
+            online = !pushError.isNetwork;
+          }
         }
       }
     } on ApiError catch (e) {

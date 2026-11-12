@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text.dart';
 import '../../../core/widgets/app_icons.dart';
@@ -138,6 +140,14 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
                 onKey: _onKey,
               ),
               const SizedBox(height: 20),
+              // Works while locked out too: SMS code → new PIN.
+              Center(
+                child: TextButton(
+                  onPressed: _busy ? null : () => context.push(Routes.pinReset),
+                  child: Text('PIN မေ့နေပါသလား?',
+                      style: AppText.s(13, weight: AppText.w600, color: AppColors.primary)),
+                ),
+              ),
               Center(
                 child: TextButton(
                   onPressed: _busy ? null : () => ref.read(authControllerProvider.notifier).signOut(),

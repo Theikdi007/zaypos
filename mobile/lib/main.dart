@@ -8,6 +8,7 @@ import 'core/db/app_database.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/secure_store.dart';
 import 'core/sync/sync_lifecycle.dart';
+import 'core/sync/sync_limits.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/data/boot_state.dart';
 
@@ -19,7 +20,11 @@ Future<void> main() async {
   final db = AppDatabase(driftDatabase(name: 'zaypos'));
   const store = FlutterSecureStore();
   final boot = await bootstrap(db, store);
-  runApp(ProviderScope(overrides: driftOverrides(db, boot, store), child: const ZayPosApp()));
+  final limits = await loadLimits(db);
+  runApp(ProviderScope(
+    overrides: [...driftOverrides(db, boot, store), initialLimitsProvider.overrideWithValue(limits)],
+    child: const ZayPosApp(),
+  ));
 }
 
 class ZayPosApp extends ConsumerWidget {

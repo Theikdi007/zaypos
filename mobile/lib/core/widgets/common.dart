@@ -397,7 +397,15 @@ class FieldLabel extends StatelessWidget {
 
 /// Labeled field: label + 6px + child.
 class LabeledField extends StatelessWidget {
-  const LabeledField({super.key, required this.label, required this.child, this.required = false, this.small = false, this.helper});
+  const LabeledField({
+    super.key,
+    required this.label,
+    required this.child,
+    this.required = false,
+    this.small = false,
+    this.helper,
+    this.error,
+  });
 
   final String label;
   final Widget child;
@@ -406,6 +414,9 @@ class LabeledField extends StatelessWidget {
   /// 13px #374151 label (inside cards) instead of 14px.
   final bool small;
   final String? helper;
+
+  /// Validation message (red, announced); shown instead of [helper].
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
@@ -418,7 +429,10 @@ class LabeledField extends StatelessWidget {
             color: small ? AppColors.textSecondary : AppColors.text),
         const SizedBox(height: 6),
         child,
-        if (helper != null) ...[
+        if (error != null) ...[
+          const SizedBox(height: 6),
+          Semantics(liveRegion: true, child: Text(error!, style: AppText.s(12, color: AppColors.danger))),
+        ] else if (helper != null) ...[
           const SizedBox(height: 6),
           Text(helper!, style: AppText.s(12, color: AppColors.muted)),
         ],

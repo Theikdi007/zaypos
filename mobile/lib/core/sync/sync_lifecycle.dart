@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'sync_engine.dart';
+import 'sync_limits.dart';
 import 'sync_providers.dart';
 
 /// When sync runs (docs/mobile/phase3-sync.md §5.1): as soon as the shop is
@@ -57,8 +58,12 @@ class _SyncLifecycleState extends ConsumerState<SyncLifecycle> {
       wasOnline = online;
     }, onError: (Object _) {});
     // A new engine = signed in / unlocked a shop: sync now, then on the timer.
+    // The form rules (/sync/limits) are refreshed once per unlock (§1.5).
     ref.listenManual<SyncEngine>(syncEngineProvider, (_, engine) {
-      if (engine.enabled) _kick();
+      if (engine.enabled) {
+        _kick();
+        unawaited(ref.read(syncLimitsProvider.notifier).refresh());
+      }
       _startTimer();
     }, fireImmediately: true);
   }
