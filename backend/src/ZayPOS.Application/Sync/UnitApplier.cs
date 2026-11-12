@@ -18,9 +18,7 @@ namespace ZayPOS.Application.Sync;
 /// </summary>
 internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, UnitRows rows, DateTime now)
 {
-    public static readonly TimeSpan MaxClockAhead = TimeSpan.FromMinutes(5);
-
-    private readonly DateTime _limit = now + MaxClockAhead;
+    private readonly DateTime _limit = now + SyncLimits.MaxClockAhead;
     private readonly HashSet<SyncIssueKind> _issueKinds = [];
     private readonly HashSet<Guid> _barcodeChanged = [];
     private readonly HashSet<Guid> _flaggedSerials = [];
@@ -80,9 +78,9 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
         await CheckNegativeStockAsync(stockBefore);
         await CheckCreditLimitsAsync();
         await CheckBarcodesAsync();
-        if (_maxAhead > MaxClockAhead)
+        if (_maxAhead > SyncLimits.MaxClockAhead)
             Issue(SyncIssueKind.ClockSkew, "Devices", caller.DeviceId,
-                $"Device clock is {_maxAhead.TotalMinutes:0} min ahead of the server; edit times were clamped to server time + 5 min.");
+                $"Device clock is {_maxAhead.TotalMinutes:0} min ahead of the server; edit times were clamped to server time + {SyncLimits.MaxClockAhead.TotalMinutes:0} min.");
 
         await db.SaveChangesAsync(ct);
     }
@@ -125,45 +123,45 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
 
     private Task CopyProduct(ProductRow r, Product p, bool isNew)
     {
-        p.Name = Text(r.Name, "products.name", 150)!;
-        p.Category = Text(r.Category, "products.category", 60)!;
-        p.Unit = Text(r.Unit, "products.unit", 20, allowEmpty: true)!;
-        var barcode = Text(r.Barcode, "products.barcode", 64, required: false);
+        p.Name = SyncLimits.ProductName.Apply(r.Name)!;
+        p.Category = SyncLimits.ProductCategory.Apply(r.Category)!;
+        p.Unit = SyncLimits.ProductUnit.Apply(r.Unit)!;
+        var barcode = SyncLimits.ProductBarcode.Apply(r.Barcode);
         if (barcode != p.Barcode || isNew) _barcodeChanged.Add(p.Id);
         p.Barcode = barcode;
-        p.Cost = NonNegative(Require(r.Cost, "products.cost"), "products.cost");
-        p.Price = NonNegative(Require(r.Price, "products.price"), "products.price");
-        p.WholesalePrice = r.WholesalePrice is { } w ? NonNegative(w, "products.wholesalePrice") : null;
+        p.Cost = SyncLimits.ProductCost.Apply(Require(r.Cost, "products.cost"));
+        p.Price = SyncLimits.ProductPrice.Apply(Require(r.Price, "products.price"));
+        p.WholesalePrice = r.WholesalePrice is { } w ? SyncLimits.ProductWholesalePrice.Apply(w) : null;
         p.LowAlertMilli = Require(r.LowAlertMilli, "products.lowAlertMilli");
         p.WarrantyMonths = r.WarrantyMonths;
         p.ExpiryAlertDays = r.ExpiryAlertDays;
         p.Tint = Require(r.Tint, "products.tint");
-        p.Initial = Text(r.Initial, "products.initial", 4, allowEmpty: true)!;
+        p.Initial = SyncLimits.ProductInitial.Apply(r.Initial)!;
         return Task.CompletedTask;
     }
 
     private async Task CopyVariant(ProductVariantRow r, ProductVariant v, bool isNew)
     {
         if (isNew) v.ProductId = await RequireRefAsync<Product>(r.ProductId, "productVariants.productId");
-        v.Size = Text(r.Size, "productVariants.size", 20, allowEmpty: true)!;
-        v.Color = Text(r.Color, "productVariants.color", 30, allowEmpty: true)!;
+        v.Size = SyncLimits.VariantSize.Apply(r.Size)!;
+        v.Color = SyncLimits.VariantColor.Apply(r.Color)!;
     }
 
     private async Task CopyBatch(ProductBatchRow r, ProductBatch b, bool isNew)
     {
         if (isNew) b.ProductId = await RequireRefAsync<Product>(r.ProductId, "productBatches.productId");
-        b.BatchNo = Text(r.BatchNo, "productBatches.batchNo", 40, allowEmpty: true)!;
+        b.BatchNo = SyncLimits.BatchNo.Apply(r.BatchNo)!;
         b.ExpiryDate = r.ExpiryDate;
     }
 
     private Task CopyCustomer(CustomerRow r, Customer c, bool isNew)
     {
-        c.Name = Text(r.Name, "customers.name", 100)!;
+        c.Name = SyncLimits.CustomerName.Apply(r.Name)!;
         // varchar(20): Myanmar digits become 0-9; anything else non-ASCII is dropped rather than rejecting the customer.
-        c.Phone = new string(AsciiDigits(Text(r.Phone, "customers.phone", 20, required: false) ?? "").Where(ch => ch < 128).ToArray());
-        c.Address = Text(r.Address, "customers.address", 200, required: false);
-        c.CreditLimit = r.CreditLimit is { } l ? NonNegative(l, "customers.creditLimit") : null;
-        c.Note = Text(r.Note, "customers.note", 300, required: false);
+        c.Phone = SyncLimits.CustomerPhone.Apply(r.Phone) ?? "";
+        c.Address = SyncLimits.CustomerAddress.Apply(r.Address);
+        c.CreditLimit = r.CreditLimit is { } l ? SyncLimits.CustomerCreditLimit.Apply(l) : null;
+        c.Note = SyncLimits.CustomerNote.Apply(r.Note);
         return Task.CompletedTask;
     }
 
@@ -178,8 +176,8 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
                          ?? throw Reject("tenant not found.");
             var updatedAt = ClampEdit(Require(r.UpdatedAt, "tenants.updatedAt"));
             if (updatedAt <= tenant.UpdatedAt) continue;
-            tenant.Name = Text(r.Name, "tenants.name", 120)!;
-            tenant.Township = Text(r.Township, "tenants.township", 80, required: false);
+            tenant.Name = SyncLimits.TenantName.Apply(r.Name)!;
+            tenant.Township = SyncLimits.TenantTownship.Apply(r.Township);
             tenant.UpdatedAt = updatedAt;
         }
     }
@@ -189,7 +187,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
         foreach (var r in rows.TenantFeatures ?? [])
         {
             RequireTenant(r.TenantId, "tenantFeatures");
-            var key = Ascii(Text(r.FeatureKey, "tenantFeatures.featureKey", 40)!, "tenantFeatures.featureKey");
+            var key = SyncLimits.FeatureKey.Apply(r.FeatureKey)!;
             var enabled = Require(r.Enabled, "tenantFeatures.enabled");
             var updatedAt = ClampEdit(Require(r.UpdatedAt, "tenantFeatures.updatedAt"));
 
@@ -212,8 +210,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
         {
             RequireTenant(r.TenantId, "devices");
             if (r.Id != caller.DeviceId) throw Reject("a device may only push its own devices row.");
-            var seq = Require(r.LastSeq, "devices.lastSeq");
-            if (seq < 0) throw Reject("devices.lastSeq must be >= 0.");
+            var seq = (int)SyncLimits.DeviceLastSeq.Apply(Require(r.LastSeq, "devices.lastSeq"));
             await db.Set<Device>()
                 .Where(d => d.Id == caller.DeviceId && d.LastSeq < seq)
                 .ExecuteUpdateAsync(s => s.SetProperty(d => d.LastSeq, seq).SetProperty(d => d.UpdatedAt, now), _ct);
@@ -242,7 +239,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
                 {
                     Id = id, TenantId = caller.TenantId,
                     ProductId = await RequireRefAsync<Product>(r.ProductId, "productSerials.productId"),
-                    Serial = Ascii(AsciiDigits(Text(r.Serial, "productSerials.serial", 40)!), "productSerials.serial"),
+                    Serial = SyncLimits.Serial.Apply(r.Serial)!,
                     Status = status, SaleLineId = r.SaleLineId,
                     CreatedAt = Require(r.CreatedAt, "productSerials.createdAt"), UpdatedAt = updatedAt, DeletedAt = r.DeletedAt,
                 });
@@ -263,7 +260,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
             {
                 existing.Status = status;
                 existing.SaleLineId = r.SaleLineId;
-                if (r.Serial is not null) existing.Serial = Ascii(AsciiDigits(Text(r.Serial, "productSerials.serial", 40)!), "productSerials.serial");
+                if (r.Serial is not null) existing.Serial = SyncLimits.Serial.Apply(r.Serial)!;
                 existing.DeletedAt ??= r.DeletedAt;
                 existing.UpdatedAt = updatedAt > existing.UpdatedAt ? updatedAt : existing.UpdatedAt;
             }
@@ -306,11 +303,11 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
             var sale = new Sale
             {
                 Id = id, TenantId = caller.TenantId,
-                No = Ascii(Text(r.No, "sales.no", 12)!, "sales.no"),
+                No = SyncLimits.SaleNo.Apply(r.No)!,
                 DeviceId = await RequireRefAsync<Device>(r.DeviceId ?? caller.DeviceId, "sales.deviceId"),
                 Method = Require(r.Method, "sales.method"),
                 CustomerId = await OptionalRefAsync<Customer>(r.CustomerId, "sales.customerId"),
-                CustomerName = Text(r.CustomerName, "sales.customerName", 100, required: false),
+                CustomerName = SyncLimits.SaleCustomerName.Apply(r.CustomerName),
                 VoidedAt = r.VoidedAt,
                 CreatedAt = Require(r.CreatedAt, "sales.createdAt"),
                 UpdatedAt = Require(r.UpdatedAt, "sales.updatedAt"),
@@ -359,10 +356,9 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
         RequireTenant(r.TenantId, "saleLines");
         if (await FindAsync<SaleLine>(id) is not null) return null;
 
-        var qty = Require(r.QtyMilli, "saleLines.qtyMilli");
-        var price = Require(r.Price, "saleLines.price");
-        var cost = Require(r.CostSnapshot, "saleLines.costSnapshot");
-        if (qty <= 0 || price < 0 || cost < 0) throw Reject("saleLines need qtyMilli > 0, price >= 0, costSnapshot >= 0.");
+        var qty = SyncLimits.SaleLineQty.Apply(Require(r.QtyMilli, "saleLines.qtyMilli"));
+        var price = SyncLimits.SaleLinePrice.Apply(Require(r.Price, "saleLines.price"));
+        var cost = SyncLimits.SaleLineCost.Apply(Require(r.CostSnapshot, "saleLines.costSnapshot"));
 
         var line = new SaleLine
         {
@@ -371,7 +367,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
             VariantId = await OptionalRefAsync<ProductVariant>(r.VariantId, "saleLines.variantId"),
             BatchId = await OptionalRefAsync<ProductBatch>(r.BatchId, "saleLines.batchId"),
             SerialId = await OptionalRefAsync<ProductSerial>(r.SerialId, "saleLines.serialId"),
-            Name = Text(r.Name, "saleLines.name", 150)!,
+            Name = SyncLimits.SaleLineName.Apply(r.Name)!,
             QtyMilli = qty, Price = price, CostSnapshot = cost,
             LineTotal = Ledger.LineTotal(price, qty),
             CreatedAt = Require(r.CreatedAt, "saleLines.createdAt"),
@@ -433,8 +429,8 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
     {
         var method = Require(r.Method, "payments.method");
         if (method == PaymentMethod.Debt) throw Reject("payments.method can't be debt (debt is a sale method).");
-        var amount = Require(r.Amount, "payments.amount");
-        if (amount < 0 || r.Received is { } rec && rec < amount) throw Reject("payments need amount >= 0 and received >= amount.");
+        var amount = SyncLimits.PaymentAmount.Apply(Require(r.Amount, "payments.amount"));
+        if (r.Received is { } rec && rec < amount) throw Reject("payments.received must be >= payments.amount.");
         return new Payment
         {
             Id = r.Id, TenantId = caller.TenantId,
@@ -456,7 +452,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
             Type = Require(r.Type, "stockMovements.type"),
             QtyMilli = Require(r.QtyMilli, "stockMovements.qtyMilli"),
             SaleId = await OptionalRefAsync<Sale>(r.SaleId, "stockMovements.saleId"),
-            Note = Text(r.Note, "stockMovements.note", 200, required: false) ?? "",
+            Note = SyncLimits.StockMovementNote.Apply(r.Note) ?? "",
             DeviceId = await RequireRefAsync<Device>(r.DeviceId ?? caller.DeviceId, "stockMovements.deviceId"),
             CreatedAt = Require(r.CreatedAt, "stockMovements.createdAt"), UpdatedAt = Require(r.UpdatedAt, "stockMovements.updatedAt"),
             DeletedAt = r.DeletedAt,
@@ -469,8 +465,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
     {
         var type = Require(r.Type, "debtEntries.type");
         var amount = Require(r.Amount, "debtEntries.amount");
-        if (type != DebtEntryType.Adjustment && amount <= 0)
-            throw Reject("debtEntries.amount must be > 0 for creditSale and payment (only adjustments are signed).");
+        if (type != DebtEntryType.Adjustment) SyncLimits.DebtEntryAmount.Apply(amount); // only adjustments are signed
         if (r.Method == PaymentMethod.Debt) throw Reject("debtEntries.method can't be debt.");
         var e = new DebtEntry
         {
@@ -478,9 +473,9 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
             CustomerId = await RequireRefAsync<Customer>(r.CustomerId, "debtEntries.customerId"),
             Type = type, Amount = amount,
             SaleId = await OptionalRefAsync<Sale>(r.SaleId, "debtEntries.saleId"),
-            SaleNo = r.SaleNo is null ? null : Ascii(Text(r.SaleNo, "debtEntries.saleNo", 12)!, "debtEntries.saleNo"),
+            SaleNo = SyncLimits.DebtEntrySaleNo.Apply(r.SaleNo),
             Method = r.Method,
-            Note = Text(r.Note, "debtEntries.note", 200, required: false),
+            Note = SyncLimits.DebtEntryNote.Apply(r.Note),
             DeviceId = await RequireRefAsync<Device>(r.DeviceId ?? caller.DeviceId, "debtEntries.deviceId"),
             CreatedAt = Require(r.CreatedAt, "debtEntries.createdAt"), UpdatedAt = Require(r.UpdatedAt, "debtEntries.updatedAt"),
             DeletedAt = r.DeletedAt,
@@ -556,7 +551,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
         {
             Id = Guid.CreateVersion7(), TenantId = caller.TenantId, Kind = kind,
             EntityTable = table, EntityId = entityId,
-            Detail = detail.Length <= 400 ? detail : detail[..400],
+            Detail = detail.Length <= SyncLimits.IssueDetailMaxLength ? detail : detail[..SyncLimits.IssueDetailMaxLength],
             DeviceId = caller.DeviceId, CreatedAt = now, UpdatedAt = now,
         });
     }
@@ -602,29 +597,6 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
 
     private static T Require<T>(T? value, string field) where T : struct =>
         value ?? throw Reject($"{field} is required.");
-
-    private static long NonNegative(long v, string field) => v >= 0 ? v : throw Reject($"{field} must be >= 0.");
-
-    private static string? Text(string? value, string field, int max, bool required = true, bool allowEmpty = false)
-    {
-        if (value is null)
-            return required ? throw Reject($"{field} is required.") : null;
-        if (value.Length == 0 && required && !allowEmpty) throw Reject($"{field} must not be empty.");
-        if (value.Length > max) throw Reject($"{field} is longer than {max} characters.");
-        return value;
-    }
-
-    /// <summary>Myanmar digits ၀-၉ (U+1040–U+1049) → 0-9.</summary>
-    private static string AsciiDigits(string value) =>
-        string.Create(value.Length, value, (span, v) =>
-        {
-            for (var i = 0; i < v.Length; i++)
-                span[i] = v[i] is >= '\u1040' and <= '\u1049' ? (char)('0' + (v[i] - '\u1040')) : v[i];
-        });
-
-    /// <summary>varchar columns: non-ASCII would be silently mangled by SQL Server.</summary>
-    private static string Ascii(string value, string field) =>
-        value.All(c => c < 128) ? value : throw Reject($"{field} must be ASCII (digits/latin letters).");
 
     private static SyncRejectException Reject(string reason) => new(reason);
 }

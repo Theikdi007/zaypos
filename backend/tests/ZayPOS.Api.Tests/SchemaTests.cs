@@ -1,5 +1,7 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using ZayPOS.Application.Sync;
 using ZayPOS.Domain.Catalog;
 using ZayPOS.Domain.Common;
 using ZayPOS.Domain.Inventory;
@@ -17,6 +19,34 @@ public class SchemaTests(SqlServerFixture sql)
         await using var db = sql.CreateContext(null);
         db.Database.HasPendingModelChanges().Should().BeFalse();
         (await db.Database.GetPendingMigrationsAsync()).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Migrations_turn_on_read_committed_snapshot()
+    {
+        await using var db = sql.CreateContext(null);
+        var on = await db.Database
+            .SqlQueryRaw<bool>("SELECT is_read_committed_snapshot_on AS [Value] FROM sys.databases WHERE name = DB_NAME()")
+            .SingleAsync();
+        on.Should().BeTrue("the ReadCommittedSnapshot migration sets it; the fixture only runs migrations");
+    }
+
+    /// <summary>"products.name" → table Products, column Name: every published limit must fit its column.</summary>
+    [Fact]
+    public async Task Every_sync_text_limit_fits_its_database_column()
+    {
+        await using var db = sql.CreateContext(null);
+        var model = db.GetService<Microsoft.EntityFrameworkCore.Metadata.IDesignTimeModel>().Model;
+        SyncLimits.Texts.Should().NotBeEmpty();
+        foreach (var limit in SyncLimits.Texts)
+        {
+            var (table, column) = (limit.Field.Split('.')[0], limit.Field.Split('.')[1]);
+            var entity = model.GetEntityTypes().Single(e => string.Equals(e.GetTableName(), table, StringComparison.OrdinalIgnoreCase));
+            var property = entity.GetProperties().Single(p => string.Equals(p.GetColumnName(), column, StringComparison.OrdinalIgnoreCase));
+            property.GetMaxLength().Should().Be(limit.MaxLength, limit.Field);
+            property.IsUnicode().Should().Be(limit.NonAscii == NonAsciiRule.Allow,
+                $"{limit.Field}: varchar columns need an ASCII rule, nvarchar columns must not have one");
+        }
     }
 
     [Fact]

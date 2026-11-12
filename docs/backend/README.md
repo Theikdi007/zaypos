@@ -233,13 +233,18 @@ All under `/api/v1`, JSON, ProblemDetails for errors, Swagger UI at `/swagger` (
 | Area | Endpoints |
 |---|---|
 | Auth | see §4 |
-| Sync | `POST /sync/push`, `GET /sync/pull` |
+| Sync | `POST /sync/push`, `GET /sync/pull`, `GET /sync/limits` (anonymous: every text/number limit the push validator enforces, from `SyncLimits`) |
 | Me | `GET /me` (user, tenant, features, plan, devices) |
 | Catalog presets | `GET /catalog/presets?template=grocery` (cached, ETag) |
 | Devices | `GET /devices`, `DELETE /devices/{id}` (owner revokes a lost phone) |
 | Subscription | `POST /subscription/screenshot-url` (R2 presigned PUT), `POST /subscription/payments`, `GET /subscription` |
 | Reports (for Blazor) | `GET /reports/summary?from&to`, `GET /reports/top-products?from&to`, `GET /reports/debt` |
 | Admin (internal) | `GET /admin/subscription-payments?status=pending`, `POST /admin/subscription-payments/{id}/approve` — role `admin`, separate policy |
+
+Config: `Storage:R2:{AccountId,AccessKeyId,SecretAccessKey,Bucket}` (user-secrets / env; without it the
+screenshot endpoints answer 503 `storage_not_configured`), `Subscription:Prices[]` (`{months, amount}`) and
+`Subscription:PayTo` (`kbz`/`wave` → account shown to the owner). `DELETE /devices/{id}`, the screenshot URL and
+`POST /subscription/payments` need role `owner`; every endpoint above refuses a revoked device's token.
 
 The mobile app only needs **auth, sync, me, presets, subscription**. CRUD for
 products/customers/sales goes through sync, not REST.

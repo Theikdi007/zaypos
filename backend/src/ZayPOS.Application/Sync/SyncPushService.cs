@@ -13,7 +13,6 @@ namespace ZayPOS.Application.Sync;
 /// </summary>
 public sealed class SyncPushService(IAppDb db, IDbErrors errors, TimeProvider clock)
 {
-    public const int MaxUnits = 50;
     private const int MaxAttempts = 3;
 
     private DateTime Now => SyncJson.ToUtcMs(clock.GetUtcNow().UtcDateTime);
@@ -24,8 +23,8 @@ public sealed class SyncPushService(IAppDb db, IDbErrors errors, TimeProvider cl
             throw new ApiException(403, "device_mismatch", "deviceId must be the device of the access token.");
         if (req.Units is not { Count: > 0 } units)
             throw new ApiException(400, "validation", "units must not be empty.");
-        if (units.Count > MaxUnits)
-            throw new ApiException(400, "validation", $"At most {MaxUnits} units per push.");
+        if (units.Count > SyncLimits.MaxUnitsPerPush)
+            throw new ApiException(400, "validation", $"At most {SyncLimits.MaxUnitsPerPush} units per push.");
         if (units.Any(u => u.UnitId == Guid.Empty))
             throw new ApiException(400, "validation", "Every unit needs a unitId.");
         await SyncAccess.RequireActiveDeviceAsync(db, caller, ct);

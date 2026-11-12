@@ -85,5 +85,7 @@ internal sealed class PresetProductConfiguration : IEntityTypeConfiguration<Pres
         b.Property(x => x.Unit).Nvarchar(20);
         b.Property(x => x.Barcode).Varchar(64);
         b.Property(x => x.SortOrder).HasDefaultValue(0, "DF_Preset_Sort");
+
+        b.HasData(Seed.PresetSeed.All());
     }
 }

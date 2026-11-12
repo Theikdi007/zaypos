@@ -19,11 +19,9 @@ namespace ZayPOS.Infrastructure.Sync;
 /// </summary>
 internal sealed class SyncPullService(ZayPosDbContext db) : ISyncPull
 {
-    public const int MaxLimit = 1000;
-
     public async Task<PullResponse> PullAsync(byte[] cursor, int limit, CancellationToken ct)
     {
-        limit = Math.Clamp(limit, 1, MaxLimit);
+        limit = Math.Clamp(limit, 1, SyncLimits.PullMaxLimit);
 
         // A transaction that is still open may hold a LOWER rowversion than rows already committed.
         // Never read at or past the oldest active one, or the cursor could jump over it forever.

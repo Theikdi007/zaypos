@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using ZayPOS.Application.Abstractions;
 using ZayPOS.Application.Sync;
-using ZayPOS.Infrastructure.Auth;
 
 namespace ZayPOS.Api.Endpoints;
 
@@ -12,27 +11,26 @@ public static class SyncEndpoints
         var sync = app.MapGroup("/api/v1/sync").WithTags("Sync").RequireAuthorization();
 
         sync.MapPost("/push", async (PushRequest req, ClaimsPrincipal user, SyncPushService svc, CancellationToken ct) =>
-                Results.Ok(await svc.PushAsync(Caller(user), req, ct)))
+                Results.Ok(await svc.PushAsync(Caller.From(user), req, ct)))
             .Produces<PushResponse>();
 
         sync.MapGet("/pull", async (string? cursor, int? limit, ClaimsPrincipal user, IAppDb db, ISyncPull pull, CancellationToken ct) =>
             {
-                var caller = Caller(user);
+                var caller = Caller.From(user);
                 await SyncAccess.RequireActiveDeviceAsync(db, caller, ct);
-                return Results.Ok(await pull.PullAsync(SyncCursor.Parse(cursor), limit ?? 500, ct));
+                return Results.Ok(await pull.PullAsync(SyncCursor.Parse(cursor), limit ?? SyncLimits.PullDefaultLimit, ct));
             })
             .Produces<PullResponse>();
 
-        return app;
-    }
+        // Static and not secret: the app may read it before signing in.
+        sync.MapGet("/limits", (HttpContext http) =>
+            {
+                http.Response.Headers.CacheControl = "public, max-age=3600";
+                return Results.Ok(SyncLimits.Describe());
+            })
+            .AllowAnonymous()
+            .Produces<SyncLimitsResponse>();
 
-    /// <summary>Tenant, user and device come from the token only.</summary>
-    private static SyncCaller Caller(ClaimsPrincipal user)
-    {
-        Guid Claim(string type) =>
-            Guid.TryParse(user.FindFirstValue(type), out var id) && id != Guid.Empty
-                ? id
-                : throw new ApiException(401, "invalid_token", $"Token has no valid '{type}' claim.");
-        return new SyncCaller(Claim(ZayPosClaims.Tenant), Claim(ZayPosClaims.User), Claim(ZayPosClaims.Device));
+        return app;
     }
 }

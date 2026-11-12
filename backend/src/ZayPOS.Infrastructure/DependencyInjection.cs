@@ -3,11 +3,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using ZayPOS.Application.Abstractions;
+using ZayPOS.Application.Account;
+using ZayPOS.Application.Catalog;
+using ZayPOS.Application.Subscription;
 using ZayPOS.Application.Auth;
 using ZayPOS.Application.Sync;
 using ZayPOS.Infrastructure.Auth;
 using ZayPOS.Infrastructure.Persistence;
+using ZayPOS.Infrastructure.Storage;
 using ZayPOS.Infrastructure.Sync;
 
 namespace ZayPOS.Infrastructure;
@@ -40,6 +45,25 @@ public static class DependencyInjection
         services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
         services.TryAddSingleton<ISmsSender, LoggingSmsSender>();
         services.AddScoped<AuthService>();
+
+        services.AddScoped<AccountService>();
+        services.AddScoped<PresetCatalogService>();
+        services.AddScoped<SubscriptionService>();
+        services.AddOptions<SubscriptionOptions>().Bind(configuration.GetSection(SubscriptionOptions.Section));
+        AddFileStorage(services, configuration);
         return services;
+    }
+
+    /// <summary>R2 only when fully configured (Storage:R2); otherwise screenshot endpoints answer 503.</summary>
+    private static void AddFileStorage(IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(R2Options.Section);
+        services.AddOptions<R2Options>().Bind(section);
+        if (section.Get<R2Options>() is { IsConfigured: true })
+            services.TryAddSingleton<IFileStorage>(sp => new R2FileStorage(
+                sp.GetRequiredService<IOptions<R2Options>>(), sp.GetRequiredService<TimeProvider>(),
+                new HttpClient { Timeout = TimeSpan.FromSeconds(10) }));
+        else
+            services.TryAddSingleton<IFileStorage, NotConfiguredFileStorage>();
     }
 }

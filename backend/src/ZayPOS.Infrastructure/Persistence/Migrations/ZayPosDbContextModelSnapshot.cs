@@ -152,6 +152,228 @@ namespace ZayPOS.Infrastructure.Persistence.Migrations
                     SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("TemplateId", "SortOrder"));
 
                     b.ToTable("PresetProducts", "dbo");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000101"),
+                            Category = "စားသောက်ကုန်",
+                            Name = "ဆန် (ပေါ်ဆန်း)",
+                            SortOrder = 10,
+                            SuggestedPrice = 8500L,
+                            TemplateId = "grocery",
+                            Unit = "ပြည်",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000102"),
+                            Category = "စားသောက်ကုန်",
+                            Name = "ပဲဆီ",
+                            SortOrder = 20,
+                            SuggestedPrice = 16000L,
+                            TemplateId = "grocery",
+                            Unit = "ပိဿာ",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000103"),
+                            Category = "စားသောက်ကုန်",
+                            Name = "သကြား",
+                            SortOrder = 30,
+                            SuggestedPrice = 6500L,
+                            TemplateId = "grocery",
+                            Unit = "ပိဿာ",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000104"),
+                            Category = "စားသောက်ကုန်",
+                            Name = "ဆား",
+                            SortOrder = 40,
+                            SuggestedPrice = 500L,
+                            TemplateId = "grocery",
+                            Unit = "ထုပ်",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000105"),
+                            Category = "စားသောက်ကုန်",
+                            Name = "ကြက်ဥ",
+                            SortOrder = 50,
+                            SuggestedPrice = 300L,
+                            TemplateId = "grocery",
+                            Unit = "ခု",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000106"),
+                            Category = "စားသောက်ကုန်",
+                            Name = "ကြက်သွန်နီ",
+                            SortOrder = 60,
+                            SuggestedPrice = 5000L,
+                            TemplateId = "grocery",
+                            Unit = "ပိဿာ",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000107"),
+                            Category = "စားသောက်ကုန်",
+                            Name = "ကြက်သွန်ဖြူ",
+                            SortOrder = 70,
+                            SuggestedPrice = 8000L,
+                            TemplateId = "grocery",
+                            Unit = "ပိဿာ",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000108"),
+                            Category = "စားသောက်ကုန်",
+                            Name = "ငံပြာရည်",
+                            SortOrder = 80,
+                            SuggestedPrice = 2500L,
+                            TemplateId = "grocery",
+                            Unit = "ဗူး",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000109"),
+                            Category = "စားသောက်ကုန်",
+                            Name = "အချိုမှုန့်",
+                            SortOrder = 90,
+                            SuggestedPrice = 1500L,
+                            TemplateId = "grocery",
+                            Unit = "ထုပ်",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-00000000010a"),
+                            Category = "စားသောက်ကုန်",
+                            Name = "အသင့်စား ခေါက်ဆွဲ",
+                            SortOrder = 100,
+                            SuggestedPrice = 600L,
+                            TemplateId = "grocery",
+                            Unit = "ထုပ်",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-00000000010b"),
+                            Category = "စားသောက်ကုန်",
+                            Name = "လက်ဖက်ခြောက်",
+                            SortOrder = 110,
+                            SuggestedPrice = 1500L,
+                            TemplateId = "grocery",
+                            Unit = "ထုပ်",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-00000000010c"),
+                            Category = "အချိုရည်",
+                            Name = "ရေသန့် 1L",
+                            SortOrder = 120,
+                            SuggestedPrice = 600L,
+                            TemplateId = "grocery",
+                            Unit = "ဗူး",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-00000000010d"),
+                            Category = "အချိုရည်",
+                            Name = "ကော်ဖီမစ် 3 in 1",
+                            SortOrder = 130,
+                            SuggestedPrice = 300L,
+                            TemplateId = "grocery",
+                            Unit = "ထုပ်",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-00000000010e"),
+                            Category = "အချိုရည်",
+                            Name = "အချိုရည် ဗူး",
+                            SortOrder = 140,
+                            SuggestedPrice = 1200L,
+                            TemplateId = "grocery",
+                            Unit = "ဗူး",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-00000000010f"),
+                            Category = "အိမ်သုံး",
+                            Name = "ဆပ်ပြာခဲ",
+                            SortOrder = 150,
+                            SuggestedPrice = 1200L,
+                            TemplateId = "grocery",
+                            Unit = "ခု",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000110"),
+                            Category = "အိမ်သုံး",
+                            Name = "ဆပ်ပြာမှုန့်",
+                            SortOrder = 160,
+                            SuggestedPrice = 2000L,
+                            TemplateId = "grocery",
+                            Unit = "ထုပ်",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000111"),
+                            Category = "အိမ်သုံး",
+                            Name = "သွားတိုက်ဆေး",
+                            SortOrder = 170,
+                            SuggestedPrice = 2500L,
+                            TemplateId = "grocery",
+                            Unit = "ခု",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000112"),
+                            Category = "အိမ်သုံး",
+                            Name = "မီးခြစ်",
+                            SortOrder = 180,
+                            SuggestedPrice = 200L,
+                            TemplateId = "grocery",
+                            Unit = "ခု",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000113"),
+                            Category = "အိမ်သုံး",
+                            Name = "ဖယောင်းတိုင်",
+                            SortOrder = 190,
+                            SuggestedPrice = 1000L,
+                            TemplateId = "grocery",
+                            Unit = "ထုပ်",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("019a7000-0000-7000-8000-000000000114"),
+                            Category = "မုန့်",
+                            Name = "ဘီစကွတ်",
+                            SortOrder = 200,
+                            SuggestedPrice = 1000L,
+                            TemplateId = "grocery",
+                            Unit = "ထုပ်",
+                            UpdatedAt = new DateTime(2026, 11, 12, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("ZayPOS.Domain.Catalog.Product", b =>

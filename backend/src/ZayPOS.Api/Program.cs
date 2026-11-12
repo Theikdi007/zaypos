@@ -41,7 +41,9 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
             RoleClaimType = ZayPosClaims.Role,
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(o =>
+    o.AddPolicy(Caller.OwnerPolicy, p => p.RequireAuthenticatedUser().RequireClaim(ZayPosClaims.Role, "owner")));
+builder.Services.AddMemoryCache();
 
 // /auth/*: per client IP + per phone. The OTP limit (3/hour/phone) also lives in AuthService.
 builder.Services.AddAuthRateLimiting(builder.Configuration);
@@ -65,6 +67,7 @@ app.UseRateLimiter();
 app.MapGet("/api/v1/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
 app.MapSyncEndpoints();
+app.MapAccountEndpoints();
 
 app.Run();
 

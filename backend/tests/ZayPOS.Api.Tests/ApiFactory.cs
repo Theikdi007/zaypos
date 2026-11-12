@@ -17,7 +17,8 @@ public sealed class ApiFactory(
     int authPerIp = 10_000,
     int authPerPhone = 10_000,
     IPAddress? remoteIp = null,
-    Action<IServiceCollection>? services = null) : WebApplicationFactory<Program>
+    Action<IServiceCollection>? services = null,
+    IReadOnlyDictionary<string, string?>? settings = null) : WebApplicationFactory<Program>
 {
     /// <summary>Test-only key; the real one lives in user-secrets / env.</summary>
     public const string SigningKey = "test-signing-key-0123456789-abcdefghijklmnopqrstuvwxyz";
@@ -31,6 +32,8 @@ public sealed class ApiFactory(
         builder.UseSetting("Jwt:SigningKey", SigningKey);
         builder.UseSetting("RateLimiting:AuthPerIpPerMinute", authPerIp.ToString());
         builder.UseSetting("RateLimiting:AuthPerPhonePerMinute", authPerPhone.ToString());
+        foreach (var (key, value) in settings ?? new Dictionary<string, string?>())
+            builder.UseSetting(key, value);
         builder.ConfigureTestServices(s =>
         {
             s.RemoveAll<ISmsSender>();

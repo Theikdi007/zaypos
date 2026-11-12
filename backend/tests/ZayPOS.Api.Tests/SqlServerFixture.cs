@@ -23,10 +23,9 @@ public sealed class SqlServerFixture : IAsyncLifetime
     {
         await _container.StartAsync();
         await using var db = CreateContext(tenantId: null);
+        // The migrations alone must leave the database ready (incl. READ_COMMITTED_SNAPSHOT,
+        // which the pull test relies on); nothing here may patch the schema.
         await db.Database.MigrateAsync();
-        // Readers don't block on in-flight writers, so the pull test can hold a transaction open
-        // while pulling. Recommended for production too (see the STEP 3 notes).
-        await db.Database.ExecuteSqlRawAsync("ALTER DATABASE CURRENT SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE");
     }
 
     public async Task DisposeAsync()
