@@ -68,9 +68,9 @@ class VoidSaleService {
 }
 
 final voidSaleServiceProvider = Provider<VoidSaleService>((ref) => VoidSaleService(
-      uow: ref.read(unitOfWorkProvider),
-      sales: ref.read(salesRepositoryProvider),
-      stock: ref.read(stockRepositoryProvider),
-      debt: ref.read(debtRepositoryProvider),
-      products: ref.read(productRepositoryProvider),
+      uow: ref.watch(unitOfWorkProvider),
+      sales: ref.watch(salesRepositoryProvider),
+      stock: ref.watch(stockRepositoryProvider),
+      debt: ref.watch(debtRepositoryProvider),
+      products: ref.watch(productRepositoryProvider),
     ));

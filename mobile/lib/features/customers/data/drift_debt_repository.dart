@@ -22,6 +22,21 @@ class DriftDebtRepository implements DebtRepository {
       .watch();
 
   @override
+  Stream<Map<String, int>> watchBalances() {
+    final e = db.debtEntries;
+    final effect = CaseWhenExpression<int>(
+      cases: [CaseWhen(e.type.equalsValue(DebtEntryType.payment), then: -e.amount)],
+      orElse: e.amount,
+    );
+    final sum = effect.sum();
+    final q = db.selectOnly(e)
+      ..addColumns([e.customerId, sum])
+      ..where(e.deletedAt.isNull())
+      ..groupBy([e.customerId]);
+    return q.watch().map((rows) => {for (final r in rows) r.read(e.customerId)!: r.read(sum) ?? 0});
+  }
+
+  @override
   Future<void> add(DebtEntry entry) async {
     final rec = UnitRecorder.require();
     final row = debtRow(entry, deviceId: deviceId);

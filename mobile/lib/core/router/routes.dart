@@ -1,6 +1,7 @@
 abstract final class Routes {
   static const login = '/login';
   static const register = '/register';
+  static const unlock = '/unlock';
   static const dashboard = '/';
   static const sales = '/sales';
   static String sale(String id) => '/sales/$id';

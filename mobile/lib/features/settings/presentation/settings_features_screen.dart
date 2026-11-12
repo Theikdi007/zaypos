@@ -12,6 +12,7 @@ import '../../../core/utils/myanmar.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/app_switch_tile.dart';
 import '../../../core/widgets/common.dart';
+import '../../auth/application/auth_controller.dart';
 import '../domain/ui_prefs.dart';
 
 class _Module {
@@ -155,6 +156,15 @@ class SettingsFeaturesScreen extends ConsumerWidget {
                   child: Text(
                     'Feature ပိတ်လိုက်ရင်လည်း မှတ်ထားပြီးသား data တွေ မပျက်ပါ။ ပြန်ဖွင့်ရင် ပြန်ပေါ်ပါမယ်။',
                     style: AppText.s(12, color: AppColors.muted),
+                  ),
+                ),
+                section('အကောင့်'),
+                AppCard(
+                  child: ListTile(
+                    title: Text('ထွက်မယ်', style: AppText.s(14, weight: AppText.w600, color: AppColors.danger)),
+                    subtitle: Text('ဒီဖုန်းထဲက စာရင်းတွေ မပျက်ပါ။ ပြန်ဝင်ရင် ဆက်သုံးလို့ရပါတယ်။',
+                        style: AppText.s(12, color: AppColors.muted)),
+                    onTap: () => ref.read(authControllerProvider.notifier).signOut(),
                   ),
                 ),
               ],

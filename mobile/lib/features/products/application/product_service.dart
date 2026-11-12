@@ -34,7 +34,7 @@ class ProductService {
 }
 
 final productServiceProvider = Provider<ProductService>((ref) => ProductService(
-      uow: ref.read(unitOfWorkProvider),
-      products: ref.read(productRepositoryProvider),
-      stock: ref.read(stockRepositoryProvider),
+      uow: ref.watch(unitOfWorkProvider),
+      products: ref.watch(productRepositoryProvider),
+      stock: ref.watch(stockRepositoryProvider),
     ));

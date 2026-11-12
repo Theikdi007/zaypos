@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import '../core/data/unit_of_work.dart';
 import '../core/features/fake_feature_repository.dart';
 import '../core/features/feature_repository.dart';
+import '../core/utils/ids.dart';
+import '../features/auth/data/boot_state.dart';
 import '../features/auth/data/session.dart';
 import '../features/customers/data/customer_repository.dart';
 import '../features/customers/data/debt_repository.dart';
@@ -35,7 +37,11 @@ final fakeDatabaseProvider = Provider<FakeDatabase>((ref) => seedFakeDatabase(re
 /// TESTS ONLY: binds every repository interface (and the unit of work) to the
 /// in-memory fake database. The app's composition root is
 /// lib/app/drift_overrides.dart.
-final List<Override> fakeRepositoryOverrides = [
+///
+/// Opens unlocked on a fresh in-memory shop, unless [boot] says otherwise
+/// (auth widget tests start signed out).
+List<Override> fakeOverrides({BootState? boot}) => [
+  bootStateProvider.overrideWithValue(boot ?? BootState(deviceId: newId(), startUnlocked: true)),
   unitOfWorkProvider.overrideWith((ref) => FakeUnitOfWork(ref.read(fakeDatabaseProvider))),
   productRepositoryProvider.overrideWith((ref) => FakeProductRepository(ref.read(fakeDatabaseProvider))),
   stockRepositoryProvider.overrideWith((ref) => FakeStockRepository(ref.read(fakeDatabaseProvider))),
@@ -49,3 +55,6 @@ final List<Override> fakeRepositoryOverrides = [
   reportRepositoryProvider.overrideWith((ref) => FakeReportRepository(ref.read(fakeDatabaseProvider))),
   featureRepositoryProvider.overrideWith((ref) => FakeFeatureRepository(ref.read(fakeDatabaseProvider))),
 ];
+
+/// [fakeOverrides] opening unlocked (most tests).
+final List<Override> fakeRepositoryOverrides = fakeOverrides();

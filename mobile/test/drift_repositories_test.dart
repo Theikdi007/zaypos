@@ -1,7 +1,8 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaypos_app/features/customers/data/debt_repository.dart';
 import 'package:zaypos_app/app/fake_seed.dart';
-import 'package:zaypos_app/app/local_bootstrap.dart';
 import 'package:zaypos_app/core/db/app_database.dart';
 import 'package:zaypos_app/core/features/features_providers.dart';
 import 'package:zaypos_app/core/features/tenant_features.dart';
@@ -30,7 +31,7 @@ import 'helpers.dart';
 void main() {
   late AppDatabase db;
   late ProviderContainer c;
-  late LocalIdentity me;
+  late TestShop me;
 
   setUp(() async {
     db = memoryDb();
@@ -44,14 +45,12 @@ void main() {
   final water = draft(productId: SeedIds.water, name: 'ရေသန့် 1L', qtyMilli: Qty.units(2), price: 600, cost: 450);
   Future<int> stockOf(String id) async => (await settled(c, productsProvider)).firstWhere((p) => p.id == id).stockMilli;
 
-  test('bootstrap: seeded sample shop, no outbox, idempotent identity', () async {
-    expect(await outbox(db), isEmpty, reason: 'local bootstrap is not user data');
+  test('seeded sample shop: no outbox, receipt numbers continue, stock from the ledger', () async {
+    expect(await outbox(db), isEmpty, reason: 'sample data is not user data');
     expect((await settled(c, salesProvider)).length, greaterThan(500));
     expect((await settled(c, deviceProvider)).nextReceiptNo, 'A-1033');
     expect(await stockOf(SeedIds.water), Qty.units(48));
-    final again = await bootstrapLocalDatabase(db, seedSampleData: true);
-    expect((again.tenantId, again.deviceId), (me.tenantId, me.deviceId));
-    expect(await db.select(db.products).get(), hasLength(SeedCatalog.items.length), reason: 'seeded once');
+    expect(await db.select(db.products).get(), hasLength(SeedCatalog.items.length));
   });
 
   test('checkout = one checkout unit with sale, lines, payment, movements and device lastSeq', () async {
@@ -224,6 +223,33 @@ void main() {
     final ledger = (await db.select(db.stockMovements).get()).where((m) => m.productId == SeedIds.water);
     expect(await stockOf(SeedIds.water), ledger.fold<int>(0, (a, m) => a + m.qtyMilli));
     expect(await stockOf(SeedIds.coffee), 0, reason: 'no movements');
+  });
+
+  test('debt balances are a SQL SUM over the ledger: payments subtract, deleted entries ignored', () async {
+    final repo = c.read(debtRepositoryProvider);
+    final ledger = await repo.watchAll().first;
+    final expected = <String, int>{};
+    for (final e in ledger) {
+      expected[e.customerId] = (expected[e.customerId] ?? 0) + e.effect;
+    }
+    expect(await repo.watchBalances().first, expected);
+    expect((await repo.watchBalances().first)[SeedIds.aungKyaw], 52000);
+    expect((await repo.watchBalances().first)[SeedIds.htet], 0, reason: '15,000 opening − 15,000 paid');
+
+    // A repayment and a soft-deleted entry.
+    await c.read(customerServiceProvider).recordPayment(
+        tenantId: me.tenantId, customerId: SeedIds.aungKyaw, amount: 2000, method: PaymentMethod.cash);
+    final first = ledger.firstWhere((e) => e.customerId == SeedIds.khinMa);
+    await (db.update(db.debtEntries)..where((e) => e.id.equals(first.id)))
+        .write(DebtEntriesCompanion(deletedAt: Value(nowUtc())));
+    final balances = await repo.watchBalances().first;
+    expect(balances[SeedIds.aungKyaw], 50000);
+    expect(balances[SeedIds.khinMa] ?? 0, 0, reason: 'its only entry was deleted');
+
+    // The customer screens read the SQL balance.
+    final account = (await settled(c, customerAccountProvider(SeedIds.aungKyaw)))!;
+    expect(account.storedBalance, 50000);
+    expect(account.balance, 50000);
   });
 
   test('StockMovementType names match the server enum', () {

@@ -156,12 +156,12 @@ class CheckoutService {
 }
 
 final checkoutServiceProvider = Provider<CheckoutService>((ref) => CheckoutService(
-      uow: ref.read(unitOfWorkProvider),
-      tenantId: ref.read(tenantIdProvider),
-      sales: ref.read(salesRepositoryProvider),
-      stock: ref.read(stockRepositoryProvider),
-      debt: ref.read(debtRepositoryProvider),
-      customers: ref.read(customerRepositoryProvider),
-      devices: ref.read(deviceRepositoryProvider),
-      products: ref.read(productRepositoryProvider),
+      uow: ref.watch(unitOfWorkProvider),
+      tenantId: ref.watch(tenantIdProvider),
+      sales: ref.watch(salesRepositoryProvider),
+      stock: ref.watch(stockRepositoryProvider),
+      debt: ref.watch(debtRepositoryProvider),
+      customers: ref.watch(customerRepositoryProvider),
+      devices: ref.watch(deviceRepositoryProvider),
+      products: ref.watch(productRepositoryProvider),
     ));

@@ -125,6 +125,15 @@ class FakeDebtRepository implements DebtRepository {
       });
 
   @override
+  Stream<Map<String, int>> watchBalances() => db.watch({FakeTable.debt}, () {
+        final out = <String, int>{};
+        for (final e in db.debt) {
+          if (e.deletedAt == null) out[e.customerId] = (out[e.customerId] ?? 0) + e.effect;
+        }
+        return out;
+      });
+
+  @override
   Future<void> add(DebtEntry entry) async {
     db.debt.add(entry);
     db.touch({FakeTable.debt});

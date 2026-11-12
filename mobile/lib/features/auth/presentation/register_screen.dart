@@ -15,7 +15,10 @@ import '../../../core/widgets/app_switch_tile.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/numeric_keypad.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../application/auth_controller.dart';
+import '../data/auth_api.dart';
 import '../data/session.dart';
+import 'widgets/auth_message.dart';
 import 'widgets/phone_field.dart';
 
 enum CatalogStart { preset, quick, import }
@@ -30,12 +33,23 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  static const _resendAfter = 60;
+
   late int _step;
   late String _type;
   late CatalogStart _start;
   late final TextEditingController _shopName;
   final _phone = TextEditingController();
+  final _otp = TextEditingController();
   String _pin = '';
+
+  /// Signed in already: opened from Settings to change the shop template.
+  late final bool _signedIn;
+  bool _codeSent = false;
+  int _resendIn = 0;
+  Timer? _timer;
+  bool _busy = false;
+  String? _error;
 
   static CatalogStart _defaultStart(ShopTemplate t) =>
       t.features.presetCatalog && t.presetCount > 0 ? CatalogStart.preset : CatalogStart.quick;
@@ -43,33 +57,119 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   void initState() {
     super.initState();
+    _signedIn = ref.read(authControllerProvider).status == AuthStatus.unlocked;
     _step = widget.initialStep.clamp(1, 4);
     _type = ref.read(shopTemplateProvider).id;
     _start = _defaultStart(ShopTemplate.byId(_type));
-    _shopName = TextEditingController(text: ref.read(sessionProvider).shopName);
+    _shopName = TextEditingController(text: _signedIn ? ref.read(sessionProvider).shopName : '');
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _shopName.dispose();
     _phone.dispose();
+    _otp.dispose();
     super.dispose();
   }
 
   void _back() {
-    if (_step > 1) {
-      setState(() => _step--);
+    if (_step > 1 && !_signedIn) {
+      setState(() {
+        _step--;
+        _error = null;
+      });
     } else if (context.canPop()) {
       context.pop();
     } else {
-      context.go(Routes.login);
+      context.go(_signedIn ? Routes.dashboard : Routes.login);
     }
   }
 
-  void _finish() {
+  /// Runs [action] with a busy state; an [AuthFailure] becomes the message.
+  Future<bool> _run(Future<void> Function(AuthController c) action) async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await action(ref.read(authControllerProvider.notifier));
+      return true;
+    } on AuthFailure catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.message;
+          if (e.code == 'otp_invalid') {
+            _step = 1;
+            _otp.clear();
+          }
+        });
+      }
+      return false;
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _sendCode() async {
+    final ok = await _run((c) => c.requestOtp(_phone.text, OtpPurpose.register));
+    if (!ok || !mounted) return;
+    setState(() {
+      _codeSent = true;
+      _resendIn = _resendAfter;
+    });
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted || _resendIn <= 0) {
+        t.cancel();
+      } else {
+        setState(() => _resendIn--);
+      }
+    });
+  }
+
+  void _fail(String message) => setState(() => _error = message);
+
+  Future<void> _next() async {
+    if (_signedIn) return _saveTemplate();
+    if (_step == 1) {
+      if (!_codeSent) return _sendCode();
+      if (_otp.text.length != 6) return _fail('SMS ကုဒ် ၆ လုံး ထည့်ပါ။');
+    }
+    if (_step == 2 && _shopName.text.trim().isEmpty) return _fail('ဆိုင်အမည် ထည့်ပါ။');
+    if (_step < 4) {
+      setState(() {
+        _step++;
+        _error = null;
+      });
+      return;
+    }
+    if (_pin.length != 6) return _fail(AuthMessages.badPin);
+    // Success: the auth status becomes unlocked and the router opens the app.
+    await _run((c) => c.register(
+          rawPhone: _phone.text,
+          otp: _otp.text,
+          shopName: _shopName.text,
+          templateId: _type,
+          pin: _pin,
+        ));
+  }
+
+  /// Settings → change shop type: applies the template's feature flags.
+  void _saveTemplate() {
     ref.read(shopTemplateProvider.notifier).select(_type);
-    ref.read(sessionProvider.notifier).setShopName(_shopName.text);
-    context.go(Routes.dashboard);
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(Routes.dashboard);
+    }
+  }
+
+  String get _buttonLabel {
+    if (_signedIn) return 'သိမ်းမယ်';
+    if (_busy) return 'ခဏစောင့်ပါ…';
+    if (_step == 1 && !_codeSent) return 'ကုဒ်ပို့မယ်';
+    return _step < 4 ? 'ဆက်သွားမယ်' : 'ဆိုင်ဖွင့်မယ်';
   }
 
   @override
@@ -87,7 +187,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 AppIconButton(icon: AppIcons.back, onPressed: _back, semanticLabel: 'နောက်သို့'),
                 const SizedBox(width: 12),
-                Expanded(child: Text('အဆင့် $_step / 4', style: AppText.s(14, color: AppColors.muted))),
+                Expanded(
+                  child: Text(_signedIn ? 'ဆိုင်အမျိုးအစား ပြောင်းမယ်' : 'အဆင့် $_step / 4',
+                      style: AppText.s(14, color: AppColors.muted)),
+                ),
               ],
             ),
           ),
@@ -114,9 +217,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 20),
               child: switch (_step) {
-                1 => _StepPhone(phone: _phone),
+                1 => _StepPhone(
+                    phone: _phone,
+                    otp: _otp,
+                    codeSent: _codeSent,
+                    resendIn: _resendIn,
+                    onResend: _busy ? null : _sendCode,
+                  ),
                 2 => _StepShopType(
-                    shopName: _shopName,
+                    shopName: _signedIn ? null : _shopName,
                     selected: _type,
                     onPick: (t) => setState(() {
                       _type = t.id;
@@ -143,9 +252,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           Padding(
             padding: EdgeInsets.fromLTRB(20, 0, 20, 28 + bottom),
-            child: _step < 4
-                ? PrimaryButton(label: 'ဆက်သွားမယ်', onPressed: () => setState(() => _step++))
-                : PrimaryButton(label: 'ဆိုင်ဖွင့်မယ်', onPressed: _finish),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_error != null) ...[AuthMessage(_error!), const SizedBox(height: 12)],
+                PrimaryButton(label: _buttonLabel, onPressed: _busy ? null : _next),
+              ],
+            ),
           ),
         ],
       ),
@@ -177,41 +291,44 @@ class _StepTitle extends StatelessWidget {
 
 // ── Step 1: phone + OTP ────────────────────────────────────────────────────
 class _StepPhone extends StatefulWidget {
-  const _StepPhone({required this.phone});
+  const _StepPhone({
+    required this.phone,
+    required this.otp,
+    required this.codeSent,
+    required this.resendIn,
+    required this.onResend,
+  });
+
   final TextEditingController phone;
+  final TextEditingController otp;
+
+  /// The SMS code was requested: show the 6 code boxes.
+  final bool codeSent;
+
+  /// Seconds until "send again" is allowed.
+  final int resendIn;
+  final VoidCallback? onResend;
 
   @override
   State<_StepPhone> createState() => _StepPhoneState();
 }
 
 class _StepPhoneState extends State<_StepPhone> {
-  final _otp = TextEditingController();
   final _otpFocus = FocusNode();
-  Timer? _timer;
-  int _seconds = 42;
+
+  TextEditingController get _otp => widget.otp;
 
   @override
   void initState() {
     super.initState();
-    _startTimer();
-    _otp.addListener(() => setState(() {}));
+    _otp.addListener(_changed);
   }
 
-  void _startTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (_seconds <= 0) {
-        t.cancel();
-      } else {
-        setState(() => _seconds--);
-      }
-    });
-  }
+  void _changed() => setState(() {});
 
   @override
   void dispose() {
-    _timer?.cancel();
-    _otp.dispose();
+    _otp.removeListener(_changed);
     _otpFocus.dispose();
     super.dispose();
   }
@@ -219,7 +336,8 @@ class _StepPhoneState extends State<_StepPhone> {
   @override
   Widget build(BuildContext context) {
     final code = _otp.text;
-    final time = '${_seconds ~/ 60}:${(_seconds % 60).toString().padLeft(2, '0')}';
+    final s = widget.resendIn;
+    final time = '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
       child: Column(
@@ -228,6 +346,13 @@ class _StepPhoneState extends State<_StepPhone> {
           const _StepTitle('ဖုန်းနံပါတ် အတည်ပြုမယ်', 'SMS နဲ့ ကုဒ် ၆ လုံး ပို့ပေးပါမယ်'),
           const SizedBox(height: 18),
           LabeledField(label: 'ဖုန်းနံပါတ်', child: PhoneField(controller: widget.phone)),
+          if (widget.codeSent) ..._codeBoxes(code, time),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _codeBoxes(String code, String time) => [
           const SizedBox(height: 18),
           Text('အတည်ပြုကုဒ်', style: AppText.s(14, weight: AppText.w600)),
           const SizedBox(height: 6),
@@ -286,34 +411,28 @@ class _StepPhoneState extends State<_StepPhone> {
             children: [
               Text('ကုဒ်မရဘူးလား? ', style: AppText.s(13, color: AppColors.muted)),
               InkWell(
-                onTap: _seconds == 0
-                    ? () => setState(() {
-                          _seconds = 42;
-                          _startTimer();
-                        })
-                    : null,
-                child: Text('ပြန်ပို့မယ် ($time)',
+                onTap: widget.resendIn == 0 ? widget.onResend : null,
+                child: Text(widget.resendIn == 0 ? 'ပြန်ပို့မယ်' : 'ပြန်ပို့မယ် ($time)',
                     style: AppText.s(13, weight: AppText.w600, color: AppColors.primary)),
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
+        ];
 }
 
 // ── Step 2: shop type ──────────────────────────────────────────────────────
 class _StepShopType extends StatelessWidget {
   const _StepShopType({required this.shopName, required this.selected, required this.onPick});
 
-  final TextEditingController shopName;
+  /// null = no name field (changing the template of an existing shop).
+  final TextEditingController? shopName;
   final String selected;
   final ValueChanged<ShopTemplate> onPick;
 
   @override
   Widget build(BuildContext context) {
     const all = ShopTemplate.all;
+    final name = shopName;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Column(
@@ -322,10 +441,12 @@ class _StepShopType extends StatelessWidget {
           const _StepTitle('ဘယ်လိုဆိုင်လဲ?', 'ရွေးလိုက်တာနဲ့ ဆိုင်နဲ့ကိုက်တဲ့ feature တွေ အလိုအလျောက် ဖွင့်ပေးမယ်',
               size: 22, subSize: 13, gap: 2),
           const SizedBox(height: 14),
-          FieldLabel('ဆိုင်အမည်', size: 13),
-          const SizedBox(height: 6),
-          AppInput(controller: shopName, height: 46, semanticLabel: 'ဆိုင်အမည်'),
-          const SizedBox(height: 14),
+          if (name != null) ...[
+            FieldLabel('ဆိုင်အမည်', size: 13),
+            const SizedBox(height: 6),
+            AppInput(controller: name, height: 46, semanticLabel: 'ဆိုင်အမည်'),
+            const SizedBox(height: 14),
+          ],
           for (var r = 0; r < all.length; r += 2) ...[
             if (r > 0) const SizedBox(height: 8),
             IntrinsicHeight(

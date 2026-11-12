@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../features/auth/data/session.dart';
 import '../data/unit_of_work.dart';
 
 /// Stored feature flags of the tenant (server table tenantFeatures). Keys are
@@ -28,7 +27,5 @@ class FeatureService {
       values.isEmpty ? Future.value() : uow.run(UnitKind.setFeatures, () => features.setAll(values));
 }
 
-final featureServiceProvider = Provider<FeatureService>((ref) {
-  ref.watch(tenantIdProvider);
-  return FeatureService(uow: ref.read(unitOfWorkProvider), features: ref.read(featureRepositoryProvider));
-});
+final featureServiceProvider = Provider<FeatureService>(
+    (ref) => FeatureService(uow: ref.watch(unitOfWorkProvider), features: ref.watch(featureRepositoryProvider)));

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
+import '../../features/auth/presentation/unlock_screen.dart';
 import '../../features/customers/presentation/add_customer_screen.dart';
 import '../../features/customers/presentation/customers_screen.dart';
 import '../../features/customers/presentation/debt_screen.dart';
@@ -22,12 +24,32 @@ import 'routes.dart';
 
 final _rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
+/// Where [status] allows [location] to go; null = stay.
+/// Signed out → Login/Register only. Locked → PIN unlock only. Unlocked →
+/// the app (Register stays reachable for changing the shop template).
+String? authRedirect(AuthStatus status, String location) {
+  final public = location == Routes.login || location == Routes.register;
+  return switch (status) {
+    AuthStatus.signedOut => public ? null : Routes.login,
+    AuthStatus.locked => location == Routes.unlock ? null : Routes.unlock,
+    AuthStatus.unlocked => location == Routes.login || location == Routes.unlock ? Routes.dashboard : null,
+  };
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
+  // Re-run the redirect whenever the auth status changes.
+  final status = ValueNotifier(ref.read(authControllerProvider).status);
+  ref.listen(authControllerProvider, (_, next) => status.value = next.status);
+  ref.onDispose(status.dispose);
+
   return GoRouter(
     navigatorKey: _rootKey,
-    initialLocation: Routes.login,
+    initialLocation: Routes.dashboard,
+    refreshListenable: status,
+    redirect: (_, s) => authRedirect(status.value, s.matchedLocation),
     routes: [
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
+      GoRoute(path: Routes.unlock, builder: (_, _) => const UnlockScreen()),
       GoRoute(
         path: Routes.register,
         builder: (_, s) => RegisterScreen(

@@ -59,7 +59,7 @@ class CustomerService {
 }
 
 final customerServiceProvider = Provider<CustomerService>((ref) => CustomerService(
-      uow: ref.read(unitOfWorkProvider),
-      customers: ref.read(customerRepositoryProvider),
-      debt: ref.read(debtRepositoryProvider),
+      uow: ref.watch(unitOfWorkProvider),
+      customers: ref.watch(customerRepositoryProvider),
+      debt: ref.watch(debtRepositoryProvider),
     ));

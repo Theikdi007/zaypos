@@ -3,15 +3,16 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/auth/data/session.dart';
 import 'feature_repository.dart';
 import 'shop_template.dart';
 import 'tenant_features.dart';
 
-/// Current shop template (set at registration; changeable from Settings).
-/// Selecting a template reseeds the tenant's feature flags.
+/// Current shop template: the signed-in shop's (from registration), changeable
+/// from Settings. Selecting a template reseeds the tenant's feature flags.
 class ShopTemplateNotifier extends Notifier<ShopTemplate> {
   @override
-  ShopTemplate build() => ShopTemplate.byId('grocery');
+  ShopTemplate build() => ShopTemplate.byId(ref.watch(sessionProvider.select((s) => s.templateId)));
 
   void select(String id) {
     state = ShopTemplate.byId(id);
@@ -32,7 +33,8 @@ class TenantFeaturesNotifier extends Notifier<TenantFeatures> {
 
   @override
   TenantFeatures build() {
-    final sub = ref.read(featureRepositoryProvider).watchAll().listen((stored) {
+    // Watching the repository rebuilds the flags when the shop changes (sign-in).
+    final sub = ref.watch(featureRepositoryProvider).watchAll().listen((stored) {
       if (_saving == 0 && stored.isNotEmpty) state = _overlay(ref.read(shopTemplateProvider).features, stored);
     });
     ref.onDispose(sub.cancel);

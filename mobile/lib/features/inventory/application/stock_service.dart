@@ -68,7 +68,7 @@ class StockService {
 }
 
 final stockServiceProvider = Provider<StockService>((ref) => StockService(
-      uow: ref.read(unitOfWorkProvider),
-      tenantId: ref.read(tenantIdProvider),
-      stock: ref.read(stockRepositoryProvider),
+      uow: ref.watch(unitOfWorkProvider),
+      tenantId: ref.watch(tenantIdProvider),
+      stock: ref.watch(stockRepositoryProvider),
     ));

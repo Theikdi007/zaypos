@@ -27,6 +27,8 @@ class _FailingDebtRepository implements DebtRepository {
   @override
   Stream<List<DebtEntry>> watchAll() => Stream.value(const []);
   @override
+  Stream<Map<String, int>> watchBalances() => Stream.value(const {});
+  @override
   Future<void> add(DebtEntry entry) async => throw StateError('disk full');
 }
 
