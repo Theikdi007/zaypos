@@ -31,3 +31,23 @@ database; every write is one unit of work recorded in the outbox
 - Debug builds only: "Demo ဆိုင်" on the Login screen opens the design's sample
   shop (never synced). Seeding throws in release builds and is never called there.
 - Live auth test against a running backend: see `test/live_api_test.dart`.
+
+## Run on a phone over Wi-Fi (debug)
+
+Debug builds may use plain HTTP to the Mac; release builds are HTTPS only.
+
+- iOS: the "Debug Local Network" build phase (`ios/scripts/debug_local_network.sh`)
+  adds `NSAllowsLocalNetworking` and `NSLocalNetworkUsageDescription` to the
+  built Info.plist of Debug builds only.
+- Android: `src/debug/res/xml/network_security_config.xml` (debug source set only)
+  allows cleartext.
+
+```sh
+# Mac, terminal 1 — API on every interface (OTP codes are printed here)
+cd backend && dotnet run --project src/ZayPOS.Api --urls http://0.0.0.0:5076
+
+# Mac, terminal 2 — app on the phone, pointed at the Mac's Wi-Fi IP
+cd mobile && flutter run -d <device-id> --dart-define=API_BASE_URL=http://$(ipconfig getifaddr en0):5076
+```
+
+Emulators: iOS simulator `http://localhost:5076`, Android emulator `http://10.0.2.2:5076`.

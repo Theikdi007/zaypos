@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DEBUG BUILDS ONLY (this file lives in src/debug): allow plain HTTP to the dev
+  API (docs/mobile/phase3-sync.md §8):
+    - Android emulator: http://10.0.2.2:5076
+    - phone on the same Wi-Fi: http://<Mac LAN IP>:5076
+  The LAN IP changes between networks, so cleartext is allowed for any host
+  here. Release and profile builds have no such config: HTTPS only.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
