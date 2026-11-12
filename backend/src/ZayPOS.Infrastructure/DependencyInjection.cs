@@ -5,8 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ZayPOS.Application.Abstractions;
 using ZayPOS.Application.Auth;
+using ZayPOS.Application.Sync;
 using ZayPOS.Infrastructure.Auth;
 using ZayPOS.Infrastructure.Persistence;
+using ZayPOS.Infrastructure.Sync;
 
 namespace ZayPOS.Infrastructure;
 
@@ -26,6 +28,11 @@ public static class DependencyInjection
                 $"Jwt:SigningKey must be at least {JwtOptions.MinKeyBytes} bytes. In development run: " +
                 "dotnet user-secrets set Jwt:SigningKey \"$(openssl rand -base64 48)\" --project src/ZayPOS.Api")
             .ValidateOnStart();
+
+        services.AddScoped<IAppDb>(sp => sp.GetRequiredService<ZayPosDbContext>());
+        services.AddSingleton<IDbErrors, SqlServerDbErrors>();
+        services.AddScoped<SyncPushService>();
+        services.AddScoped<ISyncPull, SyncPullService>();
 
         services.TryAddSingleton(TimeProvider.System);
         services.AddScoped<IAuthRepository, AuthRepository>();

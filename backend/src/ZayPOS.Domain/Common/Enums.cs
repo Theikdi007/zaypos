@@ -34,4 +34,6 @@ public enum SyncIssueKind
     CreditLimitExceeded,
     ClockSkew,
     TotalMismatch,
+    /// <summary>Not in README §3.4: a sale's receipt number already existed (reinstall reused a device code).</summary>
+    DuplicateReceiptNo,
 }

@@ -1,3 +1,4 @@
+using ZayPOS.Application.Abstractions;
 using ZayPOS.Domain.Common;
 
 namespace ZayPOS.Application.Auth;
@@ -34,11 +35,8 @@ public sealed record AuthDevice(Guid Id, string Code, int LastSeq);
 
 /// <summary>An auth failure that maps 1:1 to a ProblemDetails response.</summary>
 public sealed class AuthException(int status, string code, string detail, TimeSpan? retryAfter = null)
-    : Exception(detail)
+    : ApiException(status, code, detail, retryAfter)
 {
-    public int Status { get; } = status;
-    public string Code { get; } = code;
-    public TimeSpan? RetryAfter { get; } = retryAfter;
 
     public static AuthException Validation(string detail) => new(400, "validation", detail);
     public static AuthException OtpInvalid() => new(400, "otp_invalid", "The code is wrong or has expired.");

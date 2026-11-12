@@ -6,15 +6,21 @@ public interface ITenantOwned
     Guid TenantId { get; }
 }
 
+/// <summary>A row with a rowversion: the sync pull cursor.</summary>
+public interface IVersioned
+{
+    byte[] Version { get; }
+}
+
 /// <summary>
 /// A synced row: client-generated Id, UTC timestamps, soft delete and the
 /// rowversion pull cursor.
 /// </summary>
-public interface ISyncedRow : ITenantOwned
+public interface ISyncedRow : ITenantOwned, IVersioned
 {
-    Guid Id { get; }
-    DateTime CreatedAt { get; }
-    DateTime UpdatedAt { get; }
-    DateTime? DeletedAt { get; }
-    byte[] Version { get; }
+    Guid Id { get; set; }
+    new Guid TenantId { get; set; }
+    DateTime CreatedAt { get; set; }
+    DateTime UpdatedAt { get; set; }
+    DateTime? DeletedAt { get; set; }
 }

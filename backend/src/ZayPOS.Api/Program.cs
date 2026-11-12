@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using ZayPOS.Api;
 using ZayPOS.Api.Auth;
 using ZayPOS.Api.Endpoints;
 using ZayPOS.Application.Abstractions;
@@ -18,7 +19,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.ConfigureHttpJsonOptions(o =>
     o.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
 builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<AuthExceptionHandler>();
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -63,6 +64,7 @@ app.UseRateLimiter();
 
 app.MapGet("/api/v1/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
+app.MapSyncEndpoints();
 
 app.Run();
 

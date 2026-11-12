@@ -3,7 +3,7 @@ using ZayPOS.Domain.Common;
 namespace ZayPOS.Domain.Tenancy;
 
 /// <summary>A shop. Dart <c>ShopSession</c> + template id.</summary>
-public class Tenant
+public class Tenant : IVersioned
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = "";
@@ -21,7 +21,7 @@ public class Tenant
 }
 
 /// <summary>One Dart <c>TenantFeatures</c> field as a key/value row.</summary>
-public class TenantFeature : ITenantOwned
+public class TenantFeature : ITenantOwned, IVersioned
 {
     public Guid TenantId { get; set; }
     /// <summary>Dart field name: quickSale, stock, presetCatalog, expiryBatch, serialWarranty, variants, decimalQty, quotation, serviceItems.</summary>

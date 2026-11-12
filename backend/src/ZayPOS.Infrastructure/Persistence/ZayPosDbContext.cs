@@ -16,7 +16,7 @@ using ZayPOS.Domain.Tenancy;
 namespace ZayPOS.Infrastructure.Persistence;
 
 public class ZayPosDbContext(DbContextOptions<ZayPosDbContext> options, ICurrentTenant currentTenant)
-    : DbContext(options)
+    : DbContext(options), IAppDb
 {
     /// <summary>Read by the global query filters; EF re-evaluates it per query.</summary>
     public Guid? CurrentTenantId => currentTenant.TenantId;

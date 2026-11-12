@@ -1,18 +1,18 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using ZayPOS.Application.Auth;
+using ZayPOS.Application.Abstractions;
 
-namespace ZayPOS.Api.Auth;
+namespace ZayPOS.Api;
 
-/// <summary>Turns <see cref="AuthException"/> and bad JSON into ProblemDetails with a stable "code".</summary>
-public sealed class AuthExceptionHandler(IProblemDetailsService problems) : IExceptionHandler
+/// <summary>Turns <see cref="ApiException"/> and bad JSON into ProblemDetails with a stable "code".</summary>
+public sealed class ApiExceptionHandler(IProblemDetailsService problems) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext http, Exception exception, CancellationToken ct)
     {
         var (status, code, detail, retryAfter) = exception switch
         {
-            AuthException a => (a.Status, a.Code, a.Message, a.RetryAfter),
+            ApiException a => (a.Status, a.Code, a.Message, a.RetryAfter),
             BadHttpRequestException b => (400, "validation", b.Message, (TimeSpan?)null),
             _ => (0, "", "", null),
         };

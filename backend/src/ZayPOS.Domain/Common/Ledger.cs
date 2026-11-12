@@ -17,6 +17,15 @@ public static class Ledger
             : -((-p + QtyScale / 2) / QtyScale);
     }
 
+    /// <summary>2500 → "2.5", 3000 → "3", -1500 → "-1.5". Same as Dart <c>Qty.format</c>.</summary>
+    public static string FormatQty(long milli)
+    {
+        var abs = Math.Abs(milli);
+        var frac = (abs % QtyScale).ToString("D3").TrimEnd('0');
+        var s = frac.Length == 0 ? $"{abs / QtyScale}" : $"{abs / QtyScale}.{frac}";
+        return milli < 0 ? "-" + s : s;
+    }
+
     /// <summary>Signed effect of a debt entry on the customer balance. Same as Dart <c>DebtEntry.effect</c>.</summary>
     public static long DebtEffect(DebtEntryType type, long amount) => type switch
     {
