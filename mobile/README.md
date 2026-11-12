@@ -1,17 +1,19 @@
 # zaypos_app
 
-A new Flutter project.
+ZayPOS Flutter app. Offline-first: screens read only the local Drift (SQLite)
+database; every write is one unit of work recorded in the outbox
+(see `docs/mobile/phase3-sync.md`).
 
-## Getting Started
+## Local database (Drift)
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Schema: `lib/core/db/app_database.dart` (schemaVersion 1). Generated code
+  (`app_database.g.dart`) is committed; after changing tables run
+  `dart run build_runner build`.
+- Schema change: bump `schemaVersion`, then `dart run drift_dev make-migrations`
+  (snapshots live in `drift_schemas/`) and add the step in `onUpgrade`.
+- Composition root: `lib/app/drift_overrides.dart`. The fake repositories in
+  `lib/app/fake_*.dart` / `*/data/fake_*.dart` are for tests only
+  (`test/helpers.dart`); Drift tests use an in-memory database
+  (`test/drift_helpers.dart`).
+- Debug builds seed the design's sample shop into a brand-new database
+  (`lib/app/local_bootstrap.dart`) until sign-in lands (Phase 3 step 2).

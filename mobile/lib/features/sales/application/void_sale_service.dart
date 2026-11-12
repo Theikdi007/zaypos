@@ -35,7 +35,7 @@ class VoidSaleService {
     if (sale == null) throw StateError('Unknown sale $saleId');
     if (sale.voided == voided) return;
 
-    await uow.run(() async {
+    await uow.run(UnitKind.voidSale, () async {
       await sales.setVoided(sale.id, voided);
       await stock.addAll(voided
           ? movementsForSale(sale, StockMovementType.voidReturn, sign: 1)

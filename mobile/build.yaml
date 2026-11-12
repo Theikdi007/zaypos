@@ -1,0 +1,10 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          # SQL column names = Dart names = /sync JSON names (camelCase).
+          case_from_dart_to_sql: preserve
+          databases:
+            app: lib/core/db/app_database.dart
+          schema_dir: drift_schemas/

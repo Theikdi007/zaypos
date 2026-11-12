@@ -9,7 +9,7 @@ import '../features/products/domain/product.dart';
 import '../features/products/domain/product_modules.dart';
 import '../features/sales/domain/sale.dart';
 
-enum FakeTable { products, variants, batches, serials, stock, sales, customers, debt, devices }
+enum FakeTable { products, variants, batches, serials, stock, sales, customers, debt, devices, features }
 
 /// In-memory stand-in for the local (Drift) database: one object holding
 /// every table, so a transaction can cover writes from several
@@ -29,6 +29,7 @@ class FakeDatabase {
   final customers = <Customer>[];
   final debt = <DebtEntry>[];
   final devices = <Device>[];
+  final features = <String, bool>{};
 
   int _depth = 0;
   final _changes = StreamController<Set<FakeTable>>.broadcast();
@@ -83,6 +84,12 @@ class FakeDatabase {
       _snapshot(customers),
       _snapshot(debt),
       _snapshot(devices),
+      () {
+        final copy = Map.of(features);
+        return () => features
+          ..clear()
+          ..addAll(copy);
+      }(),
     ];
     _depth++;
     try {
@@ -108,6 +115,12 @@ class FakeUnitOfWork implements UnitOfWork {
   FakeUnitOfWork(this.db);
   final FakeDatabase db;
 
+  /// Kinds of the units run so far (tests check services pass the right one).
+  final kinds = <UnitKind>[];
+
   @override
-  Future<T> run<T>(Future<T> Function() body) => db.transaction(body);
+  Future<T> run<T>(UnitKind kind, Future<T> Function() body) {
+    kinds.add(kind);
+    return db.transaction(body);
+  }
 }

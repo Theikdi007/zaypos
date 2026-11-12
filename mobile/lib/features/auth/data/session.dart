@@ -2,7 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/ids.dart';
 
-/// Signed-in shop session (fake).
+/// Signed-in shop session. Step 1: the local tenant from the database
+/// bootstrap (lib/app/local_bootstrap.dart); Step 2 fills it from sign-in.
 class ShopSession {
   const ShopSession({required this.tenantId, required this.shopName, required this.startedAt});
 
@@ -18,8 +19,17 @@ class ShopSession {
 }
 
 class SessionNotifier extends Notifier<ShopSession> {
+  SessionNotifier({this.tenantId, this.shopName});
+
+  /// Initial values (composition root); null = a fresh in-memory tenant (tests).
+  final String? tenantId;
+  final String? shopName;
+
+  static const defaultShopName = 'ရွှေဝါ ကုန်စုံဆိုင်';
+
   @override
-  ShopSession build() => ShopSession(tenantId: newId(), shopName: 'ရွှေဝါ ကုန်စုံဆိုင်', startedAt: nowUtc());
+  ShopSession build() =>
+      ShopSession(tenantId: tenantId ?? newId(), shopName: shopName ?? defaultShopName, startedAt: nowUtc());
 
   void setShopName(String name) {
     if (name.trim().isNotEmpty) state = state.copyWith(shopName: name.trim());

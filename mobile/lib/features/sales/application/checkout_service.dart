@@ -82,7 +82,7 @@ class CheckoutService {
       customerName = match.name;
     }
 
-    return uow.run(() async {
+    return uow.run(UnitKind.checkout, () async {
       final id = newId();
       final t = nowUtc();
       final lines = [

@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 
 import '../core/data/unit_of_work.dart';
+import '../core/features/fake_feature_repository.dart';
+import '../core/features/feature_repository.dart';
 import '../features/auth/data/session.dart';
 import '../features/customers/data/customer_repository.dart';
 import '../features/customers/data/debt_repository.dart';
@@ -30,9 +32,9 @@ FakeDatabase seedFakeDatabase(String tenantId) => FakeDatabase()
 
 final fakeDatabaseProvider = Provider<FakeDatabase>((ref) => seedFakeDatabase(ref.read(tenantIdProvider)));
 
-/// Composition root: binds every repository interface (and the unit of
-/// work) to the fake database. Swap these for Drift/API implementations
-/// later — nothing else changes.
+/// TESTS ONLY: binds every repository interface (and the unit of work) to the
+/// in-memory fake database. The app's composition root is
+/// lib/app/drift_overrides.dart.
 final List<Override> fakeRepositoryOverrides = [
   unitOfWorkProvider.overrideWith((ref) => FakeUnitOfWork(ref.read(fakeDatabaseProvider))),
   productRepositoryProvider.overrideWith((ref) => FakeProductRepository(ref.read(fakeDatabaseProvider))),
@@ -45,4 +47,5 @@ final List<Override> fakeRepositoryOverrides = [
     return FakeDeviceRepository(db, deviceId: db.devices.first.id);
   }),
   reportRepositoryProvider.overrideWith((ref) => FakeReportRepository(ref.read(fakeDatabaseProvider))),
+  featureRepositoryProvider.overrideWith((ref) => FakeFeatureRepository(ref.read(fakeDatabaseProvider))),
 ];

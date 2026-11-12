@@ -26,7 +26,7 @@ class ProductService {
     for (final m in initialStock) {
       if (m.productId != product.id) throw ArgumentError('Movement for another product');
     }
-    return uow.run(() async {
+    return uow.run(UnitKind.upsertProduct, () async {
       await products.add(product, variants: variants, batches: batches, serials: serials);
       await stock.addAll(initialStock);
     });
