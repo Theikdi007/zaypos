@@ -11,7 +11,11 @@ import '../../../core/theme/app_text.dart';
 import '../../../core/utils/myanmar.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/app_switch_tile.dart';
+import '../../../core/sync/sync_providers.dart';
+import '../../../core/sync/sync_store.dart';
+import '../../../core/widgets/card_list_tile.dart';
 import '../../../core/widgets/common.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../../auth/application/auth_controller.dart';
 import '../domain/ui_prefs.dart';
 
@@ -21,6 +25,64 @@ class _Module {
   final String title;
   final String desc;
   final bool soon;
+}
+
+/// Settings → Sync (§7): last sync, waiting units, sync now, "စစ်ရန် (n)".
+class _SyncSection extends ConsumerWidget {
+  const _SyncSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final engine = ref.watch(syncEngineProvider);
+    final snap = ref.watch(syncSnapshotProvider).value ?? engine.snapshot;
+    if (!snap.enabled) {
+      return AppCard(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text('Demo ဆိုင်ကို server နဲ့ sync မလုပ်ပါ။', style: AppText.s(13, color: AppColors.muted)),
+        ),
+      );
+    }
+    final counts = ref.watch(outboxCountsProvider).value ?? const OutboxCounts();
+    final review = counts.rejected + (ref.watch(openIssuesProvider).value?.length ?? 0);
+    final last = snap.lastSyncAt;
+    final now = DateTime.now();
+    return AppCard(
+      child: DividedColumn(children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                last == null ? 'နောက်ဆုံး sync: မလုပ်ရသေးပါ' : 'နောက်ဆုံး sync: ${dayLabel(last, now)} ${timeLabel(last)}',
+                style: AppText.s(14, weight: AppText.w600),
+              ),
+              const SizedBox(height: 2),
+              Text('ပို့ရန်စောင့်: ${mmDigits(counts.pending)} ခု', style: AppText.s(13, color: AppColors.muted)),
+              if (snap.lastError != null) ...[
+                const SizedBox(height: 4),
+                Text(snap.lastError!, style: AppText.s(12, color: AppColors.dangerInk)),
+              ],
+              const SizedBox(height: 10),
+              PrimaryButton(
+                label: snap.running ? 'sync လုပ်နေသည်…' : 'ယခု sync လုပ်မယ်',
+                height: 44,
+                fontSize: 14,
+                onPressed: snap.running ? null : () => engine.syncNow(manual: true),
+              ),
+            ],
+          ),
+        ),
+        CardListTile(
+          title: Text('စစ်ရန် (${mmDigits(review)})',
+              style: AppText.s(14, weight: AppText.w600, color: review > 0 ? AppColors.dangerInk : AppColors.text)),
+          trailing: const AppIcon(AppIcons.chevronRight, size: 18, color: AppColors.subtle),
+          onTap: () => context.push(Routes.syncReview),
+        ),
+      ]),
+    );
+  }
 }
 
 class SettingsFeaturesScreen extends ConsumerWidget {
@@ -158,9 +220,11 @@ class SettingsFeaturesScreen extends ConsumerWidget {
                     style: AppText.s(12, color: AppColors.muted),
                   ),
                 ),
+                section('Sync'),
+                const _SyncSection(),
                 section('အကောင့်'),
                 AppCard(
-                  child: ListTile(
+                  child: CardListTile(
                     title: Text('ထွက်မယ်', style: AppText.s(14, weight: AppText.w600, color: AppColors.danger)),
                     subtitle: Text('ဒီဖုန်းထဲက စာရင်းတွေ မပျက်ပါ။ ပြန်ဝင်ရင် ဆက်သုံးလို့ရပါတယ်။',
                         style: AppText.s(12, color: AppColors.muted)),

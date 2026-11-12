@@ -50,8 +50,10 @@ Future<(ProviderContainer, TestShop)> driftContainer(
   AppDatabase db, {
   bool seed = true,
   List<Override> overrides = const [],
+  MemorySecureStore? store,
 }) async {
-  final store = MemorySecureStore();
+  // Same database + same secure store = same install (same device id).
+  store ??= MemorySecureStore();
   final boot = await bootstrap(db, store);
   final local = LocalData(db);
   var owner = await local.owner();

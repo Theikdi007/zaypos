@@ -7,6 +7,8 @@ import 'package:zaypos_app/core/api/api_error.dart';
 import 'package:zaypos_app/core/db/app_database.dart';
 import 'package:zaypos_app/core/db/database_provider.dart';
 import 'package:zaypos_app/core/storage/secure_store.dart';
+import 'package:zaypos_app/core/sync/sync_providers.dart';
+import 'package:zaypos_app/features/sync/presentation/first_sync_screen.dart';
 import 'package:zaypos_app/core/utils/ids.dart';
 import 'package:zaypos_app/features/auth/application/auth_controller.dart';
 import 'package:zaypos_app/features/auth/data/auth_api.dart';
@@ -54,11 +56,17 @@ void main() {
     return c;
   }
 
-  /// Lets Drift (real futures) finish, then settles the UI.
-  Future<void> settle(WidgetTester tester) async {
+  /// Lets Drift (real futures) finish, then settles the UI. [animating]: a
+  /// screen with an endless progress bar (first download) never settles, so
+  /// pump frames instead.
+  Future<void> settle(WidgetTester tester, {bool animating = false}) async {
     for (var i = 0; i < 5; i++) {
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
-      await tester.pumpAndSettle();
+      if (animating) {
+        await tester.pump(const Duration(milliseconds: 100));
+      } else {
+        await tester.pumpAndSettle();
+      }
     }
   }
 
@@ -66,17 +74,22 @@ void main() {
   /// phone, code; step 2: shop name).
   Finder input(int i) => find.byType(EditableText).at(i);
 
-  testWidgets('signed out: the app opens on Login; login opens the dashboard', (tester) async {
+  testWidgets('signed out → Login; a first login downloads the shop, then opens the dashboard', (tester) async {
     final c = await boot(tester);
     expect(find.byType(LoginScreen), findsOneWidget);
 
     await tester.enterText(input(0), '9 7123 4567');
     await tester.enterText(input(1), '123456');
     await tester.tap(find.text('ဝင်မယ်'));
-    await settle(tester);
+    await settle(tester, animating: true);
 
     expect(api.calls, ['login:+95971234567']);
     expect(c.read(authControllerProvider).status, AuthStatus.unlocked);
+    expect(find.byType(FirstSyncScreen), findsOneWidget, reason: 'an empty phone downloads the shop first (§5.4)');
+    expect(find.byType(DashboardScreen), findsNothing);
+
+    c.read(firstSyncDoneProvider.notifier).set(true); // what the engine does when the download completes
+    await settle(tester);
     expect(find.byType(DashboardScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -122,17 +135,18 @@ void main() {
       await tester.pump();
     }
     await tester.tap(find.text('ဆိုင်ဖွင့်မယ်'));
-    await settle(tester);
+    await settle(tester, animating: true);
 
     expect(api.calls.last, 'register:+95971234567:482913:မြဆေးဆိုင်:grocery');
     expect(c.read(authControllerProvider).status, AuthStatus.unlocked);
-    expect(find.byType(DashboardScreen), findsOneWidget);
+    expect(find.byType(FirstSyncScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('a stored session opens on the PIN pad; the right PIN opens the app', (tester) async {
+  testWidgets('a stored, downloaded session opens on the PIN pad; the right PIN opens the app', (tester) async {
     final hash = await const PinHasher(iterations: 10, useIsolate: false).hash('246810');
-    final c = await boot(tester, state: BootState(deviceId: newId(), session: testSession(newId(), pinHash: hash)));
+    final c = await boot(tester,
+        state: BootState(deviceId: newId(), session: testSession(newId(), pinHash: hash), initialSyncDone: true));
     store.values[SecureKeys.tenantId] = c.read(bootStateProvider).session!.tenantId;
     store.values[SecureKeys.refreshToken] = 'r';
     store.values[SecureKeys.pinHash] = hash;

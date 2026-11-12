@@ -19,37 +19,56 @@ import '../../features/sales/presentation/sale_detail_screen.dart';
 import '../../features/sales/presentation/sale_receipt_screen.dart';
 import '../../features/sales/presentation/sales_history_screen.dart';
 import '../../features/settings/presentation/settings_features_screen.dart';
+import '../../features/sync/presentation/first_sync_screen.dart';
+import '../../features/sync/presentation/rejected_unit_screen.dart';
+import '../../features/sync/presentation/sync_review_screen.dart';
+import '../sync/sync_providers.dart';
 import 'app_shell.dart';
 import 'routes.dart';
 
 final _rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 /// Where [status] allows [location] to go; null = stay.
-/// Signed out → Login/Register only. Locked → PIN unlock only. Unlocked →
-/// the app (Register stays reachable for changing the shop template).
-String? authRedirect(AuthStatus status, String location) {
+/// Signed out → Login/Register only. Locked → PIN unlock only. Unlocked but
+/// the shop not downloaded yet → the first-download screen only (§5.4).
+/// Unlocked → the app (Register stays reachable for changing the template).
+String? authRedirect(AuthStatus status, String location, {bool firstSyncDone = true}) {
   final public = location == Routes.login || location == Routes.register;
   return switch (status) {
     AuthStatus.signedOut => public ? null : Routes.login,
     AuthStatus.locked => location == Routes.unlock ? null : Routes.unlock,
-    AuthStatus.unlocked => location == Routes.login || location == Routes.unlock ? Routes.dashboard : null,
+    AuthStatus.unlocked when !firstSyncDone => location == Routes.firstSync ? null : Routes.firstSync,
+    AuthStatus.unlocked =>
+      location == Routes.login || location == Routes.unlock || location == Routes.firstSync ? Routes.dashboard : null,
   };
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  // Re-run the redirect whenever the auth status changes.
-  final status = ValueNotifier(ref.read(authControllerProvider).status);
-  ref.listen(authControllerProvider, (_, next) => status.value = next.status);
-  ref.onDispose(status.dispose);
+  // Re-run the redirect whenever the auth status or first-download state changes.
+  final gate = ValueNotifier((ref.read(authControllerProvider).status, ref.read(firstSyncDoneProvider)));
+  ref.listen(authControllerProvider, (_, next) => gate.value = (next.status, gate.value.$2));
+  ref.listen(firstSyncDoneProvider, (_, done) => gate.value = (gate.value.$1, done));
+  ref.onDispose(gate.dispose);
 
   return GoRouter(
     navigatorKey: _rootKey,
     initialLocation: Routes.dashboard,
-    refreshListenable: status,
-    redirect: (_, s) => authRedirect(status.value, s.matchedLocation),
+    refreshListenable: gate,
+    redirect: (_, s) => authRedirect(gate.value.$1, s.matchedLocation, firstSyncDone: gate.value.$2),
     routes: [
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
       GoRoute(path: Routes.unlock, builder: (_, _) => const UnlockScreen()),
+      GoRoute(path: Routes.firstSync, builder: (_, _) => const FirstSyncScreen()),
+      GoRoute(
+        path: Routes.syncReview,
+        builder: (_, _) => const SyncReviewScreen(),
+        routes: [
+          GoRoute(
+            path: 'unit/:seq',
+            builder: (_, s) => RejectedUnitScreen(seq: int.parse(s.pathParameters['seq']!)),
+          ),
+        ],
+      ),
       GoRoute(
         path: Routes.register,
         builder: (_, s) => RegisterScreen(

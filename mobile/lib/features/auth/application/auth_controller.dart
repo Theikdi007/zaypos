@@ -6,6 +6,8 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_config.dart';
 import '../../../core/api/api_error.dart';
 import '../../../core/db/local_data.dart';
+import '../../../core/sync/sync_providers.dart';
+import '../../../core/sync/sync_store.dart';
 import '../../../core/utils/ids.dart';
 import '../data/auth_api.dart';
 import '../data/boot_state.dart';
@@ -185,6 +187,8 @@ class AuthController extends Notifier<AuthState> {
     }
     final hash = await ref.read(pinHasherProvider).hash(pin);
     await _store.save(r, phone: phone, pinHash: hash);
+    // A replaced database needs its first full download before the app opens (§5.4).
+    ref.read(firstSyncDoneProvider.notifier).set(await _local.db.readState(SyncStateKeys.initialSyncDone) == 'true');
     ref.read(sessionProvider.notifier).set(ShopSession(
           tenantId: r.tenantId,
           shopName: r.tenantName,
@@ -262,6 +266,7 @@ class AuthController extends Notifier<AuthState> {
           startedAt: nowUtc(),
           isDemo: true,
         ));
+    ref.read(firstSyncDoneProvider.notifier).set(true); // the demo never downloads
     state = const AuthState(AuthStatus.unlocked);
   }
 }

@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import '../core/data/unit_of_work.dart';
 import '../core/features/fake_feature_repository.dart';
 import '../core/features/feature_repository.dart';
+import '../core/sync/sync_engine.dart';
+import '../core/sync/sync_providers.dart';
 import '../core/utils/ids.dart';
 import '../features/auth/data/boot_state.dart';
 import '../features/auth/data/session.dart';
@@ -54,6 +56,9 @@ List<Override> fakeOverrides({BootState? boot}) => [
   }),
   reportRepositoryProvider.overrideWith((ref) => FakeReportRepository(ref.read(fakeDatabaseProvider))),
   featureRepositoryProvider.overrideWith((ref) => FakeFeatureRepository(ref.read(fakeDatabaseProvider))),
+  // No server and no Drift outbox behind the fakes: sync is off.
+  syncEngineProvider.overrideWithValue(SyncEngine.disabled()),
+  connectivityProvider.overrideWithValue(const Stream<bool>.empty()),
 ];
 
 /// [fakeOverrides] opening unlocked (most tests).

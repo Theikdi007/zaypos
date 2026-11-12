@@ -4,15 +4,19 @@ import '../../../core/db/app_database.dart';
 import '../../../core/db/database_provider.dart';
 import '../../../core/db/local_data.dart';
 import '../../../core/storage/secure_store.dart';
+import '../../../core/sync/sync_store.dart';
 import '../../../core/utils/ids.dart';
 import 'session_store.dart';
 
 /// What the app knows at launch, before the first frame.
 class BootState {
-  const BootState({required this.deviceId, this.session, this.startUnlocked = false});
+  const BootState({required this.deviceId, this.session, this.startUnlocked = false, this.initialSyncDone = false});
 
   /// This install's device id (UUID v7, generated once per install).
   final String deviceId;
+
+  /// The local data already holds a full download of the session's shop (§5.4).
+  final bool initialSyncDone;
 
   /// The stored session, if any (the app then opens on the PIN unlock).
   final StoredSession? session;
@@ -43,7 +47,11 @@ Future<BootState> bootstrap(AppDatabase db, SecureStore store) async {
     await sessions.clear();
     session = null;
   }
-  return BootState(deviceId: deviceId, session: session);
+  return BootState(
+    deviceId: deviceId,
+    session: session,
+    initialSyncDone: await db.readState(SyncStateKeys.initialSyncDone) == 'true',
+  );
 }
 
 /// Bound in main.dart from [bootstrap]. Default (tests): a fresh install, signed out.

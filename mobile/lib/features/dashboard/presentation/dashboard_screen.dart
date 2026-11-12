@@ -8,11 +8,10 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text.dart';
 import '../../../core/utils/money_format.dart';
-import '../../../core/utils/myanmar.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/money_text.dart';
-import '../../../core/widgets/offline_sync_chip.dart';
+import '../../../core/sync/sync_providers.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../auth/data/session.dart';
@@ -20,6 +19,7 @@ import '../../customers/data/customer_providers.dart';
 import '../../products/data/product_providers.dart';
 import '../../sales/data/sales_providers.dart';
 import '../../sales/presentation/widgets/sale_row.dart';
+import '../../sync/presentation/sync_chip.dart';
 import '../domain/today_summary.dart';
 import '../../../core/widgets/async_view.dart';
 import '../../../core/utils/async_combine.dart';
@@ -57,7 +57,10 @@ class DashboardScreen extends ConsumerWidget {
       color: AppColors.ground,
       child: SafeArea(
         bottom: false,
-        child: ListView(
+        child: RefreshIndicator(
+          onRefresh: () => ref.read(syncEngineProvider).syncNow(manual: true),
+          child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.only(bottom: 20),
           children: [
             Padding(
@@ -74,8 +77,7 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  if (today.pendingSync > 0)
-                    OfflineSyncChip(label: 'Offline · sync ${mmDigits(today.pendingSync)} ခုစောင့်'),
+                  const SyncChip(),
                   AppIconButton(
                     icon: AppIcons.settings,
                     semanticLabel: 'Settings',
@@ -133,6 +135,7 @@ class DashboardScreen extends ConsumerWidget {
               child: DividedColumn(children: [for (final s in recent) SaleRow(sale: s)]),
             ),
           ],
+        ),
         ),
       ),
     );

@@ -67,7 +67,9 @@ Map<String, Object?> productWire(ProductRow r) => {
       'lowAlertMilli': r.lowAlertMilli,
       'warrantyMonths': r.warrantyMonths,
       'expiryAlertDays': r.expiryAlertDays,
-      'tint': r.tint,
+      // ARGB 0xFFxxxxxx locally; the server column is a signed 32-bit int
+      // (the same bits). See WireDecoder.product for the way back.
+      'tint': r.tint.toSigned(32),
       'initial': r.initial,
     };
 

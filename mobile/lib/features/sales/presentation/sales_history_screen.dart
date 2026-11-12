@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/routes.dart';
+import '../../../core/sync/sync_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text.dart';
 import '../../../core/utils/myanmar.dart';
@@ -68,16 +69,20 @@ class _SalesHistoryScreenState extends ConsumerState<SalesHistoryScreen> {
             ],
           ),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.only(top: 12, bottom: 20),
-              children: [
-                AppCard(
-                  child: DividedColumn(children: [
-                    for (final s in sales)
-                      SaleRow(sale: s, detailed: true, onTap: () => context.push(Routes.sale(s.id))),
-                  ]),
-                ),
-              ],
+            child: RefreshIndicator(
+              onRefresh: () => ref.read(syncEngineProvider).syncNow(manual: true),
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.only(top: 12, bottom: 20),
+                children: [
+                  AppCard(
+                    child: DividedColumn(children: [
+                      for (final s in sales)
+                        SaleRow(sale: s, detailed: true, onTap: () => context.push(Routes.sale(s.id))),
+                    ]),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

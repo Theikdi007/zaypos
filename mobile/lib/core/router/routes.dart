@@ -2,6 +2,9 @@ abstract final class Routes {
   static const login = '/login';
   static const register = '/register';
   static const unlock = '/unlock';
+  static const firstSync = '/first-sync';
+  static const syncReview = '/settings/sync-review';
+  static String rejectedUnit(int seq) => '/settings/sync-review/unit/$seq';
   static const dashboard = '/';
   static const sales = '/sales';
   static String sale(String id) => '/sales/$id';

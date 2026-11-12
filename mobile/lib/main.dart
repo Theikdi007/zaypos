@@ -7,6 +7,7 @@ import 'app/drift_overrides.dart';
 import 'core/db/app_database.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/secure_store.dart';
+import 'core/sync/sync_lifecycle.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/data/boot_state.dart';
 
@@ -31,6 +32,7 @@ class ZayPosApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       routerConfig: ref.watch(appRouterProvider),
+      builder: (_, child) => SyncLifecycle(child: child ?? const SizedBox()),
     );
   }
 }
