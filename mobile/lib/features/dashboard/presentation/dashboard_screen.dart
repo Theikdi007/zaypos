@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text.dart';
 import '../../../core/utils/money_format.dart';
+import '../../../core/utils/myanmar.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/money_text.dart';
@@ -45,6 +46,7 @@ class DashboardScreen extends ConsumerWidget {
     final debtors = accounts.where((a) => a.hasDebt);
     final debtTotal = debtors.fold(0, (a, c) => a + c.balance);
     final lowCount = products.where((p) => p.isLow || p.isOut).length;
+    final noPriceCount = products.where((p) => p.needsPrice).length;
 
     final debtCard = StatCard(
       label: 'အကြွေးရရန်',
@@ -106,6 +108,11 @@ class DashboardScreen extends ConsumerWidget {
                     )
                   : debtCard,
             ),
+            if (noPriceCount > 0)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: _NeedsPriceCard(count: noPriceCount),
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: PrimaryButton(
@@ -136,6 +143,51 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ],
         ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "ဈေးနှုန်း မထည့်ရသေးသော ပစ္စည်း n ခု" → Products filtered to them.
+class _NeedsPriceCard extends StatelessWidget {
+  const _NeedsPriceCard({required this.count});
+  final int count;
+
+  static String label(int n) => 'ဈေးနှုန်း မထည့်ရသေးသော ပစ္စည်း ${mmDigits(n)} ခု';
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      child: Material(
+        color: AppColors.debtBg,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          side: const BorderSide(color: AppColors.debtBorder),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => context.go(Routes.productsNeedingPrice),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(label(count), style: AppText.s(14, weight: AppText.w700, color: AppColors.debtInk)),
+                      const SizedBox(height: 2),
+                      Text('ဈေးနှုန်း မထည့်ရင် ရောင်းတဲ့အခါ မေးပါမယ်',
+                          style: AppText.s(12, color: AppColors.debtInk)),
+                    ],
+                  ),
+                ),
+                const AppIcon(AppIcons.chevronRight, size: 18, color: AppColors.debtInk),
+              ],
+            ),
+          ),
         ),
       ),
     );

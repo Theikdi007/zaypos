@@ -35,6 +35,13 @@ class ProductService {
     });
   }
 
+  /// Sets a product's selling price as ONE upsertProduct unit (POS asks for
+  /// it before selling a product without a price). [price] must be positive.
+  Future<void> setPrice(String productId, int price) async {
+    if (price <= 0) throw ArgumentError.value(price, 'price', 'must be positive');
+    await uow.run(UnitKind.upsertProduct, () => products.setPrice(productId, price));
+  }
+
   /// Many products (e.g. the preset catalog) as ONE upsertProduct unit.
   Future<void> importAll(List<Product> items) => uow.run(UnitKind.upsertProduct, () async {
         for (final p in items) {

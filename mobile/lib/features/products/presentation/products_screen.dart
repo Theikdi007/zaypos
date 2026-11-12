@@ -10,22 +10,38 @@ import '../../../core/theme/app_text.dart';
 import '../../../core/utils/money_format.dart';
 import '../../../core/utils/qty.dart';
 import '../../../core/widgets/common.dart';
+import '../../../core/widgets/product_tile.dart' show NeedsPriceBadge;
 import '../data/product_providers.dart';
 import '../domain/product_view.dart';
 import '../../../core/widgets/async_view.dart';
 
-enum _StockFilter { all, low, out }
+/// Products list filters. `noPrice` = products without a selling price
+/// (`/products?filter=noPrice`, from the Dashboard card).
+enum ProductFilter { all, low, out, noPrice }
 
 class ProductsScreen extends ConsumerStatefulWidget {
-  const ProductsScreen({super.key});
+  const ProductsScreen({super.key, this.initialFilter = ProductFilter.all});
+
+  final ProductFilter initialFilter;
+
+  /// `?filter=` value → filter (unknown = all).
+  static ProductFilter filterFromQuery(String? q) =>
+      ProductFilter.values.where((f) => f.name == q).firstOrNull ?? ProductFilter.all;
 
   @override
   ConsumerState<ProductsScreen> createState() => _ProductsScreenState();
 }
 
 class _ProductsScreenState extends ConsumerState<ProductsScreen> {
-  _StockFilter _filter = _StockFilter.all;
+  late ProductFilter _filter = widget.initialFilter;
   String _query = '';
+
+  @override
+  void didUpdateWidget(ProductsScreen old) {
+    super.didUpdateWidget(old);
+    // The shell keeps this screen alive: follow a new ?filter= link.
+    if (old.initialFilter != widget.initialFilter) _filter = widget.initialFilter;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +50,17 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     if (!async.hasValue) return AsyncView(value: async, data: (_) => const SizedBox());
     final all = async.requireValue;
     final lowCount = all.where((p) => p.isLow).length;
-    final filter = features.stock ? _filter : _StockFilter.all;
+    final noPriceCount = all.where((p) => p.needsPrice).length;
+    final filter = !features.stock && (_filter == ProductFilter.low || _filter == ProductFilter.out)
+        ? ProductFilter.all
+        : _filter;
+    final showNoPrice = noPriceCount > 0 || filter == ProductFilter.noPrice;
     final rows = all
         .where((p) => switch (filter) {
-              _StockFilter.all => true,
-              _StockFilter.low => p.isLow,
-              _StockFilter.out => p.isOut,
+              ProductFilter.all => true,
+              ProductFilter.low => p.isLow,
+              ProductFilter.out => p.isOut,
+              ProductFilter.noPrice => p.needsPrice,
             })
         .where((p) => _query.isEmpty || p.name.contains(_query))
         .toList();
@@ -73,13 +94,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     semanticLabel: 'ပစ္စည်းရှာရန်',
                     onChanged: (q) => setState(() => _query = q.trim()),
                   ),
-                  if (features.stock) ...[
+                  if (features.stock || showNoPrice) ...[
                     const SizedBox(height: 12),
-                    FilterChips<_StockFilter>(
+                    FilterChips<ProductFilter>(
+                      scrollable: true,
                       options: [
-                        (_StockFilter.all, 'အားလုံး'),
-                        (_StockFilter.low, 'Stock နည်း ($lowCount)'),
-                        (_StockFilter.out, 'ကုန်သွားပြီ'),
+                        (ProductFilter.all, 'အားလုံး'),
+                        if (features.stock) (ProductFilter.low, 'Stock နည်း ($lowCount)'),
+                        if (features.stock) (ProductFilter.out, 'ကုန်သွားပြီ'),
+                        if (showNoPrice) (ProductFilter.noPrice, 'ဈေးနှုန်းမရှိ ($noPriceCount)'),
                       ],
                       selected: filter,
                       onChanged: (f) => setState(() => _filter = f),
@@ -138,8 +161,11 @@ class _ProductRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(p.name, style: AppText.s(14, weight: AppText.w600)),
-                Text('ဝယ်ဈေး ${formatMoney(p.cost)} · ရောင်းဈေး ${formatMoney(p.price)}',
-                    style: AppText.s(12, color: AppColors.muted)),
+                if (p.needsPrice)
+                  const Padding(padding: EdgeInsets.only(top: 2), child: NeedsPriceBadge())
+                else
+                  Text('ဝယ်ဈေး ${formatMoney(p.cost)} · ရောင်းဈေး ${formatMoney(p.price)}',
+                      style: AppText.s(12, color: AppColors.muted)),
               ],
             ),
           ),

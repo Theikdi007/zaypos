@@ -15,6 +15,9 @@ abstract final class Routes {
   static const pos = '/pos';
   static const checkout = '/checkout';
   static const products = '/products';
+
+  /// Products without a selling price (Dashboard card).
+  static const productsNeedingPrice = '/products?filter=noPrice';
   static const addProduct = '/products/new';
   static const customers = '/customers';
   static const addCustomer = '/customers/new';

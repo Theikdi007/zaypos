@@ -15,7 +15,10 @@ import '../../../core/widgets/numeric_keypad.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/product_tile.dart';
 import '../../../core/widgets/segmented_tabs.dart';
+import '../../products/application/product_service.dart';
 import '../../products/data/product_providers.dart';
+import '../../products/domain/product_view.dart';
+import 'set_price_sheet.dart';
 import '../../devices/data/device_providers.dart';
 import '../domain/cart.dart';
 import '../../../core/widgets/async_view.dart';
@@ -51,6 +54,19 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         _amount += v;
       }
     });
+  }
+
+  /// A product without a price is never sold at 0 Ks: ask for the price, save
+  /// it to the product (upsertProduct unit) and use it for this sale.
+  Future<void> _addProduct(ProductView p) async {
+    if (!p.needsPrice) {
+      ref.read(cartProvider.notifier).addProduct(p.product);
+      return;
+    }
+    final price = await showSetPriceSheet(context, productName: p.name);
+    if (price == null || !mounted) return;
+    await ref.read(productServiceProvider).setPrice(p.id, price);
+    ref.read(cartProvider.notifier).addProduct(p.product.copyWith(price: price));
   }
 
   void _addQuick() {
@@ -154,7 +170,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           stockLabel: features.stock ? (low ? 'ကျန် ${Qty.format(p.stockMilli)} ခု' : 'Stock ${Qty.format(p.stockMilli)}') : null,
           stockLow: low,
           qtyMilli: cart.qtyOf(p.id),
-          onTap: () => ref.read(cartProvider.notifier).addProduct(p.product),
+          needsPrice: p.needsPrice,
+          onTap: () => _addProduct(p),
         );
       },
     );

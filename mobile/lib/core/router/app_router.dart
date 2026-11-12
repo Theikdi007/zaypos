@@ -115,7 +115,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: Routes.products,
-              builder: (_, _) => const ProductsScreen(),
+              builder: (_, s) =>
+                  ProductsScreen(initialFilter: ProductsScreen.filterFromQuery(s.uri.queryParameters['filter'])),
               routes: [
                 GoRoute(
                   path: 'new',
