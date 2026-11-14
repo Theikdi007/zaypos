@@ -274,7 +274,7 @@ void main() {
       expect(cart(c).single.serialId, s1.id);
       await burst(tester, '359800000000501');
       expect(cart(c), hasLength(1));
-      expect(find.text('ဒီ IMEI ကို ထည့်ပြီးသားပါ။'), findsOneWidget);
+      expect(find.text('ဒီ IMEI ခြင်းထဲမှာ ရှိပြီးသားပါ'), findsOneWidget);
     });
 
     testWidgets('phone without a price: the IMEI scan asks the price, then adds that IMEI', (tester) async {
@@ -307,7 +307,7 @@ void main() {
       expect(cart(c), hasLength(1),
           reason: 'one box = one phone; code comment: "Already in the cart → a message, nothing added" '
               '(cart: ${cart(c).map((l) => '${l.name} ${l.serialId}').toList()})');
-      expect(find.text('ဒီ IMEI ကို ထည့်ပြီးသားပါ။'), findsOneWidget);
+      expect(find.text('ဒီ IMEI ခြင်းထဲမှာ ရှိပြီးသားပါ'), findsOneWidget);
     });
   });
 }

@@ -185,12 +185,13 @@ void main() {
       expect(line.serialId, row.id);
 
       await burst(tester, '359000000000022');
-      expect(find.text('ဒီ IMEI ကို ထည့်ပြီးသားပါ။'), findsOneWidget);
+      expect(find.text('ဒီ IMEI ခြင်းထဲမှာ ရှိပြီးသားပါ'), findsOneWidget);
       expect(cart(c), hasLength(1));
       expect(find.text(unknownTitle), findsNothing);
     });
 
-    testWidgets('the product barcode still asks which IMEI; a sold or unknown IMEI → "ပစ္စည်းအသစ်" sheet', (tester) async {
+    testWidgets('the product barcode still asks which IMEI; a sold IMEI → "sold" message (no "ပစ္စည်းအသစ်"); '
+        'an unknown IMEI → "ပစ္စည်းအသစ်" sheet', (tester) async {
       final c = await boot(tester, template: 'phone');
       await create(c, 'Phone Y', barcode: '6901443000088', imeis: ['359000000000033']);
       final sold = db(c).serials.singleWhere((s) => s.serial == '359000000000033');
@@ -201,9 +202,10 @@ void main() {
       await openPos(tester, c);
 
       await burst(tester, '359000000000033');
-      expect(find.text(unknownTitle), findsOneWidget, reason: 'sold IMEI is not offered');
+      expect(find.text("ဒီ IMEI က ရောင်းပြီးသားပါ — ပြန်ဝယ်ရင် 'Stock ဖြည့်မယ်' ကနေ လက်ခံပါ"), findsOneWidget);
+      expect(find.text(unknownTitle), findsNothing, reason: 'owner: no "ပစ္စည်းအသစ်" for a sold IMEI');
       expect(cart(c), isEmpty);
-      await tester.tap(find.text('မလုပ်တော့ပါ'));
+      ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first)).hideCurrentSnackBar();
       await tester.pumpAndSettle();
 
       await burst(tester, '359000000000099');
@@ -213,6 +215,38 @@ void main() {
 
       await burst(tester, '6901443000088');
       expect(find.text('ဘယ် IMEI လဲ?'), findsOneWidget, reason: 'barcode → same as a tap');
+    });
+
+    testWidgets('BUG-27: one IMEI in stock on two products (duplicateSerial) — the 2nd scan is refused by IMEI value',
+        (tester) async {
+      final c = await boot(tester, template: 'phone');
+      await create(c, 'Phone P', imeis: ['359000000000044']);
+      await create(c, 'Phone Q', imeis: ['359000000000044']);
+      await openPos(tester, c);
+      await burst(tester, '359000000000044');
+      expect(cart(c), hasLength(1));
+      await burst(tester, '359000000000044');
+      expect(find.text('ဒီ IMEI ခြင်းထဲမှာ ရှိပြီးသားပါ'), findsOneWidget);
+      expect(cart(c), hasLength(1), reason: 'never two phones for one IMEI');
+    });
+
+    testWidgets('a traded-in IMEI (old row sold, new row in stock) adds the new row; an IMEI picked by tapping the product '
+        'is also refused when scanned', (tester) async {
+      final c = await boot(tester, template: 'phone');
+      final p = await create(c, 'Phone T', barcode: '6901443000077', imeis: ['359000000000055']);
+      final old = db(c).serials.single;
+      db(c).serials[0] = ProductSerial(id: old.id, tenantId: old.tenantId, productId: old.productId, serial: old.serial,
+          status: SerialStatus.sold, createdAt: old.createdAt, updatedAt: old.updatedAt);
+      final fresh = ProductSerial(id: newId(), tenantId: p.tenantId, productId: p.id, serial: old.serial,
+          status: SerialStatus.inStock, createdAt: t0.add(const Duration(days: 1)), updatedAt: t0.add(const Duration(days: 1)));
+      db(c).serials.add(fresh);
+      await openPos(tester, c);
+      await burst(tester, '359000000000055');
+      expect(cart(c).single.serialId, fresh.id);
+      await burst(tester, '359000000000055');
+      expect(find.text('ဒီ IMEI ခြင်းထဲမှာ ရှိပြီးသားပါ'), findsOneWidget);
+      expect(find.textContaining('ရောင်းပြီးသားပါ'), findsNothing);
+      expect(cart(c), hasLength(1));
     });
 
     testWidgets('shops without IMEI tracking do not look serials up', (tester) async {

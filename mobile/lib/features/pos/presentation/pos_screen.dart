@@ -60,7 +60,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   }
 
   /// A scanned code (camera or a HID scanner), in this order (owner, 2026-11-14):
-  /// 1. an in-stock IMEI / serial (phone shops) → that phone with that IMEI;
+  /// 1. an in-stock IMEI / serial (phone shops) → that phone with that IMEI (already in the cart /
+  ///    sold → a message);
   /// 2. a product barcode → like a tap; several products with it → the cashier picks one;
   /// 3. otherwise "ပစ္စည်းအသစ် ထည့်မယ်" with the code.
   Future<void> _onScan(String raw) async {
@@ -74,8 +75,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final limits = ref.read(syncLimitsProvider);
     final code = limits.normalize('products.barcode', raw);
     final all = ref.read(productsProvider).value ?? const <ProductView>[];
-    if (await _addScannedSerial(all, limits.normalize('productSerials.serial', raw)) || !mounted) return;
     final matches = productsByBarcode(all, code, limits);
+    final serial = limits.normalize('productSerials.serial', raw);
+    if (await _addScannedSerial(all, serial, barcodeMatches: matches.isNotEmpty) || !mounted) return;
     if (matches.isNotEmpty) {
       final p = matches.length == 1 ? matches.single : await _pickBarcodeMatch(code, matches);
       if (p != null && mounted) await _addProduct(p);
@@ -123,26 +125,41 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     });
   }
 
+  static const imeiInCartMessage = 'ဒီ IMEI ခြင်းထဲမှာ ရှိပြီးသားပါ';
+  static const imeiSoldMessage = "ဒီ IMEI က ရောင်းပြီးသားပါ — ပြန်ဝယ်ရင် 'Stock ဖြည့်မယ်' ကနေ လက်ခံပါ";
+
+  void _message(String text) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(text), duration: const Duration(seconds: 3)));
+
   /// Phone shops: [serial] is an in-stock IMEI of a live product → that phone
-  /// goes into the cart with this IMEI (no IMEI question). Already in the cart →
-  /// a message, nothing added. Returns true when the scan was handled.
-  Future<bool> _addScannedSerial(List<ProductView> all, String serial) async {
+  /// goes into the cart with this IMEI (no IMEI question). Returns true when the scan was handled.
+  /// - BUG-27: the IMEI VALUE is compared with every cart line (any product's row with this
+  ///   IMEI already in the cart → a message, nothing added), not just one row id.
+  /// - Owner 2026-11-14: no in-stock row and the IMEI's latest row is sold → "sold" message
+  ///   (receive it back with "Stock ဖြည့်မယ်"), not "ပစ္စည်းအသစ်" — unless a product barcode matches.
+  Future<bool> _addScannedSerial(List<ProductView> all, String serial, {required bool barcodeMatches}) async {
     if (serial.isEmpty || !ref.read(tenantFeaturesProvider).serialWarranty) return false;
     final rows = await ref.read(productRepositoryProvider).watchSerialRows(serial).first;
-    final byId = {for (final v in all) v.id: v};
-    final inStock = rows.where((s) => s.status == SerialStatus.inStock && byId.containsKey(s.productId)).toList();
-    if (inStock.isEmpty || !mounted) return false;
+    if (rows.isEmpty || !mounted) return false;
     final inCart = ref.read(cartProvider).serialIds;
-    final free = inStock.where((s) => !inCart.contains(s.id)).firstOrNull;
-    if (free == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ဒီ IMEI ကို ထည့်ပြီးသားပါ။'), duration: Duration(seconds: 2)),
-      );
+    if (rows.any((s) => inCart.contains(s.id))) {
+      _message(imeiInCartMessage);
       return true;
     }
-    await _addProduct(byId[free.productId]!,
-        pick: (serialId: free.id, variantId: null, batchId: null, label: 'IMEI ${free.serial}'));
-    return true;
+    final byId = {for (final v in all) v.id: v};
+    final inStock = rows.where((s) => s.status == SerialStatus.inStock && byId.containsKey(s.productId)).firstOrNull;
+    if (inStock != null) {
+      await _addProduct(byId[inStock.productId]!,
+          pick: (serialId: inStock.id, variantId: null, batchId: null, label: 'IMEI ${inStock.serial}'));
+      return true;
+    }
+    final latest = rows.reduce((a, b) => b.createdAt.isAfter(a.createdAt) ? b : a);
+    if (latest.status == SerialStatus.sold && !barcodeMatches) {
+      _message(imeiSoldMessage);
+      return true;
+    }
+    return false;
   }
 
   /// Several products share [code] (duplicate barcode): the cashier picks one; null = dismissed.

@@ -104,7 +104,7 @@ void main() {
 
   testWidgets('TC-POS-NEW-13 Drift: in-stock IMEI → that phone + that IMEI; Myanmar digits; again → message; sold IMEI, '
       'deleted product\'s IMEI → "ပစ္စည်းအသစ်" sheet; trade-in → the NEW row; checkout sells exactly the scanned rows; '
-      'a sold IMEI scanned again → sheet', (tester) async {
+      'a sold IMEI scanned again → "sold" message (owner 2026-11-14)', (tester) async {
     final (c, shop, adb, scanner) = await boot(tester, 'phone');
     final tid = shop.tenantId;
     Product phone(String name, {String? barcode}) => Product(id: newId(), tenantId: tid, name: name, cost: 400000,
@@ -152,7 +152,7 @@ void main() {
 
     await burst(tester, a);
     expect(cart(c), hasLength(2), reason: 'IMEI already in the cart');
-    expect(find.text('ဒီ IMEI ကို ထည့်ပြီးသားပါ။'), findsOneWidget);
+    expect(find.text('ဒီ IMEI ခြင်းထဲမှာ ရှိပြီးသားပါ'), findsOneWidget);
     await tester.pump(const Duration(seconds: 3));
     await settle(tester);
 
@@ -187,9 +187,11 @@ void main() {
 
     await openPos(tester, c);
     await burst(tester, a);
-    expect(find.text(_unknownTitle), findsOneWidget, reason: 'sold IMEI → "ပစ္စည်းအသစ်" offered (decision c)');
+    // Owner 2026-11-14 (developer edit, approved; QA reviews in round 9): sold IMEI → message, not "ပစ္စည်းအသစ်".
+    expect(find.text("ဒီ IMEI က ရောင်းပြီးသားပါ — ပြန်ဝယ်ရင် 'Stock ဖြည့်မယ်' ကနေ လက်ခံပါ"), findsOneWidget);
+    expect(find.text(_unknownTitle), findsNothing);
     expect(cart(c), isEmpty);
-    await tester.tap(find.text('မလုပ်တော့ပါ'));
+    await tester.pump(const Duration(seconds: 4));
     await settle(tester);
     await finish(tester);
   });
