@@ -661,7 +661,7 @@ Format:
 - Self-heals: when the void is pushed, the next pull brings voidedAt back; a second void by the cashier is skipped by the server and its
   local ledger rows are dropped (sync_store.dart applyResults "skipped"), so no stock is lost for good.
 - Blocks beta: no (needs a void within one failed sync of the sale on a flaky network; wrong only until the next good sync).
-- Status: open
+- Status: fixed in 17180db — general rule: a pull never overwrites a row of an unsent or blocked outbox unit, any table (ledgers included); the skipped rows are pulled again (cursor rewound) once their unit is sent; a blocked unit keeps them protected. `m/pending_rows_pull_test.dart` (void fails to send → not undone, day totals stay correct, re-pull after the send; product + stock movement; rejected unit); QA TC-SYNC-NEW-17 passes unchanged.
 
 ## BUG-33 · TC-DEBT-NEW-6 · Low · Customer screen: the "ပြင်ဆင်ရန်" (edit) button does nothing — a customer can never be corrected
 - Found in: round 10 · `mobile/test/qa/qa_round10_customer_edit_test.dart` › "TC-DEBT-NEW-6 customer screen: the "ပြင်ဆင်ရန်" (edit)
@@ -676,7 +676,7 @@ Format:
 - Suspected area: `mobile/lib/features/customers/presentation/debt_screen.dart` (header trailing button); no customer edit route.
 - Blocks beta: no (workaround: add the customer again; the old debt history stays on the old entry). Owner decision: add a small edit
   form (name, phone, address, credit limit, note) or hide the button for the beta.
-- Status: open
+- Status: fixed in ae22869 — "ပြင်ဆင်ရန်" opens the Add Customer form in edit mode (name, phone, address, credit limit, note; current balance next to the limit; a lower limit is allowed; no opening balance). Same rules as Add plus a duplicate-phone warning (new on Add too). One upsertCustomer unit, whole row. `m/customer_edit_test.dart`; QA test check changed from "route changed" to "edit form opened" (owner approved, see commit).
 
 ---
 
@@ -686,7 +686,9 @@ Format:
   new phone shows the product's initial instead. By design for the beta (6e94350 "stored locally only"; TC-PROD-NEW-32 checks that no
   photo bytes go into the outbox). Tell beta shops; photo sync is a later feature.
 - **Duplicate barcodes are allowed** (decision, implemented in e0ea12b): Add/Edit Product warns, POS asks which product. The server
-  still flags `duplicateBarcode` in the sync review.
+  still flags `duplicateBarcode` in the sync review, and closes it itself once no other live product has the barcode (1420ee8:
+  resolved "ပြင်ပြီးသွားပါပြီ", kept in the history on every phone). A duplicate that exists only on one phone (offline) is not known to
+  the server until that phone syncs.
 - **IMEI scan at POS** (decision, e0ea12b; updated 0b3e2d4): an in-stock IMEI adds that phone; an IMEI already in the cart (by its
   number, any product) → "ဒီ IMEI ခြင်းထဲမှာ ရှိပြီးသားပါ"; an IMEI whose latest row is **sold** → "ဒီ IMEI က ရောင်းပြီးသားပါ —
   ပြန်ဝယ်ရင် 'Stock ဖြည့်မယ်' ကနေ လက်ခံပါ" (no "ပစ္စည်းအသစ်" offer; a product barcode with the same code still wins); a trade-in is
