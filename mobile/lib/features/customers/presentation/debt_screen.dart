@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text.dart';
@@ -46,7 +47,8 @@ class DebtScreen extends ConsumerWidget {
             onBack: () => context.pop(),
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
             bottomGap: 16,
-            trailing: AppIconButton(icon: AppIcons.edit, size: 20, semanticLabel: 'ပြင်ဆင်ရန်', onPressed: () {}),
+            trailing: AppIconButton(
+                icon: AppIcons.edit, size: 20, semanticLabel: 'ပြင်ဆင်ရန်', onPressed: () => context.push(Routes.editCustomer(id))),
             bottom: [
               Row(
                 children: [

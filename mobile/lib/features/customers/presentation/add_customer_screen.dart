@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/sync/sync_limits.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text.dart';
+import '../../../core/utils/money_format.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -12,10 +14,16 @@ import '../../../core/widgets/form_section.dart';
 import '../../../core/utils/ids.dart';
 import '../../auth/data/session.dart';
 import '../application/customer_service.dart';
+import '../data/customer_providers.dart';
+import '../data/customer_repository.dart';
 import '../domain/customer.dart';
 
+/// Add Customer, or — with [customerId] — edit that customer (BUG-33: "ပြင်ဆင်ရန်" on the debt screen).
+/// Same fields and rules; edit mode has no opening balance (that is a ledger entry) and shows the
+/// current balance next to the credit limit (a limit below it is allowed).
 class AddCustomerScreen extends ConsumerStatefulWidget {
-  const AddCustomerScreen({super.key});
+  const AddCustomerScreen({super.key, this.customerId});
+  final String? customerId;
 
   @override
   ConsumerState<AddCustomerScreen> createState() => _AddCustomerScreenState();
@@ -30,12 +38,62 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
   final _note = TextEditingController();
   bool _showErrors = false;
 
+  /// The customer being edited (null = new, or not loaded yet).
+  Customer? _editing;
+  bool get _isEdit => widget.customerId != null;
+
   @override
   void initState() {
     super.initState();
     _name.addListener(() {
       if (_showErrors) setState(() {});
     });
+    if (_isEdit) _load();
+  }
+
+  Future<void> _load() async {
+    final c = await ref.read(customerRepositoryProvider).watchById(widget.customerId!).first;
+    if (!mounted || c == null) return;
+    setState(() {
+      _editing = c;
+      _name.text = c.name;
+      _phone.text = c.phone;
+      _address.text = c.address ?? '';
+      _limit.text = c.creditLimit?.toString() ?? '';
+      _note.text = c.note ?? '';
+    });
+  }
+
+  /// Another live customer already has this phone number: warn, don't block (same as the barcode warning).
+  Future<bool> _confirmDuplicatePhone(String phone) async {
+    final limits = ref.read(syncLimitsProvider);
+    final others = (ref.read(customersProvider).value ?? await ref.read(customerRepositoryProvider).watchAll().first)
+        .where((o) => o.id != widget.customerId && limits.normalize('customers.phone', o.phone) == phone)
+        .toList();
+    if (others.isEmpty || !mounted) return true;
+    return await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('ဒီ ဖုန်းနံပါတ် ရှိပြီးသားပါ', style: AppText.s(16, weight: AppText.w700)),
+            content: Text(
+              '$phone ကို ${others.map((o) => '“${o.name}”').join('၊ ')} မှာ သုံးထားပြီးပါပြီ။ ဒီအတိုင်း သိမ်းမလား?',
+              style: AppText.s(14),
+            ),
+            actions: [
+              TextButton(
+                key: const ValueKey('duplicatePhoneCancel'),
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('ပြန်ပြင်မယ်'),
+              ),
+              TextButton(
+                key: const ValueKey('duplicatePhoneSave'),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text('ဒီအတိုင်း သိမ်းမယ်', style: AppText.s(14, weight: AppText.w700)),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   @override
@@ -74,6 +132,22 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
       });
       return;
     }
+    final editing = _editing;
+    if (_isEdit && editing == null) return; // not loaded yet
+    final oldPhone = editing == null ? null : limits.normalize('customers.phone', editing.phone);
+    if (phone.isNotEmpty && phone != oldPhone && !await _confirmDuplicatePhone(phone)) return;
+    if (!mounted) return;
+    if (editing != null) {
+      await ref.read(customerServiceProvider).update(editing.copyWith(
+            name: name,
+            phone: phone,
+            address: () => address.isEmpty ? null : address,
+            creditLimit: () => int.tryParse(_limit.text),
+            note: () => note.isEmpty ? null : note,
+          ));
+      if (mounted) context.pop();
+      return;
+    }
     final t = nowUtc();
     final customer = Customer(
       id: newId(),
@@ -94,12 +168,13 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
   @override
   Widget build(BuildContext context) {
     final digits = [FilteringTextInputFormatter.digitsOnly];
+    final balance = _isEdit ? ref.watch(customerAccountProvider(widget.customerId!)).value?.balance : null;
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ScreenHeader(
-            title: 'ဖောက်သည်အသစ်',
+            title: _isEdit ? 'ဖောက်သည် ပြင်ဆင်ရန်' : 'ဖောက်သည်အသစ်',
             leadingIcon: AppIcons.close,
             leadingLabel: 'ပိတ်ရန်',
             onBack: () => context.pop(),
@@ -177,24 +252,43 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                       label: 'အကြွေး ကန့်သတ်ချက် (Ks)',
                       helper: 'ဒီထက်ကျော်ရင် ရောင်းတဲ့အချိန် သတိပေးပါမယ်။ မထည့်ရင် ကန့်သတ်ချက်မရှိ',
                       error: _errors['limit'],
-                      child: AppInput(
-                        controller: _limit,
-                        hint: 'ဥပမာ - 100000',
-                        keyboardType: TextInputType.number,
-                        inputFormatters: digits,
-                        semanticLabel: 'အကြွေး ကန့်သတ်ချက်',
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: AppInput(
+                              controller: _limit,
+                              hint: 'ဥပမာ - 100000',
+                              keyboardType: TextInputType.number,
+                              inputFormatters: digits,
+                              semanticLabel: 'အကြွေး ကန့်သတ်ချက်',
+                            ),
+                          ),
+                          // Edit: the current balance next to the limit (a lower limit is allowed).
+                          if (balance != null) ...[
+                            const SizedBox(width: 10),
+                            Column(
+                              key: const ValueKey('currentBalance'),
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text('လက်ရှိ အကြွေး', style: AppText.s(12, color: AppColors.muted)),
+                                Text(formatKs(balance), style: AppText.s(14, weight: AppText.w700)),
+                              ],
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                    LabeledField(
-                      label: 'ယခင်အကြွေး (စာအုပ်ထဲက)',
-                      child: AppInput(
-                        controller: _opening,
-                        hint: '0',
-                        keyboardType: TextInputType.number,
-                        inputFormatters: digits,
-                        semanticLabel: 'ယခင်အကြွေး',
+                    if (!_isEdit)
+                      LabeledField(
+                        label: 'ယခင်အကြွေး (စာအုပ်ထဲက)',
+                        child: AppInput(
+                          controller: _opening,
+                          hint: '0',
+                          keyboardType: TextInputType.number,
+                          inputFormatters: digits,
+                          semanticLabel: 'ယခင်အကြွေး',
+                        ),
                       ),
-                    ),
                     LabeledField(
                       label: 'မှတ်ချက်',
                       error: _errors['note'],

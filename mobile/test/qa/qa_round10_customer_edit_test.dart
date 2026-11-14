@@ -43,12 +43,13 @@ void main() {
     expect(find.text('အကြွေးစာရင်း'), findsOneWidget);
     final edit = find.bySemanticsLabel('ပြင်ဆင်ရန်');
     expect(edit, findsWidgets, reason: 'the pencil button is on screen');
-    final before = c.read(appRouterProvider).routerDelegate.currentConfiguration.uri.toString();
     await tester.tap(edit.first);
     await tester.pumpAndSettle();
-    final after = c.read(appRouterProvider).routerDelegate.currentConfiguration.uri.toString();
+    // Developer edit, owner-approved (2026-11-14; QA reviews in round 11): the app opens edit screens with
+    // context.push, which does not change routerDelegate.currentConfiguration.uri in this go_router version, so the
+    // route-change check became "the edit form opened" (its title + a field with the customer's name).
     final nameField = find.byWidgetPredicate((w) => w is EditableText && w.controller.text == cu.name);
-    expect((after != before, nameField.evaluate().isNotEmpty), (true, true),
-        reason: 'tapping "ပြင်ဆင်ရန်" did nothing (route $before → $after, no field with the customer\'s name)');
+    expect((find.text('ဖောက်သည် ပြင်ဆင်ရန်').evaluate().isNotEmpty, nameField.evaluate().isNotEmpty), (true, true),
+        reason: 'tapping "ပြင်ဆင်ရန်" did nothing (no edit form, no field with the customer\'s name)');
   });
 }

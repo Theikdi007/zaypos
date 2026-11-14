@@ -29,5 +29,6 @@ abstract final class Routes {
   static const customers = '/customers';
   static const addCustomer = '/customers/new';
   static String customer(String id) => '/customers/$id';
+  static String editCustomer(String id) => '/customers/$id/edit';
   static const settingsFeatures = '/settings/features';
 }

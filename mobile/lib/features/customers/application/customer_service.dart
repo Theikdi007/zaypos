@@ -26,6 +26,11 @@ class CustomerService {
         }
       });
 
+  /// Edit form ("ပြင်ဆင်ရန်"): saves name / phone / address / credit limit / note as ONE upsertCustomer
+  /// unit (synced like other edits, last-writer-wins). The debt ledger is not touched; a limit below the
+  /// current balance is allowed.
+  Future<void> update(Customer customer) => uow.run(UnitKind.upsertCustomer, () => customers.update(customer));
+
   /// PayDebt sheet: records a repayment.
   Future<DebtEntry> recordPayment({
     required String tenantId,
