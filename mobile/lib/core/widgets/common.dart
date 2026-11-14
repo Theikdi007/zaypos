@@ -525,6 +525,7 @@ class InitialAvatar extends StatelessWidget {
     this.size = 42,
     this.fontSize = 16,
     this.radius,
+    this.image,
   });
 
   final String initial;
@@ -536,17 +537,32 @@ class InitialAvatar extends StatelessWidget {
   /// null = circle.
   final double? radius;
 
+  /// A photo instead of the initial (falls back to the initial if it fails).
+  final ImageProvider? image;
+
   @override
   Widget build(BuildContext context) {
+    final letter = Text(initial, style: AppText.s(fontSize, weight: AppText.w700, color: fg, height: 1.2));
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
+      clipBehavior: image == null ? Clip.none : Clip.antiAlias,
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(radius ?? size / 2),
       ),
-      child: Text(initial, style: AppText.s(fontSize, weight: AppText.w700, color: fg, height: 1.2)),
+      child: image == null
+          ? letter
+          : Image(
+              key: const ValueKey('productPhoto'),
+              image: image!,
+              fit: BoxFit.cover,
+              width: size,
+              height: size,
+              gaplessPlayback: true,
+              errorBuilder: (_, _, _) => letter,
+            ),
     );
   }
 }

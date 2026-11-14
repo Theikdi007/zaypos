@@ -37,10 +37,14 @@ class ProductTile extends StatelessWidget {
     this.stockLow = false,
     this.qtyMilli = 0,
     this.needsPrice = false,
+    this.image,
   });
 
   /// No price yet: the badge replaces the price (tapping asks for it).
   final bool needsPrice;
+
+  /// Product photo (shown instead of the initial); null = none.
+  final ImageProvider? image;
 
   final String name;
   final String initial;
@@ -75,9 +79,21 @@ class ProductTile extends StatelessWidget {
                   Container(
                     height: 56,
                     alignment: Alignment.center,
+                    clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(color: tint, borderRadius: AppRadius.inputR),
-                    child: Text(initial,
-                        style: AppText.s(22, weight: AppText.w700, color: AppColors.textStrong)),
+                    child: image == null
+                        ? Text(initial, style: AppText.s(22, weight: AppText.w700, color: AppColors.textStrong))
+                        : Image(
+                            key: const ValueKey('productPhoto'),
+                            image: image!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 56,
+                            gaplessPlayback: true,
+                            // A broken file shows the initial, never an error box.
+                            errorBuilder: (_, _, _) =>
+                                Text(initial, style: AppText.s(22, weight: AppText.w700, color: AppColors.textStrong)),
+                          ),
                   ),
                   const SizedBox(height: 6),
                   Text(name, style: AppText.s(14, weight: AppText.w600, height: 1.4)),

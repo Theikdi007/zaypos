@@ -16,6 +16,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/product_tile.dart';
 import '../../../core/widgets/segmented_tabs.dart';
 import '../../products/application/product_service.dart';
+import '../../products/data/product_photos.dart';
 import '../../products/data/product_providers.dart';
 import '../../products/domain/product_view.dart';
 import '../../../core/sync/sync_limits.dart';
@@ -217,6 +218,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   Widget _productGrid(Cart cart) {
     final features = ref.watch(tenantFeaturesProvider);
     final async = ref.watch(productsProvider);
+    final photos = ref.watch(productPhotosProvider).value ?? const {};
     if (!async.hasValue) return AsyncView(value: async, data: (_) => const SizedBox());
     final items = async.requireValue
         .where((p) => _cat == null || p.category == _cat)
@@ -251,6 +253,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           stockLow: low,
           qtyMilli: cart.qtyOfProduct(p.id),
           needsPrice: p.needsPrice,
+          image: photos[p.id],
           onTap: () => _addProduct(p),
         );
       },
