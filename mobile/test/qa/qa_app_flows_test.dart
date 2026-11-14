@@ -265,11 +265,16 @@ void main() {
       await tester.pumpAndSettle();
       expect(c.read(tenantFeaturesProvider).expiryBatch, isTrue);
 
-      final restaurant = tester.widget<AppSwitchTile>(find.widgetWithText(AppSwitchTile, 'စားပွဲ / Order mode'));
+      // QA round 7: the v2 restaurant switch is found by its (Burmese) description, not by its title — TC-UX-02
+      // ("No English left in Burmese screens") requires the English title "စားပွဲ / Order mode" to be translated,
+      // so the old title-based finder made the two QA cases contradict each other. Same assertions as before.
+      final restaurantTile = find.byWidgetPredicate(
+          (w) => w is AppSwitchTile && w.description == 'စားသောက်ဆိုင်၊ ကော်ဖီဆိုင်' && w.title.startsWith('စားပွဲ'));
+      expect(restaurantTile, findsOneWidget, reason: 'TC-FEAT-04: the v2 restaurant / table switch is listed');
+      final restaurant = tester.widget<AppSwitchTile>(restaurantTile);
       expect((restaurant.enabled, restaurant.value), (false, false), reason: 'TC-FEAT-04');
       final flagsBefore = c.read(tenantFeaturesProvider);
-      await tester.tap(find.descendant(of: find.widgetWithText(AppSwitchTile, 'စားပွဲ / Order mode'), matching: find.byType(AppSwitch)),
-          warnIfMissed: false);
+      await tester.tap(find.descendant(of: restaurantTile, matching: find.byType(AppSwitch)), warnIfMissed: false);
       await tester.pumpAndSettle();
       expect(c.read(tenantFeaturesProvider), flagsBefore, reason: 'TC-FEAT-04: tapping the v2 toggle changes nothing');
 

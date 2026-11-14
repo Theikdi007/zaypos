@@ -144,9 +144,13 @@ Format:
 - Suspected area: `mobile/lib/core/widgets/common.dart` `FilterChips` (non-scrollable row) as used by `customers_screen.dart`;
   `products/presentation/sections/feature_sections.dart` `VariantsSection`.
 - Blocks beta: no
-- Status: open (partly: the fashion Add Product overflow was the margin row, fixed in 056ef3e; the Customers filter chips still overflow)
+- Status (rounds 1–6): open (partly: the fashion Add Product overflow was the margin row, fixed in 056ef3e; the Customers filter chips still overflow) — see round 7 below
 - QA round 2: confirmed partly fixed. `m/qa/qa_ux_test.dart::TC-UX-04 … add product, fashion template, scrolled to the end` PASS;
   `… /customers`, `… /customers/new`, `… /customers/<id>` still FAIL. Stays open (Low).
+- QA round 7 (beta-polish @ 00bcea9, fix 4e3d57a): **verified by QA.** `m/qa/qa_ux_test.dart::TC-UX-04 …` 32/32 PASS (incl. the three
+  Customers routes); developer `m/narrow_screen_test.dart` read and run (chips row scrolls, last chip reachable). Every `FilterChips`
+  use is now `scrollable: true` (customers, products, sales history, POS). Owner still checks the largest system font (TC-UX-03).
+- Status: verified by QA (round 7)
 
 ## BUG-9 · TC-UX-02 · Low · English left on Burmese screens
 - Found in: round 1 · `mobile/test/qa/qa_ux_test.dart` › "TC-UX-02 …" (2 tests)
@@ -157,7 +161,28 @@ Format:
   "ဝန်ဆောင်မှု item", "Order mode", "Hardware / ဆောက်လုပ်ရေး", "service", "Core feature". No broken Unicode found.
 - Suspected area: time formatting in `core/utils/myanmar.dart` / `sale_ui.dart`; `app_bottom_nav.dart`; `settings_features_screen.dart`; `shop_template.dart`.
 - Blocks beta: no
-- Status: open
+- Status: open (partly fixed in 00bcea9 — re-opened by QA round 7 for the rest)
+- QA round 7 (beta-polish @ 00bcea9):
+  - Fixed and verified: times (`m/qa/qa_round7_ux_test.dart::TC-UX-NEW-2 …` PASS — 00:05 "နံနက် 12:05", 12:00 "နေ့လယ် 12:00",
+    16:00 "ညနေ 4:00", 19:00 "ည 7:00", 23:59 "ည 11:59", receipt "၁၀ နိုဝင်ဘာ ၂၀၂၆ · ညနေ 4:05"); "အစီရင်ခံစာ" tab; template, Register,
+    login and Settings module texts; signed-out screens (`TC-UX-02 signed-out screens` PASS).
+  - TC-FEAT-04 / TC-UX-02 contradiction resolved on the QA side: `m/qa/qa_app_flows_test.dart::TC-FEAT-02 … TC-FEAT-04 restaurant
+    disabled` now finds the v2 switch by its description "စားသောက်ဆိုင်၊ ကော်ဖီဆိုင်" (title only has to start with "စားပွဲ"); same
+    assertions (disabled, off, a tap changes nothing), PASS. The developer may now translate the title.
+  - Still English — for the developer:
+    1. Settings → "စားပွဲ / Order mode" (`settings_features_screen.dart:111`) — `TC-UX-02 …` signed-in: `Expected: empty, Actual:
+       {'/settings/features': ['"စားပွဲ / Order mode" (English: order, mode)']}`.
+    2. Found by the wider scan `m/qa/qa_round7_ux_test.dart::TC-UX-NEW-1 …` (sheets and template forms that the round-1 route walk never
+       opened; the original report already listed "Size / အရောင်"):
+       - "Size" — fashion Add Product "Size နှင့် အရောင်" / "Size" (`feature_sections.dart:373` and the size field), edit form
+         "Size / အရောင်", "+ Size / အရောင် ထည့်မယ်", "Size အသစ်", errors "Size နဲ့ အရောင် ထည့်ပါ။", "ဒီ Size / အရောင် ရှိပြီးသားပါ။"
+         (`edit_module_sections.dart:132–305`), restock sheet "… ဘယ် Size / အရောင် ဝင်လာလဲ" (`restock_sheet.dart:278`), POS sheet
+         "ဘယ် Size / အရောင် လဲ?" (`module_pick_sheet.dart:78`). Settings already says "အရွယ်အစား / အရောင်".
+       - Settings: "ရိုးရှင်း mode", "စာလုံးကြီး၊ ခလုတ်ကြီး၊ menu နည်းနည်း", "Feature ပိတ်လိုက်ရင်လည်း … data တွေ မပျက်ပါ။" (lines 211–221).
+       - Also seen in source (not on a scanned screen): camera error "… Settings မှာ ကင်မရာ ခွင့်ပြုပါ။" (`barcode_scanner.dart:82`),
+         "Contacts ထဲက ရွေးရန်", sync texts "data" / "update" / "Copy … paste", "(FEFO)". Owner may allow some as loanwords; then QA
+         adds them to the allow-list.
+  - The new scan / photo sheets are clean ("Barcode" / "Scan" / "IMEI" are allowed loanwords).
 
 ## BUG-10 · TC-FEAT-NEW-1 · Low · The v2 restaurant template can be picked at registration
 - Found in: round 1 · `mobile/test/qa/qa_app_flows_test.dart` › "TC-FEAT-NEW-1 register step 2: the v2 restaurant template cannot be chosen"
@@ -166,7 +191,8 @@ Format:
 - Actual: step 3 shows "စားသောက် / ကော်ဖီ အတွက်"; a shop with every feature off can be created.
 - Suspected area: `register_screen.dart` `_StepShopType._typeCard` (`onTap` ignores `t.soon`).
 - Blocks beta: no
-- Status: open
+- Status: verified by QA (round 7) — fixed in b9b2b5e. `m/qa/qa_app_flows_test.dart::TC-FEAT-NEW-1 …` PASS (card dimmed, tap does
+  nothing, step 3 not reached); developer `m/register_template_test.dart` read and run, PASS.
 
 ## BUG-11 · TC-SEC-04 · Low · Dev SQL Server SA password committed — accepted risk (dev only, port bound to 127.0.0.1)
 - Found in: round 1 · `git grep`
@@ -468,6 +494,27 @@ Format:
   considered.
 - Blocks beta: no (phone shops only; needs a void of an old sale after the phone was taken back AND resold — a user mistake; the
   phone is not physically there, so the cashier cannot hand it over; stock count of that model is +1 until corrected).
+- Status: verified by QA (round 7) — fixed in 8eab56b ("taken back" = a newer live row with the same IMEI, whatever its status).
+  `m/qa/qa_round6_ui_test.dart::TC-PROD-NEW-28 (BUG-23) … trade-in row sold again (sale 2), THEN sale 1 is voided …` PASS (0 in-stock
+  rows, stock 0, POS offers nothing); BUG-23 tests in the same group still PASS; new Drift edge cases
+  `m/qa/qa_round7_drift_test.dart::TC-PROD-NEW-33 Drift (BUG-24) …` PASS: the voidSale unit has no IMEI row back to inStock and no
+  voidReturn for the phone; un-void sale 1 writes no −1; void sale 2 brings the resold row back once (stock 1); void sale 1 again: still 1.
+  Live two phones (`m/qa/live_qa_round6_test.dart`) and server `b/ZayPOS.QA.Tests/QaRound6Tests.cs` still PASS.
+
+## BUG-25 · TC-PROD-NEW-31 · Low · Add/Edit Product photo preview raises an image error for a broken or unreadable photo (no fallback)
+- Found in: round 7 · `mobile/test/qa/qa_round7_photo_test.dart` › "TC-PROD-NEW-31 … broken photo file → Products list, POS tile and
+  the edit form show the initial / camera box, no error" and "… picked file is not an image → the product is still saved …"
+- Steps to reproduce: (1) a product whose saved photo file is corrupt (e.g. a half-written `<documents>/product_photos/<id>.jpg`) →
+  Products → tap the product (edit form). (2) Add Product → photo square → "ပုံ ရွေးမယ်" → a file Flutter cannot decode.
+- Expected: spec 6e94350 "broken file → initial" — the form's photo square falls back like the POS tile and the Products row do
+  (camera box / initial), no error.
+- Actual: `Expected: null  Actual: _Exception:<Exception: Invalid image data>` (reported by the image resource service while the
+  form shows the preview). Debug builds draw a red error box in the 88 px square, release builds a blank square without the camera icon.
+  The rest works: the product saves, "ဓာတ်ပုံ သိမ်းလို့ မရပါ" is shown for (2), nothing is stored; the list and POS tile show the
+  initial for (1); tapping the square still offers ရိုက်မယ် / ရွေးမယ် / ဖယ်မယ်.
+- Suspected area: `mobile/lib/features/products/presentation/add_product_screen.dart` `build` — the `Image(key: productPhotoPreview)`
+  has no `errorBuilder` (the tile in `product_tile.dart` and `InitialAvatar` in `common.dart` have one).
+- Blocks beta: no (needs a corrupt file or an undecodable pick; the user can remove / replace the photo).
 - Status: open
 
 ---
