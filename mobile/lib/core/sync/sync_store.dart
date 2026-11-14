@@ -16,6 +16,11 @@ abstract final class SyncStateKeys {
 
   /// The first full download (§5.4) completed for this shop.
   static const initialSyncDone = 'initialSyncDone';
+
+  /// BUG-32: pulled rows skipped because a local unit with them was not sent yet ("table:id", JSON list),
+  /// and the cursor to pull again from once none of those units is left in the outbox.
+  static const repullKeys = 'repullKeys';
+  static const repullFrom = 'repullFrom';
 }
 
 class OutboxCounts {
@@ -108,6 +113,12 @@ class SyncStore {
   /// ahead) are clamped to it here too, as the server stored them (BUG-5).
   Future<bool> applyResults(List<OutboxRow> batch, List<UnitResult> results, {DateTime? editTimeLimit}) =>
       db.transaction(() async {
+        final blocked = await _applyResults(batch, results, editTimeLimit: editTimeLimit);
+        await _rewindIfSent();
+        return blocked;
+      });
+
+  Future<bool> _applyResults(List<OutboxRow> batch, List<UnitResult> results, {DateTime? editTimeLimit}) async {
         final byUnit = {for (final r in results) r.unitId: r};
         for (final o in batch) {
           final r = byUnit[o.unitId];
@@ -132,7 +143,24 @@ class SyncStore {
         }
         await db.writeState(SyncStateKeys.lastPushAt, nowUtc().toIso8601String());
         return false;
-      });
+  }
+
+  /// BUG-32: once no unit holding a skipped pulled row is left, pull again from before the skip, so this
+  /// phone gets the server's current copy of those rows (whatever the push did to them).
+  Future<void> _rewindIfSent() async {
+    final raw = await db.readState(SyncStateKeys.repullKeys);
+    if (raw == null) return;
+    final keys = {for (final k in jsonDecode(raw) as List) k as String};
+    if (keys.intersection(await _unpushedIds()).isNotEmpty) return; // still waiting (pending or rejected)
+    final from = await db.readState(SyncStateKeys.repullFrom) ?? '0';
+    if (_cursorValue(from) < _cursorValue(await cursor())) await db.writeState(SyncStateKeys.pullCursor, from);
+    await (db.delete(db.syncState)..where((x) => x.key.isIn([SyncStateKeys.repullKeys, SyncStateKeys.repullFrom]))).go();
+  }
+
+  static BigInt _cursorValue(String c) {
+    final hex = c.trim().toLowerCase().replaceFirst('0x', '');
+    return BigInt.tryParse(hex.isEmpty ? '0' : hex, radix: 16) ?? BigInt.zero;
+  }
 
   /// The server accepts an edit time at most this far ahead of its clock
   /// (backend SyncLimits.MaxClockAhead).
@@ -199,11 +227,27 @@ class SyncStore {
   /// either fully merged with its cursor, or not at all. Returns rows merged.
   Future<int> mergePage(PullPage page) => db.transaction(() async {
         final unpushed = await _unpushedIds();
+        final start = await cursor();
+        final skipped = <String>{};
         var n = 0;
         for (final MapEntry(key: table, value: rows) in page.changes.entries) {
           for (final j in rows) {
+            final key = '$table:${j['id'] ?? j['featureKey']}';
+            if (unpushed.contains(key)) {
+              skipped.add(key); // BUG-32: never over a row of an unsent / blocked unit (any table)
+              continue;
+            }
             await _merge(table, j, unpushed);
             n++;
+          }
+        }
+        if (skipped.isNotEmpty) {
+          final old = await db.readState(SyncStateKeys.repullKeys);
+          final keys = {...?(old == null ? null : (jsonDecode(old) as List).cast<String>()), ...skipped};
+          await db.writeState(SyncStateKeys.repullKeys, jsonEncode(keys.toList()));
+          final from = await db.readState(SyncStateKeys.repullFrom);
+          if (from == null || _cursorValue(start) < _cursorValue(from)) {
+            await db.writeState(SyncStateKeys.repullFrom, start);
           }
         }
         await db.writeState(SyncStateKeys.pullCursor, page.cursor);
@@ -294,7 +338,11 @@ class SyncStore {
   }
 
   /// A row the server returned outside a pull (e.g. a resolved issue).
-  Future<void> mergeRow(String table, Json row) => db.transaction(() async => _merge(table, row, await _unpushedIds()));
+  Future<void> mergeRow(String table, Json row) => db.transaction(() async {
+        final unpushed = await _unpushedIds();
+        if (unpushed.contains('$table:${row['id'] ?? row['featureKey']}')) return;
+        await _merge(table, row, unpushed);
+      });
 
   // ---------------------------------------------------------------- rejected units (§7)
 
