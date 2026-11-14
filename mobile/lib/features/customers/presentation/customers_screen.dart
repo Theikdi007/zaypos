@@ -93,6 +93,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   ),
                   const SizedBox(height: 12),
                   FilterChips<_Tab>(
+                    // BUG-8: scrolls sideways on narrow phones (320 px) instead of overflowing.
+                    scrollable: true,
                     options: [
                       (_Tab.debt, 'အကြွေးရှိသူ'),
                       (_Tab.overdue, 'ကြာနေပြီ ($overdueCount)'),
