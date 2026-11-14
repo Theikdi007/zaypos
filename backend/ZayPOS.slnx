@@ -8,5 +8,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/ZayPOS.Api.Tests/ZayPOS.Api.Tests.csproj" />
     <Project Path="tests/ZayPOS.Domain.Tests/ZayPOS.Domain.Tests.csproj" />
+    <Project Path="tests/ZayPOS.QA.Tests/ZayPOS.QA.Tests.csproj" />
   </Folder>
 </Solution>
