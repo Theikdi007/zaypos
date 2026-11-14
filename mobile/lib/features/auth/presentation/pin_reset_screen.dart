@@ -128,13 +128,13 @@ class _PinResetScreenState extends ConsumerState<PinResetScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
               children: [
-                Text('ဆိုင်ဖွင့်တုန်းက ဖုန်းနံပါတ်ကို SMS ကုဒ် ပို့ပေးပါမယ်။ PIN အသစ်နဲ့ ဒီဖုန်းကို ပြန်ဝင်ပေးပါမယ်။',
+                Text('ဆိုင်ဖွင့်တုန်းက ဖုန်းနံပါတ်ကို OTP ကုဒ် ပို့ပေးပါမယ်။ PIN အသစ်နဲ့ ဒီဖုန်းကို ပြန်ဝင်ပေးပါမယ်။',
                     style: AppText.s(14, color: AppColors.muted)),
                 const SizedBox(height: 18),
                 LabeledField(label: 'ဖုန်းနံပါတ်', child: PhoneField(controller: _phone)),
                 if (_codeSent) ...[
                   const SizedBox(height: 16),
-                  _digits(_otp, 'SMS ကုဒ်'),
+                  _digits(_otp, 'OTP ကုဒ်'),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(

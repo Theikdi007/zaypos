@@ -125,7 +125,7 @@ class ModuleRestockSheet extends ConsumerStatefulWidget {
   final Set<String> knownSerials;
 
   /// The product does not track expiry (no expiryAlertDays): it restocks as a
-  /// plain product (BUG-20) — the only choice shown is "Batch မပါ"; old
+  /// plain product (BUG-20) — the only choice shown is "အသုတ် မပါ"; old
   /// batches are not offered and no new batch can be started here.
   final bool batchOptional;
 
@@ -188,7 +188,7 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
     final limits = ref.read(syncLimitsProvider);
     final v = limits.normalize('productSerials.serial', _imei.text);
     if (v.isEmpty) return true;
-    final error = limits.checkText('productSerials.serial', v, label: 'IMEI / Serial') ??
+    final error = limits.checkText('productSerials.serial', v, label: 'IMEI / စီးရီးနံပါတ်') ??
         (_imeis.contains(v) || widget.knownSerials.contains(v) || widget.serials.any((s) => s.serial == v && s.status == SerialStatus.inStock)
             ? 'ဒီ IMEI ရှိပြီးသားပါ။'
             : null);
@@ -238,8 +238,8 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
           final limits = ref.read(syncLimitsProvider);
           final no = _batchNo.text.trim();
           // Same rule as the edit form (BUG-16): one batch number per product.
-          final error = limits.checkText('productBatches.batchNo', no, label: 'Batch နံပါတ်') ??
-              (widget.batches.any((b) => b.batchNo == no) ? 'ဒီ Batch ရှိပြီးသားပါ။' : null);
+          final error = limits.checkText('productBatches.batchNo', no, label: 'အသုတ်နံပါတ်') ??
+              (widget.batches.any((b) => b.batchNo == no) ? 'ဒီ အသုတ် ရှိပြီးသားပါ။' : null);
           if (error != null) {
             setState(() => _error = error);
             return;
@@ -274,8 +274,8 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
             Text(
               switch (widget.mode) {
                 RestockMode.imei => '${widget.productName} · ဝင်လာတဲ့ ဖုန်းတစ်လုံးချင်း IMEI ထည့်ပါ',
-                RestockMode.batch => '${widget.productName} · ဘယ် Batch ထဲ ဝင်လာလဲ',
-                RestockMode.variant => '${widget.productName} · ဘယ် Size / အရောင် ဝင်လာလဲ',
+                RestockMode.batch => '${widget.productName} · ဘယ် အသုတ် ထဲ ဝင်လာလဲ',
+                RestockMode.variant => '${widget.productName} · ဘယ် ဆိုဒ် / အရောင် ဝင်လာလဲ',
               },
               style: AppText.s(13, color: AppColors.muted),
             ),
@@ -304,7 +304,7 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
               child: AppInput(
                 key: const ValueKey('imei'),
                 controller: _imei,
-                hint: 'IMEI 15 လုံး (scan / ရိုက်)',
+                hint: 'IMEI 15 လုံး (စကင်ဖတ် / ရိုက်)',
                 keyboardType: TextInputType.number,
                 semanticLabel: 'IMEI ထည့်ရန်',
                 onSubmitted: (_) => _addImei(),
@@ -373,30 +373,30 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
             _choice(
               key: const ValueKey('restockBatch-new'),
               selected: isNew,
-              label: '+ Batch အသစ်',
+              label: '+ အသုတ်အသစ်',
               onTap: () => setState(() => _batch = ModuleRestockSheet.newBatch),
             ),
           if (widget.batchOptional)
             _choice(
               key: const ValueKey('restockBatch-none'),
               selected: _batch == ModuleRestockSheet.noBatch,
-              label: 'Batch မပါ',
+              label: 'အသုတ် မပါ',
               onTap: () => setState(() => _batch = ModuleRestockSheet.noBatch),
             ),
         ],
       ),
       if (widget.batchOptional) ...[
         const SizedBox(height: 6),
-        Text("သက်တမ်း မမှတ်တဲ့ ပစ္စည်း · Batch မလိုပါ (ပစ္စည်းမှာ 'ကုန်ခါနီးရင် သတိပေးမယ်' ရွေးမှ Batch နဲ့ ဖြည့်ပါမယ်)",
+        Text("သက်တမ်း မမှတ်တဲ့ ပစ္စည်း · အသုတ် မလိုပါ (ပစ္စည်းမှာ 'ကုန်ခါနီးရင် သတိပေးမယ်' ရွေးမှ အသုတ်နဲ့ ဖြည့်ပါမယ်)",
             style: AppText.s(12, color: AppColors.muted)),
       ],
       if (isNew) ...[
         const SizedBox(height: 10),
         TwoCol(
           LabeledField(
-            label: 'Batch နံပါတ်',
+            label: 'အသုတ်နံပါတ်',
             small: true,
-            child: AppInput(key: const ValueKey('restockBatchNo'), controller: _batchNo, semanticLabel: 'Batch နံပါတ်'),
+            child: AppInput(key: const ValueKey('restockBatchNo'), controller: _batchNo, semanticLabel: 'အသုတ်နံပါတ်'),
           ),
           LabeledField(
             label: 'သက်တမ်းကုန်ရက်',

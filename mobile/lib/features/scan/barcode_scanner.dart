@@ -21,7 +21,7 @@ class CameraBarcodeScanner implements BarcodeScanner {
   const CameraBarcodeScanner();
 
   @override
-  Future<String?> scan(BuildContext context, {String title = 'Barcode scan'}) =>
+  Future<String?> scan(BuildContext context, {String title = 'Barcode ဖတ်မယ်'}) =>
       Navigator.of(context, rootNavigator: true).push<String>(
         MaterialPageRoute(fullscreenDialog: true, builder: (_) => _CameraScanScreen(title: title)),
       );
@@ -79,7 +79,7 @@ class _CameraScanScreenState extends State<_CameraScanScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Text(
-                  'ကင်မရာ ဖွင့်လို့ မရပါ။ Settings မှာ ကင်မရာ ခွင့်ပြုပါ။',
+                  'ကင်မရာ ဖွင့်လို့ မရပါ။ ဖုန်း ဆက်တင်မှာ ကင်မရာ ခွင့်ပြုပါ။',
                   textAlign: TextAlign.center,
                   style: AppText.s(15, color: AppColors.surface),
                 ),

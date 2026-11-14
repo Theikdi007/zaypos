@@ -75,7 +75,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
   /// Camera scan into the barcode field.
   Future<void> _scanBarcode() async {
-    final code = await ref.read(barcodeScannerProvider).scan(context, title: 'Barcode scan');
+    final code = await ref.read(barcodeScannerProvider).scan(context, title: 'Barcode ဖတ်မယ်');
     if (code == null || !mounted) return;
     _barcode.text = ref.read(syncLimitsProvider).normalize('products.barcode', code);
   }
@@ -150,7 +150,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   String? _addImei(String raw) {
     final limits = ref.read(syncLimitsProvider);
     final v = limits.normalize('productSerials.serial', raw);
-    final error = limits.checkText('productSerials.serial', v, label: 'IMEI / Serial');
+    final error = limits.checkText('productSerials.serial', v, label: 'IMEI / စီးရီးနံပါတ်');
     if (error != null) return error;
     if (_imeis.contains(v)) return 'ဒီ IMEI ထည့်ပြီးသားပါ။';
     // Already on this phone (any product): refused (BUG-18).
@@ -194,7 +194,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         ('category', limits.checkText('products.category', _category ?? defaultCategory, label: 'အမျိုးအစား')),
         ('unit', limits.checkText('products.unit', _unit ?? '', label: 'ယူနစ်')),
         ('cost', limits.checkNumber('products.cost', int.tryParse(_cost.text), label: 'ဝယ်ဈေး')),
-        if (hasBatchInput) ('batchNo', limits.checkText('productBatches.batchNo', _batchNo.text, label: 'Batch နံပါတ်')),
+        if (hasBatchInput) ('batchNo', limits.checkText('productBatches.batchNo', _batchNo.text, label: 'အသုတ်နံပါတ်')),
       ])
         key: ?error,
     };
@@ -203,15 +203,15 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     if (needsBatch) {
       // Owner decision: batch number AND expiry date for tracked opening stock.
       errors['batchNo'] = _batchNo.text.trim().isEmpty
-          ? "သက်တမ်းမှတ်တဲ့ ပစ္စည်းမို့ Batch နံပါတ် ထည့်ပါ (သို့ 'သက်တမ်း မမှတ်ပါ' ရွေးပါ)။"
+          ? "သက်တမ်းမှတ်တဲ့ ပစ္စည်းမို့ အသုတ်နံပါတ် ထည့်ပါ (သို့ 'သက်တမ်း မမှတ်ပါ' ရွေးပါ)။"
           : 'သက်တမ်းမှတ်တဲ့ ပစ္စည်းမို့ သက်တမ်းကုန်ရက် ရွေးပါ။';
     }
     if (needsOpeningBatch && !errors.containsKey('batchNo')) {
       final no = _batchNo.text.trim();
       if (no.isEmpty || _expiry == null) {
-        errors['batchNo'] = 'လက်ရှိ Batch မရှိတဲ့ stock ${Qty.format(unbatched)} ခု အတွက် Batch နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ။';
+        errors['batchNo'] = 'လက်ရှိ အသုတ် မရှိတဲ့ stock ${Qty.format(unbatched)} ခု အတွက် အသုတ်နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ။';
       } else if (existingBatches.any((b) => b.batchNo == no)) {
-        errors['batchNo'] = 'ဒီ Batch ရှိပြီးသားပါ။';
+        errors['batchNo'] = 'ဒီ အသုတ် ရှိပြီးသားပါ။';
       }
     }
     if (errors.isNotEmpty) {
@@ -510,7 +510,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     final serialMode = f.serialWarranty && _serial;
     final showStockInputs = _track && !serialMode && !f.variants;
     final stockHint = f.variants
-        ? 'Variant တစ်ခုချင်း stock ကို အပေါ်မှာ ထည့်ပါ'
+        ? 'ဆိုဒ် / အရောင် တစ်ခုချင်း stock ကို အပေါ်မှာ ထည့်ပါ'
         : serialMode
             ? 'IMEI အရေအတွက်နဲ့ အလိုအလျောက် တွက်မယ်'
             : 'ရောင်းတိုင်း အလိုအလျောက် နုတ်ပေးမယ်';
@@ -530,7 +530,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             trailing: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
               decoration: BoxDecoration(color: _t.tint, borderRadius: AppRadius.chipR),
-              child: Text('${_t.productBadge ?? _t.label} template',
+              child: Text('${_t.productBadge ?? _t.label} ဆိုင်ပုံစံ',
                   style: AppText.s(12, weight: AppText.w700, color: AppColors.textStrong)),
             ),
           ),
@@ -597,12 +597,12 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                             child: AppInput(
                               key: const ValueKey('barcode'),
                               controller: _barcode,
-                              hint: 'Scan ဖတ် သို့မဟုတ် ရိုက်ထည့်',
+                              hint: 'စကင်ဖတ် သို့မဟုတ် ရိုက်ထည့်',
                               semanticLabel: 'Barcode',
                             ),
                           ),
                           const SizedBox(width: 8),
-                          ScanSquare(key: const ValueKey('barcodeScan'), label: 'Barcode scan', onTap: _scanBarcode),
+                          ScanSquare(key: const ValueKey('barcodeScan'), label: 'Barcode ဖတ်မယ်', onTap: _scanBarcode),
                         ],
                       ),
                     ),
@@ -684,7 +684,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     batchError: _errors['batchNo'],
                     showBatch: !_isEdit || openingQty > 0,
                     note: openingQty > 0
-                        ? 'လက်ရှိ Batch မရှိတဲ့ stock ${Qty.format(openingQty)} ခု ကို ဒီ Batch ထဲ ထည့်ပါမယ် · Batch နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ'
+                        ? 'လက်ရှိ အသုတ် မရှိတဲ့ stock ${Qty.format(openingQty)} ခု ကို ဒီ အသုတ် ထဲ ထည့်ပါမယ် · အသုတ်နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ'
                         : null,
                   ),
                 if (f.serialWarranty)
@@ -697,7 +697,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     onWarrantyChanged: (m) => setState(() => _warrantyMonths = m),
                     showSerials: !_isEdit,
                     registerCommit: (f) => _commitTypedImei = f,
-                    onScanImei: () => ref.read(barcodeScannerProvider).scan(context, title: 'IMEI scan'),
+                    onScanImei: () => ref.read(barcodeScannerProvider).scan(context, title: 'IMEI ဖတ်မယ်'),
                   ),
                 if (f.variants && !_isEdit)
                   VariantsSection(

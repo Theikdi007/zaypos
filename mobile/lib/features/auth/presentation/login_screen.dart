@@ -89,7 +89,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(height: 12),
                         // Debug builds only: the offline sample shop (never synced).
                         PrimaryButton(
-                          label: 'Demo ဆိုင် (offline · စမ်းသပ်)',
+                          label: 'စမ်းသပ်ဆိုင် (အင်တာနက်မလို)',
                           variant: ButtonVariant.outlineDark,
                           height: 46,
                           radius: 14,

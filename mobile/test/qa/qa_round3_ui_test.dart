@@ -253,7 +253,7 @@ void main() {
       expect(stockWhere(c, (m) => ids.contains(m.batchId)), productStock(c, p.id));
     });
 
-    testWidgets('"+ Batch အသစ်" with batch no. + expiry picked in the calendar → a new batch holding exactly the goods, '
+    testWidgets('"+ အသုတ်အသစ်" with batch no. + expiry picked in the calendar → a new batch holding exactly the goods, '
         'sold first at POS by FEFO', (tester) async {
       final c = await boot(tester, 'pharmacy');
       final p = newProduct(c, 'QA Amoxicillin R3', expiryAlertDays: 30);
@@ -290,7 +290,7 @@ void main() {
 
       // POS: two good batches → asked; the new one expires first → listed first; selling it reduces it.
       await tapInPos(tester, c, p.name);
-      expect(find.text('ဘယ် Batch လဲ?'), findsOneWidget);
+      expect(find.text('ဘယ် အသုတ် လဲ?'), findsOneWidget);
       expect(tester.getTopLeft(inSheet(find.textContaining('R3NEW'))).dy,
           lessThan(tester.getTopLeft(inSheet(find.textContaining('B1 ·'))).dy));
       expect(inSheet(find.textContaining(shown)), findsOneWidget);
@@ -300,7 +300,7 @@ void main() {
       expect(stockWhere(c, (m) => m.batchId == nb.id), Qty.units(11));
     });
 
-    testWidgets('"+ Batch အသစ်" with the number of an existing batch is refused (edit form refuses it too)', (tester) async {
+    testWidgets('"+ အသုတ်အသစ်" with the number of an existing batch is refused (edit form refuses it too)', (tester) async {
       final c = await boot(tester, 'pharmacy');
       final p = newProduct(c, 'QA Dup batch', expiryAlertDays: 30);
       final b1 = batch(p, 'B1', DateTime.utc(2030, 6, 30));
@@ -522,7 +522,7 @@ void main() {
       final y = batch(p, 'YDAY', today.subtract(const Duration(days: 1)));
       await c.read(productServiceProvider).create(p, batches: [b, y], initialStock: [into(p, 2, batchId: b.id), into(p, 2, batchId: y.id)]);
       await tapInPos(tester, c, p.name);
-      expect(find.text('ဘယ် Batch လဲ?'), findsNothing, reason: 'one unexpired batch with stock: taken without asking');
+      expect(find.text('ဘယ် အသုတ် လဲ?'), findsNothing, reason: 'one unexpired batch with stock: taken without asking');
       expect(find.textContaining('သက်တမ်းကုန်နေပါပြီ'), findsNothing, reason: 'no confirm for the expiry day');
       expect(c.read(cartProvider).lines.single.batchId, b.id, reason: 'yesterday\'s batch is expired, never auto-picked');
     });
@@ -534,10 +534,10 @@ void main() {
       final y = batch(p, 'YDAY', today.subtract(const Duration(days: 1)));
       await c.read(productServiceProvider).create(p, batches: [y], initialStock: [into(p, 3, batchId: y.id)]);
       await tapInPos(tester, c, p.name);
-      expect(find.text('ဘယ် Batch လဲ?'), findsOneWidget);
+      expect(find.text('ဘယ် အသုတ် လဲ?'), findsOneWidget);
       expect(inSheet(find.text(ExpiredBadge.label)), findsOneWidget);
       final title = tester.widget<Text>(inSheet(find.textContaining('YDAY')));
-      expect(title.style?.color, isNot(tester.widget<Text>(find.text('ဘယ် Batch လဲ?')).style?.color),
+      expect(title.style?.color, isNot(tester.widget<Text>(find.text('ဘယ် အသုတ် လဲ?')).style?.color),
           reason: 'expired title drawn in the danger colour');
       await tester.tap(inSheet(find.textContaining('YDAY')));
       await tester.pumpAndSettle();

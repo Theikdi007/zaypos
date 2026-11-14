@@ -47,10 +47,10 @@ class SyncReviewScreen extends ConsumerWidget {
                         textAlign: TextAlign.center, style: AppText.s(14, color: AppColors.muted)),
                   ),
                 if (rejected.isNotEmpty) ...[
-                  section('Server က လက်မခံသေးတဲ့ စာရင်း'),
+                  section('ဆာဗာက လက်မခံသေးတဲ့ စာရင်း'),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                    child: Text('ဒီစာရင်း မပြင်မချင်း နောက်ပိုင်း စာရင်းတွေ server ကို မပို့နိုင်ပါ။',
+                    child: Text('ဒီစာရင်း မပြင်မချင်း နောက်ပိုင်း စာရင်းတွေ ဆာဗာကို မပို့နိုင်ပါ။',
                         style: AppText.s(12, color: AppColors.dangerInk)),
                   ),
                   AppCard(

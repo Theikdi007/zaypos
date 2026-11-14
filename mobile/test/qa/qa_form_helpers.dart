@@ -1,4 +1,4 @@
-// QA helpers for the Add Product / edit form "သက်တမ်း နှင့် Batch" section (owner decisions 2026-11-14:
+// QA helpers for the Add Product / edit form "သက်တမ်း နှင့် အသုတ်" section (owner decisions 2026-11-14:
 // expiryAlertDays starts empty in Add Product; batch no. + expiry are required for tracked opening stock).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

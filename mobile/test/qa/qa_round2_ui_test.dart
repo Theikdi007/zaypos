@@ -309,7 +309,7 @@ void main() {
         restockMovement(tenantId: tid, productId: p.id, variantId: l.id, qtyMilli: Qty.units(2), note: 'initial'),
       ]);
       await tapInPos(tester, c, p.name);
-      expect(find.text('ဘယ် Size / အရောင် လဲ?'), findsOneWidget);
+      expect(find.text('ဘယ် ဆိုဒ် / အရောင် လဲ?'), findsOneWidget);
       expect(inSheet(find.text('ကျန် 3')), findsOneWidget);
       expect(inSheet(find.text('ကျန် 2')), findsOneWidget);
       await tester.tap(inSheet(find.textContaining('L')).first);
@@ -339,7 +339,7 @@ void main() {
       await c.read(productServiceProvider).create(p, batches: [late, undated, early, empty],
           initialStock: [into(late, 5), into(undated, 5), into(early, 5)]);
       await tapInPos(tester, c, p.name);
-      expect(find.text('ဘယ် Batch လဲ?'), findsOneWidget);
+      expect(find.text('ဘယ် အသုတ် လဲ?'), findsOneWidget);
       double y(String s) => tester.getTopLeft(inSheet(find.textContaining(s))).dy;
       expect(y('EARLY27'), lessThan(y('LATE28')));
       expect(y('LATE28'), lessThan(y('NODATE')));

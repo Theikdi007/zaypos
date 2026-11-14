@@ -80,7 +80,7 @@ void main() {
     await tester.enterText(imei, '35693803564380X');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
-    expect(find.text('IMEI / Serial မှာ ဂဏန်းနဲ့ အင်္ဂလိပ်စာလုံးပဲ ထည့်ပါ။'), findsNothing,
+    expect(find.text('IMEI / စီးရီးနံပါတ် မှာ ဂဏန်းနဲ့ အင်္ဂလိပ်စာလုံးပဲ ထည့်ပါ။'), findsNothing,
         reason: 'latin letters are ASCII: allowed');
 
     await tester.enterText(imei, '၃၅၆၉၃၈၀၃၅၆၄၃၈၀၉');
@@ -96,7 +96,7 @@ void main() {
     await tester.enterText(imei, 'IMEI ကခ');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
-    expect(find.text('IMEI / Serial မှာ ဂဏန်းနဲ့ အင်္ဂလိပ်စာလုံးပဲ ထည့်ပါ။'), findsOneWidget);
+    expect(find.text('IMEI / စီးရီးနံပါတ် မှာ ဂဏန်းနဲ့ အင်္ဂလိပ်စာလုံးပဲ ထည့်ပါ။'), findsOneWidget);
   });
 
   testWidgets('add customer: name limit; phone stored the way the server stores it', (tester) async {

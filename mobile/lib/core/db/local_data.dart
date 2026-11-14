@@ -173,7 +173,7 @@ class LocalData {
     return tenantId;
   }
 
-  static const demoShopName = 'ရွှေဝါ ကုန်စုံဆိုင် (Demo)';
+  static const demoShopName = 'ရွှေဝါ ကုန်စုံဆိုင် (စမ်းသပ်)';
 }
 
 /// The design's sample shop (products, opening stock, customers, debt, ~700

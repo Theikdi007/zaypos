@@ -23,12 +23,11 @@ import 'package:zaypos_app/main.dart';
 
 import '../helpers.dart';
 
-/// Same list as m/qa/qa_ux_test.dart (TC-UX-02).
+/// Same list as m/qa/qa_ux_test.dart (TC-UX-02), plus clothing size values.
 const _allowedLatin = {
-  'zaypos', 'kbzpay', 'wavepay', 'kbz', 'wave', 'viber', 'ks', 'pin', 'otp', 'sms', 'imei', 'barcode', 'scan', 'stock',
-  'sync', 'quick', 'sale', 'batch', 'excel', 'support', 'demo', 'screenshot', 'features', 'feature', 'template', 'variant',
-  'serial', 'offline', 'app', 'server', 'pro', 'free', 'ml', 'l', 'kg', 'id',
-  'xx', 'xxx',
+  // owner's list (2026-11-14, BUG-9)
+  'kbzpay', 'wavepay', 'viber', 'excel', 'imei', 'barcode', 'pin', 'otp', 'stock', 'sync',
+  'zaypos', 'ks', 'ml', 'l', 'kg', 'xx', 'xxx', // brand, currency / units, phone placeholders
   // round 7 additions — data, not UI words: clothing size values offered as chips (S M L XL XXL)
   'xs', 'xl', 'xxl',
 };

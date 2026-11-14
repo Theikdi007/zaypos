@@ -38,12 +38,13 @@ final _appRoutes = <String Function()>[
 /// Routes reachable signed out.
 const _publicRoutes = ['/login', '/register', '/register?step=2', '/register?step=3', '/register?step=4', '/pin-reset'];
 
-/// Latin words allowed on Burmese screens: brand / payment names and loanwords
-/// that the design itself uses (they appear in docs/qa/test-cases.md expected texts).
+/// Latin words allowed on Burmese screens. Owner's list (2026-11-14, BUG-9): KBZPay, WavePay, Viber, Excel, IMEI,
+/// Barcode, PIN, OTP, Stock, Sync — everything else is translated. Not English words, so also allowed: the brand,
+/// the currency and units, and phone-number placeholders.
 const _allowedLatin = {
-  'zaypos', 'kbzpay', 'wavepay', 'kbz', 'wave', 'viber', 'ks', 'pin', 'otp', 'sms', 'imei', 'barcode', 'scan', 'stock',
-  'sync', 'quick', 'sale', 'batch', 'excel', 'support', 'demo', 'screenshot', 'features', 'feature', 'template', 'variant',
-  'serial', 'offline', 'app', 'server', 'pro', 'free', 'ml', 'l', 'kg', 'id',
+  'kbzpay', 'wavepay', 'viber', 'excel', 'imei', 'barcode', 'pin', 'otp', 'stock', 'sync',
+  'zaypos', // brand
+  'ks', 'ml', 'l', 'kg', // currency / units
   'xx', 'xxx', // phone number placeholders (09 7xx xxx 102)
 };
 

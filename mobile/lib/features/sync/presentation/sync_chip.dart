@@ -24,7 +24,7 @@ class SyncChip extends ConsumerWidget {
           icon: AppIcons.send,
         ),
       SyncChipKind.offline =>
-        OfflineSyncChip(label: s.waiting > 0 ? 'Offline · sync ${mmDigits(s.waiting)} ခုစောင့်' : 'Offline'),
+        OfflineSyncChip(label: s.waiting > 0 ? 'လိုင်းမရှိ · Sync ${mmDigits(s.waiting)} ခုစောင့်' : 'လိုင်းမရှိ'),
       SyncChipKind.problem => OfflineSyncChip(
           label: 'Sync ပြဿနာ (${mmDigits(s.problems)})',
           tone: ChipTone.danger,

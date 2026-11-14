@@ -181,7 +181,7 @@ void main() {
   // ================================================================ BUG-20 / TC-PROD-NEW-23
   group('TC-PROD-NEW-23 (BUG-20) a no-expiry product WITH old batches restocks and sells as a plain product', () {
     testWidgets('pharmacy: soap (no expiryAlertDays) with batch S1 (3 left) + expired S0 → "Stock ဖြည့်မယ်" shows only '
-        '"Batch မပါ" (selected), no old batch, no "+ Batch အသစ်"; +5 outside batches; POS: no sheet, no confirm, line without '
+        '"အသုတ် မပါ" (selected), no old batch, no "+ အသုတ်အသစ်"; +5 outside batches; POS: no sheet, no confirm, line without '
         'batch; stock = all movements', (tester) async {
       final c = await boot(tester, 'pharmacy', height: 1000);
       final p = newProduct(c, 'QA R5 soap with batches');
@@ -194,7 +194,7 @@ void main() {
       expect(find.byKey(ValueKey('restockBatch-${s1.id}')), findsNothing, reason: 'old batches are not offered');
       expect(find.byKey(ValueKey('restockBatch-${s0.id}')), findsNothing);
       expect(find.byKey(const ValueKey('restockBatch-new')), findsNothing, reason: 'no new batch for a no-expiry product');
-      expect(selected(tester, 'restockBatch-none'), isTrue, reason: '"Batch မပါ" is the (only) choice');
+      expect(selected(tester, 'restockBatch-none'), isTrue, reason: '"အသုတ် မပါ" is the (only) choice');
       await keys(tester, ['5']);
       final n = kinds(c).length;
       await saveSheet(tester);
@@ -204,7 +204,7 @@ void main() {
       expect(productStock(c, p.id), Qty.units(9));
 
       await tapInPos(tester, c, p.name);
-      expect(find.text('ဘယ် Batch လဲ?'), findsNothing, reason: 'no batch sheet');
+      expect(find.text('ဘယ် အသုတ် လဲ?'), findsNothing, reason: 'no batch sheet');
       expect(find.textContaining('သက်တမ်းကုန်နေပါပြီ'), findsNothing, reason: 'no expired confirm (S0 is expired)');
       expect(c.read(cartProvider).lines.single.batchId, isNull);
       await tester.tap(find.text('ငွေရှင်းမယ်'));
@@ -216,7 +216,7 @@ void main() {
       expect(stockWhere(c, (m) => m.batchId == s1.id), Qty.units(3), reason: 'S1 untouched by the plain sale');
     });
 
-    testWidgets('pharmacy: UNTRACKED no-expiry soap sold 1 → "Stock ဖြည့်မယ်" ("Batch မပါ") 20 → shows 20, not 19 '
+    testWidgets('pharmacy: UNTRACKED no-expiry soap sold 1 → "Stock ဖြည့်မယ်" ("အသုတ် မပါ") 20 → shows 20, not 19 '
         '(TC-PROD-06 rule), ONE stockAdjust unit, no batch', (tester) async {
       final c = await boot(tester, 'pharmacy', height: 1000);
       final p = newProduct(c, 'QA R5 untracked soap');
@@ -259,7 +259,7 @@ void main() {
             expiryDate: DateTime.utc(2030, 6, 30), createdAt: t0, updatedAt: t0);
         await c.read(stockServiceProvider).receive(productId: p.id, qtyMilli: Qty.units(5), newBatch: b1);
         await tapInPos(tester, c, p.name);
-        final asked = find.text('ဘယ် Batch လဲ?').evaluate().isNotEmpty;
+        final asked = find.text('ဘယ် အသုတ် လဲ?').evaluate().isNotEmpty;
         final first = c.read(cartProvider).lines.firstOrNull?.batchId == b1.id ? 'B1' : 'other';
         c.read(cartProvider.notifier).clear();
         // 5 more sales the way POS just picked them (from B1) → B1 empty, 10 still outside batches

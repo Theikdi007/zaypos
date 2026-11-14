@@ -99,7 +99,7 @@ class Cart {
 }
 
 /// Quick Sale lines without a name are labeled with the mode name.
-const quickSaleName = 'Quick Sale';
+const quickSaleName = 'အမြန်ရောင်း';
 
 class CartNotifier extends Notifier<Cart> {
   static const step = Qty.scale; // one unit

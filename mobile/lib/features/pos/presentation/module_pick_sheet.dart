@@ -75,7 +75,7 @@ Future<ModulePickResult> pickModuleUnit(BuildContext context, WidgetRef ref, Pro
       if (!context.mounted) return const PickCancelled();
       return _sheet(
         context,
-        title: 'ဘယ် Size / အရောင် လဲ?',
+        title: 'ဘယ် ဆိုဒ် / အရောင် လဲ?',
         subtitle: p.name,
         empty: '',
         options: [
@@ -96,7 +96,7 @@ Future<ModulePickResult> pickModuleUnit(BuildContext context, WidgetRef ref, Pro
   if (f.expiryBatch && p.expiryAlertDays != null) {
     final batches = [...await products.watchBatches(p.id).first]..sort(_fefo);
     if (batches.isNotEmpty) {
-      ModulePick pickOf(ProductBatch b) => (batchId: b.id, variantId: null, serialId: null, label: 'Batch ${b.batchNo}');
+      ModulePick pickOf(ProductBatch b) => (batchId: b.id, variantId: null, serialId: null, label: 'အသုတ် ${b.batchNo}');
       final now = DateTime.now();
       final withStock = batches.where((b) => b.qtyMilli > 0).toList();
       // Expired batches are never picked automatically, and listed after the good ones.
@@ -108,7 +108,7 @@ Future<ModulePickResult> pickModuleUnit(BuildContext context, WidgetRef ref, Pro
       final shown = withStock.isEmpty ? batches : [...good, ...expired];
       final result = await _sheet(
         context,
-        title: 'ဘယ် Batch လဲ?',
+        title: 'ဘယ် အသုတ် လဲ?',
         subtitle: '${p.name} · သက်တမ်းစောတာ အပေါ်ဆုံး',
         empty: '',
         options: [
@@ -152,9 +152,9 @@ Future<bool> confirmSellExpired(BuildContext context, ProductBatch b) async =>
     await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Batch ${b.batchNo} သက်တမ်းကုန်နေပါပြီ', style: AppText.s(16, weight: AppText.w700, color: AppColors.danger)),
+        title: Text('အသုတ် ${b.batchNo} သက်တမ်းကုန်နေပါပြီ', style: AppText.s(16, weight: AppText.w700, color: AppColors.danger)),
         content: Text(
-          'သက်တမ်းကုန်ရက် ${DateFormat('yyyy-MM-dd').format(b.expiryDate!)}။ ဒီ Batch ကနေ ရောင်းမှာ သေချာလား?',
+          'သက်တမ်းကုန်ရက် ${DateFormat('yyyy-MM-dd').format(b.expiryDate!)}။ ဒီ အသုတ် ကနေ ရောင်းမှာ သေချာလား?',
           style: AppText.s(14),
         ),
         actions: [

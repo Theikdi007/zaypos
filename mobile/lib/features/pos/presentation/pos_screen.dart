@@ -52,7 +52,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   }
 
   Future<void> _scanWithCamera() async {
-    final code = await ref.read(barcodeScannerProvider).scan(context, title: 'Barcode scan');
+    final code = await ref.read(barcodeScannerProvider).scan(context, title: 'Barcode ဖတ်မယ်');
     if (code != null && mounted) await _onScan(code);
   }
 
@@ -168,7 +168,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 bottom: [
                   if (features.quickSale)
                     SegmentedTabs<PosMode>(
-                      options: const [(PosMode.products, 'ပစ္စည်းများ'), (PosMode.quick, 'Quick Sale')],
+                      options: const [(PosMode.products, 'ပစ္စည်းများ'), (PosMode.quick, 'အမြန်ရောင်း')],
                       selected: mode,
                       onChanged: (m) => setState(() => _mode = m),
                     ),
@@ -327,7 +327,7 @@ class _ScanButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Barcode scan',
+      label: 'Barcode ဖတ်မယ်',
       excludeSemantics: true,
       child: Material(
         color: AppColors.primary,

@@ -118,7 +118,7 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
     await Clipboard.setData(ClipboardData(text: json));
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Copy ကူးပြီးပါပြီ။ Viber မှာ Support ကို paste လုပ်ပြီး ပို့ပေးပါ။')),
+      const SnackBar(content: Text('ကူးယူပြီးပါပြီ။ Viber မှာ အကူအညီဌာနကို ကူးထည့်ပြီး ပို့ပေးပါ။')),
     );
   }
 
@@ -152,7 +152,7 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
               children: [
                 Semantics(header: true, child: Text(unitSummary(o.kind, rows), style: AppText.s(17, weight: AppText.w700))),
                 const SizedBox(height: 12),
-                Text('Server ရဲ့ အကြောင်းပြချက်', style: AppText.s(13, weight: AppText.w600)),
+                Text('ဆာဗာရဲ့ အကြောင်းပြချက်', style: AppText.s(13, weight: AppText.w600)),
                 const SizedBox(height: 6),
                 AuthMessage(o.rejectReason ?? ''),
                 const SizedBox(height: 20),
@@ -168,14 +168,14 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
                     const SizedBox(height: 10),
                   ],
                 ] else
-                  Text('ဒီစာရင်းမှာ ပြင်စရာ စာသား မရှိပါ။ App update ပြီးရင် ပြန်ပို့ကြည့်ပါ (သို့) Support ကို ပို့ပါ။',
+                  Text('ဒီစာရင်းမှာ ပြင်စရာ စာသား မရှိပါ။ အက်ပ် အပ်ဒိတ်ပြီးရင် ပြန်ပို့ကြည့်ပါ (သို့) အကူအညီဌာနကို ပို့ပါ။',
                       style: AppText.s(13, color: AppColors.muted)),
                 if (_error != null) ...[const SizedBox(height: 8), AuthMessage(_error!)],
                 const SizedBox(height: 16),
                 PrimaryButton(label: 'ပြင်ပြီး ပြန်ပို့မယ်', onPressed: _busy ? null : _resend),
                 const SizedBox(height: 10),
                 PrimaryButton(
-                  label: 'Support ကို ပို့မယ်',
+                  label: 'အကူအညီဌာနကို ပို့မယ်',
                   variant: ButtonVariant.outlineDark,
                   onPressed: _busy ? null : () => _copyForSupport(o),
                 ),

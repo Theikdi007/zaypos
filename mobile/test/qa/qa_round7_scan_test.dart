@@ -282,7 +282,7 @@ void main() {
       await openPos(tester, c);
 
       await burst(tester, '8850000000501');
-      expect(find.text('ဘယ် Batch လဲ?'), findsOneWidget);
+      expect(find.text('ဘယ် အသုတ် လဲ?'), findsOneWidget);
       final titles = tester.widgetList<Text>(inSheet(find.byType(Text))).map((t) => t.data ?? '').toList();
       expect(titles.indexWhere((s) => s.startsWith('EARLY')), lessThan(titles.indexWhere((s) => s.startsWith('LATE'))));
       await tester.tap(inSheet(find.textContaining('EARLY')));
@@ -364,7 +364,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('posScan')));
       await tester.pumpAndSettle();
       expect(cart(c).single.productId, p.id);
-      expect(scanner.titles, ['Barcode scan']);
+      expect(scanner.titles, ['Barcode ဖတ်မယ်']);
     });
 
     testWidgets('unknown code → sheet shows the normalized code; "မလုပ်တော့ပါ" changes nothing; "ပစ္စည်းအသစ် ထည့်မယ်" → '
@@ -425,7 +425,7 @@ void main() {
       expect(find.byWidgetPredicate((w) => w is Text && w.data == '356984102231458'), findsOneWidget,
           reason: 'listed once (the field may still hold the refused duplicate)');
       expect(find.text('ဒီ IMEI ထည့်ပြီးသားပါ။'), findsOneWidget, reason: 'same message as typing a duplicate');
-      expect(scanner.titles, ['Barcode scan', 'Barcode scan', 'IMEI scan', 'IMEI scan']);
+      expect(scanner.titles, ['Barcode ဖတ်မယ်', 'Barcode ဖတ်မယ်', 'IMEI ဖတ်မယ်', 'IMEI ဖတ်မယ်']);
     });
   });
 }

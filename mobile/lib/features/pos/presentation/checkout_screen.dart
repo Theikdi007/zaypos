@@ -273,7 +273,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text('ငွေလွှဲ screenshot (မဖြစ်မနေ မဟုတ်ပါ)',
+                          Text('ငွေလွှဲပြေစာ ပုံ (မဖြစ်မနေ မဟုတ်ပါ)',
                               style: AppText.s(13, weight: AppText.w600, color: AppColors.textSecondary)),
                           const SizedBox(height: 6),
                           InkWell(

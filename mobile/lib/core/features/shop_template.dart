@@ -64,7 +64,7 @@ class ShopTemplate {
       label: 'ဆေးဆိုင်',
       initial: 'ဆ',
       tint: AppColors.tintBlue,
-      desc: 'သက်တမ်းကုန်ရက် · Batch · ကုန်ခါနီး သတိပေး',
+      desc: 'သက်တမ်းကုန်ရက် · အသုတ် · ကုန်ခါနီး သတိပေး',
       presetCount: 0,
       features: TenantFeatures(
           quickSale: true, stock: true, presetCatalog: true, expiryBatch: true),
@@ -80,7 +80,7 @@ class ShopTemplate {
       label: 'ဖုန်း / လျှပ်စစ်ပစ္စည်း',
       initial: 'ဖ',
       tint: AppColors.tintIndigo,
-      desc: 'IMEI / Serial · အာမခံရက်',
+      desc: 'IMEI / စီးရီးနံပါတ် · အာမခံရက်',
       presetCount: 0,
       features: TenantFeatures(
           quickSale: true,
@@ -150,7 +150,7 @@ class ShopTemplate {
       label: 'အခြား',
       initial: '+',
       tint: AppColors.tintGray,
-      desc: 'အခြေခံ feature တွေပဲ · ကိုယ်တိုင်ဖွင့်',
+      desc: 'အခြေခံ လုပ်ဆောင်ချက်တွေပဲ · ကိုယ်တိုင်ဖွင့်',
       features: TenantFeatures(),
     ),
   ];

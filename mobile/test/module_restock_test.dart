@@ -126,7 +126,7 @@ void main() {
       expect(db(c).serials.where((s) => s.id == old.id).single.status, SerialStatus.sold, reason: 'history kept');
     });
 
-    testWidgets('pharmacy: default = newest unexpired batch; "+ Batch အသစ်" creates a batch (no. + expiry) holding the goods',
+    testWidgets('pharmacy: default = newest unexpired batch; "+ အသုတ်အသစ်" creates a batch (no. + expiry) holding the goods',
         (tester) async {
       final c = await boot(tester, 'pharmacy');
       final p = product(c, 'QA Ibuprofen');
@@ -276,7 +276,7 @@ void main() {
       await tester.enterText(field('newVariantColor'), 'အနက်');
       await tester.tap(find.byKey(const ValueKey('addVariant')));
       await tester.pumpAndSettle();
-      expect(find.text('ဒီ Size / အရောင် ရှိပြီးသားပါ။'), findsOneWidget);
+      expect(find.text('ဒီ ဆိုဒ် / အရောင် ရှိပြီးသားပါ။'), findsOneWidget);
       // BUG-17: the refused size/colour is still typed → save is blocked, nothing written.
       await tester.tap(find.text('သိမ်းမယ်').last);
       await tester.pumpAndSettle();
@@ -312,7 +312,7 @@ void main() {
         (tester) async {
       final (c, p, old, _) = await setup(tester);
       await tapInPos(tester, c, p.name);
-      expect(find.text('ဘယ် Batch လဲ?'), findsOneWidget, reason: 'never auto-picked');
+      expect(find.text('ဘယ် အသုတ် လဲ?'), findsOneWidget, reason: 'never auto-picked');
       expect(inSheet(find.text(ExpiredBadge.label)), findsOneWidget);
       expect(c.read(cartProvider).lines, isEmpty);
 
@@ -335,7 +335,7 @@ void main() {
     testWidgets('one good + one expired batch: the good one is taken without asking', (tester) async {
       final (c, p, _, good) = await setup(tester, withGood: true);
       await tapInPos(tester, c, p.name);
-      expect(find.text('ဘယ် Batch လဲ?'), findsNothing);
+      expect(find.text('ဘယ် အသုတ် လဲ?'), findsNothing);
       expect(c.read(cartProvider).lines.single.batchId, good!.id);
     });
 

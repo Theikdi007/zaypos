@@ -5,7 +5,7 @@ import 'sync_api.dart';
 import 'sync_store.dart';
 
 abstract final class SyncMessages {
-  static const unreadable = 'Server က ပို့တဲ့ data ကို ဖတ်မရပါ။ App ကို update လုပ်ပါ (သို့) Support ကို ဆက်သွယ်ပါ။';
+  static const unreadable = 'ဆာဗာက ပို့တဲ့ ဒေတာကို ဖတ်မရပါ။ အက်ပ်ကို အပ်ဒိတ်လုပ်ပါ (သို့) အကူအညီဌာနကို ဆက်သွယ်ပါ။';
 }
 
 /// What the sync UI shows (chip, Settings, first-download screen).

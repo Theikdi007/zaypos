@@ -8,7 +8,7 @@ String unitKindLabel(String kind) => switch (kind) {
       'payDebt' => 'အကြွေးဆပ်',
       'upsertProduct' => 'ပစ္စည်းအသစ်',
       'upsertCustomer' => 'ဖောက်သည်အသစ်',
-      'setFeatures' => 'Feature ပြောင်း',
+      'setFeatures' => 'လုပ်ဆောင်ချက် ပြောင်း',
       'stockAdjust' => 'Stock ပြင်',
       'restock' => 'Stock ဖြည့်',
       _ => kind,
@@ -38,14 +38,14 @@ String unitSummary(String kind, Map<String, dynamic> rows) {
 
 /// Server SyncIssueKind → title (README §3.4).
 String issueKindLabel(String kind) => switch (kind) {
-      'serialDoubleSold' => 'IMEI / Serial တစ်ခုကို နှစ်ခါ ရောင်းမိ',
+      'serialDoubleSold' => 'IMEI / စီးရီးနံပါတ် တစ်ခုကို နှစ်ခါ ရောင်းမိ',
       'negativeStock' => 'Stock အနုတ် ဖြစ်နေ',
       'duplicateBarcode' => 'Barcode တူ ပစ္စည်း ရှိနေ',
       'creditLimitExceeded' => 'အကြွေး ကန့်သတ်ချက် ကျော်',
       'clockSkew' => 'ဖုန်းနာရီ မှန်မနေ',
       'totalMismatch' => 'စုစုပေါင်း မကိုက်',
       'duplicateReceiptNo' => 'ပြေစာနံပါတ် ထပ်နေ',
-      'duplicateSerial' => 'IMEI / Serial တူ ဖုန်း နှစ်လုံး stock ထဲ ရှိနေ',
+      'duplicateSerial' => 'IMEI / စီးရီးနံပါတ် တူ ဖုန်း နှစ်လုံး stock ထဲ ရှိနေ',
       _ => kind,
     };
 
@@ -58,10 +58,10 @@ String fieldLabel(String column) => switch (column) {
       'phone' => 'ဖုန်း',
       'address' => 'လိပ်စာ',
       'note' => 'မှတ်ချက်',
-      'size' => 'Size',
+      'size' => 'ဆိုဒ်',
       'color' => 'အရောင်',
-      'batchNo' => 'Batch',
-      'serial' => 'IMEI / Serial',
+      'batchNo' => 'အသုတ်နံပါတ်',
+      'serial' => 'IMEI / စီးရီးနံပါတ်',
       'customerName' => 'ဖောက်သည်အမည်',
       _ => column,
     };

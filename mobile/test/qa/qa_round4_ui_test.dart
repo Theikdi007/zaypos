@@ -131,7 +131,7 @@ void main() {
 
   // ================================================================ BUG-15 / TC-PROD-NEW-11
   group('TC-PROD-NEW-11 (BUG-15) first count of an untracked batch / size product = what was counted', () {
-    testWidgets('pharmacy, expiry-tracked (30 d): sold 1 → "+ Batch အသစ်" FIRST × 20 → 20 in FIRST, 0 outside batches, '
+    testWidgets('pharmacy, expiry-tracked (30 d): sold 1 → "+ အသုတ်အသစ်" FIRST × 20 → 20 in FIRST, 0 outside batches, '
         'ONE stockAdjust unit, tracked afterwards; the next delivery is a normal restock', (tester) async {
       final c = await boot(tester, 'pharmacy');
       final p = newProduct(c, 'QA R4 untracked med', expiryAlertDays: 30);
@@ -141,7 +141,7 @@ void main() {
 
       await openRestock(tester, c, p);
       expect(find.byKey(const ValueKey('restockBatch-none')), findsNothing, reason: 'expiry-tracked: a batch is required');
-      expect(selected(tester, 'restockBatch-new'), isTrue, reason: 'no batch yet: "+ Batch အသစ်" is the default');
+      expect(selected(tester, 'restockBatch-new'), isTrue, reason: 'no batch yet: "+ အသုတ်အသစ်" is the default');
       await tester.enterText(field('restockBatchNo'), 'FIRST');
       await keys(tester, ['2', '0']);
       final n = kinds(c).length;
@@ -200,7 +200,7 @@ void main() {
   });
 
   // ================================================================ BUG-16 / TC-PROD-NEW-12
-  group('TC-PROD-NEW-12 (BUG-16) "+ Batch အသစ်" refuses an existing batch number', () {
+  group('TC-PROD-NEW-12 (BUG-16) "+ အသုတ်အသစ်" refuses an existing batch number', () {
     testWidgets('"B1" and " B1 " refused with the message, nothing written, sheet stays; "B2" then saves', (tester) async {
       final c = await boot(tester, 'pharmacy');
       final p = newProduct(c, 'QA R4 dup batch', expiryAlertDays: 30);
@@ -215,7 +215,7 @@ void main() {
         await tester.enterText(field('restockBatchNo'), no);
         await tester.pump(); // a frame: the save button follows the typed text (a real user always gets one)
         await saveSheet(tester);
-        expect(inSheet(find.text('ဒီ Batch ရှိပြီးသားပါ။')), findsOneWidget, reason: '"$no" must be refused');
+        expect(inSheet(find.text('ဒီ အသုတ် ရှိပြီးသားပါ။')), findsOneWidget, reason: '"$no" must be refused');
         expect(kinds(c).length, n, reason: 'nothing written');
       }
       await tester.enterText(field('restockBatchNo'), 'B2');
@@ -255,7 +255,7 @@ void main() {
       expect(db(c).batches.where((b) => b.productId == p.id).map((b) => b.batchNo).toSet(), {'OLD', 'TYPED'});
     });
 
-    testWidgets('fashion: size typed without colour → save blocked with "Size နဲ့ အရောင် ထည့်ပါ။", nothing written',
+    testWidgets('fashion: size typed without colour → save blocked with "ဆိုဒ် နဲ့ အရောင် ထည့်ပါ။", nothing written',
         (tester) async {
       final c = await boot(tester, 'fashion');
       final p = newProduct(c, 'QA R4 typed size');
@@ -267,7 +267,7 @@ void main() {
       final n = kinds(c).length;
       await saveForm(tester);
       expect(find.text('ပစ္စည်း ပြင်မယ်'), findsOneWidget, reason: 'still on the form');
-      expect(find.text('Size နဲ့ အရောင် ထည့်ပါ။'), findsOneWidget);
+      expect(find.text('ဆိုဒ် နဲ့ အရောင် ထည့်ပါ။'), findsOneWidget);
       expect(kinds(c).length, n);
       expect(db(c).variants.where((v) => v.productId == p.id), hasLength(1));
     });
@@ -390,8 +390,8 @@ void main() {
       expect(db(c).products.firstWhere((x) => x.id == med.id).expiryAlertDays, 60);
     });
 
-    testWidgets('TC-PROD-NEW-17 grocery with "သက်တမ်းကုန်ရက် / Batch" turned on: a product without batches restocks '
-        '"Batch မပါ" by default (plain restock) and sells without a batch sheet', (tester) async {
+    testWidgets('TC-PROD-NEW-17 grocery with "သက်တမ်းကုန်ရက် / အသုတ်" turned on: a product without batches restocks '
+        '"အသုတ် မပါ" by default (plain restock) and sells without a batch sheet', (tester) async {
       final c = await boot(tester, 'grocery');
       c.read(tenantFeaturesProvider.notifier).set(FeatureFlag.expiryBatch, true);
       await tester.pumpAndSettle();
@@ -406,18 +406,18 @@ void main() {
       expect(db(c).stock.last.batchId, isNull);
       expect(db(c).batches.where((b) => b.productId == p.id), isEmpty);
       await tapInPos(tester, c, p.name);
-      expect(find.text('ဘယ် Batch လဲ?'), findsNothing);
+      expect(find.text('ဘယ် အသုတ် လဲ?'), findsNothing);
       expect(c.read(cartProvider).lines.single.batchId, isNull);
     });
 
     testWidgets('TC-PROD-NEW-18 product switched to "သက်တမ်း မမှတ်ပါ" that still has an old EMPTY batch, goods since '
-        'received "Batch မပါ" → POS sells it like a plain product', (tester) async {
+        'received "အသုတ် မပါ" → POS sells it like a plain product', (tester) async {
       final c = await boot(tester, 'pharmacy', height: 844);
       final p = newProduct(c, 'QA R4 switched soap'); // expiryAlertDays null = "သက်တမ်း မမှတ်ပါ"
       final s1 = batch(p, 'S1', DateTime.utc(2030, 1, 1));
       await c.read(productServiceProvider).create(p, batches: [s1], initialStock: [into(p, 10)]); // 10 without batch, S1 = 0
       await tapInPos(tester, c, p.name);
-      final asked = find.text('ဘယ် Batch လဲ?').evaluate().isNotEmpty;
+      final asked = find.text('ဘယ် အသုတ် လဲ?').evaluate().isNotEmpty;
       var record = '';
       if (asked) {
         final offered = inSheet(find.textContaining('ကျန်')).evaluate().map((e) => (e.widget as Text).data).toList();
@@ -441,7 +441,7 @@ void main() {
       final s1 = batch(p, 'S1', DateTime.utc(2021, 1, 1));
       await c.read(productServiceProvider).create(p, batches: [s1], initialStock: [into(p, 10)]);
       await tapInPos(tester, c, p.name);
-      final asked = find.text('ဘယ် Batch လဲ?').evaluate().isNotEmpty;
+      final asked = find.text('ဘယ် အသုတ် လဲ?').evaluate().isNotEmpty;
       if (asked) {
         await tester.tap(inSheet(find.textContaining('S1')));
         await tester.pumpAndSettle();

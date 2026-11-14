@@ -84,8 +84,8 @@ class ExpiryBatchSection extends StatelessWidget {
 
   /// Shown under the section (pharmacy decision, item 5).
   static const help =
-      "သက်တမ်းမှတ်တဲ့ ပစ္စည်း (ဆေး စသည်) ကို Batch နံပါတ် + သက်တမ်းကုန်ရက်နဲ့ ဖြည့်/ရောင်းပါမယ်။ "
-      "သက်တမ်းမရှိတဲ့ ပစ္စည်း (ဆပ်ပြာ၊ ဒိုင်ပါ စသည်) ဆိုရင် 'သက်တမ်း မမှတ်ပါ' ရွေးပါ — Batch မလိုဘဲ ရိုးရိုးပစ္စည်းလို ဖြည့်/ရောင်းပါမယ်။";
+      "သက်တမ်းမှတ်တဲ့ ပစ္စည်း (ဆေး စသည်) ကို အသုတ်နံပါတ် + သက်တမ်းကုန်ရက်နဲ့ ဖြည့်/ရောင်းပါမယ်။ "
+      "သက်တမ်းမရှိတဲ့ ပစ္စည်း (ဆပ်ပြာ၊ ဒိုင်ပါ စသည်) ဆိုရင် 'သက်တမ်း မမှတ်ပါ' ရွေးပါ — အသုတ် မလိုဘဲ ရိုးရိုးပစ္စည်းလို ဖြည့်/ရောင်းပါမယ်။";
 
   Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();
@@ -101,7 +101,7 @@ class ExpiryBatchSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FormSection(
-      title: 'သက်တမ်း နှင့် Batch',
+      title: 'သက်တမ်း နှင့် အသုတ်',
       borderColor: AppColors.pharmacyBorder,
       children: [
         if (note != null && showBatch && warnDays != noExpiry)
@@ -110,10 +110,10 @@ class ExpiryBatchSection extends StatelessWidget {
         if (showBatch && warnDays != noExpiry)
         TwoCol(
           LabeledField(
-            label: 'Batch နံပါတ်',
+            label: 'အသုတ်နံပါတ်',
             small: true,
             error: batchError,
-            child: AppInput(key: const ValueKey('batchNo'), controller: batchNo, semanticLabel: 'Batch နံပါတ်'),
+            child: AppInput(key: const ValueKey('batchNo'), controller: batchNo, semanticLabel: 'အသုတ်နံပါတ်'),
           ),
           LabeledField(
             label: 'သက်တမ်းကုန်ရက်',
@@ -153,7 +153,7 @@ class ExpiryBatchSection extends StatelessWidget {
           ),
         ),
         if (warnDays != noExpiry)
-          Text('Batch တစ်ခုထက်ပိုရင် သက်တမ်းစောတာကို အရင်ရောင်းအောင် ညွှန်ပေးပါမယ် (FEFO)',
+          Text('အသုတ် တစ်ခုထက်ပိုရင် သက်တမ်းစောတာကို အရင်ရောင်းအောင် ညွှန်ပေးပါမယ်',
               style: AppText.s(12, color: AppColors.muted)),
         Text(help, key: const ValueKey('expiryHelp'), style: AppText.s(12, color: AppColors.muted)),
       ],
@@ -249,7 +249,7 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
       children: [
         if (widget.showSerials)
         AppSwitchTile(
-          title: 'တစ်လုံးချင်း IMEI / Serial မှတ်မယ်',
+          title: 'တစ်လုံးချင်း IMEI / စီးရီးနံပါတ် မှတ်မယ်',
           description: 'ရောင်းတဲ့အခါ ဘယ်တစ်လုံးလဲ ရွေးရမယ်',
           titleSize: 15,
           padding: EdgeInsets.zero,
@@ -276,7 +276,7 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
                   const SizedBox(width: 8),
                   Semantics(
                     button: true,
-                    label: 'IMEI scan',
+                    label: 'IMEI ဖတ်မယ်',
                     excludeSemantics: true,
                     child: Material(
                       color: AppColors.primary,
@@ -370,11 +370,11 @@ class VariantsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final variants = variantsOf(sizes, colors);
     return FormSection(
-      title: 'Size နှင့် အရောင်',
+      title: 'ဆိုဒ် နှင့် အရောင်',
       borderColor: AppColors.fashionBorder,
       children: [
         LabeledField(
-          label: 'Size',
+          label: 'ဆိုဒ်',
           small: true,
           child: Wrap(
             spacing: 8,
@@ -444,7 +444,7 @@ class VariantsSection extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Variant (${variants.length})',
+                    Text('ဆိုဒ် / အရောင် (${variants.length})',
                         style: AppText.s(12, weight: AppText.w700, color: AppColors.textSecondary)),
                     Text('Stock', style: AppText.s(12, weight: AppText.w700, color: AppColors.textSecondary)),
                   ],

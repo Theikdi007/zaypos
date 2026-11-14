@@ -139,7 +139,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                           const SizedBox(width: 8),
                           Semantics(
                             button: true,
-                            label: 'Contacts ထဲက ရွေးရန်',
+                            label: 'ဖုန်းစာအုပ်ထဲက ရွေးရန်',
                             excludeSemantics: true,
                             child: Material(
                               color: AppColors.surface,

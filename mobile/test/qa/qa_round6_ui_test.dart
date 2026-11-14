@@ -64,7 +64,7 @@ void main() {
   int productStock(ProviderContainer c, String id) => stockWhere(c, (m) => m.productId == id);
 
   final t0 = DateTime.utc(2026, 10, 1);
-  const loose10 = 'လက်ရှိ Batch မရှိတဲ့ stock 10 ခု အတွက် Batch နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ။';
+  const loose10 = 'လက်ရှိ အသုတ် မရှိတဲ့ stock 10 ခု အတွက် အသုတ်နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ။';
 
   Product newProduct(ProviderContainer c, String name, {int? expiryAlertDays}) => Product(
         id: newId(), tenantId: c.read(tenantIdProvider), name: name, cost: 400, price: 600, category: 'QA',
@@ -138,7 +138,7 @@ void main() {
       expect(find.byKey(const ValueKey('openingBatchNote')), findsNothing, reason: 'not tracked: no note');
       await pickExpiryWarn(tester, warn30Label);
       expect(find.byKey(const ValueKey('openingBatchNote')), findsOneWidget);
-      expect(find.text('လက်ရှိ Batch မရှိတဲ့ stock 10 ခု ကို ဒီ Batch ထဲ ထည့်ပါမယ် · Batch နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ'),
+      expect(find.text('လက်ရှိ အသုတ် မရှိတဲ့ stock 10 ခု ကို ဒီ အသုတ် ထဲ ထည့်ပါမယ် · အသုတ်နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ'),
           findsOneWidget);
       expect(find.byKey(const ValueKey('batchNo')), findsOneWidget);
 
@@ -183,20 +183,20 @@ void main() {
       expect(db(c).batches.where((x) => x.productId == p.id), hasLength(1), reason: 'no second opening batch');
     });
 
-    testWidgets('tracked medicine: batch B1 (5) + 3 loose → note says 3; batch no. "B1" and " B1 " → "ဒီ Batch ရှိပြီးသားပါ။", '
+    testWidgets('tracked medicine: batch B1 (5) + 3 loose → note says 3; batch no. "B1" and " B1 " → "ဒီ အသုတ် ရှိပြီးသားပါ။", '
         'nothing written; "B2" → B2 holds 3, B1 stays 5, stock 8', (tester) async {
       final c = await boot(tester, 'pharmacy');
       final p = newProduct(c, 'QA R6 med mixed', expiryAlertDays: 30);
       final b1 = batch(p, 'B1', DateTime.utc(2030, 1, 1));
       await c.read(productServiceProvider).create(p, batches: [b1], initialStock: [into(p, 5, batchId: b1.id), into(p, 3)]);
       await openEdit(tester, c, p);
-      expect(find.textContaining('လက်ရှိ Batch မရှိတဲ့ stock 3 ခု ကို'), findsOneWidget, reason: 'note counts only loose stock');
+      expect(find.textContaining('လက်ရှိ အသုတ် မရှိတဲ့ stock 3 ခု ကို'), findsOneWidget, reason: 'note counts only loose stock');
       await pickAddProductExpiry(tester, 28);
       final n0 = kinds(c).length;
       for (final no in ['B1', ' B1 ']) {
         await typeBatchNo(tester, no);
         await saveForm(tester);
-        expect((onForm(), find.text('ဒီ Batch ရှိပြီးသားပါ။').evaluate().length, kinds(c).length), (true, 1, n0),
+        expect((onForm(), find.text('ဒီ အသုတ် ရှိပြီးသားပါ။').evaluate().length, kinds(c).length), (true, 1, n0),
             reason: 'existing batch number "$no" refused');
       }
       await typeBatchNo(tester, 'B2');
@@ -233,7 +233,7 @@ void main() {
       expect(stockWhere(c, (x) => x.batchId == b.id && x.variantId == m.id), Qty.units(3), reason: 'per size group');
     });
 
-    // Two phones: B (offline, still sees the product as plain) received 5 "Batch မပါ" after A switched it to tracked.
+    // Two phones: B (offline, still sees the product as plain) received 5 "အသုတ် မပါ" after A switched it to tracked.
     // After sync the tracked product has 5 outside batches again; the edit form is the way back (note for 5, ONE unit).
     testWidgets('tracked product with OPEN (10) that got 5 loose from another phone → edit form asks for a batch for the 5 '
         '(also for a plain price edit); "OPEN" refused, "LATE5" → 0 loose, OPEN 10, LATE5 5', (tester) async {
@@ -244,7 +244,7 @@ void main() {
       await c.read(stockServiceProvider).receive(productId: p.id, qtyMilli: Qty.units(5)); // as pulled from phone B
       expect(stockWhere(c, (m) => m.productId == p.id && m.batchId == null), Qty.units(5));
       await openEdit(tester, c, p);
-      expect(find.textContaining('လက်ရှိ Batch မရှိတဲ့ stock 5 ခု ကို'), findsOneWidget);
+      expect(find.textContaining('လက်ရှိ အသုတ် မရှိတဲ့ stock 5 ခု ကို'), findsOneWidget);
       await tester.enterText(field('price'), '700');
       final n0 = kinds(c).length;
       await saveForm(tester);
@@ -252,7 +252,7 @@ void main() {
       await typeBatchNo(tester, 'OPEN');
       await pickAddProductExpiry(tester, 28);
       await saveForm(tester);
-      expect((onForm(), find.text('ဒီ Batch ရှိပြီးသားပါ။').evaluate().length), (true, 1));
+      expect((onForm(), find.text('ဒီ အသုတ် ရှိပြီးသားပါ။').evaluate().length), (true, 1));
       await typeBatchNo(tester, 'LATE5');
       await saveForm(tester);
       expect(onForm(), isFalse);

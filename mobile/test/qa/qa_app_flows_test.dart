@@ -250,7 +250,7 @@ void main() {
     });
 
     // ---------------------------------------------------------------- TC-FEAT-02 / TC-FEAT-04
-    testWidgets('TC-FEAT-02 Settings toggle "သက်တမ်းကုန်ရက် / Batch" → Add Product shows batch + expiry; TC-FEAT-04 restaurant disabled',
+    testWidgets('TC-FEAT-02 Settings toggle "သက်တမ်းကုန်ရက် / အသုတ်" → Add Product shows batch + expiry; TC-FEAT-04 restaurant disabled',
         (tester) async {
       final c = await boot(tester);
       expect(c.read(tenantFeaturesProvider).expiryBatch, isFalse, reason: 'grocery default');
@@ -260,13 +260,13 @@ void main() {
 
       c.read(appRouterProvider).go(Routes.settingsFeatures);
       await tester.pumpAndSettle();
-      final tile = find.widgetWithText(AppSwitchTile, 'သက်တမ်းကုန်ရက် / Batch');
+      final tile = find.widgetWithText(AppSwitchTile, 'သက်တမ်းကုန်ရက် / အသုတ်');
       await tester.tap(find.descendant(of: tile, matching: find.byType(AppSwitch)));
       await tester.pumpAndSettle();
       expect(c.read(tenantFeaturesProvider).expiryBatch, isTrue);
 
       // QA round 7: the v2 restaurant switch is found by its (Burmese) description, not by its title — TC-UX-02
-      // ("No English left in Burmese screens") requires the English title "စားပွဲ / Order mode" to be translated,
+      // ("No English left in Burmese screens") requires the English title "စားပွဲ / အော်ဒါ ပုံစံ" to be translated,
       // so the old title-based finder made the two QA cases contradict each other. Same assertions as before.
       final restaurantTile = find.byWidgetPredicate(
           (w) => w is AppSwitchTile && w.description == 'စားသောက်ဆိုင်၊ ကော်ဖီဆိုင်' && w.title.startsWith('စားပွဲ'));

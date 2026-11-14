@@ -58,7 +58,7 @@ class SaleReceiptScreen extends ConsumerWidget {
                       ),
                       if (sale.pending) ...[
                         const SizedBox(height: 10),
-                        Text('Offline သိမ်းထားသည် · လိုင်းရရင် sync လုပ်ပါမယ်',
+                        Text('လိုင်းမရှိဘဲ သိမ်းထားသည် · လိုင်းရရင် Sync လုပ်ပါမယ်',
                             textAlign: TextAlign.center, style: AppText.s(14, color: AppColors.muted)),
                       ],
                     ],
