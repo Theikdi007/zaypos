@@ -121,7 +121,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                   path: 'new',
                   parentNavigatorKey: _rootKey,
-                  builder: (_, _) => const AddProductScreen(),
+                  builder: (_, s) => AddProductScreen(initialBarcode: s.uri.queryParameters['barcode']),
                 ),
                 GoRoute(
                   path: ':id/edit',

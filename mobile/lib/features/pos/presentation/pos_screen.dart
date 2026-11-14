@@ -18,6 +18,8 @@ import '../../../core/widgets/segmented_tabs.dart';
 import '../../products/application/product_service.dart';
 import '../../products/data/product_providers.dart';
 import '../../products/domain/product_view.dart';
+import '../../../core/sync/sync_limits.dart';
+import '../../scan/barcode_scanner.dart';
 import 'module_pick_sheet.dart';
 import 'set_price_sheet.dart';
 import '../../devices/data/device_providers.dart';
@@ -39,11 +41,66 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   String _query = '';
   String _amount = '';
   final _quickName = TextEditingController();
+  final _search = TextEditingController();
 
   @override
   void dispose() {
     _quickName.dispose();
+    _search.dispose();
     super.dispose();
+  }
+
+  Future<void> _scanWithCamera() async {
+    final code = await ref.read(barcodeScannerProvider).scan(context, title: 'Barcode scan');
+    if (code != null && mounted) await _onScan(code);
+  }
+
+  /// A scanned barcode (camera or a HID scanner): the product goes into the
+  /// cart like a tap; an unknown code offers "ပစ္စည်းအသစ် ထည့်မယ်" with it.
+  Future<void> _onScan(String raw) async {
+    // Only when POS is on top (not under Checkout / a sheet).
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+    // A HID scanner also types into a focused search box: undo that.
+    if (_search.text.isNotEmpty && _search.text.contains(raw.trim())) {
+      _search.clear();
+      setState(() => _query = '');
+    }
+    final limits = ref.read(syncLimitsProvider);
+    final code = limits.normalize('products.barcode', raw);
+    final p = productByBarcode(ref.read(productsProvider).value ?? const [], code, limits);
+    if (p != null) {
+      await _addProduct(p);
+      return;
+    }
+    final add = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('ဒီ Barcode နဲ့ ပစ္စည်း မရှိသေးပါ', style: AppText.s(17, weight: AppText.w700)),
+              const SizedBox(height: 4),
+              Text(code, key: const ValueKey('unknownBarcode'), style: AppText.s(15, color: AppColors.muted)),
+              const SizedBox(height: 16),
+              PrimaryButton(label: 'ပစ္စည်းအသစ် ထည့်မယ်', onPressed: () => Navigator.pop(ctx, true)),
+              const SizedBox(height: 8),
+              PrimaryButton(
+                label: 'မလုပ်တော့ပါ',
+                variant: ButtonVariant.outline,
+                borderColor: AppColors.inputBorder,
+                onPressed: () => Navigator.pop(ctx, false),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (add == true && mounted) await context.push(Routes.addProductWithBarcode(code));
   }
 
   void _onKey(String v) {
@@ -96,7 +153,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final mode = features.quickSale ? (_mode ?? PosMode.quick) : PosMode.products;
 
     return Scaffold(
-      body: Stack(
+      body: HidScannerListener(
+        onScan: _onScan,
+        child: Stack(
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -120,6 +179,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           ),
           Positioned(left: 12, right: 12, bottom: 16 + MediaQuery.paddingOf(context).bottom, child: _CartBar(cart: cart)),
         ],
+        ),
       ),
     );
   }
@@ -135,13 +195,14 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         children: [
           Expanded(
             child: SearchField(
+              controller: _search,
               hint: 'ပစ္စည်းအမည် ရှာရန်',
               semanticLabel: 'ပစ္စည်းရှာရန်',
               onChanged: (q) => setState(() => _query = q.trim()),
             ),
           ),
           const SizedBox(width: 10),
-          const _ScanButton(),
+          _ScanButton(onTap: _scanWithCamera),
         ],
       ),
       FilterChips<String?>(
@@ -256,7 +317,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 }
 
 class _ScanButton extends StatelessWidget {
-  const _ScanButton();
+  const _ScanButton({required this.onTap});
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -268,8 +330,9 @@ class _ScanButton extends StatelessWidget {
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
+          key: const ValueKey('posScan'),
           borderRadius: BorderRadius.circular(14),
-          onTap: () {},
+          onTap: onTap,
           child: const SizedBox(
             width: 48,
             height: 48,

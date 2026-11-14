@@ -22,6 +22,9 @@ abstract final class Routes {
   /// Products filtered to "Stock နည်း" (Dashboard low-stock card).
   static const productsLowStock = '/products?filter=low';
   static const addProduct = '/products/new';
+
+  /// Add Product with the barcode already filled in (POS: unknown barcode scanned).
+  static String addProductWithBarcode(String barcode) => '/products/new?barcode=${Uri.encodeQueryComponent(barcode)}';
   static String editProduct(String id) => '/products/$id/edit';
   static const customers = '/customers';
   static const addCustomer = '/customers/new';

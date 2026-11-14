@@ -256,11 +256,14 @@ class PillChip extends StatelessWidget {
 
 /// Gray rounded search field with leading search icon.
 class SearchField extends StatelessWidget {
-  const SearchField({super.key, required this.hint, required this.semanticLabel, this.onChanged});
+  const SearchField({super.key, required this.hint, required this.semanticLabel, this.onChanged, this.controller});
 
   final String hint;
   final String semanticLabel;
   final ValueChanged<String>? onChanged;
+
+  /// Optional: lets the screen clear the text (e.g. after a barcode scan).
+  final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -277,6 +280,7 @@ class SearchField extends StatelessWidget {
               label: semanticLabel,
               textField: true,
               child: TextField(
+                controller: controller,
                 onChanged: onChanged,
                 style: AppText.s(15),
                 textInputAction: TextInputAction.search,

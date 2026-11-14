@@ -26,6 +26,7 @@ import '../application/product_service.dart';
 import '../data/product_providers.dart';
 import '../domain/product.dart';
 import '../domain/product_modules.dart';
+import '../../scan/barcode_scanner.dart';
 import 'sections/edit_module_sections.dart';
 import 'sections/feature_sections.dart';
 
@@ -34,7 +35,10 @@ import 'sections/feature_sections.dart';
 /// its own fields only — stock, IMEIs, variants and batches are received
 /// through "Stock ဖြည့်မယ်", not edited here.
 class AddProductScreen extends ConsumerStatefulWidget {
-  const AddProductScreen({super.key, this.editing});
+  const AddProductScreen({super.key, this.editing, this.initialBarcode});
+
+  /// New product from POS: an unknown barcode that was scanned.
+  final String? initialBarcode;
 
   /// The product being edited; null = a new product.
   final Product? editing;
@@ -66,7 +70,14 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   late final Product? _p = widget.editing;
   bool get _isEdit => _p != null;
   late final _name = TextEditingController(text: _p?.name ?? '');
-  late final _barcode = TextEditingController(text: _p?.barcode ?? '');
+  late final _barcode = TextEditingController(text: _p?.barcode ?? widget.initialBarcode ?? '');
+
+  /// Camera scan into the barcode field.
+  Future<void> _scanBarcode() async {
+    final code = await ref.read(barcodeScannerProvider).scan(context, title: 'Barcode scan');
+    if (code == null || !mounted) return;
+    _barcode.text = ref.read(syncLimitsProvider).normalize('products.barcode', code);
+  }
   late final _cost = TextEditingController(text: '${_p?.cost ?? _t.sampleCost}');
   late final _price = TextEditingController(text: _p == null ? '${_t.samplePrice}' : (_p.price > 0 ? '${_p.price}' : ''));
   late final _wholesale = TextEditingController(text: _p?.wholesalePrice?.toString() ?? '');
@@ -499,7 +510,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const ScanSquare(label: 'Barcode scan'),
+                          ScanSquare(key: const ValueKey('barcodeScan'), label: 'Barcode scan', onTap: _scanBarcode),
                         ],
                       ),
                     ),
@@ -594,6 +605,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     onWarrantyChanged: (m) => setState(() => _warrantyMonths = m),
                     showSerials: !_isEdit,
                     registerCommit: (f) => _commitTypedImei = f,
+                    onScanImei: () => ref.read(barcodeScannerProvider).scan(context, title: 'IMEI scan'),
                   ),
                 if (f.variants && !_isEdit)
                   VariantsSection(
