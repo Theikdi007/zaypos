@@ -208,6 +208,8 @@ Format:
 - **Status (owner, 2026-11-14): accepted risk (dev only, port bound to 127.0.0.1).** The dev SA password is still the one in git
   history; the owner will change it later. Not a beta blocker: the container is reachable only from the Mac itself
   (`127.0.0.1:1433`), no other device on the Wi-Fi can reach it, and no production / shared server uses this password.
+- Round 6 (QA): treated as accepted risk (not open for the exit rule). Binding re-confirmed without touching the container:
+  `docker port zaypos-sql` → `1433/tcp -> 127.0.0.1:1433`; `nc -z <Wi-Fi IP> 1433` → not reachable; `nc -z 127.0.0.1 1433` → reachable.
 
 ## BUG-12 · TC-PROD-NEW-5 · High · Goods received for an IMEI / batch / size-colour product cannot be entered as IMEIs / a batch / a variant
 - Found in: round 2 · `mobile/test/qa/qa_round2_ui_test.dart` › "TC-PROD-NEW-5 …" (phone, pharmacy, fashion — 3 tests)
@@ -416,7 +418,16 @@ Format:
 - Blocks beta: no in general; pharmacy condition: when adding a medicine pick 30/60/90 days (or add it with stock 0 and receive it with
   "Stock ဖြည့်မယ်"); never switch a product that has stock to tracking. Recommended before the pharmacy beta. Owner may decide to accept
   it with that training note (then it can be Low).
-- Status: open
+- Status: fixed in 667a0e2 — **verified by QA (round 6)**. `m/qa/qa_round5_ui_test.dart::TC-PROD-NEW-24 …` now PASS;
+  `m/qa/qa_round6_ui_test.dart::TC-PROD-NEW-27 (BUG-22) …` 5/5 PASS: note + batch fields after "ရက် ၃၀ အလို"; no batch no. → refused with
+  "လက်ရှိ Batch မရှိတဲ့ stock 10 ခု အတွက် Batch နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ။", batch no. without expiry → refused, nothing written; with
+  both → ONE upsertProduct, OPEN6 (the picked date) holds 10, 0 outside, product 10, adjustments −10 / +10 "opening batch"; POS takes OPEN6;
+  the next edit asks nothing. Existing batch "B1" / " B1 " → "ဒီ Batch ရှိပြီးသားပါ။"; mixed B1 5 + 3 loose → B2 3, B1 5. Fashion sizes:
+  per-size groups, size stock unchanged. Loose ≤ 0 / back to "သက်တမ်း မမှတ်ပါ" → nothing asked. Loose stock arriving later from another
+  phone is caught by the next edit (blocked, even a price edit, until it gets a batch — by design). Drift (real edit form):
+  `m/qa/qa_round6_drift_test.dart::TC-PROD-NEW-27 Drift …` PASS (ONE outbox unit, wire shape recorded). Server:
+  `b/…/QaRound6Tests.cs::TC_SYNC_NEW_11_…` PASS (applied, no issue, B pulls batch + movements). Live two phones:
+  `m/qa/live_qa_round6_test.dart` PASS (B: expiryAlertDays 30, OPENL6 2027-11-28, batch 10, loose 0).
 
 ## BUG-23 · TC-PROD-NEW-26 · Low · Trade-in, then voiding the ORIGINAL sale puts the same IMEI in stock twice, unflagged (app and server)
 - Found in: round 5 · `mobile/test/qa/qa_round5_ui_test.dart` › "TC-PROD-NEW-26 … then the ORIGINAL sale is voided …";
@@ -432,6 +443,31 @@ Format:
   check); `backend/src/ZayPOS.Application/Sync/UnitApplier.cs` `ApplySerialsAsync` (an existing row turning inStock is not added to
   `_newInStockSerials`).
 - Blocks beta: no (needs a void of a sale whose phone was already taken back — a user mistake; spec gap, owner to decide).
+- Status: fixed in 667a0e2 — **verified by QA (round 6)**. App: `m/qa/qa_round5_ui_test.dart::TC-PROD-NEW-26 …` now PASS;
+  `m/qa/qa_round6_ui_test.dart::TC-PROD-NEW-28 (BUG-23) …` (sale with X + 2 covers: void → covers +2, X line skipped, old row sold with
+  sale 1's line, 1 in-stock row, phone stock 1; un-void → covers −2, phone 1; void again same; POS offers X once; normal void/un-void
+  unchanged) PASS; Drift `m/qa/qa_round6_drift_test.dart::TC-PROD-NEW-28 Drift …` PASS (voidSale unit without the old row and without a
+  phone movement; un-void no −1). Server: `b/…/QaRound5Tests.cs::TC_SYNC_NEW_9_…` now PASS; `b/…/QaRound6Tests.cs::TC_SYNC_NEW_12_…` PASS
+  (void pushed before the trade-in → duplicateSerial on the trade-in; fixed app's void → no issue; normal void → no issue). Live two
+  phones `m/qa/live_qa_round6_test.dart` PASS (both phones: no issue, X in stock once; crossing offline → duplicateSerial on both).
+  Remaining gap (phone already resold before the void) → BUG-24.
+
+## BUG-24 · TC-PROD-NEW-29 · Low · Trade-in resold, then voiding the ORIGINAL sale puts the phone back in stock (phantom IMEI)
+- Found in: round 6 · `mobile/test/qa/qa_round6_ui_test.dart` › "TC-PROD-NEW-28 (BUG-23) … trade-in row sold again (sale 2), THEN sale 1 is
+  voided → the IMEI must not come back into stock (the phone is with customer 2)"
+- Steps to reproduce: phone shop → sell IMEI 357000000000003 (sale 1) → take it back: "Stock ဖြည့်မယ်" → that IMEI (trade-in, new row) →
+  POS: sell it to customer 2 (sale 2) → History → sale 1 → ပယ်ဖျက်မယ် → POS tap the product.
+- Expected: the phone came back once (trade-in) and is now with customer 2, so voiding sale 1 does not return it a second time — the
+  same rule the BUG-23 fix applies (`void_sale_service.dart`: "a phone of this sale that was already taken back … is not returned a
+  second time"); decision 3 keeps the IMEI history. 0 in-stock rows, stock 0.
+- Actual: `Expected: (0, 0)  Actual: (1, 1000)` — "old row inStock, 1 in-stock rows, stock 1, POS offers it 1×". The void returns the
+  OLD row to stock (+1 voidReturn) although that phone is with customer 2; POS offers it for sale. No sync issue on the server either
+  (only one in-stock row, README §3.4 is not triggered), so nobody is told.
+- Suspected area: `mobile/lib/features/sales/application/void_sale_service.dart` `setVoided` — `alreadyBack` only counts a line whose
+  IMEI is IN STOCK as a newer row (`inStock.contains(row.serial)`); a newer row with the same serial that is already sold again is not
+  considered.
+- Blocks beta: no (phone shops only; needs a void of an old sale after the phone was taken back AND resold — a user mistake; the
+  phone is not physically there, so the cashier cannot hand it over; stock count of that model is +1 until corrected).
 - Status: open
 
 ---
