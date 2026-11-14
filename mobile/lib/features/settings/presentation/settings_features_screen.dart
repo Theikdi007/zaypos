@@ -88,7 +88,7 @@ class _SyncSection extends ConsumerWidget {
 class SettingsFeaturesScreen extends ConsumerWidget {
   const SettingsFeaturesScreen({super.key});
 
-  static const _core = ['ရောင်းခြင်း (POS)', 'အကြွေးစာအုပ်', 'ငွေသား / KBZPay / WavePay', 'နေ့စဉ် Report', 'Offline + Sync'];
+  static const _core = ['ရောင်းခြင်း', 'အကြွေးစာအုပ်', 'ငွေသား / KBZPay / WavePay', 'နေ့စဉ် အစီရင်ခံစာ', 'Offline + Sync'];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -103,11 +103,11 @@ class SettingsFeaturesScreen extends ConsumerWidget {
               ? '${template.productBadge ?? template.label} ပစ္စည်း ${mmDigits(template.presetCount)} မျိုး'
               : 'ဒီဆိုင်အမျိုးအစားအတွက် မရှိသေးပါ'),
       const _Module(FeatureFlag.expiryBatch, 'သက်တမ်းကုန်ရက် / Batch', 'ဆေးဆိုင်၊ အစားအသောက်'),
-      const _Module(FeatureFlag.serialWarranty, 'IMEI / Serial + အာမခံ', 'ဖုန်း၊ Electronics'),
-      const _Module(FeatureFlag.variants, 'Size / အရောင်', 'အဝတ်အထည်၊ ဖိနပ်၊ အလှကုန်'),
+      const _Module(FeatureFlag.serialWarranty, 'IMEI / Serial + အာမခံ', 'ဖုန်း၊ လျှပ်စစ်ပစ္စည်း'),
+      const _Module(FeatureFlag.variants, 'အရွယ်အစား / အရောင်', 'အဝတ်အထည်၊ ဖိနပ်၊ အလှကုန်'),
       const _Module(FeatureFlag.decimalQty, 'ဒသမ အရေအတွက်', '2.5 ပေ · 0.75 ကီလို'),
-      const _Module(FeatureFlag.quotation, 'ဈေးနှုန်းတင်ပြချက် (Quotation)', 'ကန်ထရိုက်တာ / လက်ကား'),
-      const _Module(FeatureFlag.serviceItems, 'ဝန်ဆောင်မှု item', 'Stock မလို · ဆံပင်ညှပ်၊ ပြင်ဆင်ခ'),
+      const _Module(FeatureFlag.quotation, 'ဈေးနှုန်းတင်ပြချက်', 'ကန်ထရိုက်တာ / လက်ကား'),
+      const _Module(FeatureFlag.serviceItems, 'ဝန်ဆောင်မှုများ','Stock မလို · ဆံပင်ညှပ်၊ ပြင်ဆင်ခ'),
       const _Module(null, 'စားပွဲ / Order mode', 'စားသောက်ဆိုင်၊ ကော်ဖီဆိုင်', soon: true),
     ];
 
