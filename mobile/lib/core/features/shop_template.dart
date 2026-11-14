@@ -49,8 +49,8 @@ class ShopTemplate {
       label: 'ကုန်စုံဆိုင်',
       initial: 'က',
       tint: AppColors.tintGreen,
-      desc: 'ပစ္စည်း ၃၀၀ ကြိုထည့်ပြီး · ပြည်/ပိဿာ',
-      presetCount: 300,
+      desc: 'ပစ္စည်း ၂၀ ကြိုထည့်ပြီး · ပြည်/ပိဿာ',
+      presetCount: 20,
       features: TenantFeatures(quickSale: true, stock: true, presetCatalog: true),
       productBadge: 'ကုန်စုံ',
       namePlaceholder: 'ဥပမာ - ရေသန့် 1L',
@@ -65,7 +65,7 @@ class ShopTemplate {
       initial: 'ဆ',
       tint: AppColors.tintBlue,
       desc: 'သက်တမ်းကုန်ရက် · Batch · ကုန်ခါနီး သတိပေး',
-      presetCount: 250,
+      presetCount: 0,
       features: TenantFeatures(
           quickSale: true, stock: true, presetCatalog: true, expiryBatch: true),
       productBadge: 'ဆေးဆိုင်',
@@ -81,7 +81,7 @@ class ShopTemplate {
       initial: 'ဖ',
       tint: AppColors.tintIndigo,
       desc: 'IMEI / Serial · အာမခံရက်',
-      presetCount: 120,
+      presetCount: 0,
       features: TenantFeatures(
           quickSale: true,
           stock: true,
@@ -114,7 +114,7 @@ class ShopTemplate {
       initial: 'H',
       tint: AppColors.tintAmber,
       desc: 'ပေ/ကီလို/အိတ် · ဒသမ · Quotation',
-      presetCount: 200,
+      presetCount: 0,
       features: TenantFeatures(
           quickSale: true,
           stock: true,

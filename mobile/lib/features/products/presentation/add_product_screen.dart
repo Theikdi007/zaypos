@@ -307,16 +307,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               children: _gap14([
-                if (!_isEdit && f.presetCatalog && _t.presetCount > 0)
-                  PrimaryButton(
-                    label: 'ကြိုတင်စာရင်း (${_t.presetCount}) ထဲက ရှာမယ်',
-                    variant: ButtonVariant.soft,
-                    icon: AppIcons.search,
-                    height: 52,
-                    radius: 14,
-                    fontSize: 14,
-                    onPressed: () {},
-                  ),
+                // (BUG-6) No "search the preset list" button here: presets are
+                // imported at registration; a picker is not built yet.
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -435,8 +427,11 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('တစ်ခုချင်း အမြတ်',
-                              style: AppText.s(14, weight: AppText.w600, color: ok ? AppColors.success : AppColors.danger)),
+                          Flexible(
+                            child: Text('တစ်ခုချင်း အမြတ်',
+                                style: AppText.s(14, weight: AppText.w600, color: ok ? AppColors.success : AppColors.danger)),
+                          ),
+                          const SizedBox(width: 8),
                           Text('${ok ? '+' : '-'}${formatKs(margin.abs())} ($pct%)',
                               style: AppText.s(14, weight: AppText.w600, color: ok ? AppColors.success : AppColors.danger)),
                         ],

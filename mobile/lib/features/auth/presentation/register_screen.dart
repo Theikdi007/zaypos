@@ -544,7 +544,7 @@ class _StepCatalog extends StatelessWidget {
         (
           CatalogStart.preset,
           'ကြိုတင်စာရင်း သုံးမယ် (အကြံပြု)',
-          'အများဆုံးရောင်းတဲ့ ပစ္စည်း ${template.presetCount} မျိုး barcode နဲ့တကွ ထည့်ပြီးသား · ဈေးနှုန်းပဲ ပြင်ရုံ',
+          'အများဆုံးရောင်းတဲ့ ပစ္စည်း ${template.presetCount} မျိုး ထည့်ပြီးသား · ဈေးနှုန်းပဲ ထည့်ရုံ',
         ),
       (CatalogStart.quick, 'Quick Sale နဲ့ ချက်ချင်း စရောင်းမယ်', 'ဈေးနှုန်းရိုက်ပြီး ရောင်းရုံပဲ · ပစ္စည်းစာရင်း နောက်မှ ထည့်'),
       (CatalogStart.import, 'Excel ကနေ တင်မယ်', 'ရှိပြီးသား ပစ္စည်းစာရင်း ဖိုင်ကို တင်ပါ'),
