@@ -190,6 +190,8 @@ Format:
   template→ဆိုင်ပုံစံ, Quick Sale→အမြန်ရောင်း, scan→ဖတ်မယ် / စကင်ဖတ်, Contacts→ဖုန်းစာအုပ်, screenshot→ငွေလွှဲပြေစာ ပုံ.
 - Status: fixed in fb520d9 — QA allow-lists (TC-UX-02, TC-UX-NEW-1) narrowed to the owner's list; new `m/no_english_test.dart` checks
   every Burmese string literal under `lib/`. Owner to read the developer's word choices.
+- Owner decision 2026-11-14 (after round 8): **"Batch" is allowed** (printed on medicine boxes) — အသုတ် reverted to Batch in 7eb11f9;
+  "batch" added to every allow-list (QA's three and `m/no_english_test.dart`).
 - QA round 8 (beta-polish @ 54e9146): **verified by QA** for the app's own texts. `m/qa/qa_ux_test.dart::TC-UX-02 …` (signed-in and
   signed-out) and `m/qa/qa_round7_ux_test.dart::TC-UX-NEW-1 …` PASS with the owner's allow-list; new `m/qa/qa_round8_ux_test.dart::TC-UX-NEW-4 …`
   PASS (duplicate-barcode dialog, POS picker, IMEI snackbar, /settings/devices, products without a price). QA accepts the developer's
@@ -560,7 +562,7 @@ Format:
   `rejected_unit_screen.dart` (`AuthMessage(o.rejectReason)`), `sync_labels.dart` `unitSummary` ('setFeatures' joins raw `featureKey`;
   `unitKindLabel` / `issueKindLabel` / `fieldLabel` fall back to the raw English key); server `UnitApplier.cs` `Issue(...)` details.
 - Blocks beta: no (the Burmese title above each entry says what happened; the English line is the detail / reason).
-- Status: open
+- Status: fixed in 7df5f1f — the app builds Burmese messages from structured server fields (SyncIssues.data, reject code + data); unknown kinds / codes → a generic Burmese message; feature keys → Settings names. Tests: `m/no_english_test.dart` (screens with sample server payloads), `m/sync_messages_test.dart`, Api `SyncTests` / `AccountTests`. QA TC-UX-NEW-3 passes unchanged.
 
 ## BUG-27 · TC-POS-NEW-13 · Low · One IMEI in stock on two products: scanning the box twice adds two phones
 - Found in: round 8 · `mobile/test/qa/qa_round8_scan_test.dart` › "TC-POS-NEW-13 IMEI scanned at POS the same IMEI in stock on TWO products
@@ -575,7 +577,7 @@ Format:
 - Suspected area: `mobile/lib/features/pos/presentation/pos_screen.dart` `_addScannedSerial` — "in the cart" is checked by serial row id
   (`cart.serialIds`), not by the IMEI value.
 - Blocks beta: no (needs an already-flagged duplicateSerial state; the cashier sees two lines).
-- Status: open
+- Status: fixed in 0b3e2d4 — the scanned IMEI value is compared with every cart line ("ဒီ IMEI ခြင်းထဲမှာ ရှိပြီးသားပါ"); `m/scan_lookup_test.dart` › "BUG-27 …"; QA's TC-POS-NEW-13 twin test passes (message text updated, owner-approved).
 
 ---
 
@@ -586,7 +588,14 @@ Format:
   photo bytes go into the outbox). Tell beta shops; photo sync is a later feature.
 - **Duplicate barcodes are allowed** (decision, implemented in e0ea12b): Add/Edit Product warns, POS asks which product. The server
   still flags `duplicateBarcode` in the sync review.
-- **IMEI scan at POS** (decision, e0ea12b): an in-stock IMEI adds that phone; sold / unknown IMEIs go to "ပစ္စည်းအသစ် ထည့်မယ်".
+- **IMEI scan at POS** (decision, e0ea12b; updated 0b3e2d4): an in-stock IMEI adds that phone; an IMEI already in the cart (by its
+  number, any product) → "ဒီ IMEI ခြင်းထဲမှာ ရှိပြီးသားပါ"; an IMEI whose latest row is **sold** → "ဒီ IMEI က ရောင်းပြီးသားပါ —
+  ပြန်ဝယ်ရင် 'Stock ဖြည့်မယ်' ကနေ လက်ခံပါ" (no "ပစ္စည်းအသစ်" offer; a product barcode with the same code still wins); a trade-in is
+  received only with "Stock ဖြည့်မယ်". Unknown IMEIs and IMEIs of deleted products still go to "ပစ္စည်းအသစ် ထည့်မယ်". Only in shops
+  with IMEI tracking on.
+- **Sync issue texts** (BUG-26, 7df5f1f): the app builds them in Burmese from the server's structured fields. Issues raised before
+  this server version have no fields and show a shorter Burmese sentence (e.g. "ဒီ Barcode ကို ပစ္စည်းတွေမှာ သုံးထားပါတယ်…" without
+  the names).
 
 QA round 8 check of this section: **accurate**, with four additions the owner should tell shops (all proven by round-8 tests):
 1. Photos: correct (TC-PROD-NEW-32 PASS: one upsertProduct unit without photo bytes; phone B shows the initial).
@@ -597,6 +606,9 @@ QA round 8 check of this section: **accurate**, with four additions the owner sh
    offered as a new product's barcode is still the round-7 risk — trade-ins must be received with "Stock ဖြည့်မယ်", not by scanning at POS
    (TC-POS-NEW-13).
 4. If one IMEI is in stock twice (a flagged duplicateSerial), two scans add two phones (BUG-27).
+
+Developer note (after round 8): points 2 (English issue text) and 4 are fixed by BUG-26 / BUG-27; point 3's sold-IMEI risk is replaced by
+the owner's "sold" message (see the IMEI bullet above).
 
 ---
 
