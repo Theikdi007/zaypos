@@ -483,6 +483,17 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     final f = ref.watch(tenantFeaturesProvider);
     final saved = _isEdit ? ref.watch(productPhotoProvider(_p!.id)) : null;
     final ImageProvider? photo = _newPhoto != null ? MemoryImage(_newPhoto!) : (_removePhoto ? null : saved);
+    const cameraBox = DashedBox(
+      radius: 16,
+      background: AppColors.surface,
+      child: SizedBox(
+        width: 88,
+        height: 88,
+        child: Center(
+          child: AppIcon(AppIcons.camera, size: 28, strokeWidth: 1.8, color: AppColors.textSecondary),
+        ),
+      ),
+    );
     if (_isEdit && f.expiryBatch) {
       // keep the opening-batch check (BUG-22) loaded
       ref.watch(unbatchedStockProvider(_p!.id));
@@ -541,18 +552,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                         onTap: () => _pickPhoto(hasPhoto: photo != null),
                         borderRadius: BorderRadius.circular(16),
                         child: photo == null
-                            ? const DashedBox(
-                                radius: 16,
-                                background: AppColors.surface,
-                                child: SizedBox(
-                                  width: 88,
-                                  height: 88,
-                                  child: Center(
-                                    child: AppIcon(AppIcons.camera,
-                                        size: 28, strokeWidth: 1.8, color: AppColors.textSecondary),
-                                  ),
-                                ),
-                              )
+                            ? cameraBox
                             : ClipRRect(
                                 borderRadius: BorderRadius.circular(16),
                                 child: Image(
@@ -562,6 +562,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                                   height: 88,
                                   fit: BoxFit.cover,
                                   gaplessPlayback: true,
+                                  // BUG-25: a broken saved photo or an undecodable pick shows the camera box, like the POS tile.
+                                  errorBuilder: (_, _, _) => cameraBox,
                                 ),
                               ),
                       ),

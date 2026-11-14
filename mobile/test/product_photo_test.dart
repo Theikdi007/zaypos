@@ -9,6 +9,7 @@ import 'package:image/image.dart' as img;
 import 'package:zaypos_app/app/fake_overrides.dart';
 import 'package:zaypos_app/core/router/app_router.dart';
 import 'package:zaypos_app/core/router/routes.dart';
+import 'package:zaypos_app/core/widgets/dashed_box.dart';
 import 'package:zaypos_app/features/products/data/product_photos.dart';
 import 'package:zaypos_app/main.dart';
 
@@ -164,5 +165,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(files.bytes, isEmpty);
     expect(c.read(productPhotoProvider(p.id)), isNull);
+  });
+
+  testWidgets('BUG-25: a broken saved photo shows the camera box in the edit form, no image error', (tester) async {
+    final (c, _, files) = await boot(tester);
+    final p = c.read(fakeDatabaseProvider).products.first;
+    files.bytes[p.id] = Uint8List.fromList(List.filled(64, 7)); // half-written / corrupt .jpg
+    c.invalidate(productPhotosProvider);
+    await tester.pumpAndSettle();
+
+    c.read(appRouterProvider).go(Routes.editProduct(p.id));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200))); // let decoding fail
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    final preview = find.byKey(const ValueKey('productPhotoPreview'));
+    expect(preview, findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('productPhotoButton')), matching: find.byType(DashedBox)),
+        findsOneWidget, reason: 'falls back to the camera box');
+
+    await tester.tap(find.byKey(const ValueKey('productPhotoButton')));
+    await tester.pumpAndSettle();
+    expect(find.text('ဓာတ်ပုံ ဖယ်မယ်'), findsOneWidget, reason: 'the broken photo can still be removed');
   });
 }
