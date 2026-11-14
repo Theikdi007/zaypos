@@ -183,6 +183,13 @@ Format:
          "Contacts ထဲက ရွေးရန်", sync texts "data" / "update" / "Copy … paste", "(FEFO)". Owner may allow some as loanwords; then QA
          adds them to the allow-list.
   - The new scan / photo sheets are clean ("Barcode" / "Scan" / "IMEI" are allowed loanwords).
+- Owner decision 2026-11-14: allowed English = KBZPay, WavePay, Viber, Excel, IMEI, Barcode, PIN, OTP, Stock, Sync (plus the brand, Ks /
+  units and phone placeholders, which are not words). Everything else translated: Size→ဆိုဒ်, menu→မီနူး, data→ဒေတာ, Order mode→အော်ဒါ
+  ပုံစံ, ရိုးရှင်း mode→ရိုးရှင်းသော ပုံစံ (owner's words); developer's choices for the rest — Batch→အသုတ်, Serial→စီးရီးနံပါတ်,
+  Server→ဆာဗာ, App→အက်ပ်, Support→အကူအညီဌာန, Demo→စမ်းသပ်, Offline→လိုင်းမရှိ, SMS ကုဒ်→OTP ကုဒ်, feature→လုပ်ဆောင်ချက်,
+  template→ဆိုင်ပုံစံ, Quick Sale→အမြန်ရောင်း, scan→ဖတ်မယ် / စကင်ဖတ်, Contacts→ဖုန်းစာအုပ်, screenshot→ငွေလွှဲပြေစာ ပုံ.
+- Status: fixed in fb520d9 — QA allow-lists (TC-UX-02, TC-UX-NEW-1) narrowed to the owner's list; new `m/no_english_test.dart` checks
+  every Burmese string literal under `lib/`. Owner to read the developer's word choices.
 
 ## BUG-10 · TC-FEAT-NEW-1 · Low · The v2 restaurant template can be picked at registration
 - Found in: round 1 · `mobile/test/qa/qa_app_flows_test.dart` › "TC-FEAT-NEW-1 register step 2: the v2 restaurant template cannot be chosen"
@@ -515,7 +522,18 @@ Format:
 - Suspected area: `mobile/lib/features/products/presentation/add_product_screen.dart` `build` — the `Image(key: productPhotoPreview)`
   has no `errorBuilder` (the tile in `product_tile.dart` and `InitialAvatar` in `common.dart` have one).
 - Blocks beta: no (needs a corrupt file or an undecodable pick; the user can remove / replace the photo).
-- Status: open
+- Status: fixed in 2c020e8 — the preview has an `errorBuilder` showing the camera box; `m/product_photo_test.dart` › "BUG-25 …".
+
+---
+
+## Known limitations for the beta (owner, 2026-11-14)
+
+- **Product photos stay on the phone where they were taken.** They are not synced: another phone of the same shop, a reinstall or a
+  new phone shows the product's initial instead. By design for the beta (6e94350 "stored locally only"; TC-PROD-NEW-32 checks that no
+  photo bytes go into the outbox). Tell beta shops; photo sync is a later feature.
+- **Duplicate barcodes are allowed** (decision, implemented in e0ea12b): Add/Edit Product warns, POS asks which product. The server
+  still flags `duplicateBarcode` in the sync review.
+- **IMEI scan at POS** (decision, e0ea12b): an in-stock IMEI adds that phone; sold / unknown IMEIs go to "ပစ္စည်းအသစ် ထည့်မယ်".
 
 ---
 
