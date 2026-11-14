@@ -23,6 +23,17 @@ import '../../sales/domain/sale.dart';
 import '../../sales/presentation/sale_ui.dart';
 import '../domain/cart.dart';
 
+/// Warning when a credit sale of [saleTotal] takes [c] over their credit
+/// limit — the same rule the server flags later (balance > limit). It warns,
+/// it does not block: the owner decides. Null = no limit, or still within it.
+String? creditLimitWarning(CustomerAccount c, int saleTotal) {
+  final limit = c.customer.creditLimit;
+  if (limit == null) return null;
+  final after = c.balance + saleTotal;
+  if (after <= limit) return null;
+  return 'အကြွေး ကန့်သတ်ချက် ${formatKs(limit)} ကျော်ပါမယ် · ရောင်းပြီးရင် ${formatKs(after)}';
+}
+
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
 
@@ -57,6 +68,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   /// Why confirming is blocked (shown under the button), or null if allowed.
+  /// (Going over a credit limit only warns — see [creditLimitWarning].)
   String? _blockReason(Cart cart, CustomerAccount? customer) {
     if (cart.isEmpty) return null; // nothing to hint; button just disabled
     if (_method == PaymentMethod.debt && customer == null) return 'အကြွေးရောင်းရန် ဖောက်သည် ရွေးပါ';
@@ -235,6 +247,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                     Text(customer.name, style: AppText.s(14, weight: AppText.w700)),
                                     Text('ယခင်အကြွေး ${formatKs(customer.balance)}',
                                         style: AppText.s(12, color: AppColors.debtInk)),
+                                    if (creditLimitWarning(customer, cart.total) case final w?)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Semantics(
+                                          liveRegion: true,
+                                          child: Text(w,
+                                              key: const ValueKey('creditLimitWarning'),
+                                              style: AppText.s(12, weight: AppText.w700, color: AppColors.danger)),
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),
