@@ -38,13 +38,17 @@ class VoidSaleService {
     // BUG-23: a phone of this sale that was already taken back (trade-in: its
     // IMEI is in stock again as a newer row) is not returned a second time —
     // its old row stays as history and no +1 is written for it.
+    // BUG-24: "taken back" = a NEWER row with the same IMEI exists (on any
+    // product), whatever its status now — it may have been sold again to
+    // another customer; the phone is not here either way.
     final alreadyBack = <String>{};
     if (voided && sale.lines.any((l) => l.serialId != null)) {
-      final inStock = await products.watchInStockSerialValues().first;
       for (final l in sale.lines) {
         if (l.serialId == null || l.productId == null) continue;
         final row = (await products.watchSerials(l.productId!).first).where((s) => s.id == l.serialId).firstOrNull;
-        if (row != null && row.status == SerialStatus.sold && inStock.contains(row.serial)) alreadyBack.add(l.id);
+        if (row == null || row.status != SerialStatus.sold) continue;
+        final same = await products.watchSerialRows(row.serial).first;
+        if (same.any((s) => s.id != row.id && s.createdAt.isAfter(row.createdAt))) alreadyBack.add(l.id);
       }
     }
     // Un-void mirrors it: a line whose IMEI row was never returned (still sold
