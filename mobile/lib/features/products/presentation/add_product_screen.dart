@@ -81,8 +81,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   final _pending = PendingModules();
   final _batchNo = TextEditingController();
   DateTime? _expiry;
-  // New product: tracked (30 days). Edit: as saved; none = "သက်တမ်း မမှတ်ပါ" (item 5).
-  late int _expiryWarnDays = _p == null ? 30 : (_p.expiryAlertDays ?? ExpiryBatchSection.noExpiry);
+  // Expiry tracking is opt-in: a new product starts at "သက်တမ်း မမှတ်ပါ" (owner decision). Edit: as saved.
+  late int _expiryWarnDays = _p == null ? ExpiryBatchSection.noExpiry : (_p.expiryAlertDays ?? ExpiryBatchSection.noExpiry);
   late int _warrantyMonths = _p == null ? 6 : (_p.warrantyMonths ?? 0);
   late String? _category = _p?.category ?? (_t.categories.isEmpty ? null : _t.categories.first);
   late String? _unit = _p != null ? (_p.unit.isEmpty && _t.units.isEmpty ? null : _p.unit) : (_t.units.isEmpty ? null : _t.units.first);
@@ -159,7 +159,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         !features.variants &&
         !(features.serialWarranty && _serial) &&
         openingQty > 0 &&
-        _batchNo.text.trim().isEmpty;
+        (_batchNo.text.trim().isEmpty || _expiry == null);
     final errors = <String, String>{
       for (final (key, error) in [
         ('name', limits.checkText('products.name', name, label: 'ပစ္စည်းအမည်')),
@@ -174,7 +174,10 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     if (name.isEmpty) errors['name'] ??= 'ပစ္စည်းအမည် ထည့်ပါ။';
     if (price <= 0) errors['price'] = 'ရောင်းဈေး ထည့်ပါ။';
     if (needsBatch) {
-      errors['batchNo'] = "သက်တမ်းမှတ်တဲ့ ပစ္စည်းမို့ Batch နံပါတ် ထည့်ပါ (သို့ 'သက်တမ်း မမှတ်ပါ' ရွေးပါ)။";
+      // Owner decision: batch number AND expiry date for tracked opening stock.
+      errors['batchNo'] = _batchNo.text.trim().isEmpty
+          ? "သက်တမ်းမှတ်တဲ့ ပစ္စည်းမို့ Batch နံပါတ် ထည့်ပါ (သို့ 'သက်တမ်း မမှတ်ပါ' ရွေးပါ)။"
+          : 'သက်တမ်းမှတ်တဲ့ ပစ္စည်းမို့ သက်တမ်းကုန်ရက် ရွေးပါ။';
     }
     if (errors.isNotEmpty) {
       setState(() {

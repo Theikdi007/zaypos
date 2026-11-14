@@ -179,6 +179,32 @@ public class SyncTests(SqlServerFixture sql)
     }
 
     [Fact]
+    public async Task Trade_in_a_sold_IMEI_received_again_is_a_new_in_stock_row_history_kept_a_second_copy_is_flagged()
+    {
+        var shop = await NewShop("phone");
+        var phoneB = await SecondDevice(shop);
+        var product = await AddProduct(shop, stock: 0);
+        var soldId = Guid.CreateVersion7();
+        await PushOne(shop, SerialUnit(product, soldId, "354444444444444", status: "sold"));
+
+        // Trade-in: the same IMEI comes back as a new in-stock row.
+        var back = await PushOne(shop, SerialUnit(product, Guid.CreateVersion7(), "354444444444444"));
+        back.Outcome.Should().Be(UnitOutcome.Applied);
+        back.Issues.Should().BeEmpty("only in-stock duplicates are flagged");
+
+        // Another phone receives it again while it is in stock → flagged, both kept.
+        var again = await PushOne(phoneB, SerialUnit(product, Guid.CreateVersion7(), "354444444444444"));
+        again.Outcome.Should().Be(UnitOutcome.Applied);
+        again.Issues.Should().Equal(SyncIssueKind.DuplicateSerial);
+
+        await using var db = sql.CreateContext(shop.TenantId);
+        var rows = await db.ProductSerials.Where(s => s.Serial == "354444444444444").ToListAsync();
+        rows.Should().HaveCount(3);
+        rows.Single(s => s.Id == soldId).Status.Should().Be(SerialStatus.Sold, "history kept");
+        rows.Count(s => s.Status == SerialStatus.InStock).Should().Be(2);
+    }
+
+    [Fact]
     public async Task Two_devices_selling_the_same_IMEI_keep_both_sales_and_raise_serialDoubleSold()
     {
         var shop = await NewShop("phone");

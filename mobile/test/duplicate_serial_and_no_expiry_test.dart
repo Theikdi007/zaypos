@@ -22,6 +22,7 @@ import 'package:zaypos_app/main.dart';
 import 'drift_helpers.dart';
 import 'fake_sync_api.dart';
 import 'helpers.dart';
+import 'qa/qa_form_helpers.dart';
 import 'sync_screens_test.dart' show settle;
 
 /// Item 4 (BUG-18 decision): an IMEI already known on this phone (any product)
@@ -172,11 +173,12 @@ void main() {
       c.read(appRouterProvider).go(Routes.addProduct);
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('expiryHelp')), findsOneWidget, reason: 'the form explains the rule');
-      expect(find.byKey(const ValueKey('batchNo')), findsOneWidget, reason: 'tracked by default');
-      await tester.tap(find.byKey(const ValueKey('expiryWarn')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('သက်တမ်း မမှတ်ပါ').last);
-      await tester.pumpAndSettle();
+      // Owner decision: expiry tracking is opt-in — the form starts at "သက်တမ်း မမှတ်ပါ".
+      expect(expiryWarnShows(noExpiryLabel), findsOneWidget);
+      expect(find.byKey(const ValueKey('batchNo')), findsNothing);
+      await pickExpiryWarn(tester, warn30Label);
+      expect(find.byKey(const ValueKey('batchNo')), findsOneWidget, reason: 'opted in → batch fields');
+      await pickExpiryWarn(tester, noExpiryLabel);
       expect(find.byKey(const ValueKey('batchNo')), findsNothing);
       await tester.enterText(field('productName'), 'QA ဆပ်ပြာ');
       await tester.enterText(field('price'), '1500');
@@ -308,6 +310,39 @@ void main() {
     });
   });
 
+  group('trade-in: a sold IMEI can be received again; an in-stock one cannot', () {
+    testWidgets('edit form: sold IMEI → new in-stock row (old sold row kept), stock +1; in-stock IMEI refused', (tester) async {
+      final c = await boot(tester, 'phone');
+      final p = product(c, 'QA trade-in');
+      final t = nowUtc();
+      ProductSerial s(String imei, SerialStatus st) => ProductSerial(
+          id: newId(), tenantId: p.tenantId, productId: p.id, serial: imei, status: st, createdAt: t, updatedAt: t);
+      final sold = s('360000000000001', SerialStatus.sold);
+      final have = s('360000000000002', SerialStatus.inStock);
+      await c.read(productServiceProvider).create(p, serials: [sold, have],
+          initialStock: [restockMovement(tenantId: p.tenantId, productId: p.id, qtyMilli: Qty.units(1))]);
+      await openProducts(tester, c, p.name);
+      await tester.tap(find.text(p.name).last);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(field('newImei'), have.serial);
+      await tester.tap(find.byKey(const ValueKey('addImei')));
+      await tester.pumpAndSettle();
+      expect(find.text('ဒီ IMEI ရှိပြီးသားပါ။'), findsOneWidget, reason: 'in stock → refused');
+      await tester.enterText(field('newImei'), sold.serial);
+      await tester.tap(find.byKey(const ValueKey('addImei')));
+      await tester.pumpAndSettle();
+      expect(find.text('${sold.serial} · အသစ်'), findsOneWidget, reason: 'sold → accepted (trade-in)');
+      await tester.tap(find.text('သိမ်းမယ်').last);
+      await tester.pumpAndSettle();
+
+      final rows = db(c).serials.where((x) => x.serial == sold.serial).toList();
+      expect(rows.map((x) => x.status).toList()..sort((a, b) => a.index - b.index), [SerialStatus.inStock, SerialStatus.sold]);
+      expect(rows.singleWhere((x) => x.id == sold.id).status, SerialStatus.sold, reason: 'history kept');
+      expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(2));
+    });
+  });
+
   group('BUG-20 no expiryAlertDays = plain product, even with old batches', () {
     testWidgets('old empty + expired batches: POS asks nothing (no batch sheet, no expired confirm); restock only "Batch မပါ"; '
         'stock = all movements', (tester) async {
@@ -350,10 +385,12 @@ void main() {
   });
 
   group('BUG-21 expiry-tracked product: opening stock needs a batch number', () {
-    testWidgets('stock without batch no. → refused with the message; with batch no. → saved into that batch', (tester) async {
+    testWidgets('stock without batch no. → refused; batch no. without expiry → refused; both → saved into that batch',
+        (tester) async {
       final c = await boot(tester, 'pharmacy');
       c.read(appRouterProvider).go(Routes.addProduct);
       await tester.pumpAndSettle();
+      await pickExpiryWarn(tester, warn30Label);
       await tester.enterText(field('productName'), 'QA tracked med');
       await tester.enterText(field('price'), '1500');
       await tester.enterText(field('stockQty'), '10');
@@ -365,8 +402,15 @@ void main() {
       await tester.enterText(field('batchNo'), 'T1');
       await tester.tap(find.text('သိမ်းမယ်').last);
       await tester.pumpAndSettle();
+      expect(find.textContaining('သက်တမ်းကုန်ရက် ရွေးပါ'), findsOneWidget);
+      expect(db(c).products.where((x) => x.name == 'QA tracked med'), isEmpty, reason: 'expiry date required too');
+
+      await pickAddProductExpiry(tester, 28);
+      await tester.tap(find.text('သိမ်းမယ်').last);
+      await tester.pumpAndSettle();
       final p = db(c).products.firstWhere((x) => x.name == 'QA tracked med');
       final b = db(c).batches.singleWhere((x) => x.productId == p.id);
+      expect(b.expiryDate, isNotNull);
       expect(stockWhere(c, (m) => m.batchId == b.id), Qty.units(10));
       expect(stockWhere(c, (m) => m.productId == p.id && m.batchId == null), 0);
     });

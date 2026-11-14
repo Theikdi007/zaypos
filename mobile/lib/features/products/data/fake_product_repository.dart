@@ -65,9 +65,12 @@ class FakeProductRepository implements ProductRepository {
       );
 
   @override
-  Stream<Set<String>> watchAllSerialValues() => db.watch(
+  Stream<Set<String>> watchInStockSerialValues() => db.watch(
         {FakeTable.serials},
-        () => {for (final s in db.serials) if (s.deletedAt == null) s.serial},
+        () => {
+          for (final s in db.serials)
+            if (s.deletedAt == null && s.status == SerialStatus.inStock) s.serial,
+        },
       );
 
   @override

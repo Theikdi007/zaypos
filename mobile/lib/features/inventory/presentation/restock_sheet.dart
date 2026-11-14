@@ -189,7 +189,7 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
     final v = limits.normalize('productSerials.serial', _imei.text);
     if (v.isEmpty) return true;
     final error = limits.checkText('productSerials.serial', v, label: 'IMEI / Serial') ??
-        (_imeis.contains(v) || widget.knownSerials.contains(v) || widget.serials.any((s) => s.serial == v)
+        (_imeis.contains(v) || widget.knownSerials.contains(v) || widget.serials.any((s) => s.serial == v && s.status == SerialStatus.inStock)
             ? 'ဒီ IMEI ရှိပြီးသားပါ။'
             : null);
     setState(() {

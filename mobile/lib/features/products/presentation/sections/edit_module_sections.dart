@@ -97,7 +97,7 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
     // Refused if this phone knows it already, on any product (BUG-18).
     final known = ref.read(knownSerialsProvider).value ?? const <String>{};
     final error = limits.checkText('productSerials.serial', v, label: 'IMEI / Serial') ??
-        (_p.imeis.contains(v) || known.contains(v) || existing.any((s) => s.serial == v)
+        (_p.imeis.contains(v) || known.contains(v) || existing.any((s) => s.serial == v && s.status == SerialStatus.inStock)
             ? 'ဒီ IMEI ရှိပြီးသားပါ။'
             : null);
     setState(() => _imeiError = error);

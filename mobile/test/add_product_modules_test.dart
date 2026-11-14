@@ -10,6 +10,7 @@ import 'package:zaypos_app/features/products/domain/product_modules.dart';
 import 'package:zaypos_app/main.dart';
 
 import 'helpers.dart';
+import 'qa/qa_form_helpers.dart';
 
 void main() {
   setUpAll(loadAppFonts);
@@ -38,7 +39,10 @@ void main() {
   testWidgets('pharmacy: saves a batch and receives stock into it', (tester) async {
     final c = await openAddProduct(tester, 'pharmacy');
     await tester.enterText(field('productName'), 'Paracetamol 500mg');
+    // Expiry tracking is opt-in; tracked opening stock needs batch no. + expiry.
+    await pickExpiryWarn(tester, warn30Label);
     await tester.enterText(field('batchNo'), 'B2406A');
+    await pickAddProductExpiry(tester, 28);
     await tester.scrollUntilVisible(field('stockQty'), 200, scrollable: find.byType(Scrollable).first);
     await tester.enterText(field('stockQty'), '40');
     await tester.pumpAndSettle();

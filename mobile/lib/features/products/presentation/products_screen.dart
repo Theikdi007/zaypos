@@ -114,7 +114,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           v.id: moves.where((m) => m.variantId == v.id && m.deletedAt == null).fold(0, (a, m) => a + m.qtyMilli),
       };
     }
-    final known = mode == RestockMode.imei ? await repo.watchAllSerialValues().first : const <String>{};
+    final known = mode == RestockMode.imei ? await repo.watchInStockSerialValues().first : const <String>{};
     if (!mounted) return true;
     final r = await showModuleRestockSheet(
       context,

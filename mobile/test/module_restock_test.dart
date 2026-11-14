@@ -104,8 +104,16 @@ void main() {
         await tester.testTextInput.receiveAction(TextInputAction.done);
         await tester.pumpAndSettle();
       }
-      expect(inSheet(find.text('ဒီ IMEI ရှိပြီးသားပါ။')), findsNothing, reason: 'the last one was valid');
-      expect(inSheet(find.textContaining('IMEI 2 လုံး')), findsOneWidget, reason: '111… already exists (sold)');
+      expect(inSheet(find.text('ဒီ IMEI ရှိပြီးသားပါ။')), findsNothing);
+      // Trade-in (owner decision): 111… was sold, so it may be received again.
+      expect(inSheet(find.textContaining('IMEI 3 လုံး')), findsOneWidget);
+      // An in-stock IMEI (just added) is still refused.
+      await tester.enterText(field('imei'), '222222222222222');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(inSheet(find.text('ဒီ IMEI ရှိပြီးသားပါ။')), findsOneWidget);
+      await tester.enterText(field('imei'), '');
+      await tester.pumpAndSettle();
       final n = kinds(c).length;
       await tester.tap(inSheet(find.text('သိမ်းမယ်')));
       await tester.pumpAndSettle();
@@ -113,9 +121,9 @@ void main() {
       // The product has no stock history yet ("Stock မမှတ်ရသေး"): its first count is an opening count (BUG-15).
       expect(kinds(c).sublist(n), [UnitKind.stockAdjust]);
       final fresh = db(c).serials.where((s) => s.productId == p.id && s.status == SerialStatus.inStock).map((s) => s.serial);
-      expect(fresh.toSet(), {'222222222222222', '333333333333333'});
-      expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(2));
-      expect(db(c).serials.where((s) => s.id == old.id).single.status, SerialStatus.sold, reason: 'sold one untouched');
+      expect(fresh.toSet(), {'111111111111111', '222222222222222', '333333333333333'});
+      expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(3));
+      expect(db(c).serials.where((s) => s.id == old.id).single.status, SerialStatus.sold, reason: 'history kept');
     });
 
     testWidgets('pharmacy: default = newest unexpired batch; "+ Batch အသစ်" creates a batch (no. + expiry) holding the goods',
