@@ -41,6 +41,34 @@ class CustomerService {
     });
   }
 
+  /// Corrects a wrong payment (BUG-4): appends an adjustment of +amount with
+  /// the payment's derived reversal id, as ONE payDebt unit. The payment row
+  /// is kept. Reversing the same payment again does nothing (returns null).
+  Future<DebtEntry?> reversePayment(DebtEntry payment) {
+    if (payment.type != DebtEntryType.payment || payment.deletedAt != null) {
+      throw ArgumentError.value(payment.type, 'payment', 'only a live payment can be reversed');
+    }
+    final id = paymentReversalId(payment.id);
+    return uow.run(UnitKind.payDebt, () async {
+      final existing = await debt.watchAll().first;
+      if (existing.any((e) => e.id == id)) return null;
+      final t = nowUtc();
+      final e = DebtEntry(
+        id: id,
+        tenantId: payment.tenantId,
+        customerId: payment.customerId,
+        type: DebtEntryType.adjustment,
+        amount: payment.amount,
+        method: payment.method,
+        note: '$paymentReversalNote · ${(payment.method ?? PaymentMethod.cash).label}',
+        createdAt: t,
+        updatedAt: t,
+      );
+      await debt.add(e);
+      return e;
+    });
+  }
+
   DebtEntry _entry(String tenantId, String customerId, DebtEntryType type, int amount,
       {PaymentMethod? method, String? note}) {
     final t = nowUtc();

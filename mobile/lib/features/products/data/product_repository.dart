@@ -12,6 +12,10 @@ abstract interface class ProductRepository {
   Stream<List<ProductBatch>> watchBatches(String productId);
   Stream<List<ProductSerial>> watchSerials(String productId);
 
+  /// Every live IN-STOCK IMEI / serial value of the shop (any product). A sold
+  /// IMEI is not in it: a traded-in phone can be received again.
+  Stream<Set<String>> watchInStockSerialValues();
+
   /// Saves a product together with its module rows.
   Future<void> add(
     Product product, {
@@ -22,6 +26,18 @@ abstract interface class ProductRepository {
 
   /// Sets the selling price (kyats); updatedAt moves to now (last-writer-wins).
   Future<void> setPrice(String productId, int price);
+
+  /// Adds module rows (new IMEIs, batches, size/colour variants) to a saved
+  /// product. Existing rows are never changed or deleted here.
+  Future<void> addModules({
+    List<ProductVariant> variants = const [],
+    List<ProductBatch> batches = const [],
+    List<ProductSerial> serials = const [],
+  });
+
+  /// Replaces a saved product's own fields (name, prices, unit, alerts…);
+  /// updatedAt moves to now (last-writer-wins). Module rows and stock are untouched.
+  Future<void> update(Product product);
 
   /// Marks an IMEI/serial sold (with its sale line) or back in stock.
   Future<void> setSerialStatus(String serialId, SerialStatus status, {String? saleLineId});

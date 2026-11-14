@@ -22,6 +22,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
     private readonly HashSet<SyncIssueKind> _issueKinds = [];
     private readonly HashSet<Guid> _barcodeChanged = [];
     private readonly HashSet<Guid> _flaggedSerials = [];
+    private readonly HashSet<Guid> _newInStockSerials = [];
     private readonly HashSet<Guid> _stockTouched = [];
     private readonly HashSet<Guid> _creditCustomers = [];
     private TimeSpan _maxAhead = TimeSpan.Zero;
@@ -78,6 +79,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
         await CheckNegativeStockAsync(stockBefore);
         await CheckCreditLimitsAsync();
         await CheckBarcodesAsync();
+        await CheckDuplicateSerialsAsync();
         if (_maxAhead > SyncLimits.MaxClockAhead)
             Issue(SyncIssueKind.ClockSkew, "Devices", caller.DeviceId,
                 $"Device clock is {_maxAhead.TotalMinutes:0} min ahead of the server; edit times were clamped to server time + {SyncLimits.MaxClockAhead.TotalMinutes:0} min.");
@@ -243,6 +245,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
                     Status = status, SaleLineId = r.SaleLineId,
                     CreatedAt = Require(r.CreatedAt, "productSerials.createdAt"), UpdatedAt = updatedAt, DeletedAt = r.DeletedAt,
                 });
+                if (status == SerialStatus.InStock && r.DeletedAt is null) _newInStockSerials.Add(id);
                 continue;
             }
 
@@ -258,6 +261,9 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
                        || Decide(existing.UpdatedAt, existing.DeletedAt, updatedAt, r.DeletedAt, restore: false) == LwwAction.Update;
             if (take)
             {
+                // An existing row turning back to in-stock (e.g. a void after a trade-in) is checked like a new one (BUG-23).
+                if (status == SerialStatus.InStock && existing.Status != SerialStatus.InStock && existing.DeletedAt is null && r.DeletedAt is null)
+                    _newInStockSerials.Add(existing.Id);
                 existing.Status = status;
                 existing.SaleLineId = r.SaleLineId;
                 if (r.Serial is not null) existing.Serial = SyncLimits.Serial.Apply(r.Serial)!;
@@ -553,6 +559,26 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
             if (others.Count > 0)
                 Issue(SyncIssueKind.DuplicateBarcode, "Products", productId,
                     $"Barcode {barcode} is also used by: {string.Join(", ", others)}.");
+        }
+    }
+
+    /// <summary>
+    /// A new live in-stock IMEI / serial whose serial another live in-stock row of the shop already has
+    /// (any product): both rows are kept, the owner is told (duplicateSerial).
+    /// </summary>
+    private async Task CheckDuplicateSerialsAsync()
+    {
+        foreach (var id in _newInStockSerials)
+        {
+            var s = await FindAsync<ProductSerial>(id);
+            if (s is not { Status: SerialStatus.InStock, DeletedAt: null }) continue;
+            var others = await db.Set<ProductSerial>()
+                .Where(o => o.Id != id && o.Serial == s.Serial && o.Status == SerialStatus.InStock && o.DeletedAt == null)
+                .Join(db.Set<Product>(), o => o.ProductId, p => p.Id, (o, p) => p.Name)
+                .ToListAsync(_ct);
+            if (others.Count > 0)
+                Issue(SyncIssueKind.DuplicateSerial, "ProductSerials", id,
+                    $"Serial {s.Serial} is already in stock ({string.Join(", ", others)}). Both rows were kept.");
         }
     }
 

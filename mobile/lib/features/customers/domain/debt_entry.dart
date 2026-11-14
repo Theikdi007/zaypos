@@ -1,3 +1,4 @@
+import '../../../core/utils/ids.dart';
 import '../../sales/domain/sale.dart';
 
 enum DebtEntryType { creditSale, payment, adjustment }
@@ -72,6 +73,14 @@ class DebtEntry {
         deletedAt: deletedAt != null ? deletedAt() : this.deletedAt,
       );
 }
+
+/// Id of the entry that reverses payment [paymentId] (BUG-4: a wrong payment
+/// is corrected by an opposite entry, never deleted). Derived, so a payment
+/// is reversed at most once even if two phones do it offline.
+String paymentReversalId(String paymentId) => derivedId('payment-reversal:$paymentId');
+
+/// Note on a payment reversal row (shown as its history title).
+const paymentReversalNote = 'ငွေပြန်ဆပ် ပြန်ပယ်';
 
 /// Balance owed from a ledger (soft-deleted rows ignored).
 int debtBalance(Iterable<DebtEntry> entries) =>

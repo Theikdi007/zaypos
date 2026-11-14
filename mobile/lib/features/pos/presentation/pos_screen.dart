@@ -18,6 +18,7 @@ import '../../../core/widgets/segmented_tabs.dart';
 import '../../products/application/product_service.dart';
 import '../../products/data/product_providers.dart';
 import '../../products/domain/product_view.dart';
+import 'module_pick_sheet.dart';
 import 'set_price_sheet.dart';
 import '../../devices/data/device_providers.dart';
 import '../domain/cart.dart';
@@ -59,14 +60,24 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   /// A product without a price is never sold at 0 Ks: ask for the price, save
   /// it to the product (upsertProduct unit) and use it for this sale.
   Future<void> _addProduct(ProductView p) async {
-    if (!p.needsPrice) {
-      ref.read(cartProvider.notifier).addProduct(p.product);
-      return;
+    var product = p.product;
+    if (p.needsPrice) {
+      final price = await showSetPriceSheet(context, productName: p.name);
+      if (price == null || !mounted) return;
+      await ref.read(productServiceProvider).setPrice(p.id, price);
+      product = product.copyWith(price: price);
     }
-    final price = await showSetPriceSheet(context, productName: p.name);
-    if (price == null || !mounted) return;
-    await ref.read(productServiceProvider).setPrice(p.id, price);
-    ref.read(cartProvider.notifier).addProduct(p.product.copyWith(price: price));
+    if (!mounted) return;
+    // Which IMEI / size-colour / batch (BUG-2).
+    final result = await pickModuleUnit(context, ref, product, ref.read(cartProvider));
+    switch (result) {
+      case PickCancelled():
+        return;
+      case PlainProduct():
+        ref.read(cartProvider.notifier).addProduct(product);
+      case Picked(:final pick):
+        ref.read(cartProvider.notifier).addProduct(product, pick: pick);
+    }
   }
 
   void _addQuick() {
@@ -177,7 +188,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           price: p.price,
           stockLabel: stockLabel,
           stockLow: low,
-          qtyMilli: cart.qtyOf(p.id),
+          qtyMilli: cart.qtyOfProduct(p.id),
           needsPrice: p.needsPrice,
           onTap: () => _addProduct(p),
         );

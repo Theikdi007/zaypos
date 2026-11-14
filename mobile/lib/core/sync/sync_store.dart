@@ -102,13 +102,19 @@ class SyncStore {
   ///   The sale row itself stays: its state already equals the server's, and a
   ///   pull would not bring it back if it was pulled before.
   /// - rejected → status rejected + reason; later units are not touched.
-  Future<bool> applyResults(List<OutboxRow> batch, List<UnitResult> results) => db.transaction(() async {
+  ///
+  /// [editTimeLimit] (server time + [maxClockAhead]): an applied unit's
+  /// last-writer-wins rows with a later updatedAt (this phone's clock is
+  /// ahead) are clamped to it here too, as the server stored them (BUG-5).
+  Future<bool> applyResults(List<OutboxRow> batch, List<UnitResult> results, {DateTime? editTimeLimit}) =>
+      db.transaction(() async {
         final byUnit = {for (final r in results) r.unitId: r};
         for (final o in batch) {
           final r = byUnit[o.unitId];
           if (r == null) return false; // not answered: stays pending
           switch (r.outcome) {
             case UnitOutcome.applied:
+              if (editTimeLimit != null) await _clampEditTimes(rowsOf(o), editTimeLimit);
               await _deleteOutbox(o.seq);
             case UnitOutcome.skipped:
               await _dropLedgerRows(rowsOf(o));
@@ -125,6 +131,42 @@ class SyncStore {
         await db.writeState(SyncStateKeys.lastPushAt, nowUtc().toIso8601String());
         return false;
       });
+
+  /// The server accepts an edit time at most this far ahead of its clock
+  /// (backend SyncLimits.MaxClockAhead).
+  static const maxClockAhead = Duration(minutes: 5);
+
+  /// Local tables whose rows are last-writer-wins by updatedAt (§5.3), by wire name.
+  late final Map<String, TableInfo<Table, Object?>> _lwwTables = {
+    WireTable.products: db.products,
+    WireTable.productVariants: db.productVariants,
+    WireTable.productBatches: db.productBatches,
+    WireTable.customers: db.customers,
+    WireTable.tenants: db.tenants,
+  };
+
+  /// Pulls this phone's future edit times back to [limit] (what the server stored).
+  Future<void> _clampEditTimes(Map<String, dynamic> rows, DateTime limit) async {
+    final ms = limit.millisecondsSinceEpoch;
+    for (final (table, id) in _ids(rows)) {
+      if (table == WireTable.tenantFeatures) {
+        await db.customUpdate(
+          'UPDATE "${db.tenantFeatureFlags.actualTableName}" SET "updatedAt" = ? '
+          'WHERE "tenantId" = ? AND "featureKey" = ? AND "updatedAt" > ?',
+          variables: [Variable.withInt(ms), Variable.withString(tenantId), Variable.withString(id), Variable.withInt(ms)],
+          updates: {db.tenantFeatureFlags},
+        );
+        continue;
+      }
+      final local = _lwwTables[table];
+      if (local == null) continue;
+      await db.customUpdate(
+        'UPDATE "${local.actualTableName}" SET "updatedAt" = ? WHERE "id" = ? AND "updatedAt" > ?',
+        variables: [Variable.withInt(ms), Variable.withString(id), Variable.withInt(ms)],
+        updates: {local},
+      );
+    }
+  }
 
   Future<void> _deleteOutbox(int seq) => (db.delete(db.outbox)..where((x) => x.seq.equals(seq))).go();
 

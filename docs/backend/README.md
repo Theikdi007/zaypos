@@ -191,6 +191,7 @@ after it has saved the whole page in one Drift transaction.
 | `serialDoubleSold` | Two sales claim the same `ProductSerial`. |
 | `negativeStock` | A product's ledger sum drops below 0 after the unit. |
 | `duplicateBarcode` | Two live products in a tenant share a barcode. |
+| `duplicateSerial` | A new live in-stock `ProductSerial` has the same serial as another live in-stock row of the tenant (any product), e.g. two phones received the same IMEI offline. Both rows are kept; the unit is applied. |
 | `creditLimitExceeded` | Customer balance > `CreditLimit` after a credit sale. |
 | `clockSkew` | Device time more than 5 minutes ahead of the server. |
 | `totalMismatch` | Client total ≠ server recomputed total. |
@@ -273,9 +274,42 @@ SQL Server does not run natively on macOS — use Docker Desktop
 (Settings → General → "Use Rosetta for x86/amd64 emulation on Apple Silicon"):
 
 ```bash
-docker run -d --name zaypos-sql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Zaypos!Dev2026' \
-  -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest
+# <YOUR_DEV_SA_PASSWORD>: choose your own (SQL Server needs 8+ chars with upper,
+# lower, digit and symbol). Never commit it; never reuse it on a shared server.
+docker run -d --name zaypos-sql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='<YOUR_DEV_SA_PASSWORD>' \
+  -v zaypos-sql-data:/var/opt/mssql \
+  -p 127.0.0.1:1433:1433 mcr.microsoft.com/mssql/server:2022-latest
 ```
+
+The API reads it from the `ZayPOS` connection string. Set it in **one** of these
+places, both outside git:
+
+- `backend/src/ZayPOS.Api/appsettings.Development.json` (git-ignored): copy
+  `appsettings.Development.example.json` and replace `<your-local-sa-password>`.
+- or .NET user-secrets (the API project already has a `UserSecretsId`):
+  ```bash
+  cd backend/src/ZayPOS.Api
+  dotnet user-secrets set "ConnectionStrings:ZayPOS" \
+    "Server=localhost,1433;Database=ZayPOS;User Id=sa;Password=<YOUR_DEV_SA_PASSWORD>;TrustServerCertificate=True"
+  ```
+  User-secrets override `appsettings.Development.json` in Development.
+
+`dotnet ef` commands (`--startup-project src/ZayPOS.Api`) read the same settings.
+The integration tests do not need it: they start their own throw-away SQL Server
+(Testcontainers).
+
+A password that was ever committed stays in git history: if yours was, change it
+(recreate the container with a new `MSSQL_SA_PASSWORD`, update the setting above).
+
+`-p 127.0.0.1:1433:1433` publishes SQL Server on the Mac's loopback only, so other
+devices on the same Wi-Fi cannot reach it (the API is what the phone talks to).
+Check with `docker ps`: the port must read `127.0.0.1:1433->1433/tcp`, not `0.0.0.0:1433`.
+
+A container created earlier with `-p 1433:1433` keeps listening on every interface
+(a port binding cannot be changed in place). To fix it, recreate the container. If
+it was created **without** the `-v zaypos-sql-data:/var/opt/mssql` volume, its
+databases are lost with it: re-run `dotnet ef database update` afterwards (dev
+data only), or back up first.
 
 SSMS is Windows-only; on Mac use VS Code with the **SQL Server (mssql)** extension.
 

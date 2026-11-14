@@ -45,6 +45,7 @@ String issueKindLabel(String kind) => switch (kind) {
       'clockSkew' => 'ဖုန်းနာရီ မှန်မနေ',
       'totalMismatch' => 'စုစုပေါင်း မကိုက်',
       'duplicateReceiptNo' => 'ပြေစာနံပါတ် ထပ်နေ',
+      'duplicateSerial' => 'IMEI / Serial တူ ဖုန်း နှစ်လုံး stock ထဲ ရှိနေ',
       _ => kind,
     };
 

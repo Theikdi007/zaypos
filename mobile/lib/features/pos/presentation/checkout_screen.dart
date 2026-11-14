@@ -13,6 +13,8 @@ import '../../../core/widgets/common.dart';
 import '../../../core/widgets/dashed_box.dart';
 import '../../../core/widgets/money_text.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/qty_sheet.dart';
+import '../../../core/features/features_providers.dart';
 import '../../customers/data/customer_providers.dart';
 import '../../customers/domain/customer_account.dart';
 import '../../customers/presentation/widgets/customer_row.dart';
@@ -20,6 +22,17 @@ import '../../sales/application/checkout_service.dart';
 import '../../sales/domain/sale.dart';
 import '../../sales/presentation/sale_ui.dart';
 import '../domain/cart.dart';
+
+/// Warning when a credit sale of [saleTotal] takes [c] over their credit
+/// limit — the same rule the server flags later (balance > limit). It warns,
+/// it does not block: the owner decides. Null = no limit, or still within it.
+String? creditLimitWarning(CustomerAccount c, int saleTotal) {
+  final limit = c.customer.creditLimit;
+  if (limit == null) return null;
+  final after = c.balance + saleTotal;
+  if (after <= limit) return null;
+  return 'အကြွေး ကန့်သတ်ချက် ${formatKs(limit)} ကျော်ပါမယ် · ရောင်းပြီးရင် ${formatKs(after)}';
+}
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -55,6 +68,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   /// Why confirming is blocked (shown under the button), or null if allowed.
+  /// (Going over a credit limit only warns — see [creditLimitWarning].)
   String? _blockReason(Cart cart, CustomerAccount? customer) {
     if (cart.isEmpty) return null; // nothing to hint; button just disabled
     if (_method == PaymentMethod.debt && customer == null) return 'အကြွေးရောင်းရန် ဖောက်သည် ရွေးပါ';
@@ -233,6 +247,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                     Text(customer.name, style: AppText.s(14, weight: AppText.w700)),
                                     Text('ယခင်အကြွေး ${formatKs(customer.balance)}',
                                         style: AppText.s(12, color: AppColors.debtInk)),
+                                    if (creditLimitWarning(customer, cart.total) case final w?)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Semantics(
+                                          liveRegion: true,
+                                          child: Text(w,
+                                              key: const ValueKey('creditLimitWarning'),
+                                              style: AppText.s(12, weight: AppText.w700, color: AppColors.danger)),
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),
@@ -344,6 +368,20 @@ class _LineRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.read(cartProvider.notifier);
+    final decimal = ref.watch(tenantFeaturesProvider).decimalQty;
+    // Tap the quantity: type it (decimals when decimalQty is on, e.g. 2.5 ပေ).
+    Future<void> editQty() async {
+      final q = await showQtySheet(
+        context,
+        title: 'အရေအတွက်',
+        subtitle: '${line.name} · ${formatKs(line.price)}',
+        decimal: decimal,
+        initialMilli: line.qtyMilli,
+        confirmLabel: 'ပြောင်းမယ်',
+      );
+      if (q != null) cart.setQty(line.key, q);
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
@@ -363,11 +401,29 @@ class _LineRow extends ConsumerWidget {
             decoration: BoxDecoration(color: AppColors.fill, borderRadius: AppRadius.inputR),
             child: Row(
               children: [
-                _stepBtn('−', 'လျှော့ရန်', () => cart.setQty(line.key, line.qtyMilli - CartNotifier.step)),
+                _stepBtn('−', 'လျှော့ရန်', () {
+                  // Never below what is there when it is one unit or less (0.5 stays 0.5).
+                  if (line.qtyMilli > CartNotifier.step) cart.setQty(line.key, line.qtyMilli - CartNotifier.step);
+                }),
                 const SizedBox(width: 4),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 22),
-                  child: Text(Qty.format(line.qtyMilli), textAlign: TextAlign.center, style: AppText.s(15, weight: AppText.w700)),
+                Semantics(
+                  button: true,
+                  label: 'အရေအတွက် ${Qty.format(line.qtyMilli)} · ပြောင်းရန်',
+                  excludeSemantics: true,
+                  child: InkWell(
+                    key: ValueKey('qty-${line.key}'),
+                    onTap: editQty,
+                    borderRadius: BorderRadius.circular(8),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 30, minHeight: 36),
+                      child: Center(
+                        child: Text(Qty.format(line.qtyMilli),
+                            textAlign: TextAlign.center,
+                            style: AppText.s(15, weight: AppText.w700)
+                                .copyWith(decoration: TextDecoration.underline, decorationStyle: TextDecorationStyle.dotted)),
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 4),
                 _stepBtn('+', 'တိုးရန်', () => cart.setQty(line.key, line.qtyMilli + CartNotifier.step)),

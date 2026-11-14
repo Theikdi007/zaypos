@@ -44,16 +44,33 @@ class FakeProductRepository implements ProductRepository {
         () => List.unmodifiable(db.variants.where((v) => v.productId == productId && v.deletedAt == null)),
       );
 
+  /// Batch quantity = SUM of its live stock movements, like the Drift repository.
   @override
   Stream<List<ProductBatch>> watchBatches(String productId) => db.watch(
-        {FakeTable.batches},
-        () => List.unmodifiable(db.batches.where((b) => b.productId == productId && b.deletedAt == null)),
+        {FakeTable.batches, FakeTable.stock},
+        () => List.unmodifiable([
+          for (final b in db.batches.where((b) => b.productId == productId && b.deletedAt == null))
+            b.copyWith(
+              qtyMilli: db.stock
+                  .where((m) => m.batchId == b.id && m.deletedAt == null)
+                  .fold<int>(0, (a, m) => a + m.qtyMilli),
+            ),
+        ]),
       );
 
   @override
   Stream<List<ProductSerial>> watchSerials(String productId) => db.watch(
         {FakeTable.serials},
         () => List.unmodifiable(db.serials.where((s) => s.productId == productId && s.deletedAt == null)),
+      );
+
+  @override
+  Stream<Set<String>> watchInStockSerialValues() => db.watch(
+        {FakeTable.serials},
+        () => {
+          for (final s in db.serials)
+            if (s.deletedAt == null && s.status == SerialStatus.inStock) s.serial,
+        },
       );
 
   @override
@@ -64,6 +81,15 @@ class FakeProductRepository implements ProductRepository {
     List<ProductSerial> serials = const [],
   }) async {
     db.products.insert(0, product);
+    await addModules(variants: variants, batches: batches, serials: serials);
+  }
+
+  @override
+  Future<void> addModules({
+    List<ProductVariant> variants = const [],
+    List<ProductBatch> batches = const [],
+    List<ProductSerial> serials = const [],
+  }) async {
     db.variants.addAll(variants);
     db.batches.addAll(batches);
     db.serials.addAll(serials);
@@ -75,6 +101,33 @@ class FakeProductRepository implements ProductRepository {
     final i = db.products.indexWhere((p) => p.id == productId);
     if (i < 0) throw StateError('Unknown product $productId');
     db.products[i] = db.products[i].copyWith(price: price, updatedAt: nowUtc());
+    db.touch({FakeTable.products});
+  }
+
+  @override
+  Future<void> update(Product product) async {
+    final i = db.products.indexWhere((p) => p.id == product.id);
+    if (i < 0) throw StateError('Unknown product ${product.id}');
+    final current = db.products[i];
+    db.products[i] = Product(
+      id: current.id,
+      tenantId: current.tenantId,
+      name: product.name,
+      cost: product.cost,
+      price: product.price,
+      wholesalePrice: product.wholesalePrice,
+      lowAlertMilli: product.lowAlertMilli,
+      category: product.category,
+      unit: product.unit,
+      barcode: product.barcode,
+      warrantyMonths: product.warrantyMonths,
+      expiryAlertDays: product.expiryAlertDays,
+      tint: product.tint,
+      initial: product.initial,
+      createdAt: current.createdAt,
+      updatedAt: nowUtc(),
+      deletedAt: current.deletedAt,
+    );
     db.touch({FakeTable.products});
   }
 

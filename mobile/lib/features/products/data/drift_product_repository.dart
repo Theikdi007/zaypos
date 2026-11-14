@@ -57,6 +57,17 @@ class DriftProductRepository implements ProductRepository {
       .watch();
 
   @override
+  Stream<Set<String>> watchInStockSerialValues() {
+    final s = db.productSerials;
+    return (db.selectOnly(s)
+          ..addColumns([s.serial])
+          ..where(s.deletedAt.isNull() & s.status.equalsValue(SerialStatus.inStock)))
+        .map((r) => r.read(s.serial)!)
+        .watch()
+        .map((l) => l.toSet());
+  }
+
+  @override
   Future<void> add(
     Product product, {
     List<ProductVariant> variants = const [],
@@ -67,6 +78,16 @@ class DriftProductRepository implements ProductRepository {
     final p = productRow(product);
     await db.into(db.products).insert(p);
     rec.record(WireTable.products, productWire(p));
+    await addModules(variants: variants, batches: batches, serials: serials);
+  }
+
+  @override
+  Future<void> addModules({
+    List<ProductVariant> variants = const [],
+    List<ProductBatch> batches = const [],
+    List<ProductSerial> serials = const [],
+  }) async {
+    final rec = UnitRecorder.require();
     for (final v in variants.map(variantRow)) {
       await db.into(db.productVariants).insert(v);
       rec.record(WireTable.productVariants, variantWire(v));
@@ -88,6 +109,18 @@ class DriftProductRepository implements ProductRepository {
     final current = await (db.select(db.products)..where((p) => p.id.equals(productId))).getSingleOrNull();
     if (current == null) throw StateError('Unknown product $productId');
     final updated = current.copyWith(price: price, updatedAt: nowUtc());
+    await db.update(db.products).replace(updated);
+    rec.record(WireTable.products, productWire(updated));
+  }
+
+  @override
+  Future<void> update(Product product) async {
+    final rec = UnitRecorder.require();
+    final current = await (db.select(db.products)..where((p) => p.id.equals(product.id))).getSingleOrNull();
+    if (current == null) throw StateError('Unknown product ${product.id}');
+    final row = productRow(product.copyWith(updatedAt: nowUtc()));
+    // Keep identity/history columns as stored.
+    final updated = row.copyWith(tenantId: current.tenantId, createdAt: current.createdAt, deletedAt: Value(current.deletedAt));
     await db.update(db.products).replace(updated);
     rec.record(WireTable.products, productWire(updated));
   }

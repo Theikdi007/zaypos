@@ -53,16 +53,26 @@ class _PayDebtSheetState extends ConsumerState<PayDebtSheet> {
     _amount.selection = TextSelection.collapsed(offset: _amount.text.length);
   }
 
+  /// True while the payment is being written: a second tap does nothing
+  /// (one tap = one payment, like Checkout).
+  bool _busy = false;
+
   Future<void> _confirm(int amount) async {
-    if (amount > 0) {
-      await ref.read(customerServiceProvider).recordPayment(
-            tenantId: widget.customer.customer.tenantId,
-            customerId: widget.customer.id,
-            amount: amount,
-            method: _method,
-          );
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      if (amount > 0) {
+        await ref.read(customerServiceProvider).recordPayment(
+              tenantId: widget.customer.customer.tenantId,
+              customerId: widget.customer.id,
+              amount: amount,
+              method: _method,
+            );
+      }
+      if (mounted) Navigator.pop(context);
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
-    if (mounted) Navigator.pop(context);
   }
 
   @override
@@ -170,7 +180,7 @@ class _PayDebtSheetState extends ConsumerState<PayDebtSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          PrimaryButton(label: '${formatKs(a)} လက်ခံမယ်', onPressed: () => _confirm(a)),
+          PrimaryButton(label: '${formatKs(a)} လက်ခံမယ်', onPressed: _busy ? null : () => _confirm(a)),
         ],
       ),
     );

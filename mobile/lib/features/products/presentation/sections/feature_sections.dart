@@ -50,7 +50,15 @@ class ExpiryBatchSection extends StatelessWidget {
     required this.warnDays,
     required this.onWarnDays,
     this.batchError,
+    this.showBatch = true,
+    this.note,
   });
+
+  /// False when editing a saved product: batches are received as stock, not edited here.
+  final bool showBatch;
+
+  /// Extra line above the batch fields (e.g. the edit form's opening batch, BUG-22).
+  final String? note;
 
   final TextEditingController batchNo;
 
@@ -61,7 +69,20 @@ class ExpiryBatchSection extends StatelessWidget {
   final int warnDays;
   final ValueChanged<int> onWarnDays;
 
-  static const warnOptions = [(30, 'ရက် ၃၀ အလို'), (60, 'ရက် ၆၀ အလို'), (90, 'ရက် ၉၀ အလို')];
+  /// Product without an expiry (soap, diapers…): no expiryAlertDays, no batch needed.
+  static const noExpiry = 0;
+
+  static const warnOptions = [
+    (30, 'ရက် ၃၀ အလို'),
+    (60, 'ရက် ၆၀ အလို'),
+    (90, 'ရက် ၉၀ အလို'),
+    (noExpiry, 'သက်တမ်း မမှတ်ပါ'),
+  ];
+
+  /// Shown under the section (pharmacy decision, item 5).
+  static const help =
+      "သက်တမ်းမှတ်တဲ့ ပစ္စည်း (ဆေး စသည်) ကို Batch နံပါတ် + သက်တမ်းကုန်ရက်နဲ့ ဖြည့်/ရောင်းပါမယ်။ "
+      "သက်တမ်းမရှိတဲ့ ပစ္စည်း (ဆပ်ပြာ၊ ဒိုင်ပါ စသည်) ဆိုရင် 'သက်တမ်း မမှတ်ပါ' ရွေးပါ — Batch မလိုဘဲ ရိုးရိုးပစ္စည်းလို ဖြည့်/ရောင်းပါမယ်။";
 
   Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();
@@ -80,6 +101,10 @@ class ExpiryBatchSection extends StatelessWidget {
       title: 'သက်တမ်း နှင့် Batch',
       borderColor: AppColors.pharmacyBorder,
       children: [
+        if (note != null && showBatch && warnDays != noExpiry)
+          Text(note!, key: const ValueKey('openingBatchNote'),
+              style: AppText.s(12, weight: AppText.w600, color: AppColors.danger)),
+        if (showBatch && warnDays != noExpiry)
         TwoCol(
           LabeledField(
             label: 'Batch နံပါတ်',
@@ -117,14 +142,17 @@ class ExpiryBatchSection extends StatelessWidget {
           label: 'ကုန်ခါနီးရင် သတိပေးမယ်',
           small: true,
           child: AppSelect<int>(
+            key: const ValueKey('expiryWarn'),
             label: 'ကုန်ခါနီးရင် သတိပေးမယ်',
             items: warnOptions,
             value: warnDays,
             onChanged: onWarnDays,
           ),
         ),
-        Text('Batch တစ်ခုထက်ပိုရင် သက်တမ်းစောတာကို အရင်ရောင်းအောင် ညွှန်ပေးပါမယ် (FEFO)',
-            style: AppText.s(12, color: AppColors.muted)),
+        if (warnDays != noExpiry)
+          Text('Batch တစ်ခုထက်ပိုရင် သက်တမ်းစောတာကို အရင်ရောင်းအောင် ညွှန်ပေးပါမယ် (FEFO)',
+              style: AppText.s(12, color: AppColors.muted)),
+        Text(help, key: const ValueKey('expiryHelp'), style: AppText.s(12, color: AppColors.muted)),
       ],
     );
   }
@@ -140,7 +168,15 @@ class SerialWarrantySection extends StatefulWidget {
     required this.onAddImei,
     required this.warrantyMonths,
     required this.onWarrantyChanged,
+    this.showSerials = true,
+    this.registerCommit,
   });
+
+  /// False when editing a saved product: IMEIs are stock, entered when goods arrive.
+  final bool showSerials;
+
+  /// Receives the "add what is typed" callback the form calls on save (BUG-19).
+  final ValueSetter<bool Function()>? registerCommit;
 
   final bool serial;
   final ValueChanged<bool> onSerialChanged;
@@ -165,6 +201,19 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
   String? _error;
 
   @override
+  void initState() {
+    super.initState();
+    widget.registerCommit?.call(_commitTyped);
+  }
+
+  /// A typed IMEI not yet added: add it now; false (message shown) if refused (BUG-19).
+  bool _commitTyped() {
+    if (!widget.serial || _imei.text.trim().isEmpty) return true;
+    _submit();
+    return _error == null;
+  }
+
+  @override
   void dispose() {
     _imei.dispose();
     super.dispose();
@@ -183,6 +232,7 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
     return FormSection(
       borderColor: AppColors.phoneBorder,
       children: [
+        if (widget.showSerials)
         AppSwitchTile(
           title: 'တစ်လုံးချင်း IMEI / Serial မှတ်မယ်',
           description: 'ရောင်းတဲ့အခါ ဘယ်တစ်လုံးလဲ ရွေးရမယ်',
@@ -191,7 +241,7 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
           value: widget.serial,
           onChanged: widget.onSerialChanged,
         ),
-        if (widget.serial)
+        if (widget.serial && widget.showSerials)
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

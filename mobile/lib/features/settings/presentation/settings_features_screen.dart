@@ -99,7 +99,9 @@ class SettingsFeaturesScreen extends ConsumerWidget {
       const _Module(FeatureFlag.quickSale, 'Quick Sale', 'ပစ္စည်းမထည့်ဘဲ ဈေးနှုန်းရိုက်ပြီး ရောင်း'),
       const _Module(FeatureFlag.stock, 'Stock မှတ်ခြင်း', 'ရောင်းတိုင်း နုတ် · နည်းရင် သတိပေး'),
       _Module(FeatureFlag.presetCatalog, 'ကြိုတင်ပစ္စည်းစာရင်း',
-          '${template.productBadge ?? template.label} ပစ္စည်း ${mmDigits(template.presetCount)} barcode နဲ့'),
+          template.presetCount > 0
+              ? '${template.productBadge ?? template.label} ပစ္စည်း ${mmDigits(template.presetCount)} မျိုး'
+              : 'ဒီဆိုင်အမျိုးအစားအတွက် မရှိသေးပါ'),
       const _Module(FeatureFlag.expiryBatch, 'သက်တမ်းကုန်ရက် / Batch', 'ဆေးဆိုင်၊ အစားအသောက်'),
       const _Module(FeatureFlag.serialWarranty, 'IMEI / Serial + အာမခံ', 'ဖုန်း၊ Electronics'),
       const _Module(FeatureFlag.variants, 'Size / အရောင်', 'အဝတ်အထည်၊ ဖိနပ်၊ အလှကုန်'),

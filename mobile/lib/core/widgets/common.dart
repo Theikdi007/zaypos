@@ -386,11 +386,18 @@ class FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text.rich(
-      TextSpan(text: text, children: [
-        if (required) TextSpan(text: ' *', style: AppText.s(size, weight: AppText.w600, color: AppColors.danger)),
-      ]),
-      style: AppText.s(size, weight: AppText.w600, color: color),
+    final label = Text(text, style: AppText.s(size, weight: AppText.w600, color: color));
+    if (!required) return label;
+    // Label and red asterisk as separate texts (the label stays findable by
+    // its own text), read as one by screen readers.
+    return MergeSemantics(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Flexible(child: label),
+          Text(' *', style: AppText.s(size, weight: AppText.w600, color: AppColors.danger)),
+        ],
+      ),
     );
   }
 }
