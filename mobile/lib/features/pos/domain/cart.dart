@@ -95,10 +95,11 @@ class CartNotifier extends Notifier<Cart> {
     ]);
   }
 
-  /// Checkout +/−; quantity never drops below one unit (as in the design).
+  /// Checkout +/− and typed quantity. Any positive quantity is kept (2.5 or
+  /// 0.75 when decimalQty is on); zero or less becomes one unit (as in the design).
   void setQty(String key, int qtyMilli) {
     state = Cart([
-      for (final l in state.lines) l.key == key ? l.withQty(qtyMilli < step ? step : qtyMilli) : l,
+      for (final l in state.lines) l.key == key ? l.withQty(qtyMilli <= 0 ? step : qtyMilli) : l,
     ]);
   }
 

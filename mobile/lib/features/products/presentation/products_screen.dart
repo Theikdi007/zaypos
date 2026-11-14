@@ -64,7 +64,13 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   /// exactly what was counted, even after sales made before tracking (ledger
   /// ≤ 0, so the adjustment is > 0 and starts tracking).
   Future<void> _restock(ProductView p) async {
-    final qtyMilli = await showRestockSheet(context, productName: p.name, untracked: p.isUntracked);
+    final qtyMilli = await showRestockSheet(
+      context,
+      productName: p.name,
+      untracked: p.isUntracked,
+      decimal: ref.read(tenantFeaturesProvider).decimalQty,
+      unit: p.product.unit.isEmpty ? 'ခု' : p.product.unit,
+    );
     if (qtyMilli == null || !mounted) return;
     final stock = ref.read(stockServiceProvider);
     if (p.isUntracked) {
