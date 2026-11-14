@@ -44,10 +44,18 @@ class FakeProductRepository implements ProductRepository {
         () => List.unmodifiable(db.variants.where((v) => v.productId == productId && v.deletedAt == null)),
       );
 
+  /// Batch quantity = SUM of its live stock movements, like the Drift repository.
   @override
   Stream<List<ProductBatch>> watchBatches(String productId) => db.watch(
-        {FakeTable.batches},
-        () => List.unmodifiable(db.batches.where((b) => b.productId == productId && b.deletedAt == null)),
+        {FakeTable.batches, FakeTable.stock},
+        () => List.unmodifiable([
+          for (final b in db.batches.where((b) => b.productId == productId && b.deletedAt == null))
+            b.copyWith(
+              qtyMilli: db.stock
+                  .where((m) => m.batchId == b.id && m.deletedAt == null)
+                  .fold<int>(0, (a, m) => a + m.qtyMilli),
+            ),
+        ]),
       );
 
   @override
