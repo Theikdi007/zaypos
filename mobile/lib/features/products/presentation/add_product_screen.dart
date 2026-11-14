@@ -69,7 +69,10 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   late final _price = TextEditingController(text: _p == null ? '${_t.samplePrice}' : (_p.price > 0 ? '${_p.price}' : ''));
   late final _wholesale = TextEditingController(text: _p?.wholesalePrice?.toString() ?? '');
   final _stock = TextEditingController();
-  late final _alert = TextEditingController(text: _p == null ? '' : Qty.format(_p.lowAlertMilli));
+  /// Low-stock alert 0 = "no alert" (the field is left empty).
+  static const noLowAlert = 0;
+  late final _alert = TextEditingController(
+      text: _p == null || _p.lowAlertMilli == noLowAlert ? '' : Qty.format(_p.lowAlertMilli));
 
   /// IMEIs / batches / sizes-colours added in the edit form (BUG-12).
   final _pending = PendingModules();
@@ -166,7 +169,10 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             cost: int.tryParse(_cost.text) ?? 0,
             price: price,
             wholesalePrice: () => features.quotation ? int.tryParse(_wholesale.text) : editing.wholesalePrice,
-            lowAlertMilli: Qty.parse(_alert.text, decimal: features.decimalQty) ?? editing.lowAlertMilli,
+            // A cleared field = no low-stock alert (0), not the old value.
+            lowAlertMilli: features.stock
+                ? (Qty.parse(_alert.text, decimal: features.decimalQty) ?? noLowAlert)
+                : editing.lowAlertMilli,
             category: _category ?? defaultCategory,
             unit: _unit ?? '',
             barcode: () => barcode.isEmpty ? null : barcode,
@@ -514,11 +520,12 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                       LabeledField(
                         label: 'နည်းရင် သတိပေး',
                         small: true,
+                        helper: 'မထည့်ရင် သတိမပေးပါ',
                         child: AppInput(
                           key: const ValueKey('lowAlert'),
                           controller: _alert,
                           fontSize: 16,
-                          hint: '5',
+                          hint: 'မထည့်ရင် သတိမပေး',
                           keyboardType: numKb,
                           inputFormatters: [qtyFormatter],
                           semanticLabel: 'နည်းရင် သတိပေး',
