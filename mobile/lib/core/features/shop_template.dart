@@ -64,7 +64,7 @@ class ShopTemplate {
       label: 'ဆေးဆိုင်',
       initial: 'ဆ',
       tint: AppColors.tintBlue,
-      desc: 'သက်တမ်းကုန်ရက် · အသုတ် · ကုန်ခါနီး သတိပေး',
+      desc: 'သက်တမ်းကုန်ရက် · Batch · ကုန်ခါနီး သတိပေး',
       presetCount: 0,
       features: TenantFeatures(
           quickSale: true, stock: true, presetCatalog: true, expiryBatch: true),

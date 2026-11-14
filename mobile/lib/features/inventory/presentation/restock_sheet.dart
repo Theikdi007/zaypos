@@ -125,7 +125,7 @@ class ModuleRestockSheet extends ConsumerStatefulWidget {
   final Set<String> knownSerials;
 
   /// The product does not track expiry (no expiryAlertDays): it restocks as a
-  /// plain product (BUG-20) — the only choice shown is "အသုတ် မပါ"; old
+  /// plain product (BUG-20) — the only choice shown is "Batch မပါ"; old
   /// batches are not offered and no new batch can be started here.
   final bool batchOptional;
 
@@ -238,8 +238,8 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
           final limits = ref.read(syncLimitsProvider);
           final no = _batchNo.text.trim();
           // Same rule as the edit form (BUG-16): one batch number per product.
-          final error = limits.checkText('productBatches.batchNo', no, label: 'အသုတ်နံပါတ်') ??
-              (widget.batches.any((b) => b.batchNo == no) ? 'ဒီ အသုတ် ရှိပြီးသားပါ။' : null);
+          final error = limits.checkText('productBatches.batchNo', no, label: 'Batch နံပါတ်') ??
+              (widget.batches.any((b) => b.batchNo == no) ? 'ဒီ Batch ရှိပြီးသားပါ။' : null);
           if (error != null) {
             setState(() => _error = error);
             return;
@@ -274,7 +274,7 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
             Text(
               switch (widget.mode) {
                 RestockMode.imei => '${widget.productName} · ဝင်လာတဲ့ ဖုန်းတစ်လုံးချင်း IMEI ထည့်ပါ',
-                RestockMode.batch => '${widget.productName} · ဘယ် အသုတ် ထဲ ဝင်လာလဲ',
+                RestockMode.batch => '${widget.productName} · ဘယ် Batch ထဲ ဝင်လာလဲ',
                 RestockMode.variant => '${widget.productName} · ဘယ် ဆိုဒ် / အရောင် ဝင်လာလဲ',
               },
               style: AppText.s(13, color: AppColors.muted),
@@ -373,30 +373,30 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
             _choice(
               key: const ValueKey('restockBatch-new'),
               selected: isNew,
-              label: '+ အသုတ်အသစ်',
+              label: '+ Batch အသစ်',
               onTap: () => setState(() => _batch = ModuleRestockSheet.newBatch),
             ),
           if (widget.batchOptional)
             _choice(
               key: const ValueKey('restockBatch-none'),
               selected: _batch == ModuleRestockSheet.noBatch,
-              label: 'အသုတ် မပါ',
+              label: 'Batch မပါ',
               onTap: () => setState(() => _batch = ModuleRestockSheet.noBatch),
             ),
         ],
       ),
       if (widget.batchOptional) ...[
         const SizedBox(height: 6),
-        Text("သက်တမ်း မမှတ်တဲ့ ပစ္စည်း · အသုတ် မလိုပါ (ပစ္စည်းမှာ 'ကုန်ခါနီးရင် သတိပေးမယ်' ရွေးမှ အသုတ်နဲ့ ဖြည့်ပါမယ်)",
+        Text("သက်တမ်း မမှတ်တဲ့ ပစ္စည်း · Batch မလိုပါ (ပစ္စည်းမှာ 'ကုန်ခါနီးရင် သတိပေးမယ်' ရွေးမှ Batch နဲ့ ဖြည့်ပါမယ်)",
             style: AppText.s(12, color: AppColors.muted)),
       ],
       if (isNew) ...[
         const SizedBox(height: 10),
         TwoCol(
           LabeledField(
-            label: 'အသုတ်နံပါတ်',
+            label: 'Batch နံပါတ်',
             small: true,
-            child: AppInput(key: const ValueKey('restockBatchNo'), controller: _batchNo, semanticLabel: 'အသုတ်နံပါတ်'),
+            child: AppInput(key: const ValueKey('restockBatchNo'), controller: _batchNo, semanticLabel: 'Batch နံပါတ်'),
           ),
           LabeledField(
             label: 'သက်တမ်းကုန်ရက်',

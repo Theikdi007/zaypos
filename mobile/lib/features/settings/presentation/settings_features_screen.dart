@@ -102,7 +102,7 @@ class SettingsFeaturesScreen extends ConsumerWidget {
           template.presetCount > 0
               ? '${template.productBadge ?? template.label} ပစ္စည်း ${mmDigits(template.presetCount)} မျိုး'
               : 'ဒီဆိုင်အမျိုးအစားအတွက် မရှိသေးပါ'),
-      const _Module(FeatureFlag.expiryBatch, 'သက်တမ်းကုန်ရက် / အသုတ်', 'ဆေးဆိုင်၊ အစားအသောက်'),
+      const _Module(FeatureFlag.expiryBatch, 'သက်တမ်းကုန်ရက် / Batch', 'ဆေးဆိုင်၊ အစားအသောက်'),
       const _Module(FeatureFlag.serialWarranty, 'IMEI / စီးရီးနံပါတ် + အာမခံ', 'ဖုန်း၊ လျှပ်စစ်ပစ္စည်း'),
       const _Module(FeatureFlag.variants, 'အရွယ်အစား / အရောင်', 'အဝတ်အထည်၊ ဖိနပ်၊ အလှကုန်'),
       const _Module(FeatureFlag.decimalQty, 'ဒသမ အရေအတွက်', '2.5 ပေ · 0.75 ကီလို'),

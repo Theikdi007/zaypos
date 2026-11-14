@@ -282,7 +282,7 @@ void main() {
       await openPos(tester, c);
 
       await burst(tester, '8850000000501');
-      expect(find.text('ဘယ် အသုတ် လဲ?'), findsOneWidget);
+      expect(find.text('ဘယ် Batch လဲ?'), findsOneWidget);
       final titles = tester.widgetList<Text>(inSheet(find.byType(Text))).map((t) => t.data ?? '').toList();
       expect(titles.indexWhere((s) => s.startsWith('EARLY')), lessThan(titles.indexWhere((s) => s.startsWith('LATE'))));
       await tester.tap(inSheet(find.textContaining('EARLY')));

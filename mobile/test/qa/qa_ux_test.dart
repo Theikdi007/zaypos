@@ -42,7 +42,7 @@ const _publicRoutes = ['/login', '/register', '/register?step=2', '/register?ste
 /// Barcode, PIN, OTP, Stock, Sync — everything else is translated. Not English words, so also allowed: the brand,
 /// the currency and units, and phone-number placeholders.
 const _allowedLatin = {
-  'kbzpay', 'wavepay', 'viber', 'excel', 'imei', 'barcode', 'pin', 'otp', 'stock', 'sync',
+  'kbzpay', 'wavepay', 'viber', 'excel', 'imei', 'barcode', 'pin', 'otp', 'stock', 'sync', 'batch', // batch: owner 2026-11-14 (printed on medicine boxes)
   'zaypos', // brand
   'ks', 'ml', 'l', 'kg', // currency / units
   'xx', 'xxx', // phone number placeholders (09 7xx xxx 102)

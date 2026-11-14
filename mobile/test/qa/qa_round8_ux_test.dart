@@ -38,7 +38,7 @@ import '../sync_screens_test.dart' show drive, settle;
 
 /// Same list as m/qa/qa_ux_test.dart (TC-UX-02) / m/qa/qa_round7_ux_test.dart (TC-UX-NEW-1).
 const _allowedLatin = {
-  'kbzpay', 'wavepay', 'viber', 'excel', 'imei', 'barcode', 'pin', 'otp', 'stock', 'sync',
+  'kbzpay', 'wavepay', 'viber', 'excel', 'imei', 'barcode', 'pin', 'otp', 'stock', 'sync', 'batch', // batch: owner 2026-11-14 (printed on medicine boxes)
   'zaypos', 'ks', 'ml', 'l', 'kg', 'xx', 'xxx',
   'xs', 'xl', 'xxl',
 };

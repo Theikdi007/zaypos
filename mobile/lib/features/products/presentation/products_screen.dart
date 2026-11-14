@@ -102,7 +102,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         ? RestockMode.imei
         : variants.isNotEmpty
             ? RestockMode.variant
-            // Batch shop: expiry-tracked → batch required; others → "အသုတ် မပါ" only (plain).
+            // Batch shop: expiry-tracked → batch required; others → "Batch မပါ" only (plain).
             : f.expiryBatch
                 ? RestockMode.batch
                 : null;

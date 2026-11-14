@@ -250,7 +250,7 @@ void main() {
     });
 
     // ---------------------------------------------------------------- TC-FEAT-02 / TC-FEAT-04
-    testWidgets('TC-FEAT-02 Settings toggle "သက်တမ်းကုန်ရက် / အသုတ်" → Add Product shows batch + expiry; TC-FEAT-04 restaurant disabled',
+    testWidgets('TC-FEAT-02 Settings toggle "သက်တမ်းကုန်ရက် / Batch" → Add Product shows batch + expiry; TC-FEAT-04 restaurant disabled',
         (tester) async {
       final c = await boot(tester);
       expect(c.read(tenantFeaturesProvider).expiryBatch, isFalse, reason: 'grocery default');
@@ -260,7 +260,7 @@ void main() {
 
       c.read(appRouterProvider).go(Routes.settingsFeatures);
       await tester.pumpAndSettle();
-      final tile = find.widgetWithText(AppSwitchTile, 'သက်တမ်းကုန်ရက် / အသုတ်');
+      final tile = find.widgetWithText(AppSwitchTile, 'သက်တမ်းကုန်ရက် / Batch');
       await tester.tap(find.descendant(of: tile, matching: find.byType(AppSwitch)));
       await tester.pumpAndSettle();
       expect(c.read(tenantFeaturesProvider).expiryBatch, isTrue);

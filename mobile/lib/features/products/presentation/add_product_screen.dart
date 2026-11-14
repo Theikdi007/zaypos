@@ -222,7 +222,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         ('category', limits.checkText('products.category', _category ?? defaultCategory, label: 'အမျိုးအစား')),
         ('unit', limits.checkText('products.unit', _unit ?? '', label: 'ယူနစ်')),
         ('cost', limits.checkNumber('products.cost', int.tryParse(_cost.text), label: 'ဝယ်ဈေး')),
-        if (hasBatchInput) ('batchNo', limits.checkText('productBatches.batchNo', _batchNo.text, label: 'အသုတ်နံပါတ်')),
+        if (hasBatchInput) ('batchNo', limits.checkText('productBatches.batchNo', _batchNo.text, label: 'Batch နံပါတ်')),
       ])
         key: ?error,
     };
@@ -231,15 +231,15 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     if (needsBatch) {
       // Owner decision: batch number AND expiry date for tracked opening stock.
       errors['batchNo'] = _batchNo.text.trim().isEmpty
-          ? "သက်တမ်းမှတ်တဲ့ ပစ္စည်းမို့ အသုတ်နံပါတ် ထည့်ပါ (သို့ 'သက်တမ်း မမှတ်ပါ' ရွေးပါ)။"
+          ? "သက်တမ်းမှတ်တဲ့ ပစ္စည်းမို့ Batch နံပါတ် ထည့်ပါ (သို့ 'သက်တမ်း မမှတ်ပါ' ရွေးပါ)။"
           : 'သက်တမ်းမှတ်တဲ့ ပစ္စည်းမို့ သက်တမ်းကုန်ရက် ရွေးပါ။';
     }
     if (needsOpeningBatch && !errors.containsKey('batchNo')) {
       final no = _batchNo.text.trim();
       if (no.isEmpty || _expiry == null) {
-        errors['batchNo'] = 'လက်ရှိ အသုတ် မရှိတဲ့ stock ${Qty.format(unbatched)} ခု အတွက် အသုတ်နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ။';
+        errors['batchNo'] = 'လက်ရှိ Batch မရှိတဲ့ stock ${Qty.format(unbatched)} ခု အတွက် Batch နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ။';
       } else if (existingBatches.any((b) => b.batchNo == no)) {
-        errors['batchNo'] = 'ဒီ အသုတ် ရှိပြီးသားပါ။';
+        errors['batchNo'] = 'ဒီ Batch ရှိပြီးသားပါ။';
       }
     }
     if (errors.isNotEmpty) {
@@ -720,7 +720,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     batchError: _errors['batchNo'],
                     showBatch: !_isEdit || openingQty > 0,
                     note: openingQty > 0
-                        ? 'လက်ရှိ အသုတ် မရှိတဲ့ stock ${Qty.format(openingQty)} ခု ကို ဒီ အသုတ် ထဲ ထည့်ပါမယ် · အသုတ်နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ'
+                        ? 'လက်ရှိ Batch မရှိတဲ့ stock ${Qty.format(openingQty)} ခု ကို ဒီ Batch ထဲ ထည့်ပါမယ် · Batch နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ'
                         : null,
                   ),
                 if (f.serialWarranty)

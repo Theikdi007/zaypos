@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 /// BUG-9: Burmese UI strings may only contain the owner's English words (2026-11-14):
-/// KBZPay, WavePay, Viber, Excel, IMEI, Barcode, PIN, OTP, Stock, Sync — plus things that are not words:
+/// KBZPay, WavePay, Viber, Excel, IMEI, Barcode, PIN, OTP, Stock, Sync, Batch — plus things that are not words:
 /// the brand, the currency / units and phone-number placeholders. Product-name examples are data.
 const _allowed = {
-  'kbzpay', 'wavepay', 'viber', 'excel', 'imei', 'barcode', 'pin', 'otp', 'stock', 'sync',
+  'kbzpay', 'wavepay', 'viber', 'excel', 'imei', 'barcode', 'pin', 'otp', 'stock', 'sync', 'batch', // batch: owner 2026-11-14 (printed on medicine boxes)
   'zaypos', 'ks', 'ml', 'kg', 'xx', 'xxx',
 };
 const _examples = {'ဥပမာ - Paracetamol 500mg', 'ဥပမာ - Type-C အားသွင်းကြိုး'};

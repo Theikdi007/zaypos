@@ -339,7 +339,7 @@ void main() {
       await c.read(productServiceProvider).create(p, batches: [late, undated, early, empty],
           initialStock: [into(late, 5), into(undated, 5), into(early, 5)]);
       await tapInPos(tester, c, p.name);
-      expect(find.text('ဘယ် အသုတ် လဲ?'), findsOneWidget);
+      expect(find.text('ဘယ် Batch လဲ?'), findsOneWidget);
       double y(String s) => tester.getTopLeft(inSheet(find.textContaining(s))).dy;
       expect(y('EARLY27'), lessThan(y('LATE28')));
       expect(y('LATE28'), lessThan(y('NODATE')));

@@ -112,9 +112,9 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
     final limits = ref.read(syncLimitsProvider);
     final no = _batchNo.text.trim();
     final existing = ref.read(productBatchesProvider(widget.productId)).value ?? const [];
-    final error = limits.checkText('productBatches.batchNo', no, label: 'အသုတ်နံပါတ်') ??
+    final error = limits.checkText('productBatches.batchNo', no, label: 'Batch နံပါတ်') ??
         (existing.any((b) => b.batchNo == no) || _p.batches.any((b) => b.batchNo == no)
-            ? 'ဒီ အသုတ် ရှိပြီးသားပါ။'
+            ? 'ဒီ Batch ရှိပြီးသားပါ။'
             : null);
     setState(() => _batchError = error);
     if (error != null) return false;
@@ -207,11 +207,11 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
         if (f.expiryBatch) ...[
           if (f.serialWarranty) const SizedBox(height: 14),
           FormSection(
-            title: 'အသုတ်များ',
+            title: 'Batch များ',
             borderColor: AppColors.pharmacyBorder,
             children: [
               if (batches.isEmpty && _p.batches.isEmpty)
-                Text('အသုတ် မရှိသေးပါ', style: AppText.s(13, color: AppColors.muted)),
+                Text('Batch မရှိသေးပါ', style: AppText.s(13, color: AppColors.muted)),
               for (final b in batches)
                 Row(
                   key: ValueKey('batch-${b.id}'),
@@ -231,16 +231,16 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
                     style: AppText.s(14, weight: AppText.w600, color: AppColors.primary)),
               TwoCol(
                 LabeledField(
-                  label: 'အသုတ်အသစ်',
+                  label: 'Batch အသစ်',
                   small: true,
-                  child: AppInput(key: const ValueKey('newBatchNo'), controller: _batchNo, semanticLabel: 'အသုတ်အသစ် နံပါတ်'),
+                  child: AppInput(key: const ValueKey('newBatchNo'), controller: _batchNo, semanticLabel: 'Batch အသစ် နံပါတ်'),
                 ),
                 LabeledField(
                   label: 'သက်တမ်းကုန်ရက်',
                   small: true,
                   child: Semantics(
                     button: true,
-                    label: 'အသုတ်အသစ် သက်တမ်းကုန်ရက်',
+                    label: 'Batch အသစ် သက်တမ်းကုန်ရက်',
                     child: InkWell(
                       key: const ValueKey('newBatchExpiry'),
                       onTap: _pickExpiry,
@@ -261,7 +261,7 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
               ),
               PrimaryButton(
                 key: const ValueKey('addBatch'),
-                label: '+ အသုတ် ထည့်မယ်',
+                label: '+ Batch ထည့်မယ်',
                 variant: ButtonVariant.soft,
                 height: 44,
                 radius: 12,
@@ -269,7 +269,7 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
                 onPressed: () => _addBatch(),
               ),
               if (_batchError != null) _errorText(_batchError!),
-              Text("အသုတ်အသစ်ထဲ ပစ္စည်းကို 'Stock ဖြည့်မယ်' နဲ့ ထည့်ပါ", style: AppText.s(12, color: AppColors.muted)),
+              Text("Batch အသစ်ထဲ ပစ္စည်းကို 'Stock ဖြည့်မယ်' နဲ့ ထည့်ပါ", style: AppText.s(12, color: AppColors.muted)),
             ],
           ),
         ],

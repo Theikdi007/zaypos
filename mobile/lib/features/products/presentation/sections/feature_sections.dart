@@ -84,8 +84,8 @@ class ExpiryBatchSection extends StatelessWidget {
 
   /// Shown under the section (pharmacy decision, item 5).
   static const help =
-      "သက်တမ်းမှတ်တဲ့ ပစ္စည်း (ဆေး စသည်) ကို အသုတ်နံပါတ် + သက်တမ်းကုန်ရက်နဲ့ ဖြည့်/ရောင်းပါမယ်။ "
-      "သက်တမ်းမရှိတဲ့ ပစ္စည်း (ဆပ်ပြာ၊ ဒိုင်ပါ စသည်) ဆိုရင် 'သက်တမ်း မမှတ်ပါ' ရွေးပါ — အသုတ် မလိုဘဲ ရိုးရိုးပစ္စည်းလို ဖြည့်/ရောင်းပါမယ်။";
+      "သက်တမ်းမှတ်တဲ့ ပစ္စည်း (ဆေး စသည်) ကို Batch နံပါတ် + သက်တမ်းကုန်ရက်နဲ့ ဖြည့်/ရောင်းပါမယ်။ "
+      "သက်တမ်းမရှိတဲ့ ပစ္စည်း (ဆပ်ပြာ၊ ဒိုင်ပါ စသည်) ဆိုရင် 'သက်တမ်း မမှတ်ပါ' ရွေးပါ — Batch မလိုဘဲ ရိုးရိုးပစ္စည်းလို ဖြည့်/ရောင်းပါမယ်။";
 
   Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();
@@ -101,7 +101,7 @@ class ExpiryBatchSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FormSection(
-      title: 'သက်တမ်း နှင့် အသုတ်',
+      title: 'သက်တမ်း နှင့် Batch',
       borderColor: AppColors.pharmacyBorder,
       children: [
         if (note != null && showBatch && warnDays != noExpiry)
@@ -110,10 +110,10 @@ class ExpiryBatchSection extends StatelessWidget {
         if (showBatch && warnDays != noExpiry)
         TwoCol(
           LabeledField(
-            label: 'အသုတ်နံပါတ်',
+            label: 'Batch နံပါတ်',
             small: true,
             error: batchError,
-            child: AppInput(key: const ValueKey('batchNo'), controller: batchNo, semanticLabel: 'အသုတ်နံပါတ်'),
+            child: AppInput(key: const ValueKey('batchNo'), controller: batchNo, semanticLabel: 'Batch နံပါတ်'),
           ),
           LabeledField(
             label: 'သက်တမ်းကုန်ရက်',
@@ -153,7 +153,7 @@ class ExpiryBatchSection extends StatelessWidget {
           ),
         ),
         if (warnDays != noExpiry)
-          Text('အသုတ် တစ်ခုထက်ပိုရင် သက်တမ်းစောတာကို အရင်ရောင်းအောင် ညွှန်ပေးပါမယ်',
+          Text('Batch တစ်ခုထက်ပိုရင် သက်တမ်းစောတာကို အရင်ရောင်းအောင် ညွှန်ပေးပါမယ်',
               style: AppText.s(12, color: AppColors.muted)),
         Text(help, key: const ValueKey('expiryHelp'), style: AppText.s(12, color: AppColors.muted)),
       ],

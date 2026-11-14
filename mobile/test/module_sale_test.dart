@@ -112,7 +112,7 @@ void main() {
     await c.read(productServiceProvider).create(p, batches: [late, early], initialStock: [into(late, 10), into(early, 10)]);
 
     await tapInPos(tester, c, p.name);
-    expect(find.text('ဘယ် အသုတ် လဲ?'), findsOneWidget);
+    expect(find.text('ဘယ် Batch လဲ?'), findsOneWidget);
     double y(String s) => tester.getTopLeft(find.textContaining(s)).dy;
     expect(y('EARLY'), lessThan(y('LATE')), reason: 'FEFO: earliest expiry on top');
     await tester.tap(find.textContaining('EARLY'));
@@ -133,7 +133,7 @@ void main() {
     await c.read(productServiceProvider).create(q, batches: [only],
         initialStock: [restockMovement(tenantId: tenantId, productId: q.id, qtyMilli: Qty.units(5), batchId: only.id, note: 'initial')]);
     await tapInPos(tester, c, q.name);
-    expect(find.text('ဘယ် အသုတ် လဲ?'), findsNothing);
+    expect(find.text('ဘယ် Batch လဲ?'), findsNothing);
     expect(c.read(cartProvider).lines.firstWhere((l) => l.productId == q.id).batchId, only.id);
   });
 

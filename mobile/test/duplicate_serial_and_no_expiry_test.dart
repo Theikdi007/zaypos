@@ -197,7 +197,7 @@ void main() {
       expect(stockWhere(c, (m) => m.productId == p.id && m.batchId == null), Qty.units(12));
     });
 
-    testWidgets('no-expiry product: restock defaults to "အသုတ် မပါ" (goods without batch); POS sells it without asking',
+    testWidgets('no-expiry product: restock defaults to "Batch မပါ" (goods without batch); POS sells it without asking',
         (tester) async {
       final c = await boot(tester, 'pharmacy');
       final p = product(c, 'QA ဒိုင်ပါ');
@@ -225,11 +225,11 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text(p.name).last);
       await tester.pumpAndSettle();
-      expect(find.text('ဘယ် အသုတ် လဲ?'), findsNothing);
+      expect(find.text('ဘယ် Batch လဲ?'), findsNothing);
       expect(c.read(cartProvider).lines.single.batchId, isNull);
     });
 
-    testWidgets('no-expiry product, untracked, sold once: first count 20 with "အသုတ် မပါ" shows 20', (tester) async {
+    testWidgets('no-expiry product, untracked, sold once: first count 20 with "Batch မပါ" shows 20', (tester) async {
       final c = await boot(tester, 'pharmacy');
       final p = product(c, 'QA ဆပ်ပြာခဲ');
       await c.read(productServiceProvider).create(p);
@@ -243,7 +243,7 @@ void main() {
       expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(20));
     });
 
-    testWidgets('expiry-tracked product: no "အသုတ် မပါ" — a batch is required', (tester) async {
+    testWidgets('expiry-tracked product: no "Batch မပါ" — a batch is required', (tester) async {
       final c = await boot(tester, 'pharmacy');
       final p = product(c, 'QA Amox tracked', expiryDays: 30);
       await c.read(productServiceProvider).create(p);
@@ -367,7 +367,7 @@ void main() {
 
       await tester.tap(find.text('သိမ်းမယ်').last);
       await tester.pumpAndSettle();
-      expect(find.text('လက်ရှိ အသုတ် မရှိတဲ့ stock 10 ခု အတွက် အသုတ်နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ။'), findsOneWidget);
+      expect(find.text('လက်ရှိ Batch မရှိတဲ့ stock 10 ခု အတွက် Batch နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ။'), findsOneWidget);
       expect(db(c).products.firstWhere((x) => x.id == p.id).expiryAlertDays, isNull, reason: 'nothing saved');
 
       await tester.enterText(field('batchNo'), 'OPEN1');
@@ -473,7 +473,7 @@ void main() {
   });
 
   group('BUG-20 no expiryAlertDays = plain product, even with old batches', () {
-    testWidgets('old empty + expired batches: POS asks nothing (no batch sheet, no expired confirm); restock only "အသုတ် မပါ"; '
+    testWidgets('old empty + expired batches: POS asks nothing (no batch sheet, no expired confirm); restock only "Batch မပါ"; '
         'stock = all movements', (tester) async {
       final c = await boot(tester, 'pharmacy');
       final p = product(c, 'QA old-batch soap'); // expiryAlertDays null
@@ -507,7 +507,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text(p.name).last);
       await tester.pumpAndSettle();
-      expect(find.text('ဘယ် အသုတ် လဲ?'), findsNothing);
+      expect(find.text('ဘယ် Batch လဲ?'), findsNothing);
       expect(find.textContaining('သက်တမ်းကုန်နေပါပြီ'), findsNothing);
       expect(c.read(cartProvider).lines.single.batchId, isNull);
     });
@@ -525,7 +525,7 @@ void main() {
       await tester.enterText(field('stockQty'), '10');
       await tester.tap(find.text('သိမ်းမယ်').last);
       await tester.pumpAndSettle();
-      expect(find.textContaining('အသုတ်နံပါတ် ထည့်ပါ'), findsOneWidget);
+      expect(find.textContaining('Batch နံပါတ် ထည့်ပါ'), findsOneWidget);
       expect(db(c).products.where((x) => x.name == 'QA tracked med'), isEmpty);
 
       await tester.enterText(field('batchNo'), 'T1');
