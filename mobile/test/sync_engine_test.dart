@@ -560,4 +560,31 @@ void main() {
     }
     expect(api.pushes, hasLength(1));
   });
+  group('BUG-30: a failed pull shows Burmese only; the raw error is logged', () {
+    test('a pulled row the app cannot read → SyncMessages.unreadable, no exception text', () async {
+      api.pages.add(page({
+        'syncIssues': [
+          {'id': 'i1', 'tenantId': shop.tenantId, 'kind': null, 'createdAt': '2026-11-14T09:00:00Z', 'updatedAt': '2026-11-14T09:00:00Z'},
+        ],
+      }, cursor: '05'));
+      final e = engine();
+      await e.syncNow(manual: true);
+      expect(e.snapshot.lastError, SyncMessages.unreadable);
+      expect(e.snapshot.lastError, isNot(contains('FormatException')));
+      expect(await db.readState(SyncStateKeys.pullCursor), isNot('05'), reason: 'page rolled back');
+    });
+
+    test('any other unexpected error → SyncMessages.failed', () async {
+      final broken = _ThrowingPullApi();
+      final e = SyncEngine(api: broken, store: store, deviceId: shop.deviceId, clock: () => now);
+      await e.syncNow(manual: true);
+      expect(e.snapshot.lastError, SyncMessages.failed);
+      expect(e.snapshot.lastError, isNot(contains('StateError')));
+    });
+  });
+}
+
+class _ThrowingPullApi extends FakeSyncApi {
+  @override
+  Future<PullPage> pull(String cursor, {int limit = 500}) async => throw StateError('disk full: syncIssues.kind');
 }
