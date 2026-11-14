@@ -67,6 +67,16 @@ class DriftProductRepository implements ProductRepository {
     final p = productRow(product);
     await db.into(db.products).insert(p);
     rec.record(WireTable.products, productWire(p));
+    await addModules(variants: variants, batches: batches, serials: serials);
+  }
+
+  @override
+  Future<void> addModules({
+    List<ProductVariant> variants = const [],
+    List<ProductBatch> batches = const [],
+    List<ProductSerial> serials = const [],
+  }) async {
+    final rec = UnitRecorder.require();
     for (final v in variants.map(variantRow)) {
       await db.into(db.productVariants).insert(v);
       rec.record(WireTable.productVariants, variantWire(v));

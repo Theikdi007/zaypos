@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/data/unit_of_work.dart';
 import '../../../core/sync/sync_limits.dart';
 import '../../../core/utils/ids.dart';
+import '../../../core/utils/qty.dart';
 import '../data/preset_catalog_api.dart';
 import '../../inventory/data/stock_repository.dart';
 import '../../inventory/domain/stock_movement.dart';
@@ -44,9 +45,37 @@ class ProductService {
 
   /// Saves an edited product (Products → tap → edit form) as ONE
   /// upsertProduct unit. [product.price] must be positive.
-  Future<void> update(Product product) async {
+  ///
+  /// New module rows added in the edit form go in the same unit (BUG-12):
+  /// new sizes/colours and batches start empty; each new IMEI is a phone in
+  /// hand, so [serials] come with a matching restock of their count.
+  /// Existing module rows are never changed or deleted.
+  Future<void> update(
+    Product product, {
+    List<ProductVariant> variants = const [],
+    List<ProductBatch> batches = const [],
+    List<ProductSerial> serials = const [],
+  }) async {
     if (product.price <= 0) throw ArgumentError.value(product.price, 'price', 'must be positive');
-    await uow.run(UnitKind.upsertProduct, () => products.update(product));
+    for (final r in [...variants.map((v) => v.productId), ...batches.map((b) => b.productId), ...serials.map((s) => s.productId)]) {
+      if (r != product.id) throw ArgumentError('Module row for another product');
+    }
+    await uow.run(UnitKind.upsertProduct, () async {
+      await products.update(product);
+      if (variants.isNotEmpty || batches.isNotEmpty || serials.isNotEmpty) {
+        await products.addModules(variants: variants, batches: batches, serials: serials);
+      }
+      if (serials.isNotEmpty) {
+        await stock.addAll([
+          restockMovement(
+            tenantId: product.tenantId,
+            productId: product.id,
+            qtyMilli: Qty.units(serials.length),
+            note: 'IMEI added',
+          ),
+        ]);
+      }
+    });
   }
 
   /// Many products (e.g. the preset catalog) as ONE upsertProduct unit.

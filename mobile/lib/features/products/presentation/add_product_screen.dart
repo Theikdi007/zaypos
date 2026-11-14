@@ -24,6 +24,7 @@ import '../application/product_service.dart';
 import '../data/product_providers.dart';
 import '../domain/product.dart';
 import '../domain/product_modules.dart';
+import 'sections/edit_module_sections.dart';
 import 'sections/feature_sections.dart';
 
 /// One Add Product screen; sections appear according to [TenantFeatures].
@@ -69,6 +70,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   late final _wholesale = TextEditingController(text: _p?.wholesalePrice?.toString() ?? '');
   final _stock = TextEditingController();
   late final _alert = TextEditingController(text: _p == null ? '' : Qty.format(_p.lowAlertMilli));
+
+  /// IMEIs / batches / sizes-colours added in the edit form (BUG-12).
+  final _pending = PendingModules();
   final _batchNo = TextEditingController();
   DateTime? _expiry;
   late int _expiryWarnDays = _p?.expiryAlertDays ?? 30;
@@ -153,7 +157,11 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     }
     final editing = _p;
     if (editing != null) {
-      await ref.read(productServiceProvider).update(editing.copyWith(
+      final t = nowUtc();
+      final tenantId = editing.tenantId;
+      final pending = _pending;
+      await ref.read(productServiceProvider).update(
+            editing.copyWith(
             name: name,
             cost: int.tryParse(_cost.text) ?? 0,
             price: price,
@@ -167,7 +175,32 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                 : editing.warrantyMonths,
             expiryAlertDays: () => features.expiryBatch ? _expiryWarnDays : editing.expiryAlertDays,
             initial: String.fromCharCode(name.runes.first),
-          ));
+          ),
+            variants: [
+              if (features.variants)
+                for (final v in pending.variants)
+                  ProductVariant(
+                    id: newId(), tenantId: tenantId, productId: editing.id, size: v.size, color: v.color,
+                    createdAt: t, updatedAt: t,
+                  ),
+            ],
+            batches: [
+              if (features.expiryBatch)
+                for (final b in pending.batches)
+                  ProductBatch(
+                    id: newId(), tenantId: tenantId, productId: editing.id, batchNo: b.batchNo, expiryDate: b.expiry,
+                    qtyMilli: 0, createdAt: t, updatedAt: t,
+                  ),
+            ],
+            serials: [
+              if (features.serialWarranty)
+                for (final s in pending.imeis)
+                  ProductSerial(
+                    id: newId(), tenantId: tenantId, productId: editing.id, serial: s, status: SerialStatus.inStock,
+                    createdAt: t, updatedAt: t,
+                  ),
+            ],
+          );
       if (mounted) context.pop();
       return;
     }
@@ -467,6 +500,13 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     onToggleColor: (k) => setState(() => _colors[k] = !_colors[k]!),
                     stock: _variantStock,
                     onStockChanged: (v, milli) => _variantStock[v] = milli,
+                  ),
+                if (_isEdit && (f.serialWarranty || f.expiryBatch || f.variants))
+                  EditModuleSections(
+                    productId: _p!.id,
+                    features: f,
+                    pending: _pending,
+                    onChanged: () => setState(() {}),
                   ),
                 if (f.stock && _isEdit)
                   FormSection(

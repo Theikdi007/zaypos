@@ -12,8 +12,13 @@ import '../../../core/utils/qty.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/product_tile.dart' show NeedsPriceBadge, untrackedStockLabel;
 import '../../inventory/application/stock_service.dart';
+import '../../../core/utils/ids.dart';
+import '../../inventory/data/stock_repository.dart';
 import '../../inventory/presentation/restock_sheet.dart';
 import '../data/product_providers.dart';
+import '../data/product_repository.dart';
+import '../domain/product.dart';
+import '../domain/product_modules.dart';
 import '../domain/product_view.dart';
 import '../../../core/widgets/async_view.dart';
 
@@ -64,6 +69,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   /// exactly what was counted, even after sales made before tracking (ledger
   /// ≤ 0, so the adjustment is > 0 and starts tracking).
   Future<void> _restock(ProductView p) async {
+    if (await _restockModule(p)) return;
+    if (!mounted) return;
     final qtyMilli = await showRestockSheet(
       context,
       productName: p.name,
@@ -78,6 +85,66 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     } else {
       await stock.restock(productId: p.id, qtyMilli: qtyMilli);
     }
+  }
+
+  /// BUG-12: goods for an IMEI / batch / size-colour product are entered as
+  /// IMEIs / into a batch / into a variant. Returns false for a plain product.
+  Future<bool> _restockModule(ProductView p) async {
+    final f = ref.read(tenantFeaturesProvider);
+    final repo = ref.read(productRepositoryProvider);
+    final serials = f.serialWarranty ? await repo.watchSerials(p.id).first : const <ProductSerial>[];
+    final variants = f.variants ? await repo.watchVariants(p.id).first : const <ProductVariant>[];
+    final batches = f.expiryBatch ? await repo.watchBatches(p.id).first : const <ProductBatch>[];
+    final mode = serials.isNotEmpty
+        ? RestockMode.imei
+        : variants.isNotEmpty
+            ? RestockMode.variant
+            : f.expiryBatch
+                ? RestockMode.batch
+                : null;
+    if (mode == null || !mounted) return false;
+    var variantStock = const <String, int>{};
+    if (mode == RestockMode.variant) {
+      final moves = await ref.read(stockRepositoryProvider).watchAll().first;
+      variantStock = {
+        for (final v in variants)
+          v.id: moves.where((m) => m.variantId == v.id && m.deletedAt == null).fold(0, (a, m) => a + m.qtyMilli),
+      };
+    }
+    if (!mounted) return true;
+    final r = await showModuleRestockSheet(
+      context,
+      mode: mode,
+      productName: p.name,
+      decimal: f.decimalQty,
+      unit: p.product.unit.isEmpty ? 'ခု' : p.product.unit,
+      serials: serials,
+      batches: batches,
+      variants: variants,
+      variantStock: variantStock,
+    );
+    if (r == null || !mounted) return true;
+    final t = nowUtc();
+    await ref.read(stockServiceProvider).receive(
+          productId: p.id,
+          qtyMilli: r.qtyMilli,
+          variantId: r.variantId,
+          batchId: r.batchId,
+          serials: r.imeis,
+          newBatch: r.newBatchNo == null
+              ? null
+              : ProductBatch(
+                  id: newId(),
+                  tenantId: p.product.tenantId,
+                  productId: p.id,
+                  batchNo: r.newBatchNo!,
+                  expiryDate: r.newBatchExpiry,
+                  qtyMilli: r.qtyMilli,
+                  createdAt: t,
+                  updatedAt: t,
+                ),
+        );
+    return true;
   }
 
   @override

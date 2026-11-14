@@ -28,6 +28,15 @@ class ProductBatch {
   final DateTime updatedAt;
   final DateTime? deletedAt;
 
+  /// Past its expiry date on [now]'s local calendar day (sold on the expiry
+  /// day itself is still allowed). Undated batches never expire.
+  bool isExpired(DateTime now) {
+    final e = expiryDate;
+    if (e == null) return false;
+    final local = now.toLocal();
+    return DateTime.utc(e.year, e.month, e.day).isBefore(DateTime.utc(local.year, local.month, local.day));
+  }
+
   ProductBatch copyWith({int? qtyMilli, DateTime? updatedAt, DateTime? Function()? deletedAt}) => ProductBatch(
         id: id,
         tenantId: tenantId,

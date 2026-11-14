@@ -23,6 +23,14 @@ abstract interface class ProductRepository {
   /// Sets the selling price (kyats); updatedAt moves to now (last-writer-wins).
   Future<void> setPrice(String productId, int price);
 
+  /// Adds module rows (new IMEIs, batches, size/colour variants) to a saved
+  /// product. Existing rows are never changed or deleted here.
+  Future<void> addModules({
+    List<ProductVariant> variants = const [],
+    List<ProductBatch> batches = const [],
+    List<ProductSerial> serials = const [],
+  });
+
   /// Replaces a saved product's own fields (name, prices, unit, alerts…);
   /// updatedAt moves to now (last-writer-wins). Module rows and stock are untouched.
   Future<void> update(Product product);

@@ -72,6 +72,15 @@ class FakeProductRepository implements ProductRepository {
     List<ProductSerial> serials = const [],
   }) async {
     db.products.insert(0, product);
+    await addModules(variants: variants, batches: batches, serials: serials);
+  }
+
+  @override
+  Future<void> addModules({
+    List<ProductVariant> variants = const [],
+    List<ProductBatch> batches = const [],
+    List<ProductSerial> serials = const [],
+  }) async {
     db.variants.addAll(variants);
     db.batches.addAll(batches);
     db.serials.addAll(serials);
