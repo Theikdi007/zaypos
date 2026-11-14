@@ -314,8 +314,10 @@ void main() {
 
   // ================================================================ TC-POS-NEW-11 risky inputs (no spec line beyond README §3.4)
   group('TC-POS-NEW-11 duplicate barcode on one phone; IMEI scanned at POS', () {
-    testWidgets('two products with one barcode: Add Product saves the 2nd without a word; a scan adds exactly ONE line '
-        '(recorded: which one)', (tester) async {
+    // Updated to the owner decisions of 2026-11-14 (developer, with the change; QA round 8 re-checks):
+    // duplicate barcode → warn on save (not blocked) and a picker at POS; an in-stock IMEI scanned at POS → that phone.
+    testWidgets('two products with one barcode: Add Product warns but saves the 2nd; a scan opens a picker with both '
+        '(nothing auto-picked)', (tester) async {
       final (c, _) = await boot(tester);
       final first = await plain(c, 'QA R7 dup first', '8850000001111');
       await openPos(tester, c);
@@ -327,17 +329,20 @@ void main() {
       await tester.ensureVisible(find.text('သိမ်းမယ်').last);
       await tester.tap(find.text('သိမ်းမယ်').last);
       await tester.pumpAndSettle();
+      expect(find.text('ဒီ Barcode ရှိပြီးသားပါ'), findsOneWidget, reason: 'owner: warn');
+      await tester.tap(find.byKey(const ValueKey('duplicateBarcodeSave')));
+      await tester.pumpAndSettle();
       final both = db(c).products.where((p) => p.barcode == '8850000001111').toList();
-      expect(both, hasLength(2), reason: 'README §3.4: duplicateBarcode is only flagged by the server');
+      expect(both, hasLength(2), reason: 'owner: warn, do not block');
       await burst(tester, '8850000001111');
-      expect(cart(c), hasLength(1));
-      final picked = cart(c).single.productId == first.id ? 'the older one' : 'the newer one';
-      // ignore: avoid_print
-      print('TC-POS-NEW-11 duplicate barcode: the scan added $picked');
+      expect(cart(c), isEmpty, reason: 'owner: a picker instead of auto-picking');
+      expect(find.byKey(ValueKey('barcodeMatch-${first.id}')), findsOneWidget);
+      await tester.tap(find.byKey(ValueKey('barcodeMatch-${first.id}')));
+      await tester.pumpAndSettle();
+      expect(cart(c).single.productId, first.id);
     });
 
-    testWidgets('phone shop: scanning an in-stock IMEI (box sticker) at POS → the unknown-barcode sheet (no IMEI lookup)',
-        (tester) async {
+    testWidgets('phone shop: scanning an in-stock IMEI (box sticker) at POS adds that phone with that IMEI', (tester) async {
       final (c, _) = await boot(tester, template: 'phone');
       final p = product(c, 'QA R7 phone2', barcode: '6901443000099');
       await c.read(productServiceProvider).create(p, serials: [
@@ -346,11 +351,9 @@ void main() {
       ], initialStock: [into(p, 1)]);
       await openPos(tester, c);
       await burst(tester, '359000000000099');
-      final sheet = find.text(_unknownTitle).evaluate().isNotEmpty ? 'unknown-barcode sheet' : 'something else';
-      // ignore: avoid_print
-      print('TC-POS-NEW-11 IMEI scanned at POS → $sheet; cart ${cart(c).length}');
-      expect(find.text(_unknownTitle), findsOneWidget, reason: 'spec: unknown barcode → sheet');
-      expect(cart(c), isEmpty);
+      expect(find.text(_unknownTitle), findsNothing, reason: 'owner: look up in-stock IMEIs');
+      expect(cart(c).single.productId, p.id);
+      expect(cart(c).single.serialId, db(c).serials.singleWhere((s) => s.serial == '359000000000099').id);
     });
   });
 

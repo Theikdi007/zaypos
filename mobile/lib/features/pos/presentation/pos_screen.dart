@@ -15,7 +15,10 @@ import '../../../core/widgets/numeric_keypad.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/product_tile.dart';
 import '../../../core/widgets/segmented_tabs.dart';
+import '../../../core/utils/myanmar.dart';
 import '../../products/application/product_service.dart';
+import '../../products/data/product_repository.dart';
+import '../../products/domain/product_modules.dart';
 import '../../products/data/product_photos.dart';
 import '../../products/data/product_providers.dart';
 import '../../products/domain/product_view.dart';
@@ -56,8 +59,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     if (code != null && mounted) await _onScan(code);
   }
 
-  /// A scanned barcode (camera or a HID scanner): the product goes into the
-  /// cart like a tap; an unknown code offers "ပစ္စည်းအသစ် ထည့်မယ်" with it.
+  /// A scanned code (camera or a HID scanner), in this order (owner, 2026-11-14):
+  /// 1. an in-stock IMEI / serial (phone shops) → that phone with that IMEI;
+  /// 2. a product barcode → like a tap; several products with it → the cashier picks one;
+  /// 3. otherwise "ပစ္စည်းအသစ် ထည့်မယ်" with the code.
   Future<void> _onScan(String raw) async {
     // Only when POS is on top (not under Checkout / a sheet).
     if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
@@ -68,9 +73,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     }
     final limits = ref.read(syncLimitsProvider);
     final code = limits.normalize('products.barcode', raw);
-    final p = productByBarcode(ref.read(productsProvider).value ?? const [], code, limits);
-    if (p != null) {
-      await _addProduct(p);
+    final all = ref.read(productsProvider).value ?? const <ProductView>[];
+    if (await _addScannedSerial(all, limits.normalize('productSerials.serial', raw)) || !mounted) return;
+    final matches = productsByBarcode(all, code, limits);
+    if (matches.isNotEmpty) {
+      final p = matches.length == 1 ? matches.single : await _pickBarcodeMatch(code, matches);
+      if (p != null && mounted) await _addProduct(p);
       return;
     }
     final add = await showModalBottomSheet<bool>(
@@ -115,9 +123,71 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     });
   }
 
+  /// Phone shops: [serial] is an in-stock IMEI of a live product → that phone
+  /// goes into the cart with this IMEI (no IMEI question). Already in the cart →
+  /// a message, nothing added. Returns true when the scan was handled.
+  Future<bool> _addScannedSerial(List<ProductView> all, String serial) async {
+    if (serial.isEmpty || !ref.read(tenantFeaturesProvider).serialWarranty) return false;
+    final rows = await ref.read(productRepositoryProvider).watchSerialRows(serial).first;
+    final byId = {for (final v in all) v.id: v};
+    final inStock = rows.where((s) => s.status == SerialStatus.inStock && byId.containsKey(s.productId)).toList();
+    if (inStock.isEmpty || !mounted) return false;
+    final inCart = ref.read(cartProvider).serialIds;
+    final free = inStock.where((s) => !inCart.contains(s.id)).firstOrNull;
+    if (free == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ဒီ IMEI ကို ထည့်ပြီးသားပါ။'), duration: Duration(seconds: 2)),
+      );
+      return true;
+    }
+    await _addProduct(byId[free.productId]!,
+        pick: (serialId: free.id, variantId: null, batchId: null, label: 'IMEI ${free.serial}'));
+    return true;
+  }
+
+  /// Several products share [code] (duplicate barcode): the cashier picks one; null = dismissed.
+  Future<ProductView?> _pickBarcodeMatch(String code, List<ProductView> matches) => showModalBottomSheet<ProductView>(
+        context: context,
+        backgroundColor: AppColors.surface,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        builder: (ctx) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('ဘယ်ပစ္စည်းလဲ?', style: AppText.s(17, weight: AppText.w700)),
+                const SizedBox(height: 4),
+                Text('Barcode $code နဲ့ ပစ္စည်း ${mmDigits(matches.length)} မျိုး ရှိပါတယ်',
+                    style: AppText.s(14, color: AppColors.muted)),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (final m in matches)
+                        ListTile(
+                          key: ValueKey('barcodeMatch-${m.id}'),
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(m.name, style: AppText.s(15, weight: AppText.w600)),
+                          trailing: Text(formatKs(m.product.price), style: AppText.s(14)),
+                          onTap: () => Navigator.pop(ctx, m),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
   /// A product without a price is never sold at 0 Ks: ask for the price, save
   /// it to the product (upsertProduct unit) and use it for this sale.
-  Future<void> _addProduct(ProductView p) async {
+  /// [pick] = the unit is already known (a scanned IMEI): no module question.
+  Future<void> _addProduct(ProductView p, {ModulePick? pick}) async {
     var product = p.product;
     if (p.needsPrice) {
       final price = await showSetPriceSheet(context, productName: p.name);
@@ -126,6 +196,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       product = product.copyWith(price: price);
     }
     if (!mounted) return;
+    if (pick != null) {
+      ref.read(cartProvider.notifier).addProduct(product, pick: pick);
+      return;
+    }
     // Which IMEI / size-colour / batch (BUG-2).
     final result = await pickModuleUnit(context, ref, product, ref.read(cartProvider));
     switch (result) {

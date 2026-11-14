@@ -109,15 +109,17 @@ class _CameraScanScreenState extends State<_CameraScanScreen> {
   }
 }
 
-/// The product with [raw] as its barcode (normalized like the server), or null.
-ProductView? productByBarcode(Iterable<ProductView> products, String raw, SyncLimitsData limits) {
+/// Every product with [raw] as its barcode (normalized like the server). More
+/// than one = a duplicate barcode (allowed with a warning; POS asks which).
+List<ProductView> productsByBarcode(Iterable<ProductView> products, String raw, SyncLimitsData limits) {
   final code = limits.normalize('products.barcode', raw);
-  if (code.isEmpty) return null;
-  for (final p in products) {
-    if (p.product.barcode == code) return p;
-  }
-  return null;
+  if (code.isEmpty) return const [];
+  return [for (final p in products) if (p.product.barcode == code) p];
 }
+
+/// The first product with [raw] as its barcode, or null.
+ProductView? productByBarcode(Iterable<ProductView> products, String raw, SyncLimitsData limits) =>
+    productsByBarcode(products, raw, limits).firstOrNull;
 
 /// Bluetooth / USB barcode scanners in HID (keyboard) mode type the code very
 /// fast and end with Enter. This listens to the hardware keyboard while

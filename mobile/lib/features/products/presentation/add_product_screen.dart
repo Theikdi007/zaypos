@@ -27,6 +27,7 @@ import '../data/product_photos.dart';
 import '../data/product_providers.dart';
 import '../domain/product.dart';
 import '../domain/product_modules.dart';
+import '../domain/product_view.dart';
 import '../../scan/barcode_scanner.dart';
 import 'sections/edit_module_sections.dart';
 import 'sections/feature_sections.dart';
@@ -159,6 +160,33 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     return null;
   }
 
+  /// "This barcode is already on another product — save anyway?" Cancel keeps the form open.
+  Future<bool> _confirmDuplicateBarcode(String barcode, List<ProductView> others) async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('ဒီ Barcode ရှိပြီးသားပါ', style: AppText.s(16, weight: AppText.w700)),
+          content: Text(
+            '$barcode ကို ${others.map((o) => '“${o.name}”').join('၊ ')} မှာ သုံးထားပြီးပါပြီ။ '
+            'ဒီအတိုင်း သိမ်းရင် ရောင်းတဲ့အခါ ဘယ်ပစ္စည်းလဲ ရွေးခိုင်းပါမယ်။',
+            style: AppText.s(14),
+          ),
+          actions: [
+            TextButton(
+              key: const ValueKey('duplicateBarcodeCancel'),
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('ပြန်ပြင်မယ်'),
+            ),
+            TextButton(
+              key: const ValueKey('duplicateBarcodeSave'),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text('ဒီအတိုင်း သိမ်းမယ်', style: AppText.s(14, weight: AppText.w700)),
+            ),
+          ],
+        ),
+      ) ??
+      false;
+
   Future<void> _save() async {
     final features = ref.read(tenantFeaturesProvider);
     final limits = ref.read(syncLimitsProvider);
@@ -220,6 +248,14 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         _errors = errors;
       });
       return;
+    }
+    // Duplicate barcode: warn, never block (owner, 2026-11-14). Only when the barcode is new or changed.
+    if (barcode.isNotEmpty && barcode != _p?.barcode) {
+      final others = productsByBarcode(ref.read(productsProvider).value ?? const [], barcode, limits)
+          .where((v) => v.id != _p?.id)
+          .toList();
+      if (others.isNotEmpty && !await _confirmDuplicateBarcode(barcode, others)) return;
+      if (!mounted) return;
     }
     final editing = _p;
     if (editing != null) {
