@@ -197,6 +197,14 @@ Format:
   `127.0.0.1:1433->1433/tcp` and the container's password differs from the one in history.
 - QA round 4: unchanged, stays open (owner). `docker port zaypos-sql` → `0.0.0.0:1433`, `[::]:1433`; container env and local
   `appsettings.Development.json` still match the value in history (1 / 1, value not printed); `nc -z <Wi-Fi IP> 1433` → reachable.
+- QA round 5: **partly fixed, stays open (owner: rotate the password).** Evidence 2026-11-14 (no secret printed, container not stopped or
+  changed): container recreated 2026-11-14T08:06Z; `docker port zaypos-sql` → `1433/tcp -> 127.0.0.1:1433` only; `nc -z <Wi-Fi IP> 1433` →
+  NOT reachable (loopback reachable) — the Wi-Fi exposure is gone. `git check-ignore -v backend/src/ZayPOS.Api/appsettings.Development.json`
+  → ignored (backend/.gitignore:8), `git ls-files --error-unmatch` → untracked; `git grep -F -l <old> HEAD` → 0 files. BUT the password was
+  NOT changed: the old value (from commit 9ee93e3 of docs/backend/README.md; `git log --all -S<old>` → 4 commits) is equal to the
+  container's `MSSQL_SA_PASSWORD` (string compare → equal) and is found in `appsettings.Development.json` (`grep -F -c` → 1), and
+  `sqlcmd -U sa` with the old value **logs in** (`SELECT 'login-…-OK'` returned, databases listed). Close when the sa password differs from
+  the one in git history (container env / `ALTER LOGIN sa`, and appsettings.Development.json). Severity stays Low (dev machine, loopback only now).
 
 ## BUG-12 · TC-PROD-NEW-5 · High · Goods received for an IMEI / batch / size-colour product cannot be entered as IMEIs / a batch / a variant
 - Found in: round 2 · `mobile/test/qa/qa_round2_ui_test.dart` › "TC-PROD-NEW-5 …" (phone, pharmacy, fashion — 3 tests)
@@ -337,7 +345,11 @@ Format:
 - Suspected area: `mobile/lib/features/products/presentation/add_product_screen.dart` `_save` (create branch uses only `_imeis`);
   `sections/feature_sections.dart` `SerialWarrantySection` keeps the typed text in its own `_imei` controller.
 - Blocks beta: no — for phone shops recommended before beta (small); workaround: tap "+"/Enter and check the IMEI list before saving.
-- Status: open
+- Status: fixed in 2b74d73 (branch fix/qa-round-1) — save adds a typed IMEI; a refused one blocks the save with its message.
+- QA round 5: **verified by QA.** `m/qa/qa_round4_ui_test.dart::TC-PROD-NEW-15 …` PASS (typed IMEI saved); `m/qa/qa_round5_ui_test.dart::
+  TC-PROD-NEW-22 (BUG-19) …` 2/2 PASS (one Enter-ed + one typed → both inStock, stock 2, ONE upsertProduct; typed duplicate of a listed IMEI →
+  save blocked with "ဒီ IMEI ထည့်ပြီးသားပါ။", nothing written, clearing it saves with 1); `m/qa/qa_round4_ui_test.dart::TC-PROD-NEW-14 … Add
+  Product …` PASS (typed in-stock IMEI of another product blocks the save with "ဒီ IMEI ရှိပြီးသားပါ။").
 
 ## BUG-20 · TC-PROD-NEW-18 · Medium · A product without expiryAlertDays that has (old) batches is still sold by batch at POS
 - Found in: round 4 · `mobile/test/qa/qa_round4_ui_test.dart` › "item 5 … TC-PROD-NEW-18 …" (2 tests)
@@ -355,7 +367,13 @@ Format:
   `p.expiryAlertDays`); `products_screen.dart` `_restockModule` default for such products (newest unexpired batch, not "Batch မပါ").
 - Blocks beta: no for pharmacy if the shop is told: choose "သက်တမ်း မမှတ်ပါ" when ADDING a non-medicine, never give it a batch, and never
   switch a product that already has batches. Recommended before beta.
-- Status: open
+- Status: fixed in 2b74d73 (branch fix/qa-round-1) — no expiryAlertDays = plain product: POS never asks for a batch / expired confirm;
+  "Stock ဖြည့်မယ်" shows only "Batch မပါ".
+- QA round 5: **verified by QA.** `m/qa/qa_round4_ui_test.dart::… TC-PROD-NEW-18 …` 2/2 PASS (no sheet, line without batch; expired old
+  batch: no sheet, no confirm); `m/qa/qa_round5_ui_test.dart::TC-PROD-NEW-23 (BUG-20) …` 2/2 PASS (soap with S1 (3) + expired S0: restock shows
+  no old batch and no "+ Batch အသစ်", "Batch မပါ" selected, +5 outside batches in ONE restock unit, no batch created; POS no sheet / no confirm,
+  sale line batchId null, stock = all movements 9 → 8, S1 stays 3; untracked soap sold 1 → "Batch မပါ" 20 → 20, ONE stockAdjust, no batch).
+  The reverse switch (plain product with stock → expiry tracked) is not covered by the fix → BUG-22.
 
 ## BUG-21 · TC-PROD-NEW-19 · Medium · Add Product: an expiry-tracked product is saved with opening stock outside any batch
 - Found in: round 4 · `mobile/test/qa/qa_round4_ui_test.dart` › "item 5 … TC-PROD-NEW-19 …"
@@ -369,14 +387,70 @@ Format:
 - Suspected area: `mobile/lib/features/products/presentation/add_product_screen.dart` `_save` (`hasBatchInput` false → plain restock).
 - Blocks beta: no for pharmacy if every medicine is added with a batch no. + expiry (or with stock 0 and received by "Stock ဖြည့်မယ်");
   recommended before beta (a validation line).
+- Status: fixed in 2b74d73 (batch no. required), extended in f5b6e3b to batch no. AND expiry date (owner decision 2).
+- QA round 5: **verified by QA.** `m/qa/qa_round4_ui_test.dart::… TC-PROD-NEW-19 …` PASS (no batch no. → refused, 0 outside batches);
+  `… TC-PROD-NEW-21 …` 2/2 PASS (batch R5B1 without expiry → refused, nothing written, still on the form; with the 28th picked → saved,
+  expiryAlertDays 30, R5B1 with that date holds 10, 0 outside; stock 0 → saved without batch). Developer test
+  `m/duplicate_serial_and_no_expiry_test.dart::BUG-21 …` PASS. Live: a tracked product with batch + expiry reaches phone B unchanged
+  (`m/qa/live_qa_round5_test.dart`). Only Add Product is covered; switching an existing product with stock to tracked → BUG-22.
+
+## BUG-22 · TC-PROD-NEW-24 · Medium · Edit form: switching a product WITH stock to expiry tracking leaves that stock outside any batch; POS then sells it from the newest batch, which goes negative
+- Found in: round 5 · `mobile/test/qa/qa_round5_ui_test.dart` › "TC-PROD-NEW-24 … plain medicine with 10 in stock (no batch) → edit → 'ရက် ၃၀ အလို' → save …"
+- Why it matters now: owner decision 1 made "သက်တမ်း မမှတ်ပါ" the Add Product default, so a medicine added with stock and the default is a
+  plain product; the natural correction is the edit form. Item 5: "batches are required only for products with expiryAlertDays set";
+  decision 2 refuses exactly this state in Add Product (tracked + stock outside a batch, BUG-21).
+- Steps to reproduce: pharmacy → Add Product "QA med" with stock 10, leave "သက်တမ်း မမှတ်ပါ" → save → Products → tap it (edit) → pick
+  "ရက် ၃၀ အလို" → သိမ်းမယ်. Then "Stock ဖြည့်မယ်" → "+ Batch အသစ်" B1 (expiry) × 5 → POS → tap it 6 times over 6 sales.
+- Expected: a tracked product never keeps stock outside batches unnoticed: the edit form asks for a batch no. + expiry for the stock on
+  hand (as decision 2 does in Add Product), or refuses / warns.
+- Actual: `saved with expiryAlertDays 30, 10 outside any batch, form closed, no message; after receiving B1 × 5, POS auto-picks → cart batch =
+  B1; after 5 sales from B1 (product stock 10) POS offers [ကျန် 0]` — the 10 old units are sold as B1 (auto-pick, no sheet), and once B1 is
+  empty the only choice is "B1 ကျန် 0", so B1 goes negative on every later sale while 10 units stay outside batches forever. Batch stock and
+  the expiry each batch stands for are wrong (the same consequence as BUG-21). Product total and money are right.
+- Suspected area: `mobile/lib/features/products/presentation/add_product_screen.dart` `_save` edit branch (`needsBatch` is `!_isEdit && …`;
+  no check when `expiryAlertDays` goes from null to a value while stock outside batches > 0); `module_pick_sheet.dart` batch branch ignores
+  stock outside batches.
+- Blocks beta: no in general; pharmacy condition: when adding a medicine pick 30/60/90 days (or add it with stock 0 and receive it with
+  "Stock ဖြည့်မယ်"); never switch a product that has stock to tracking. Recommended before the pharmacy beta. Owner may decide to accept
+  it with that training note (then it can be Low).
+- Status: open
+
+## BUG-23 · TC-PROD-NEW-26 · Low · Trade-in, then voiding the ORIGINAL sale puts the same IMEI in stock twice, unflagged (app and server)
+- Found in: round 5 · `mobile/test/qa/qa_round5_ui_test.dart` › "TC-PROD-NEW-26 … then the ORIGINAL sale is voided …";
+  `backend/tests/ZayPOS.QA.Tests/QaRound5Tests.cs` › `TC_SYNC_NEW_9_void_of_the_original_sale_after_a_trade_in_puts_the_imei_in_stock_twice_and_is_flagged`
+- Steps to reproduce: phone shop → sell IMEI 353000000000002 (sale 1) → take the phone back: "Stock ဖြည့်မယ်" → that IMEI (decision 3:
+  accepted, new in-stock row) → History → sale 1 → ပယ်ဖျက်မယ်.
+- Expected: decision 3 "an IMEI that is 'inStock' is still refused" — the same IMEI is never in stock twice without the owner knowing: the
+  void is refused / warned on the phone, or (two phones) the server raises `duplicateSerial` (README §3.4) like BUG-18.
+- Actual: app: `void accepted, 2 in-stock rows for the IMEI, stock 2, POS offers it 2×`. Server: the voidSale unit (Drift record: it carries
+  the OLD row with status inStock) is applied with `v.Issues {empty}` — `in-stock rows: 2, stock: 2000`; `CheckDuplicateSerialsAsync` only
+  checks NEW rows.
+- Suspected area: `mobile/lib/features/sales/application/void_sale_service.dart` `setVoided` (sets the serial back to inStock without a
+  check); `backend/src/ZayPOS.Application/Sync/UnitApplier.cs` `ApplySerialsAsync` (an existing row turning inStock is not added to
+  `_newInStockSerials`).
+- Blocks beta: no (needs a void of a sale whose phone was already taken back — a user mistake; spec gap, owner to decide).
 - Status: open
 
 ---
 
-## Pending owner decisions 2026-11-14 (change requests, not bugs)
+## Owner decisions 2026-11-14 — resolved in round 5
 
-QA updated its tests to these decisions before the developer implements them (developer may not edit QA tests). The tests below fail
-at 2b74d73 by design; they are the developer's acceptance tests. Round 5 verifies them; any that still fail then become bugs.
+Implemented in f5b6e3b; QA's acceptance tests (written at 2b74d73, failing then by design) now pass. Developer-owned tests were updated
+to the decisions (read in round 5: same purpose, new expected result, nothing removed).
+
+- **Decision 1 — verified.** `m/qa/qa_app_flows_test.dart::TC-FEAT-02 …` PASS, `m/qa/qa_round4_ui_test.dart::… TC-PROD-NEW-20 …` PASS (starts
+  at "သက်တမ်း မမှတ်ပါ", no batch fields until 30/60/90, hidden again, default saves a plain product with 12 outside batches); edit form keeps
+  saved days (TC-PROD-NEW-16 PASS). Live: the default product reaches phone B with expiryAlertDays null (`m/qa/live_qa_round5_test.dart`).
+  Side effect found: BUG-22.
+- **Decision 2 — verified.** TC-PROD-NEW-21 2/2 PASS, TC-PROD-NEW-19 PASS (see BUG-21).
+- **Decision 3 — verified** for receiving (Add Product, edit form, "Stock ဖြည့်မယ်") and two phones: `m/qa/qa_round3_ui_test.dart::TC-PROD-NEW-6 …`,
+  `::TC-PROD-NEW-9 … phone …`, `m/qa/qa_round4_ui_test.dart::TC-PROD-NEW-14 …` 2/2, `m/qa/qa_round5_ui_test.dart::TC-PROD-NEW-25 … sells the
+  NEW row …`, `m/qa/qa_round5_drift_test.dart::TC-PROD-NEW-25 Drift …` (SQL in-stock set excludes sold and deleted; trade-in = ONE restock unit
+  with only the new row), server `b/…/QaRound5Tests.cs::TC_SYNC_NEW_10_…` and developer `b/…/SyncTests.cs::Trade_in_a_sold_IMEI_received_again…`
+  PASS, live two phones `m/qa/live_qa_round5_test.dart` PASS (A sells X, B takes it back, A sells it again: no issue, both phones 2 rows with
+  their own sale lines, stock 0). Gap found: void of the original sale afterwards → BUG-23 (Low).
+
+Original text of the pending section (round 4 → 2b74d73), kept for history:
 
 - **Decision 1** — Add Product starts at "သက်တမ်း မမှတ်ပါ"; batch fields only after 30/60/90 is picked.
   `m/qa/qa_app_flows_test.dart::TC-FEAT-02 …`, `m/qa/qa_round4_ui_test.dart::… TC-PROD-NEW-20 …`.
