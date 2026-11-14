@@ -132,8 +132,8 @@ void main() {
 
   // ================================================================ TC-PROD-NEW-6 restock an IMEI product
   group('TC-PROD-NEW-6 "Stock ဖြည့်မယ်" for an IMEI product', () {
-    testWidgets('keypad + "+ ထည့်" list; duplicates (list / in stock / sold) refused; typed-but-not-added counts; '
-        'ONE restock unit; POS offers exactly the in-stock IMEIs', (tester) async {
+    testWidgets('keypad + "+ ထည့်" list; duplicates (list / in stock) refused, a SOLD IMEI accepted (trade-in); '
+        'typed-but-not-added counts; ONE restock unit; POS offers exactly the in-stock IMEIs', (tester) async {
       final c = await boot(tester, 'phone');
       final p = newProduct(c, 'QA Redmi R3');
       final sold = serial(p, '111111111111111', status: SerialStatus.sold);
@@ -150,14 +150,21 @@ void main() {
       await tester.tap(inSheet(find.text('+ ထည့်')));
       await tester.pumpAndSettle();
       expect(inSheet(find.text('333333333333333')), findsOneWidget);
-      // 2) duplicates: in the list, already in stock, already sold
-      for (final dup in ['333333333333333', have.serial, sold.serial]) {
+      // 2) duplicates: in the list, already in stock → refused
+      for (final dup in ['333333333333333', have.serial]) {
         await tester.enterText(field('imei'), dup);
         await tester.pump(); // a frame: the button follows the typed text
         await tester.tap(inSheet(find.text('+ ထည့်')));
         await tester.pumpAndSettle();
         expect(inSheet(find.text('ဒီ IMEI ရှိပြီးသားပါ။')), findsOneWidget, reason: '$dup must be refused');
       }
+      // 2b) owner decision 3 (2026-11-14, trade-in): an IMEI whose last status is "sold" can be received again.
+      await tester.enterText(field('imei'), sold.serial);
+      await tester.pump();
+      await tester.tap(inSheet(find.text('+ ထည့်')));
+      await tester.pumpAndSettle();
+      expect(inSheet(find.text('ဒီ IMEI ရှိပြီးသားပါ။')), findsNothing, reason: 'sold ${sold.serial} must be accepted (trade-in)');
+      expect(tester.widget<EditableText>(field('imei')).controller.text, isEmpty, reason: 'taken into the list');
       // 3) typed (scanner) but "+ ထည့်" not tapped: saving takes it too
       await tester.enterText(field('imei'), '444444444444444');
       await tester.pumpAndSettle();
@@ -165,29 +172,32 @@ void main() {
       await saveSheet(tester);
 
       expect(kinds(c).sublist(n), [UnitKind.restock], reason: 'ONE restock unit');
-      expect(productStock(c, p.id), before + Qty.units(2), reason: 'quantity = number of new IMEIs');
+      expect(productStock(c, p.id), before + Qty.units(3), reason: 'quantity = number of new IMEIs (333, traded-in 111, 444)');
       final rows = db(c).serials.where((s) => s.productId == p.id).toList();
-      expect(rows.map((s) => (s.serial, s.status)).toSet(), {
-        (sold.serial, SerialStatus.sold),
-        (have.serial, SerialStatus.inStock),
-        ('333333333333333', SerialStatus.inStock),
-        ('444444444444444', SerialStatus.inStock),
-      });
+      String key((String, SerialStatus) r) => '${r.$1}/${r.$2.name}';
+      expect(rows.map((s) => key((s.serial, s.status))).toList()..sort(), [
+        key((sold.serial, SerialStatus.inStock)),
+        key((sold.serial, SerialStatus.sold)),
+        key((have.serial, SerialStatus.inStock)),
+        key(('333333333333333', SerialStatus.inStock)),
+        key(('444444444444444', SerialStatus.inStock)),
+      ]..sort(), reason: 'trade-in = a NEW inStock row; the sold row (history) is kept');
+      final oldSold = rows.singleWhere((s) => s.id == sold.id);
+      expect((oldSold.status, oldSold.updatedAt), (SerialStatus.sold, t0), reason: 'sold history row untouched');
       expect(rows.where((s) => s.serial == have.serial).single.updatedAt, t0, reason: 'existing IMEI rows untouched');
 
-      // POS offers the three in-stock IMEIs, not the sold one; selling a received one marks it sold.
+      // POS offers the four in-stock IMEIs (the traded-in 111 once); selling a received one marks it sold.
       await tapInPos(tester, c, p.name);
-      for (final s in [have.serial, '333333333333333', '444444444444444']) {
-        expect(inSheet(find.text(s)), findsOneWidget, reason: '$s is in stock');
+      for (final s in [have.serial, '333333333333333', '444444444444444', sold.serial]) {
+        expect(inSheet(find.text(s)), findsOneWidget, reason: '$s is in stock (offered once)');
       }
-      expect(inSheet(find.text(sold.serial)), findsNothing);
       await tester.tap(inSheet(find.text('444444444444444')));
       await tester.pumpAndSettle();
       await checkoutCash(tester);
       final s4 = db(c).serials.singleWhere((s) => s.serial == '444444444444444');
       final line = db(c).sales.expand((s) => s.lines).singleWhere((l) => l.serialId == s4.id);
       expect((s4.status, s4.saleLineId), (SerialStatus.sold, line.id));
-      expect(productStock(c, p.id), before + Qty.units(1));
+      expect(productStock(c, p.id), before + Qty.units(2));
     });
 
     testWidgets('dismissing the sheet writes nothing; an empty list cannot be saved', (tester) async {
@@ -374,8 +384,8 @@ void main() {
 
   // ================================================================ TC-PROD-NEW-9 edit form adds, never deletes
   group('TC-PROD-NEW-9 edit form lists and adds IMEIs / batches / sizes — nothing is deleted or changed', () {
-    testWidgets('phone: in-stock + sold IMEIs listed; two new IMEIs (dup of a sold one refused) → ONE upsertProduct, '
-        '+2 stock, old rows identical', (tester) async {
+    testWidgets('phone: in-stock + sold IMEIs listed; dup of the in-stock one refused, the sold one accepted as a new '
+        'in-stock row (trade-in) + two new IMEIs → ONE upsertProduct, +3 stock, old rows identical', (tester) async {
       final c = await boot(tester, 'phone');
       final p = newProduct(c, 'QA Pixel R3');
       final sold = serial(p, '700000000000001', status: SerialStatus.sold);
@@ -387,25 +397,34 @@ void main() {
       await openEdit(tester, c, p);
       expect(find.text('${sold.serial} · ရောင်းပြီး'), findsOneWidget);
       expect(find.text(have.serial), findsOneWidget);
-      for (final imei in ['700000000000003', sold.serial, '700000000000004']) {
+      Future<void> addImei(String imei) async {
         await tester.enterText(field('newImei'), imei);
         await tester.ensureVisible(find.byKey(const ValueKey('addImei')));
         await tester.tap(find.byKey(const ValueKey('addImei')));
         await tester.pumpAndSettle();
       }
+
+      await addImei('700000000000003');
+      await addImei(have.serial); // in stock → still refused
+      expect(find.text('ဒီ IMEI ရှိပြီးသားပါ။'), findsOneWidget, reason: 'in-stock ${have.serial} must be refused');
+      await addImei(sold.serial); // owner decision 3 (2026-11-14): sold → can be received again (trade-in)
+      await addImei('700000000000004');
       expect(find.text('700000000000003 · အသစ်'), findsOneWidget);
+      expect(find.text('${sold.serial} · အသစ်'), findsOneWidget, reason: 'the traded-in IMEI is accepted as new');
       expect(find.text('700000000000004 · အသစ်'), findsOneWidget);
+      expect(find.text('${have.serial} · အသစ်'), findsNothing);
       final n = kinds(c).length;
       await saveForm(tester);
 
       expect(kinds(c).sublist(n), [UnitKind.upsertProduct]);
       final rows = db(c).serials.where((s) => s.productId == p.id).toList();
-      expect(rows, hasLength(4), reason: 'sold one refused as duplicate');
+      expect(rows, hasLength(5), reason: 'in-stock dup refused; the sold one received again as a NEW row');
       expect(rows.map((s) => (s.id, s.serial, s.status, s.updatedAt)).toSet().containsAll(oldRows), isTrue,
-          reason: 'existing IMEI rows unchanged');
-      expect(rows.where((s) => s.serial.endsWith('3') || s.serial.endsWith('4')).every((s) => s.status == SerialStatus.inStock),
-          isTrue);
-      expect(productStock(c, p.id), stock0 + Qty.units(2), reason: 'each new IMEI = one phone in hand');
+          reason: 'existing IMEI rows unchanged (the sold history row is kept)');
+      final added = rows.where((s) => !oldRows.any((o) => o.$1 == s.id)).map((s) => '${s.serial}/${s.status.name}').toList()
+        ..sort();
+      expect(added, ['700000000000001/inStock', '700000000000003/inStock', '700000000000004/inStock']);
+      expect(productStock(c, p.id), stock0 + Qty.units(3), reason: 'each new IMEI = one phone in hand');
     });
 
     testWidgets('pharmacy: batches listed (expiry, stock, expired badge, empty one); new batch with expiry starts empty; '

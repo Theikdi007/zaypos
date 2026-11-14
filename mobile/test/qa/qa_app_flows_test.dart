@@ -34,6 +34,7 @@ import '../drift_helpers.dart';
 import '../fake_auth_api.dart';
 import '../helpers.dart';
 import '../sync_limits_test.dart' show bundledLimits;
+import 'qa_form_helpers.dart';
 
 /// The 20 grocery presets the server seeds (backend PresetSeed.cs), as /catalog/presets serves them.
 const _serverGroceryPresets = [
@@ -274,6 +275,11 @@ void main() {
 
       c.read(appRouterProvider).go(Routes.addProduct);
       await tester.pumpAndSettle();
+      // Owner decision 1 (2026-11-14): expiryAlertDays starts empty; batch no. / expiry appear once 30/60/90 is picked.
+      expect(find.byKey(expiryWarnKey), findsOneWidget, reason: 'the expiry section is shown');
+      expect(expiryWarnShows(noExpiryLabel), findsOneWidget, reason: 'owner decision 1: default = "သက်တမ်း မမှတ်ပါ"');
+      expect(find.byKey(const ValueKey('batchNo')), findsNothing, reason: 'no batch fields until a day option is picked');
+      await pickExpiryWarn(tester, warn30Label);
       expect(find.byKey(const ValueKey('batchNo')), findsOneWidget);
       expect(find.textContaining('သက်တမ်းကုန်ရက်'), findsWidgets);
     });
@@ -293,11 +299,15 @@ void main() {
       f.set(FeatureFlag.expiryBatch, false);
       c.read(appRouterProvider).go(Routes.addProduct);
       await tester.pumpAndSettle();
+      expect(find.byKey(expiryWarnKey), findsNothing, reason: 'feature off: the expiry section is hidden');
       expect(find.byKey(const ValueKey('batchNo')), findsNothing);
       expect(db.batches.where((b) => b.batchNo == 'B1'), hasLength(1), reason: 'data kept');
 
       f.set(FeatureFlag.expiryBatch, true);
       await tester.pumpAndSettle();
+      // Owner decision 1: the section is back with "သက်တမ်း မမှတ်ပါ"; the batch fields follow a day option.
+      expect(find.byKey(expiryWarnKey), findsOneWidget);
+      await pickExpiryWarn(tester, warn30Label);
       expect(find.byKey(const ValueKey('batchNo')), findsOneWidget);
       expect(db.batches.where((b) => b.batchNo == 'B1'), hasLength(1));
     });

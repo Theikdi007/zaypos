@@ -13,6 +13,7 @@ import 'package:zaypos_app/features/products/domain/product_modules.dart';
 import 'package:zaypos_app/main.dart';
 
 import '../helpers.dart';
+import 'qa_form_helpers.dart';
 
 void main() {
   setUpAll(loadAppFonts);
@@ -134,7 +135,11 @@ void main() {
       final c = await openAddProduct(tester, 'pharmacy');
       await tester.enterText(field('productName'), 'QA Paracetamol');
       await tester.enterText(field('price'), '150');
+      // Owner decisions 1 + 2 (2026-11-14): expiry tracking is opted into (default "သက်တမ်း မမှတ်ပါ"), and
+      // tracked opening stock needs a batch number AND an expiry date.
+      await pickExpiryWarn(tester, warn30Label);
       await enter(tester, 'batchNo', 'B1');
+      await pickAddProductExpiry(tester, 28);
       await enter(tester, 'stockQty', '40');
       await save(tester);
       final db = c.read(fakeDatabaseProvider);

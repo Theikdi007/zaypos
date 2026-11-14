@@ -370,3 +370,24 @@ Format:
 - Blocks beta: no for pharmacy if every medicine is added with a batch no. + expiry (or with stock 0 and received by "Stock ဖြည့်မယ်");
   recommended before beta (a validation line).
 - Status: open
+
+---
+
+## Pending owner decisions 2026-11-14 (change requests, not bugs)
+
+QA updated its tests to these decisions before the developer implements them (developer may not edit QA tests). The tests below fail
+at 2b74d73 by design; they are the developer's acceptance tests. Round 5 verifies them; any that still fail then become bugs.
+
+- **Decision 1** — Add Product starts at "သက်တမ်း မမှတ်ပါ"; batch fields only after 30/60/90 is picked.
+  `m/qa/qa_app_flows_test.dart::TC-FEAT-02 …`, `m/qa/qa_round4_ui_test.dart::… TC-PROD-NEW-20 …`.
+  Today: `Found 0 widgets with text "သက်တမ်း မမှတ်ပါ"` under `expiryWarn` (default is ရက် ၃၀).
+- **Decision 2** — tracked opening stock needs batch no. AND expiry date. `m/qa/qa_round4_ui_test.dart::… TC-PROD-NEW-21 … batch no.
+  without expiry date refused …`. Today: saved with batch R5B1 and no expiry (`Expected: empty, Actual: [Product]`). Suspected area:
+  `add_product_screen.dart` `_save` (`needsBatch` checks only `_batchNo`).
+- **Decision 3** — a SOLD IMEI can be received again (new inStock row, sold row kept); in-stock still refused.
+  `m/qa/qa_round3_ui_test.dart::TC-PROD-NEW-6 … keypad …`, `::TC-PROD-NEW-9 … phone: …`, `m/qa/qa_round4_ui_test.dart::TC-PROD-NEW-14 …`
+  (2 tests). Today: "ဒီ IMEI ရှိပြီးသားပါ။" for the sold IMEI. Suspected area: `knownSerialsProvider` (contains sold serials) used by
+  `add_product_screen.dart` `_addImei`, `edit_module_sections.dart` `_addImei`, `products_screen.dart` → restock sheet `knownSerials`.
+- Developer-owned tests that encode the old behaviour (QA did not touch them): `m/duplicate_serial_and_no_expiry_test.dart` › item 5
+  "Add Product: … hides batch fields …" (expects `batchNo` at the default) and BUG-21 "stock without batch no. → refused …; with batch
+  no. → saved into that batch" (saves without expiry); `m/add_product_modules_test.dart` (types `batchNo` at the default, ~line 41).
