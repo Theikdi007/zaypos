@@ -436,6 +436,13 @@ class SyncStore {
       .watch();
 
   /// Issues the owner has not reviewed yet, newest first.
+  /// The latest resolved issues, newest resolution first (kept as history).
+  Stream<List<SyncIssueRow>> watchResolvedIssues({int limit = 30}) => (db.select(db.syncIssues)
+        ..where((i) => i.resolvedAt.isNotNull() & i.deletedAt.isNull())
+        ..orderBy([(i) => OrderingTerm.desc(i.resolvedAt)])
+        ..limit(limit))
+      .watch();
+
   Stream<List<SyncIssueRow>> watchOpenIssues() => (db.select(db.syncIssues)
         ..where((i) => i.resolvedAt.isNull() & i.deletedAt.isNull())
         ..orderBy([(i) => OrderingTerm.desc(i.createdAt)]))

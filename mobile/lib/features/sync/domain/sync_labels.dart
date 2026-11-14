@@ -115,6 +115,11 @@ String issueMessage(String kind, String? dataJson) {
   }
 }
 
+/// How a resolved issue was closed: by the server because the cause is gone (data.resolution "fixed"),
+/// otherwise by the owner.
+String issueResolutionLabel(String? dataJson) =>
+    decodeFields(dataJson)['resolution'] == 'fixed' ? 'ပြင်ပြီးသွားပါပြီ' : 'စစ်ပြီးပြီ';
+
 /// Wire field "table.column" → a Burmese label; unknown → null.
 String? _wireFieldLabel(String? field) {
   if (field == null) return null;

@@ -113,5 +113,16 @@ void main() {
     expect((await (aDb.select(aDb.customers)..where((x) => x.id.equals(customer.id))).getSingle()).creditLimit, isNull);
     final withDup = await (aDb.select(aDb.products)..where((x) => x.barcode.equals('8850000031002'))).get();
     expect(withDup.map((x) => x.id), [dupA.id], reason: 'the duplicate is resolved on A too: one product keeps the barcode');
+
+    // Owner 2026-11-14: the server closed the duplicateBarcode issue itself; both phones show it resolved ("fixed").
+    await sync(b);
+    for (final db in [aDb, bDb]) {
+      final issues = await (db.select(db.syncIssues)..where((i) => i.kind.equals('duplicateBarcode'))).get();
+      expect(issues, isNotEmpty, reason: 'kept in history');
+      for (final i in issues) {
+        expect(i.resolvedAt, isNotNull, reason: 'closed by the server');
+        expect(i.data, contains('"resolution":"fixed"'));
+      }
+    }
   }, skip: skip, timeout: const Timeout(Duration(minutes: 2)));
 }

@@ -41,6 +41,48 @@ public static class SyncIssueData
         });
         return JsonSerializer.Serialize(cut, Json);
     }
+
+    /// <summary>Data.resolution of an issue the server closed itself (the cause is gone).</summary>
+    public const string ResolutionFixed = "fixed";
+
+    /// <summary><paramref name="data"/> (a JSON object or null) with <paramref name="key"/> set.</summary>
+    public static string With(string? data, string key, string value)
+    {
+        var fields = new Dictionary<string, object?>();
+        if (data is not null)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(data);
+                if (doc.RootElement.ValueKind == JsonValueKind.Object)
+                    foreach (var p in doc.RootElement.EnumerateObject()) fields[p.Name] = p.Value.Clone();
+            }
+            catch (JsonException) { /* unreadable old data: start fresh */ }
+        }
+        fields[key] = value;
+        return Serialize(fields);
+    }
+
+    private static readonly System.Text.RegularExpressions.Regex DetailBarcode =
+        new(@"^Barcode (?<b>.+?) is also used by:", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+    /// <summary>The barcode of a duplicateBarcode issue: Data.barcode, else from the English detail (rows before Data).</summary>
+    public static string? Barcode(string? data, string detail)
+    {
+        if (data is not null)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(data);
+                if (doc.RootElement.ValueKind == JsonValueKind.Object && doc.RootElement.TryGetProperty("barcode", out var b)
+                    && b.ValueKind == JsonValueKind.String)
+                    return b.GetString();
+            }
+            catch (JsonException) { }
+        }
+        var m = DetailBarcode.Match(detail);
+        return m.Success ? m.Groups["b"].Value : null;
+    }
 }
 
 /// <summary>Stable codes of a rejected unit. Data keys: field (wire "table.column"), min, max, kind.</summary>

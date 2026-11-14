@@ -486,6 +486,60 @@ public class SyncTests(SqlServerFixture sql)
     }
 
     [Fact]
+    public async Task A_duplicateBarcode_issue_closes_itself_once_one_product_keeps_the_barcode()
+    {
+        // Owner 2026-11-14: resolved by the server with resolution "fixed", kept in history, pulled by every phone.
+        var shop = await NewShop();
+        var a = Guid.CreateVersion7();
+        var b = Guid.CreateVersion7();
+        var c = Guid.CreateVersion7();
+        await PushOne(shop, ProductUnit(a, "Coke A", Now(), barcode: "8850999320099"));
+        await PushOne(shop, ProductUnit(b, "Coke B", Now(), barcode: "8850999320099"));
+        await PushOne(shop, ProductUnit(c, "Coke C", Now(), barcode: "8850999320099"));
+        async Task<List<SyncIssue>> Issues()
+        {
+            await using var db = sql.CreateContext(shop.TenantId);
+            return await db.SyncIssues.Where(i => i.Kind == SyncIssueKind.DuplicateBarcode).OrderBy(i => i.CreatedAt).ToListAsync();
+        }
+        (await Issues()).Should().HaveCount(2).And.OnlyContain(i => i.ResolvedAt == null);
+
+        await PushOne(shop, ProductUnit(c, "Coke C", Now().AddMinutes(1), barcode: null)); // 2 still share it
+        (await Issues()).Should().OnlyContain(i => i.ResolvedAt == null, "Coke A and Coke B still share the barcode");
+
+        await PushOne(shop, ProductUnit(b, "Coke B", Now().AddMinutes(1), deletedAt: Now().AddMinutes(1))); // deleted
+        var closed = await Issues();
+        closed.Should().HaveCount(2, "kept in history").And.OnlyContain(i => i.ResolvedAt != null && i.DeletedAt == null);
+        foreach (var i in closed)
+        {
+            using var data = JsonDocument.Parse(i.Data!);
+            data.RootElement.GetProperty("resolution").GetString().Should().Be("fixed");
+            data.RootElement.GetProperty("barcode").GetString().Should().Be("8850999320099", "the other fields are kept");
+        }
+        (await PullAll(shop)).Changes.SyncIssues.Should().OnlyContain(i => i.ResolvedAt != null && i.Data!.Contains("\"resolution\":\"fixed\""));
+    }
+
+    [Fact]
+    public async Task An_old_duplicateBarcode_issue_without_data_is_found_by_its_detail_and_closed()
+    {
+        var shop = await NewShop();
+        var a = Guid.CreateVersion7();
+        var b = Guid.CreateVersion7();
+        await PushOne(shop, ProductUnit(a, "Coke A", Now(), barcode: "8850999320098"));
+        await PushOne(shop, ProductUnit(b, "Coke B", Now(), barcode: "8850999320098"));
+        await using (var db = sql.CreateContext(shop.TenantId))
+        {
+            var issue = await db.SyncIssues.SingleAsync();
+            issue.Data = null; // raised before SyncIssues.Data existed
+            await db.SaveChangesAsync();
+        }
+        await PushOne(shop, ProductUnit(b, "Coke B", Now().AddMinutes(1), barcode: "8850999320097"));
+        await using var check = sql.CreateContext(shop.TenantId);
+        var closed = await check.SyncIssues.SingleAsync();
+        closed.ResolvedAt.Should().NotBeNull();
+        closed.Data.Should().Be("{\"resolution\":\"fixed\"}");
+    }
+
+    [Fact]
     public async Task Device_lastSeq_only_moves_forward()
     {
         var shop = await NewShop();

@@ -79,6 +79,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
         await CheckNegativeStockAsync(stockBefore);
         await CheckCreditLimitsAsync();
         await CheckBarcodesAsync();
+        if (rows.Products is { Count: > 0 }) await ResolveFixedDuplicateBarcodesAsync();
         await CheckDuplicateSerialsAsync();
         if (_maxAhead > SyncLimits.MaxClockAhead)
             Issue(SyncIssueKind.ClockSkew, "Devices", caller.DeviceId,
@@ -571,6 +572,27 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
                     $"Barcode {barcode} is also used by: {string.Join(", ", others)}.",
                     new() { ["barcode"] = barcode, ["productName"] = p.Name, ["others"] = names, ["othersCount"] = count });
             }
+        }
+    }
+
+    /// <summary>
+    /// Owner 2026-11-14: an open duplicateBarcode issue closes itself once at most one live product of the shop
+    /// has that barcode (cleared, changed or deleted on any phone). It stays in history: ResolvedAt + UpdatedAt
+    /// are set (every phone pulls it) and Data gets "resolution": "fixed" (apps: "ပြင်ပြီးသွားပါပြီ").
+    /// </summary>
+    private async Task ResolveFixedDuplicateBarcodesAsync()
+    {
+        var open = await db.Set<SyncIssue>()
+            .Where(i => i.Kind == SyncIssueKind.DuplicateBarcode && i.ResolvedAt == null && i.DeletedAt == null)
+            .ToListAsync(_ct);
+        foreach (var issue in open)
+        {
+            if (SyncIssueData.Barcode(issue.Data, issue.Detail) is not { } barcode) continue;
+            var live = await db.Set<Product>().CountAsync(p => p.Barcode == barcode && p.DeletedAt == null, _ct);
+            if (live > 1) continue;
+            issue.ResolvedAt = now;
+            issue.UpdatedAt = now;
+            issue.Data = SyncIssueData.With(issue.Data, "resolution", SyncIssueData.ResolutionFixed);
         }
     }
 

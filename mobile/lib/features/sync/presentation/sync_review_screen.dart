@@ -25,6 +25,7 @@ class SyncReviewScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final rejected = ref.watch(rejectedUnitsProvider).value ?? const <OutboxRow>[];
     final issues = ref.watch(openIssuesProvider).value ?? const <SyncIssueRow>[];
+    final resolved = ref.watch(resolvedIssuesProvider).value ?? const <SyncIssueRow>[];
     final isOwner = ref.watch(sessionProvider.select((s) => s.isOwner));
     final now = DateTime.now();
 
@@ -82,6 +83,23 @@ class SyncReviewScreen extends ConsumerWidget {
                                       style: AppText.s(13, weight: AppText.w600, color: AppColors.primary)),
                                 )
                               : null,
+                        ),
+                    ]),
+                  ),
+                ],
+                if (resolved.isNotEmpty) ...[
+                  section('ပြီးသွားတဲ့ ကိစ္စများ'),
+                  AppCard(
+                    child: DividedColumn(children: [
+                      for (final i in resolved)
+                        CardListTile(
+                          key: ValueKey('resolvedIssue-${i.id}'),
+                          title: Text(issueKindLabel(i.kind), style: AppText.s(14, weight: AppText.w600, color: AppColors.textSecondary)),
+                          subtitle: Text('${issueMessage(i.kind, i.data)}\n${entryDateLabel(i.resolvedAt!, now)}',
+                              style: AppText.s(12, color: AppColors.muted)),
+                          isThreeLine: true,
+                          trailing: Text(issueResolutionLabel(i.data),
+                              style: AppText.s(12, weight: AppText.w600, color: AppColors.success)),
                         ),
                     ]),
                   ),
