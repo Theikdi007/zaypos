@@ -190,6 +190,14 @@ Format:
   template→ဆိုင်ပုံစံ, Quick Sale→အမြန်ရောင်း, scan→ဖတ်မယ် / စကင်ဖတ်, Contacts→ဖုန်းစာအုပ်, screenshot→ငွေလွှဲပြေစာ ပုံ.
 - Status: fixed in fb520d9 — QA allow-lists (TC-UX-02, TC-UX-NEW-1) narrowed to the owner's list; new `m/no_english_test.dart` checks
   every Burmese string literal under `lib/`. Owner to read the developer's word choices.
+- QA round 8 (beta-polish @ 54e9146): **verified by QA** for the app's own texts. `m/qa/qa_ux_test.dart::TC-UX-02 …` (signed-in and
+  signed-out) and `m/qa/qa_round7_ux_test.dart::TC-UX-NEW-1 …` PASS with the owner's allow-list; new `m/qa/qa_round8_ux_test.dart::TC-UX-NEW-4 …`
+  PASS (duplicate-barcode dialog, POS picker, IMEI snackbar, /settings/devices, products without a price). QA accepts the developer's
+  edits to the QA allow-lists (they are the owner's list exactly, plus brand / Ks / units / phone placeholders / size values, i.e.
+  stricter than round 7) and the mechanical text renames in the other QA finders (only expected strings changed, no assertion removed or
+  weakened). Not covered by `m/no_english_test.dart`: literals without a Burmese letter and texts built at runtime — the remaining
+  English found that way comes from the server and raw keys → **BUG-26** (new, Low), not a re-open of BUG-9.
+- Status: verified by QA (round 8)
 
 ## BUG-10 · TC-FEAT-NEW-1 · Low · The v2 restaurant template can be picked at registration
 - Found in: round 1 · `mobile/test/qa/qa_app_flows_test.dart` › "TC-FEAT-NEW-1 register step 2: the v2 restaurant template cannot be chosen"
@@ -523,6 +531,51 @@ Format:
   has no `errorBuilder` (the tile in `product_tile.dart` and `InitialAvatar` in `common.dart` have one).
 - Blocks beta: no (needs a corrupt file or an undecodable pick; the user can remove / replace the photo).
 - Status: fixed in 2c020e8 — the preview has an `errorBuilder` showing the camera box; `m/product_photo_test.dart` › "BUG-25 …".
+- QA round 8 (beta-polish @ 54e9146): **verified by QA.** `m/qa/qa_round7_photo_test.dart::TC-PROD-NEW-31 … picked file is not an image …`
+  (c) and `… broken photo file → Products list, POS tile and the edit form …` (d) now PASS unchanged (no image exception; camera box
+  shown); a, b, e still PASS; developer `m/product_photo_test.dart` read and run.
+- Status: verified by QA (round 8)
+
+## BUG-26 · TC-UX-NEW-3 · Low · Server texts and raw keys in English on "စစ်ရန်" and the rejected-unit screen
+- Found in: round 8 · `mobile/test/qa/qa_round8_ux_test.dart` › "TC-UX-NEW-3 server texts on "စစ်ရန်" and the rejected-unit screen, and a
+  rejected setFeatures unit: no English"
+- Steps to reproduce: (1) save two products with the same barcode (now allowed with a warning, decision a) → sync → Settings → "စစ်ရန်".
+  (2) any unit the server rejects (e.g. a setFeatures unit) → "စစ်ရန်" → tap it.
+- Expected: TC-UX-02 "No English left in Burmese screens" (owner's allow-list); docs/mobile/phase3-sync.md "Errors from the server are
+  ProblemDetails with a stable `code`; map codes to Burmese messages".
+- Actual: the issue subtitle is the server's English `detail`; the rejected unit's reason is the server's English text; a setFeatures
+  unit shows the raw feature key. Real server text from the live run (`m/qa/live_qa_round8_test.dart`): `"Barcode 8850000088001 is also
+  used by: QA r8 dup one."` Test output:
+  ```
+  '/settings/sync-review': [
+    '"လုပ်ဆောင်ချက် ပြောင်း · expiryBatch" (English: expirybatch)',
+    '"tenantFeatures.featureKey must not be empty." (English: tenantfeatures, featurekey, must, not, be, empty)',
+    '"Barcode 8850000088001 is also used by: ကိုကာကိုလာ.\nယခုလေးတင်" (English: is, also, used, by)' ],
+  'rejected unit': [ '"လုပ်ဆောင်ချက် ပြောင်း · expiryBatch" …', '"tenantFeatures.featureKey must not be empty." …' ]
+  ```
+  Since e0ea12b allows duplicate barcodes, the duplicateBarcode issue (English detail) is now an everyday entry, not a rare one. Every
+  server issue kind has an English detail (`UnitApplier.cs`: negativeStock "… stock is … after this sync. The sale was kept.",
+  creditLimitExceeded "… owes … Ks, over the … Ks limit.", duplicateSerial "Serial … is already in stock (…). Both rows were kept.").
+- Suspected area: `mobile/lib/features/sync/presentation/sync_review_screen.dart` (subtitle `i.detail`, `o.rejectReason`),
+  `rejected_unit_screen.dart` (`AuthMessage(o.rejectReason)`), `sync_labels.dart` `unitSummary` ('setFeatures' joins raw `featureKey`;
+  `unitKindLabel` / `issueKindLabel` / `fieldLabel` fall back to the raw English key); server `UnitApplier.cs` `Issue(...)` details.
+- Blocks beta: no (the Burmese title above each entry says what happened; the English line is the detail / reason).
+- Status: open
+
+## BUG-27 · TC-POS-NEW-13 · Low · One IMEI in stock on two products: scanning the box twice adds two phones
+- Found in: round 8 · `mobile/test/qa/qa_round8_scan_test.dart` › "TC-POS-NEW-13 IMEI scanned at POS the same IMEI in stock on TWO products
+  (duplicateSerial, BUG-18 state): scanning the one box twice adds ONE phone; the 2nd scan gives the "already in the cart" message"
+- Steps to reproduce: phone shop with the same IMEI in stock on two products (the state the server flags as `duplicateSerial`, e.g. the
+  same box received on two phones offline, TC-SYNC-NEW-5) → POS → scan the IMEI → scan it again (a double read of a HID scanner is enough).
+- Expected: decision (c) "a scanned in-stock IMEI adds that phone with that IMEI"; code comment (`pos_screen.dart` `_addScannedSerial`)
+  "Already in the cart → a message, nothing added". One box = one phone.
+- Actual: `Expected: an object with length of <1>  Actual: [Instance of 'CartLine', Instance of 'CartLine']` — cart
+  `[QA R8 twin 1 · IMEI 359800000000701 …, QA R8 twin 2 · IMEI 359800000000701 …]`: the 2nd scan adds the other product's row with the
+  same IMEI, no message. Checking out sells two phones for one box (each row sold once, so the server raises no serialDoubleSold).
+- Suspected area: `mobile/lib/features/pos/presentation/pos_screen.dart` `_addScannedSerial` — "in the cart" is checked by serial row id
+  (`cart.serialIds`), not by the IMEI value.
+- Blocks beta: no (needs an already-flagged duplicateSerial state; the cashier sees two lines).
+- Status: open
 
 ---
 
@@ -534,6 +587,16 @@ Format:
 - **Duplicate barcodes are allowed** (decision, implemented in e0ea12b): Add/Edit Product warns, POS asks which product. The server
   still flags `duplicateBarcode` in the sync review.
 - **IMEI scan at POS** (decision, e0ea12b): an in-stock IMEI adds that phone; sold / unknown IMEIs go to "ပစ္စည်းအသစ် ထည့်မယ်".
+
+QA round 8 check of this section: **accurate**, with four additions the owner should tell shops (all proven by round-8 tests):
+1. Photos: correct (TC-PROD-NEW-32 PASS: one upsertProduct unit without photo bytes; phone B shows the initial).
+2. Duplicate barcodes: the warning only knows the products on THIS phone. Two phones adding the same barcode offline get no warning; the
+   server flags it after sync (TC-SYNC-NEW-13 live: one `duplicateBarcode` on both phones; phone B's POS picker lists both). A deleted
+   product's barcode is not a duplicate (TC-PROD-NEW-35). The issue text on "စစ်ရန်" is English (BUG-26).
+3. IMEI scan: only in shops with IMEI tracking on; an IMEI of a deleted product also goes to "ပစ္စည်းအသစ် ထည့်မယ်"; a SOLD IMEI being
+   offered as a new product's barcode is still the round-7 risk — trade-ins must be received with "Stock ဖြည့်မယ်", not by scanning at POS
+   (TC-POS-NEW-13).
+4. If one IMEI is in stock twice (a flagged duplicateSerial), two scans add two phones (BUG-27).
 
 ---
 

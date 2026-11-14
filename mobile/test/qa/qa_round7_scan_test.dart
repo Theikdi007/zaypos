@@ -337,6 +337,9 @@ void main() {
       await burst(tester, '8850000001111');
       expect(cart(c), isEmpty, reason: 'owner: a picker instead of auto-picking');
       expect(find.byKey(ValueKey('barcodeMatch-${first.id}')), findsOneWidget);
+      // QA round 8: the title says "a picker with both" — check the second one is listed too.
+      final second = both.singleWhere((p) => p.id != first.id);
+      expect(find.byKey(ValueKey('barcodeMatch-${second.id}')), findsOneWidget);
       await tester.tap(find.byKey(ValueKey('barcodeMatch-${first.id}')));
       await tester.pumpAndSettle();
       expect(cart(c).single.productId, first.id);
