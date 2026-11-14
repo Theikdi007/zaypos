@@ -217,6 +217,24 @@ void main() {
       expect(find.text('ဘယ် IMEI လဲ?'), findsOneWidget, reason: 'barcode → same as a tap');
     });
 
+    testWidgets('BUG-28: one IMEI on two products — after scanning it, tapping the twin product does not offer it again',
+        (tester) async {
+      final c = await boot(tester, template: 'phone');
+      await create(c, 'Phone R', imeis: ['359000000000066']);
+      await create(c, 'Phone S', imeis: ['359000000000066', '359000000000077']);
+      await openPos(tester, c);
+      await burst(tester, '359000000000066');
+      expect(cart(c), hasLength(1));
+
+      await tester.enterText(find.byType(EditableText).first, 'Phone S');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Phone S').last);
+      await tester.pumpAndSettle();
+      expect(find.text('ဘယ် IMEI လဲ?'), findsOneWidget);
+      expect(find.text('359000000000066'), findsNothing, reason: 'already in the cart (from Phone R)');
+      expect(find.text('359000000000077'), findsOneWidget);
+    });
+
     testWidgets('BUG-27: one IMEI in stock on two products (duplicateSerial) — the 2nd scan is refused by IMEI value',
         (tester) async {
       final c = await boot(tester, template: 'phone');
