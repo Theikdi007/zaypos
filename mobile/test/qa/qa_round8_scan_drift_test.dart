@@ -102,9 +102,9 @@ void main() {
 
   List<CartLine> cart(ProviderContainer c) => c.read(cartProvider).lines;
 
-  testWidgets('TC-POS-NEW-13 Drift: in-stock IMEI → that phone + that IMEI; Myanmar digits; again → message; sold IMEI, '
+  testWidgets('TC-POS-NEW-13 Drift: in-stock IMEI → that phone + that IMEI; Myanmar digits; again → message; '
       'deleted product\'s IMEI → "ပစ္စည်းအသစ်" sheet; trade-in → the NEW row; checkout sells exactly the scanned rows; '
-      'a sold IMEI scanned again → "sold" message (owner 2026-11-14)', (tester) async {
+      'a sold IMEI scanned → "sold" message (owner 2026-11-14)', (tester) async {
     final (c, shop, adb, scanner) = await boot(tester, 'phone');
     final tid = shop.tenantId;
     Product phone(String name, {String? barcode}) => Product(id: newId(), tenantId: tid, name: name, cost: 400000,

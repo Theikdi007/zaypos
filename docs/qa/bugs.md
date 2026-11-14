@@ -563,6 +563,7 @@ Format:
   `unitKindLabel` / `issueKindLabel` / `fieldLabel` fall back to the raw English key); server `UnitApplier.cs` `Issue(...)` details.
 - Blocks beta: no (the Burmese title above each entry says what happened; the English line is the detail / reason).
 - Status: fixed in 7df5f1f — the app builds Burmese messages from structured server fields (SyncIssues.data, reject code + data); unknown kinds / codes → a generic Burmese message; feature keys → Settings names. Tests: `m/no_english_test.dart` (screens with sample server payloads), `m/sync_messages_test.dart`, Api `SyncTests` / `AccountTests`. QA TC-UX-NEW-3 passes unchanged.
+- QA round 9: **verified** for what this bug reported. `m/qa/qa_round8_ux_test.dart::TC-UX-NEW-3 …` PASS unchanged; `m/qa/qa_round9_sync_text_test.dart` TC-UX-NEW-5 / -6: every issue kind pulled through the real engine (English user data, 6 "others", unknown kind, old row without data, a schema-v1 install upgraded to v2) shows the Burmese message with the right names / numbers and never the English detail / reason; live `m/qa/live_qa_round9_test.dart` (TC-SYNC-NEW-15): all 8 SyncIssueKinds provoked on the real server arrive WITH data on both phones, the messages are Burmese with barcode / names / IMEI / Ks / receipt numbers / minutes; an issue with Data NULL → the shorter sentence on a new phone; rejected units store code + data (fieldTooLong {products.name, 150}, fieldNotAscii {products.barcode}) → Burmese reasons. Remaining English / internal names on the same screens, not covered by this bug's report: BUG-29 (table name on the rejected-unit field labels) and BUG-30 (exception text in the sync error). Cosmetic, no bug: a number field the app has no label for is called "စာသားတစ်ခု" ("a text"), e.g. `rejectMessage('fieldTooSmall', {field: debtEntries.amount, min: 1})` → "စာသားတစ်ခု က ၁ ထက် ငယ်နေပါတယ်။" (only app bugs reach it).
 
 ## BUG-27 · TC-POS-NEW-13 · Low · One IMEI in stock on two products: scanning the box twice adds two phones
 - Found in: round 8 · `mobile/test/qa/qa_round8_scan_test.dart` › "TC-POS-NEW-13 IMEI scanned at POS the same IMEI in stock on TWO products
@@ -578,6 +579,65 @@ Format:
   (`cart.serialIds`), not by the IMEI value.
 - Blocks beta: no (needs an already-flagged duplicateSerial state; the cashier sees two lines).
 - Status: fixed in 0b3e2d4 — the scanned IMEI value is compared with every cart line ("ဒီ IMEI ခြင်းထဲမှာ ရှိပြီးသားပါ"); `m/scan_lookup_test.dart` › "BUG-27 …"; QA's TC-POS-NEW-13 twin test passes (message text updated, owner-approved).
+- QA round 9: **verified** for the scan path. `m/qa/qa_round8_scan_test.dart::TC-POS-NEW-13 …` 3/3 PASS; `m/qa/qa_round9_scan_test.dart::TC-POS-NEW-14 …` (twin rows, picked by tapping product A, then scanned in ASCII and in Myanmar digits → the message each time, one line) PASS; Drift `m/qa/qa_round9_scan_drift_test.dart` (received a 2nd time → newest row, 2nd scan → message) PASS. The same box can still become two phones through a TAP after the scan → BUG-28.
+
+## BUG-28 · TC-POS-NEW-16 · Low · One IMEI in stock on two products: scan it, then tap the other product → the same IMEI is offered and added again
+- Found in: round 9 · `mobile/test/qa/qa_round9_scan_test.dart` › "TC-POS-NEW-16 duplicateSerial: IMEI scanned, then the twin product
+  tapped …"
+- Steps to reproduce: phone shop with IMEI X in stock on product A and on product B (the flagged `duplicateSerial` state, e.g. one box
+  received on two phones offline) → POS → scan X (A's phone goes into the cart) → tap product B → "ဘယ် IMEI လဲ?" lists X → tap it.
+- Expected: one box = one phone. Commit 0b3e2d4 (BUG-27): "The scanned IMEI value is compared with every cart line … one box is never
+  two phones (duplicateSerial)". The owner's BUG-27 words cover the scan; the tap path is the same box.
+- Actual: `Expected: <1> Actual: <2>` — cart `[QA R9 tap A · IMEI 359900000000501 …, QA R9 tap B · IMEI 359900000000501 …]`; checkout
+  would sell two phones for one box with no server issue (each row is sold once).
+- Suspected area: `mobile/lib/features/pos/presentation/module_pick_sheet.dart` `pickModuleUnit` — `free` excludes `cart.serialIds`
+  (row ids), not the IMEI values already in the cart.
+- Blocks beta: no (needs an already-flagged duplicateSerial state; the cashier sees two lines with the same IMEI).
+- Status: open
+
+## BUG-29 · TC-UX-NEW-5, TC-UX-NEW-6 · Low · Rejected-unit screen: field labels show the internal table name ("အမည် · customers")
+- Found in: round 9 · `mobile/test/qa/qa_round9_sync_text_test.dart` › "TC-UX-NEW-5 …" and "TC-UX-NEW-6 …"
+- Steps to reproduce: any unit rejected by the server whose rows have ids (e.g. a new customer or product) → Settings → "စစ်ရန်" → tap
+  the rejected unit → "ပြင်ရန်" fields.
+- Expected: owner (BUG-26 hand-over): "No internal names on screen"; TC-UX-02 allow-list.
+- Actual: field labels `"အမည် · customers"`, `"ဖုန်း · customers"`, `"လိပ်စာ · customers"`, `"မှတ်ချက် · customers"` (customer unit);
+  `"အမည် · products"` (product unit, schema-v1 upgrade). Every message check in both tests passes; only these labels fail. The
+  developer's `m/no_english_test.dart` sample units have rows without ids, so no field is rendered and this line is never seen.
+- Suspected area: `mobile/lib/features/sync/presentation/rejected_unit_screen.dart` line ~166 `label: '${fieldLabel(f.column)} · ${f.table}'`.
+- Blocks beta: no (a rejection only happens after an app bug; the Burmese label before the "·" is right).
+- Status: open
+
+## BUG-30 · TC-UX-NEW-7 · Low · Sync error for a row the app cannot read shows the exception text in English ("FormatException: syncIssues.kind …")
+- Found in: round 9 · `mobile/test/qa/qa_round9_sync_text_test.dart` › "TC-UX-NEW-7 a pulled row the app cannot read …"
+- Steps to reproduce: the server sends a pulled row this app version cannot decode (e.g. a newer server; test: a syncIssues row without
+  `kind`) → sync → Settings → ဆိုင် Features (sync card); the first-sync screen shows the same `lastError`.
+- Expected: phase3-sync.md "map codes to Burmese messages"; owner: "No internal names on screen". The Burmese sentence alone.
+- Actual: `"ဆာဗာက ပို့တဲ့ ဒေတာကို ဖတ်မရပါ။ အက်ပ်ကို အပ်ဒိတ်လုပ်ပါ (သို့) အကူအညီဌာနကို ဆက်သွယ်ပါ။ (FormatException: syncIssues.kind:
+  expected String, got Null)"`.
+- Suspected area: `mobile/lib/core/sync/sync_engine.dart` `_cycle` — `error = '${SyncMessages.unreadable} ($e)'`.
+- Blocks beta: no (only on an app / server version mismatch; the Burmese part says what to do).
+- Status: open
+
+## BUG-31 · TC-SYNC-NEW-14 · Medium · A field cleared on one phone is never cleared on the other phones (pulled NULLs are ignored)
+- Found in: round 9 · live `mobile/test/qa/live_qa_round9_test.dart` (scratch DB R9) and `mobile/test/qa/qa_round9_pull_null_test.dart` ›
+  "TC-SYNC-NEW-14 pulled NULLs replace local values …"
+- Steps to reproduce: two phones of one shop, product with a barcode (or wholesale price, warranty, "ကုန်ခါနီးရင် သတိပေးမယ်" days;
+  customer address / note / credit limit …) → on phone B edit the product and clear the barcode → sync B → sync A.
+- Expected: phase3-sync.md §5.3 "products, productVariants, productBatches, customers, tenantFeatures, tenants | replace only if
+  pulled.updatedAt >= local.updatedAt …"; ledgers and syncIssues "insert or replace by id". The newer row from B replaces A's row,
+  so A's barcode is empty too.
+- Actual: live: `server: <NULL> · B: null · A: 8850000099101 (A updatedAt 2026-11-14T14:38:32.960Z, B 2026-11-14T14:38:32.960Z)` — A took
+  B's newer updatedAt but kept the barcode. Drift test: `Expected: {barcode: null, wholesalePrice: null, issue.data: null}  Actual:
+  {barcode: 8850000099500, wholesalePrice: 140, issue.data: {"barcode":"8850000099500"}}`. Every phone that already had the value keeps it
+  for good (a later edit does not clear it either); a newly signed-in phone gets the right (empty) value — the shop's phones silently
+  disagree. Examples that matter in the beta: removing a duplicate barcode from one product (what shops will do after a
+  `duplicateBarcode` issue) — the other phones keep the barcode and keep showing the "ဘယ်ပစ္စည်းလဲ?" picker; switching a medicine back
+  to "သက်တမ်း မမှတ်ပါ" — the other phones keep asking for a Batch; removing a customer's credit limit.
+- Suspected area: `mobile/lib/core/sync/sync_store.dart` `_merge` — `insertOnConflictUpdate(<data class>)`: Drift writes a data class
+  with `nullToAbsent: true`, so NULL columns are left out of the `ON CONFLICT DO UPDATE` and the old values stay. Local edits are not
+  affected (`drift_product_repository.dart` `update` uses `replace`).
+- Blocks beta: **yes by the owner's exit rule** (Medium) — or the owner accepts it as a known risk for 3–5 shops.
+- Status: open
 
 ---
 
@@ -609,6 +669,19 @@ QA round 8 check of this section: **accurate**, with four additions the owner sh
 
 Developer note (after round 8): points 2 (English issue text) and 4 are fixed by BUG-26 / BUG-27; point 3's sold-IMEI risk is replaced by
 the owner's "sold" message (see the IMEI bullet above).
+
+QA round 9 check of this section (fe1acaa): **accurate, with one correction and three additions** (all proven by round-9 tests):
+1. Photos, duplicate barcodes: unchanged and correct. Addition: clearing a duplicate barcode on one phone does not reach the other phones
+   (BUG-31, Medium) — they keep the barcode and keep showing the picker.
+2. IMEI scan: correct for the in-cart message (by number, any product, Myanmar digits too — TC-POS-NEW-14), the sold message (latest
+   row by createdAt, whole trade-in chains, a product barcode wins, only with IMEI tracking on — TC-POS-NEW-15) and "unknown IMEIs →
+   ပစ္စည်းအသစ်". **Correction:** "IMEIs of deleted products still go to ပစ္စည်းအသစ်" is true only for an in-stock IMEI; a deleted
+   product's IMEI whose latest row is sold gets the sold message (`qa_round9_scan_test.dart` TC-POS-NEW-15, 3rd test). Addition: the "in
+   the cart" check is for scans only — tapping the twin product after a scan still offers the same IMEI (BUG-28).
+3. Sync issue texts: correct — old issues without fields show the shorter Burmese sentence (live: phone C; TC-UX-NEW-6 after a v1 → v2
+   upgrade). Addition: a phone that already has an issue keeps its old copy of the fields (BUG-31); the rejected-unit screen still shows
+   the table name (BUG-29) and the Settings sync card can show an English exception for an unreadable row (BUG-30).
+4. QA round-8 points 2 ("issue text is English") and 4 (BUG-27) are out of date as the developer note says.
 
 ---
 
