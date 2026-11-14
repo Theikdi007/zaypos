@@ -473,10 +473,14 @@ class _StepShopType extends StatelessWidget {
 
   Widget _typeCard(ShopTemplate t) {
     final on = t.id == selected;
+    // BUG-10: "v2" (soon) templates cannot be chosen, like in Settings.
     return Semantics(
       button: true,
       selected: on,
-      child: Material(
+      enabled: !t.soon,
+      child: Opacity(
+        opacity: t.soon ? 0.5 : 1,
+        child: Material(
         color: on ? AppColors.primarySoft : AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
@@ -484,7 +488,7 @@ class _StepShopType extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () => onPick(t),
+          onTap: t.soon ? null : () => onPick(t),
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 92),
             child: Stack(
@@ -524,6 +528,7 @@ class _StepShopType extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }

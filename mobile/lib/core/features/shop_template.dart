@@ -77,7 +77,7 @@ class ShopTemplate {
     ),
     ShopTemplate(
       id: 'phone',
-      label: 'ဖုန်း / Electronics',
+      label: 'ဖုန်း / လျှပ်စစ်ပစ္စည်း',
       initial: 'ဖ',
       tint: AppColors.tintIndigo,
       desc: 'IMEI / Serial · အာမခံရက်',
@@ -99,7 +99,7 @@ class ShopTemplate {
       label: 'အဝတ် / အလှကုန်',
       initial: 'အ',
       tint: AppColors.tintPink,
-      desc: 'Size · အရောင် ခွဲမှတ်',
+      desc: 'အရွယ်အစား · အရောင် ခွဲမှတ်',
       features: TenantFeatures(quickSale: true, stock: true, variants: true),
       productBadge: 'အဝတ်အထည်',
       namePlaceholder: 'ဥပမာ - ချည်သား တီရှပ်',
@@ -110,10 +110,10 @@ class ShopTemplate {
     ),
     ShopTemplate(
       id: 'hardware',
-      label: 'Hardware / ဆောက်လုပ်ရေး',
+      label: 'သံပစ္စည်း / ဆောက်လုပ်ရေး',
       initial: 'H',
       tint: AppColors.tintAmber,
-      desc: 'ပေ/ကီလို/အိတ် · ဒသမ · Quotation',
+      desc: 'ပေ/ကီလို/အိတ် · ဒသမ · ဈေးနှုန်းတင်ပြချက်',
       presetCount: 0,
       features: TenantFeatures(
           quickSale: true,
@@ -133,7 +133,7 @@ class ShopTemplate {
       label: 'ဝန်ဆောင်မှု',
       initial: 'ဝ',
       tint: AppColors.tintOrange,
-      desc: 'Stock မလိုတဲ့ service · ချိန်းဆို',
+      desc: 'Stock မလိုတဲ့ ဝန်ဆောင်မှု · ချိန်းဆို',
       features: TenantFeatures(quickSale: true, serviceItems: true),
     ),
     ShopTemplate(
@@ -141,7 +141,7 @@ class ShopTemplate {
       label: 'စားသောက် / ကော်ဖီ',
       initial: 'စ',
       tint: AppColors.tintRed,
-      desc: 'စားပွဲ · Order',
+      desc: 'စားပွဲ · မှာယူမှု',
       soon: true,
       features: TenantFeatures(),
     ),
@@ -150,7 +150,7 @@ class ShopTemplate {
       label: 'အခြား',
       initial: '+',
       tint: AppColors.tintGray,
-      desc: 'Core feature တွေပဲ · ကိုယ်တိုင်ဖွင့်',
+      desc: 'အခြေခံ feature တွေပဲ · ကိုယ်တိုင်ဖွင့်',
       features: TenantFeatures(),
     ),
   ];

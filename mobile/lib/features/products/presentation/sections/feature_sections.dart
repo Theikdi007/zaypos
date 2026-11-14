@@ -12,10 +12,13 @@ import '../../../../core/utils/qty.dart';
 
 /// Accent square scan button.
 class ScanSquare extends StatelessWidget {
-  const ScanSquare({super.key, this.size = 48, this.iconSize = 22, required this.label});
+  const ScanSquare({super.key, this.size = 48, this.iconSize = 22, required this.label, this.onTap});
   final double size;
   final double iconSize;
   final String label;
+
+  /// Opens the camera scanner; null = disabled.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +31,7 @@ class ScanSquare extends StatelessWidget {
         borderRadius: AppRadius.inputR,
         child: InkWell(
           borderRadius: AppRadius.inputR,
-          onTap: () {},
+          onTap: onTap,
           child: SizedBox(
             width: size,
             height: size,
@@ -170,7 +173,11 @@ class SerialWarrantySection extends StatefulWidget {
     required this.onWarrantyChanged,
     this.showSerials = true,
     this.registerCommit,
+    this.onScanImei,
   });
+
+  /// Camera scan of an IMEI (returns the code, or null if closed).
+  final Future<String?> Function()? onScanImei;
 
   /// False when editing a saved product: IMEIs are stock, entered when goods arrive.
   final bool showSerials;
@@ -217,6 +224,14 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
   void dispose() {
     _imei.dispose();
     super.dispose();
+  }
+
+  /// Scanned IMEI is added like a typed one.
+  Future<void> _scan() async {
+    final code = await widget.onScanImei!();
+    if (code == null || !mounted) return;
+    _imei.text = code;
+    _submit();
   }
 
   void _submit() {
@@ -267,8 +282,9 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
                       color: AppColors.primary,
                       borderRadius: AppRadius.inputR,
                       child: InkWell(
+                        key: const ValueKey('imeiScan'),
                         borderRadius: AppRadius.inputR,
-                        onTap: () {},
+                        onTap: widget.onScanImei == null ? null : _scan,
                         child: const SizedBox(
                           width: 44,
                           height: 44,
