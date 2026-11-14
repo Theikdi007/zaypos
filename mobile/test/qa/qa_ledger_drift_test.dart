@@ -12,6 +12,7 @@ import 'package:zaypos_app/features/customers/application/customer_service.dart'
 import 'package:zaypos_app/features/customers/data/customer_providers.dart';
 import 'package:zaypos_app/features/customers/data/debt_repository.dart';
 import 'package:zaypos_app/features/customers/domain/customer.dart';
+import 'package:zaypos_app/features/customers/domain/customer_account.dart';
 import 'package:zaypos_app/features/customers/domain/debt_entry.dart';
 import 'package:zaypos_app/features/products/application/product_service.dart';
 import 'package:zaypos_app/features/products/data/product_providers.dart';
@@ -236,8 +237,15 @@ void main() {
     final totalBefore = (await settled(c, customerAccountsProvider)).fold<int>(0, (a, x) => a + (x.balance > 0 ? x.balance : 0));
     final cust = Customer(id: newId(), tenantId: me.tenantId, name: 'ဒေါ်ခင်မာ', phone: '', createdAt: nowUtc(), updatedAt: nowUtc());
     await c.read(customerServiceProvider).create(cust, openingBalance: 52000);
-    expect(await balanceOf(cust.id), 52000);
-    final total = (await settled(c, customerAccountsProvider)).fold<int>(0, (a, x) => a + (x.balance > 0 ? x.balance : 0));
+    // Round 2: wait for the Drift streams like every other step. customerAccountsProvider joins three
+    // independent streams (customers, ledger, balances); a single settled() read right after the write
+    // can return the join of the NEW customers list with the OLD balances map (balance 0) — a test
+    // timing defect, not a product one (the stored balance is checked below, straight from SQL).
+    expect(await until(() => balanceOf(cust.id), (b) => b == 52000), 52000);
+    expect((await c.read(debtRepositoryProvider).watchBalances().first)[cust.id], 52000, reason: 'SQL balance');
+    int positiveTotal(List<CustomerAccount> all) => all.fold<int>(0, (a, x) => a + (x.balance > 0 ? x.balance : 0));
+    final total = await until(() async => positiveTotal(await settled(c, customerAccountsProvider)),
+        (t) => t == totalBefore + 52000);
     expect(total, totalBefore + 52000, reason: 'TC-DEBT-01: total ရရန်ကျန် updated');
 
     final p = product(price: 24000, cost: 20000);
