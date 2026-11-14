@@ -42,8 +42,9 @@ void main() {
 
   test('reject messages: field labels, never the wire name; unknown code / field → generic', () {
     expect(rejectMessage('fieldTooLong', '{"field":"products.name","max":"120"}'), '“အမည်” က စာလုံး ၁၂၀ လုံးထက် ရှည်နေပါတယ်။');
-    expect(rejectMessage('fieldEmpty', '{"field":"tenantFeatures.featureKey"}'), 'စာသားတစ်ခု ထည့်ရန် လိုပါတယ်။');
-    expect(rejectMessage('fieldTooSmall', '{"field":"debtEntries.amount","min":"1"}'), 'စာသားတစ်ခု က ၁ ထက် ငယ်နေပါတယ်။');
+    expect(rejectMessage('fieldEmpty', '{"field":"tenantFeatures.featureKey"}'), '“လုပ်ဆောင်ချက်” ထည့်ရန် လိုပါတယ်။');
+    expect(rejectMessage('fieldTooSmall', '{"field":"debtEntries.amount","min":"1"}'), '“ပမာဏ” က ၁ ထက် ငယ်နေပါတယ်။');
+    expect(rejectMessage('fieldTooLarge', '{"field":"x.unknownNumber","max":"9"}'), 'အချက်အလက်တစ်ခု က ၉ ထက် ကြီးနေပါတယ်။');
     expect(rejectMessage(null, null), 'ဆာဗာက ဒီစာရင်းကို လက်မခံပါ။ အကူအညီဌာနကို ပို့ပေးပါ။');
     expect(rejectMessage('brandNew', '{"field":"x.secret"}'), isNot(contains('secret')));
     expect(unitKindLabel('teleport'), 'စာရင်း');

@@ -120,7 +120,7 @@ void main() {
       ];
       // Rejected units: every code, an unknown code, an old server (reason only), a setFeatures unit.
       final rejects = <(String, Map<String, Object?>, String, String?, Map<String, String>?)>[
-        ('upsertProduct', {'products': [{'name': 'ဆပ်ပြာ'}]}, 'products.name is longer than 120 characters.', 'fieldTooLong',
+        ('upsertProduct', {'products': [{'id': 'p1', 'name': 'ဆပ်ပြာ', 'category': 'အိမ်သုံး', 'unit': 'ခု', 'barcode': '885'}]}, 'products.name is longer than 120 characters.', 'fieldTooLong',
             {'field': 'products.name', 'max': '120'}),
         ('setFeatures', {'tenantFeatures': [{'featureKey': 'expiryBatch'}, {'featureKey': 'tables'}]},
             'tenantFeatures.featureKey must not be empty.', 'fieldEmpty', {'field': 'tenantFeatures.featureKey'}),
@@ -128,11 +128,11 @@ void main() {
             {'field': 'stockMovements.productId'}),
         ('teleport', <String, Object?>{}, "Unknown unit kind 'teleport'.", 'unknownKind', {'kind': 'teleport'}),
         ('checkout', <String, Object?>{}, 'The database refused the unit: FK_Sales_Customer', 'databaseRefused', null),
-        ('upsertCustomer', {'customers': [{'name': 'မမ'}]}, 'customers.phone must be ASCII (digits/latin letters).',
+        ('upsertCustomer', {'customers': [{'id': 'c1', 'name': 'မမ', 'phone': '09၁၂၃', 'address': 'ရန်ကုန်', 'note': null}]}, 'customers.phone must be ASCII (digits/latin letters).',
             'fieldNotAscii', {'field': 'customers.phone'}),
         ('payDebt', <String, Object?>{}, 'debtEntries.amount must be >= 1.', 'fieldTooSmall', {'field': 'debtEntries.amount', 'min': '1'}),
         ('stockAdjust', <String, Object?>{}, 'stockMovements.qtyMilli must be <= 9.', 'fieldTooLarge', {'field': 'x.y', 'max': '9'}),
-        ('upsertProduct', {'products': [{'name': 'ဆီ'}]}, 'products.category is required.', null, null),
+        ('upsertProduct', {'products': [{'id': 'p2', 'name': 'ဆီ'}], 'productVariants': [{'id': 'v1', 'size': 'XL', 'color': 'အနီ'}], 'productBatches': [{'id': 'b1', 'batchNo': 'B12'}], 'productSerials': [{'id': 's1', 'serial': '359'}], 'sales': [{'id': 'sa1', 'customerName': 'မမ'}], 'saleLines': [{'id': 'l1', 'name': 'ဆီ'}], 'stockMovements': [{'id': 'm1', 'note': 'ဖြည့်'}], 'debtEntries': [{'id': 'd1', 'note': 'ဆပ်'}]}, 'products.category is required.', null, null),
         ('upsertProduct', {'products': [{'name': 'ငံပြာရည်'}]}, 'Something odd.', 'brandNewCode', {'field': 'products.secretColumn'}),
       ];
       await tester.runAsync(() async {
@@ -174,13 +174,21 @@ void main() {
 
     testWidgets('each rejected-unit screen: no English, no internal names', (tester) async {
       final c = await boot(tester);
-      final seqs = (await tester.runAsync(() => db.select(db.outbox).get()))!.map((o) => o.seq).toList();
-      for (final seq in seqs) {
-        c.read(appRouterProvider).go(Routes.rejectedUnit(seq));
+      final units = (await tester.runAsync(() => db.select(db.outbox).get()))!;
+      final labels = <String>{};
+      for (final o in units) {
+        c.read(appRouterProvider).go(Routes.rejectedUnit(o.seq));
         await settle(tester);
-        expect(english(tester), isEmpty, reason: 'unit seq $seq');
+        expect(english(tester), isEmpty, reason: 'unit ${o.kind} (seq ${o.seq})');
         expect(find.textContaining('secretColumn'), findsNothing);
+        labels.addAll(tester.widgetList<Text>(find.byType(Text)).map((t) => t.data ?? '').where((s) => s.contains(' · ')));
       }
+      // BUG-29: the editable fields are shown (rows have ids) with Burmese table + field names.
+      expect(labels, containsAll([
+        'ပစ္စည်း · အမည်', 'ပစ္စည်း · Barcode', 'ဖောက်သည် · ဖုန်း', 'ဆိုဒ် / အရောင် · ဆိုဒ်', 'Batch · Batch',
+        'IMEI · IMEI / စီးရီးနံပါတ်', 'ပြေစာ · ဖောက်သည်အမည်', 'ပြေစာထဲက ပစ္စည်း · အမည်', 'Stock အဝင်အထွက် · မှတ်ချက်',
+        'အကြွေးစာရင်း · မှတ်ချက်',
+      ]));
     });
   });
 }

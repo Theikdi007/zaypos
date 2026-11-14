@@ -46,10 +46,26 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
 
   @override
   void dispose() {
+    _disposeFields();
+    super.dispose();
+  }
+
+  void _disposeFields() {
     for (final f in _fields ?? const <_Field>[]) {
       f.controller.dispose();
     }
-    super.dispose();
+  }
+
+  /// Another unit in the same screen (route replaced): rebuild its fields.
+  @override
+  void didUpdateWidget(RejectedUnitScreen old) {
+    super.didUpdateWidget(old);
+    if (old.seq != widget.seq) {
+      _disposeFields();
+      _fields = null;
+      _fieldErrors = {};
+      _error = null;
+    }
   }
 
   List<_Field> _fieldsOf(Map<String, dynamic> rows) => [
@@ -163,7 +179,7 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
                   const SizedBox(height: 6),
                   for (final f in fields) ...[
                     LabeledField(
-                      label: '${fieldLabel(f.column)} · ${f.table}',
+                      label: rowFieldLabel(f.table, f.column),
                       error: _fieldErrors[f],
                       child: AppInput(controller: f.controller, height: 46, semanticLabel: fieldLabel(f.column)),
                     ),

@@ -127,7 +127,7 @@ String? _wireFieldLabel(String? field) {
 String rejectMessage(String? code, String? dataJson) {
   final d = decodeFields(dataJson);
   final label = _wireFieldLabel(_str(d, 'field'));
-  final what = label != null ? '“$label”' : 'စာသားတစ်ခု';
+  final what = label != null ? '“$label”' : 'အချက်အလက်တစ်ခု';
   final max = _int(d, 'max'), min = _int(d, 'min');
   return switch (code) {
     'fieldRequired' || 'fieldEmpty' => '$what ထည့်ရန် လိုပါတယ်။',
@@ -206,8 +206,38 @@ String fieldLabel(String column) => switch (column) {
       'batchNo' => 'Batch',
       'serial' => 'IMEI / စီးရီးနံပါတ်',
       'customerName' => 'ဖောက်သည်အမည်',
+      // numbers / keys that can appear in a reject reason
+      'price' => 'ရောင်းဈေး',
+      'cost' => 'ဝယ်ဈေး',
+      'wholesalePrice' => 'လက်ကား ဈေး',
+      'amount' => 'ပမာဏ',
+      'received' => 'လက်ခံငွေ',
+      'qtyMilli' => 'အရေအတွက်',
+      'creditLimit' => 'အကြွေး ကန့်သတ်ချက်',
+      'featureKey' => 'လုပ်ဆောင်ချက်',
       _ => _unknownField,
     };
+
+/// Wire table → what it is, in Burmese (BUG-29: never the internal name). Unknown → 'စာရင်း'.
+String tableLabel(String table) => switch (table) {
+      WireTable.tenants => 'ဆိုင်',
+      WireTable.tenantFeatures => 'လုပ်ဆောင်ချက်',
+      WireTable.devices => 'ဖုန်း',
+      WireTable.products => 'ပစ္စည်း',
+      WireTable.productVariants => 'ဆိုဒ် / အရောင်',
+      WireTable.productBatches => 'Batch',
+      WireTable.productSerials => 'IMEI',
+      WireTable.customers => 'ဖောက်သည်',
+      WireTable.sales => 'ပြေစာ',
+      WireTable.saleLines => 'ပြေစာထဲက ပစ္စည်း',
+      WireTable.payments => 'ငွေပေးချေမှု',
+      WireTable.stockMovements => 'Stock အဝင်အထွက်',
+      WireTable.debtEntries => 'အကြွေးစာရင်း',
+      _ => 'စာရင်း',
+    };
+
+/// "ဖောက်သည် · အမည်" — a rejected unit's editable field, all Burmese.
+String rowFieldLabel(String table, String column) => '${tableLabel(table)} · ${fieldLabel(column)}';
 
 /// Label of a column the app has no name for (never the internal name — BUG-26).
 const _unknownField = 'စာသား';
