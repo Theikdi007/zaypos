@@ -14,7 +14,11 @@ class StatCard extends StatelessWidget {
     this.valueColor = AppColors.text,
     this.valueSize = 20,
     this.padding = const EdgeInsets.all(16),
+    this.onTap,
   });
+
+  /// Makes the card a button (ink ripple, button semantics).
+  final VoidCallback? onTap;
 
   final String label;
   final String value;
@@ -25,9 +29,8 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final content = Padding(
       padding: padding,
-      decoration: const BoxDecoration(color: AppColors.surface, borderRadius: AppRadius.cardR),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -39,6 +42,15 @@ class StatCard extends StatelessWidget {
             Text(caption!, style: AppText.s(12, color: AppColors.muted)),
           ],
         ],
+      ),
+    );
+    return Semantics(
+      button: onTap != null,
+      child: Material(
+        color: AppColors.surface,
+        shape: const RoundedRectangleBorder(borderRadius: AppRadius.cardR),
+        clipBehavior: Clip.antiAlias,
+        child: onTap == null ? content : InkWell(onTap: onTap, child: content),
       ),
     );
   }
