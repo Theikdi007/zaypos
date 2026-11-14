@@ -397,7 +397,7 @@ CREATE TABLE dbo.ProcessedUnits (
 CREATE TABLE dbo.SyncIssues (
     Id              uniqueidentifier NOT NULL,
     TenantId        uniqueidentifier NOT NULL,
-    Kind            varchar(30)      NOT NULL,           -- serialDoubleSold|negativeStock|duplicateBarcode|clockSkew|creditLimitExceeded
+    Kind            varchar(30)      NOT NULL,           -- serialDoubleSold|negativeStock|duplicateBarcode|clockSkew|creditLimitExceeded|duplicateSerial
     EntityTable     varchar(40)      NOT NULL,
     EntityId        uniqueidentifier NOT NULL,
     Detail          nvarchar(400)    NOT NULL,

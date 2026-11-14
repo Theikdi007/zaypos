@@ -191,6 +191,7 @@ after it has saved the whole page in one Drift transaction.
 | `serialDoubleSold` | Two sales claim the same `ProductSerial`. |
 | `negativeStock` | A product's ledger sum drops below 0 after the unit. |
 | `duplicateBarcode` | Two live products in a tenant share a barcode. |
+| `duplicateSerial` | A new live in-stock `ProductSerial` has the same serial as another live in-stock row of the tenant (any product), e.g. two phones received the same IMEI offline. Both rows are kept; the unit is applied. |
 | `creditLimitExceeded` | Customer balance > `CreditLimit` after a credit sale. |
 | `clockSkew` | Device time more than 5 minutes ahead of the server. |
 | `totalMismatch` | Client total ≠ server recomputed total. |

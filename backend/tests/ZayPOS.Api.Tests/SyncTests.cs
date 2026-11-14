@@ -135,6 +135,49 @@ public class SyncTests(SqlServerFixture sql)
         (await db.StockMovements.CountAsync(m => m.Type == StockMovementType.VoidReturn)).Should().Be(1);
     }
 
+    private static TestUnit SerialUnit(Guid product, Guid id, string serial, string status = "inStock") => Unit("restock", new
+    {
+        productSerials = new[] { new { id, productId = product, serial, status, createdAt = Now(), updatedAt = Now() } },
+    });
+
+    [Fact]
+    public async Task Two_devices_receiving_the_same_IMEI_keep_both_rows_and_raise_duplicateSerial()
+    {
+        var shop = await NewShop("phone");
+        var phoneB = await SecondDevice(shop);
+        var product = await AddProduct(shop, stock: 0);
+        var other = await AddProduct(shop, stock: 0);
+
+        (await PushOne(shop, SerialUnit(product, Guid.CreateVersion7(), "351111111111111"))).Issues.Should().BeEmpty();
+        var b = await PushOne(phoneB, SerialUnit(product, Guid.CreateVersion7(), "351111111111111"));
+        b.Outcome.Should().Be(UnitOutcome.Applied, "never rejected: phone B's outbox must not block");
+        b.Issues.Should().Equal(SyncIssueKind.DuplicateSerial);
+
+        // Also across products of the shop.
+        var c = await PushOne(shop, SerialUnit(other, Guid.CreateVersion7(), "351111111111111"));
+        c.Issues.Should().Equal(SyncIssueKind.DuplicateSerial);
+
+        await using var db = sql.CreateContext(shop.TenantId);
+        (await db.ProductSerials.CountAsync(s => s.Serial == "351111111111111")).Should().Be(3, "all rows are kept");
+        var issue = await db.SyncIssues.FirstAsync(i => i.Kind == SyncIssueKind.DuplicateSerial);
+        issue.EntityTable.Should().Be("ProductSerials");
+        issue.Detail.Should().Contain("351111111111111");
+    }
+
+    [Fact]
+    public async Task A_new_IMEI_matching_only_a_sold_one_or_a_resent_row_raises_no_duplicateSerial()
+    {
+        var shop = await NewShop("phone");
+        var product = await AddProduct(shop, stock: 0);
+        await PushOne(shop, SerialUnit(product, Guid.CreateVersion7(), "352222222222222", status: "sold"));
+        (await PushOne(shop, SerialUnit(product, Guid.CreateVersion7(), "352222222222222"))).Issues.Should().BeEmpty(
+            "the sold phone came back / was traded in: only in-stock duplicates matter");
+
+        var id = Guid.CreateVersion7();
+        await PushOne(shop, SerialUnit(product, id, "353333333333333"));
+        (await PushOne(shop, SerialUnit(product, id, "353333333333333"))).Issues.Should().BeEmpty("same row again is not a duplicate");
+    }
+
     [Fact]
     public async Task Two_devices_selling_the_same_IMEI_keep_both_sales_and_raise_serialDoubleSold()
     {

@@ -36,4 +36,6 @@ public enum SyncIssueKind
     TotalMismatch,
     /// <summary>Not in README §3.4: a sale's receipt number already existed (reinstall reused a device code).</summary>
     DuplicateReceiptNo,
+    /// <summary>A second live in-stock IMEI / serial row with the same serial arrived (e.g. two phones received it offline). Both rows are kept.</summary>
+    DuplicateSerial,
 }
