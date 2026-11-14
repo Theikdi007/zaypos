@@ -257,7 +257,7 @@ void main() {
       final c = await boot(tester, template: 'pharmacy');
       final tid = c.read(tenantIdProvider);
       final t = nowUtc();
-      final p = newProduct(c, 'QA Amoxicillin');
+      final p = newProduct(c, 'QA Amoxicillin', expiryDays: 30); // r4: a medicine tracks expiry (owner item 5)
       final b1 = ProductBatch(id: newId(), tenantId: tid, productId: p.id, batchNo: 'B1', qtyMilli: 0,
           expiryDate: DateTime.utc(2027, 1, 31), createdAt: t, updatedAt: t);
       await c.read(productServiceProvider).create(p, batches: [b1], initialStock: [
@@ -327,7 +327,7 @@ void main() {
       final c = await boot(tester, template: 'pharmacy', height: 844);
       final tid = c.read(tenantIdProvider);
       final t = nowUtc();
-      final p = newProduct(c, 'QA Cetirizine');
+      final p = newProduct(c, 'QA Cetirizine', expiryDays: 30); // r4: a medicine tracks expiry (owner item 5)
       ProductBatch b(String no, DateTime? exp) => ProductBatch(id: newId(), tenantId: tid, productId: p.id, batchNo: no,
           qtyMilli: 0, expiryDate: exp, createdAt: t, updatedAt: t);
       final late = b('LATE28', DateTime.utc(2028, 3, 1));

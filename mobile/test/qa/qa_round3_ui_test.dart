@@ -51,9 +51,14 @@ void main() {
   final now = DateTime.now();
   final today = DateTime.utc(now.year, now.month, now.day);
 
-  Product newProduct(ProviderContainer c, String name, {int lowAlertMilli = 5000, String unit = ''}) => Product(
+  // r4: medicine fixtures pass expiryAlertDays 30 — owner item 5: "batches are required only for products with
+  // expiryAlertDays set; products without it (soap etc.) sell and restock like plain products". A medicine sold by
+  // batch is an expiry-tracked product; the r3 seeds left the field null only because it did not matter then.
+  Product newProduct(ProviderContainer c, String name, {int lowAlertMilli = 5000, String unit = '', int? expiryAlertDays}) =>
+      Product(
         id: newId(), tenantId: c.read(tenantIdProvider), name: name, cost: 400, price: 600, category: 'QA',
         tint: 0xFFDBEAFE, initial: 'Q', createdAt: t0, updatedAt: t0, lowAlertMilli: lowAlertMilli, unit: unit,
+        expiryAlertDays: expiryAlertDays,
       );
   ProductSerial serial(Product p, String imei, {SerialStatus status = SerialStatus.inStock}) => ProductSerial(
       id: newId(), tenantId: p.tenantId, productId: p.id, serial: imei, status: status, createdAt: t0, updatedAt: t0);
@@ -206,7 +211,7 @@ void main() {
   group('TC-PROD-NEW-7 "Stock ဖြည့်မယ်" for a batch product (pharmacy)', () {
     testWidgets('default = newest UNEXPIRED batch (newest expired one is skipped and marked); goods go into it', (tester) async {
       final c = await boot(tester, 'pharmacy');
-      final p = newProduct(c, 'QA Paracetamol R3');
+      final p = newProduct(c, 'QA Paracetamol R3', expiryAlertDays: 30);
       final good = batch(p, 'GOOD30', DateTime.utc(2030, 1, 31), created: t0);
       final newer = batch(p, 'NEWER31', DateTime.utc(2031, 1, 31), created: t0.add(const Duration(days: 1)));
       final expired = batch(p, 'EXP20', DateTime.utc(2020, 1, 31), created: t0.add(const Duration(days: 2)));
@@ -241,7 +246,7 @@ void main() {
     testWidgets('"+ Batch အသစ်" with batch no. + expiry picked in the calendar → a new batch holding exactly the goods, '
         'sold first at POS by FEFO', (tester) async {
       final c = await boot(tester, 'pharmacy');
-      final p = newProduct(c, 'QA Amoxicillin R3');
+      final p = newProduct(c, 'QA Amoxicillin R3', expiryAlertDays: 30);
       final b1 = batch(p, 'B1', DateTime.utc(2030, 6, 30));
       await c.read(productServiceProvider).create(p, batches: [b1], initialStock: [into(p, 2, batchId: b1.id)]);
       await openRestock(tester, c, p);
@@ -287,7 +292,7 @@ void main() {
 
     testWidgets('"+ Batch အသစ်" with the number of an existing batch is refused (edit form refuses it too)', (tester) async {
       final c = await boot(tester, 'pharmacy');
-      final p = newProduct(c, 'QA Dup batch');
+      final p = newProduct(c, 'QA Dup batch', expiryAlertDays: 30);
       final b1 = batch(p, 'B1', DateTime.utc(2030, 6, 30));
       await c.read(productServiceProvider).create(p, batches: [b1], initialStock: [into(p, 2, batchId: b1.id)]);
       await openRestock(tester, c, p);
@@ -303,7 +308,7 @@ void main() {
     testWidgets('TC-PROD-06 rule for a batch product: untracked, sold once, first count 20 into a new batch → shows 20',
         (tester) async {
       final c = await boot(tester, 'pharmacy');
-      final p = newProduct(c, 'QA Untracked med');
+      final p = newProduct(c, 'QA Untracked med', expiryAlertDays: 30);
       await c.read(productServiceProvider).create(p); // no stock, no batch: "Stock မမှတ်ရသေး"
       await sell(c, [(productId: p.id, variantId: null, batchId: null, serialId: null, name: p.name, qtyMilli: 1000, price: 600, cost: 400)]);
       expect(productStock(c, p.id), -1000);
@@ -406,7 +411,7 @@ void main() {
     testWidgets('pharmacy: batches listed (expiry, stock, expired badge, empty one); new batch with expiry starts empty; '
         'old batch rows identical; restock then offers it', (tester) async {
       final c = await boot(tester, 'pharmacy');
-      final p = newProduct(c, 'QA Vitamin C R3');
+      final p = newProduct(c, 'QA Vitamin C R3', expiryAlertDays: 30);
       final exp = batch(p, 'OLD19', DateTime.utc(2019, 1, 31));
       final empty = batch(p, 'EMPTY', DateTime.utc(2029, 1, 31));
       final good = batch(p, 'GOOD', DateTime.utc(2030, 1, 31));
@@ -493,7 +498,7 @@ void main() {
     testWidgets('the expiry day itself is still sellable: the only batch with stock expiring TODAY is auto-picked',
         (tester) async {
       final c = await boot(tester, 'pharmacy', height: 844);
-      final p = newProduct(c, 'QA Today');
+      final p = newProduct(c, 'QA Today', expiryAlertDays: 30);
       final b = batch(p, 'TODAY', today);
       final y = batch(p, 'YDAY', today.subtract(const Duration(days: 1)));
       await c.read(productServiceProvider).create(p, batches: [b, y], initialStock: [into(p, 2, batchId: b.id), into(p, 2, batchId: y.id)]);
@@ -506,7 +511,7 @@ void main() {
     testWidgets('expired YESTERDAY + nothing else: asked, red badge, barrier-dismissing the confirm = cancel; '
         '"သိပြီး ရောင်းမယ်" sells from it and the sale line carries it', (tester) async {
       final c = await boot(tester, 'pharmacy', height: 844);
-      final p = newProduct(c, 'QA Yesterday');
+      final p = newProduct(c, 'QA Yesterday', expiryAlertDays: 30);
       final y = batch(p, 'YDAY', today.subtract(const Duration(days: 1)));
       await c.read(productServiceProvider).create(p, batches: [y], initialStock: [into(p, 3, batchId: y.id)]);
       await tapInPos(tester, c, p.name);
@@ -537,7 +542,7 @@ void main() {
     testWidgets('two good + one expired (earliest date): good ones by FEFO first, expired last with the only badge; '
         'a good pick needs no confirm', (tester) async {
       final c = await boot(tester, 'pharmacy', height: 844);
-      final p = newProduct(c, 'QA Mixed');
+      final p = newProduct(c, 'QA Mixed', expiryAlertDays: 30);
       final e = batch(p, 'E-OLD', DateTime.utc(2021, 1, 1));
       final g1 = batch(p, 'G-2029', DateTime.utc(2029, 1, 1));
       final g2 = batch(p, 'G-2028', DateTime.utc(2028, 1, 1));
