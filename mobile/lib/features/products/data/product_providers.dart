@@ -27,6 +27,14 @@ final productSerialsProvider = StreamProvider.family<List<ProductSerial>, String
 final knownSerialsProvider =
     StreamProvider<Set<String>>((ref) => ref.watch(productRepositoryProvider).watchInStockSerialValues());
 
+/// A product's stock outside any batch (SUM of its live movements without batchId).
+final unbatchedStockProvider = StreamProvider.family<int, String>((ref, productId) => ref
+    .watch(stockRepositoryProvider)
+    .watchAll()
+    .map((moves) => moves
+        .where((m) => m.productId == productId && m.batchId == null && m.deletedAt == null)
+        .fold(0, (a, m) => a + m.qtyMilli)));
+
 /// Stock on hand per variant id (SUM of live movements).
 final variantStockProvider = StreamProvider<Map<String, int>>((ref) => ref.watch(stockRepositoryProvider).watchAll().map(
       (moves) {

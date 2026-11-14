@@ -11,7 +11,12 @@ import 'package:zaypos_app/core/sync/sync_store.dart';
 import 'package:zaypos_app/core/utils/ids.dart';
 import 'package:zaypos_app/core/utils/qty.dart';
 import 'package:zaypos_app/features/auth/data/session.dart';
+import 'package:zaypos_app/core/data/unit_of_work.dart';
+import 'package:zaypos_app/features/inventory/application/stock_service.dart';
 import 'package:zaypos_app/features/inventory/domain/stock_movement.dart';
+import 'package:zaypos_app/features/sales/application/checkout_service.dart';
+import 'package:zaypos_app/features/sales/application/void_sale_service.dart';
+import 'package:zaypos_app/features/sales/domain/sale.dart';
 import 'package:zaypos_app/features/pos/domain/cart.dart';
 import 'package:zaypos_app/features/products/application/product_service.dart';
 import 'package:zaypos_app/features/products/domain/product.dart';
@@ -340,6 +345,103 @@ void main() {
       expect(rows.map((x) => x.status).toList()..sort((a, b) => a.index - b.index), [SerialStatus.inStock, SerialStatus.sold]);
       expect(rows.singleWhere((x) => x.id == sold.id).status, SerialStatus.sold, reason: 'history kept');
       expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(2));
+    });
+  });
+
+  group('BUG-22 edit form: switching a product with stock to expiry tracking needs an opening batch', () {
+    testWidgets('blocked without batch no. + expiry; with them the stock moves into the opening batch in ONE unit',
+        (tester) async {
+      final c = await boot(tester, 'pharmacy');
+      final p = product(c, 'QA switch to tracked');
+      await c.read(productServiceProvider).create(p, initialStock: [
+        restockMovement(tenantId: p.tenantId, productId: p.id, qtyMilli: Qty.units(10)),
+      ]);
+      await openProducts(tester, c, p.name);
+      await tester.tap(find.text(p.name).last);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('batchNo')), findsNothing, reason: 'not tracked yet');
+      await pickExpiryWarn(tester, warn30Label);
+      expect(find.byKey(const ValueKey('openingBatchNote')), findsOneWidget);
+      expect(find.byKey(const ValueKey('batchNo')), findsOneWidget);
+
+      await tester.tap(find.text('သိမ်းမယ်').last);
+      await tester.pumpAndSettle();
+      expect(find.text('လက်ရှိ Batch မရှိတဲ့ stock 10 ခု အတွက် Batch နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ။'), findsOneWidget);
+      expect(db(c).products.firstWhere((x) => x.id == p.id).expiryAlertDays, isNull, reason: 'nothing saved');
+
+      await tester.enterText(field('batchNo'), 'OPEN1');
+      await pickAddProductExpiry(tester, 28);
+      final n = (c.read(unitOfWorkProvider) as FakeUnitOfWork).kinds.length;
+      await tester.tap(find.text('သိမ်းမယ်').last);
+      await tester.pumpAndSettle();
+
+      expect((c.read(unitOfWorkProvider) as FakeUnitOfWork).kinds.sublist(n), [UnitKind.upsertProduct]);
+      expect(db(c).products.firstWhere((x) => x.id == p.id).expiryAlertDays, 30);
+      final b = db(c).batches.singleWhere((x) => x.productId == p.id);
+      expect((b.batchNo, b.expiryDate != null), ('OPEN1', true));
+      expect(stockWhere(c, (m) => m.batchId == b.id), Qty.units(10));
+      expect(stockWhere(c, (m) => m.productId == p.id && m.batchId == null), 0);
+      expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(10), reason: 'product stock unchanged');
+    });
+
+    testWidgets('a tracked product without stock outside batches: no opening batch asked', (tester) async {
+      final c = await boot(tester, 'pharmacy');
+      final p = product(c, 'QA tracked no loose', expiryDays: 30);
+      await c.read(productServiceProvider).create(p);
+      await openProducts(tester, c, p.name);
+      await tester.tap(find.text(p.name).last);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('openingBatchNote')), findsNothing);
+      await tester.tap(find.text('သိမ်းမယ်').last);
+      await tester.pumpAndSettle();
+      expect(find.text('ပစ္စည်း ပြင်မယ်'), findsNothing, reason: 'saved');
+    });
+  });
+
+  group('BUG-23 void after a trade-in', () {
+    test('voiding the original sale keeps ONE in-stock row and stock 1; un-void restores the sale without a second −1',
+        () async {
+      final c = makeContainer();
+      addTearDown(c.dispose);
+      c.read(shopTemplateProvider.notifier).select('phone');
+      final p = product(c, 'QA void trade-in');
+      final t = nowUtc();
+      final old = ProductSerial(id: newId(), tenantId: p.tenantId, productId: p.id, serial: '370000000000001',
+          status: SerialStatus.inStock, createdAt: t, updatedAt: t);
+      await c.read(productServiceProvider).create(p, serials: [old],
+          initialStock: [restockMovement(tenantId: p.tenantId, productId: p.id, qtyMilli: Qty.units(1))]);
+      final sale = await c.read(checkoutServiceProvider).checkout(CheckoutRequest(lines: [
+        (productId: p.id, variantId: null, batchId: null, serialId: old.id, name: p.name, qtyMilli: 1000, price: 600, cost: 400),
+      ], method: PaymentMethod.cash));
+      await c.read(stockServiceProvider).receive(productId: p.id, qtyMilli: Qty.units(1), serials: ['370000000000001']);
+
+      await c.read(voidSaleServiceProvider).setVoided(sale.id, true);
+      int inStock() => db(c).serials.where((s) => s.serial == '370000000000001' && s.status == SerialStatus.inStock).length;
+      expect(inStock(), 1);
+      expect(db(c).serials.singleWhere((s) => s.id == old.id).status, SerialStatus.sold, reason: 'history kept');
+      expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(1), reason: 'the phone is back once, not twice');
+
+      await c.read(voidSaleServiceProvider).setVoided(sale.id, false);
+      expect(inStock(), 1);
+      expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(1), reason: 'un-void mirrors it');
+    });
+
+    test('a normal void still returns the phone (row in stock, stock +1)', () async {
+      final c = makeContainer();
+      addTearDown(c.dispose);
+      c.read(shopTemplateProvider.notifier).select('phone');
+      final p = product(c, 'QA normal void');
+      final t = nowUtc();
+      final s = ProductSerial(id: newId(), tenantId: p.tenantId, productId: p.id, serial: '370000000000002',
+          status: SerialStatus.inStock, createdAt: t, updatedAt: t);
+      await c.read(productServiceProvider).create(p, serials: [s],
+          initialStock: [restockMovement(tenantId: p.tenantId, productId: p.id, qtyMilli: Qty.units(1))]);
+      final sale = await c.read(checkoutServiceProvider).checkout(CheckoutRequest(lines: [
+        (productId: p.id, variantId: null, batchId: null, serialId: s.id, name: p.name, qtyMilli: 1000, price: 600, cost: 400),
+      ], method: PaymentMethod.cash));
+      await c.read(voidSaleServiceProvider).setVoided(sale.id, true);
+      expect(db(c).serials.singleWhere((x) => x.id == s.id).status, SerialStatus.inStock);
+      expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(1));
     });
   });
 

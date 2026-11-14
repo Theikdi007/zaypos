@@ -109,11 +109,17 @@ Map<String, StockLevel> stockLevels(Iterable<StockMovement> movements) {
 
 /// One movement per catalog line of [sale] (carrying variant/batch).
 /// [sign] −1 = goods out (sale), +1 = goods back (void).
-List<StockMovement> movementsForSale(Sale sale, StockMovementType type, {required int sign, String note = ''}) {
+List<StockMovement> movementsForSale(
+  Sale sale,
+  StockMovementType type, {
+  required int sign,
+  String note = '',
+  bool Function(SaleLine line)? where,
+}) {
   final t = nowUtc();
   return [
     for (final l in sale.lines)
-      if (l.productId != null)
+      if (l.productId != null && (where == null || where(l)))
         StockMovement(
           id: newId(),
           tenantId: sale.tenantId,

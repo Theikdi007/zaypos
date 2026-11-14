@@ -19,6 +19,8 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/qty.dart';
 import '../../auth/data/session.dart';
+import '../../../core/features/tenant_features.dart';
+import '../../inventory/data/stock_repository.dart';
 import '../../inventory/domain/stock_movement.dart';
 import '../application/product_service.dart';
 import '../data/product_providers.dart';
@@ -73,6 +75,14 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   static const noLowAlert = 0;
   late final _alert = TextEditingController(
       text: _p == null || _p.lowAlertMilli == noLowAlert ? '' : Qty.format(_p.lowAlertMilli));
+
+  /// Edit form, expiry tracked: stock outside any batch that must go into an
+  /// opening batch on save (BUG-22). 0 when not applicable.
+  int _unbatchedNow(TenantFeatures f) {
+    if (!_isEdit || !f.expiryBatch || !f.stock || _expiryWarnDays == ExpiryBatchSection.noExpiry) return 0;
+    final n = ref.read(unbatchedStockProvider(_p!.id)).value ?? 0;
+    return n > 0 ? n : 0;
+  }
 
   /// Add Product: adds an IMEI typed but not yet "+"-ed (BUG-19).
   bool Function()? _commitTypedImei;
@@ -160,6 +170,11 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         !(features.serialWarranty && _serial) &&
         openingQty > 0 &&
         (_batchNo.text.trim().isEmpty || _expiry == null);
+    // BUG-22: editing a product that tracks expiry (e.g. just switched on) while
+    // it has stock outside any batch: that stock goes into an opening batch.
+    final unbatched = _unbatchedNow(features);
+    final needsOpeningBatch = unbatched > 0;
+    final existingBatches = _isEdit ? ref.read(productBatchesProvider(_p!.id)).value ?? const <ProductBatch>[] : const <ProductBatch>[];
     final errors = <String, String>{
       for (final (key, error) in [
         ('name', limits.checkText('products.name', name, label: 'ပစ္စည်းအမည်')),
@@ -179,6 +194,14 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
           ? "သက်တမ်းမှတ်တဲ့ ပစ္စည်းမို့ Batch နံပါတ် ထည့်ပါ (သို့ 'သက်တမ်း မမှတ်ပါ' ရွေးပါ)။"
           : 'သက်တမ်းမှတ်တဲ့ ပစ္စည်းမို့ သက်တမ်းကုန်ရက် ရွေးပါ။';
     }
+    if (needsOpeningBatch && !errors.containsKey('batchNo')) {
+      final no = _batchNo.text.trim();
+      if (no.isEmpty || _expiry == null) {
+        errors['batchNo'] = 'လက်ရှိ Batch မရှိတဲ့ stock ${Qty.format(unbatched)} ခု အတွက် Batch နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ။';
+      } else if (existingBatches.any((b) => b.batchNo == no)) {
+        errors['batchNo'] = 'ဒီ Batch ရှိပြီးသားပါ။';
+      }
+    }
     if (errors.isNotEmpty) {
       setState(() {
         _showErrors = true;
@@ -197,6 +220,31 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       final t = nowUtc();
       final tenantId = editing.tenantId;
       final pending = _pending;
+      // BUG-22: move the stock outside batches into the opening batch (same unit),
+      // so batch stock = product stock. Per size/colour, so variant stock is unchanged.
+      ProductBatch? opening;
+      final openingMoves = <StockMovement>[];
+      if (needsOpeningBatch) {
+        opening = ProductBatch(
+          id: newId(), tenantId: tenantId, productId: editing.id, batchNo: _batchNo.text.trim(),
+          expiryDate: DateTime.utc(_expiry!.year, _expiry!.month, _expiry!.day), qtyMilli: unbatched,
+          createdAt: t, updatedAt: t,
+        );
+        final byVariant = <String?, int>{};
+        for (final m in await ref.read(stockRepositoryProvider).watchAll().first) {
+          if (m.productId != editing.id || m.batchId != null || m.deletedAt != null) continue;
+          byVariant.update(m.variantId, (v) => v + m.qtyMilli, ifAbsent: () => m.qtyMilli);
+        }
+        for (final MapEntry(key: v, value: sum) in byVariant.entries) {
+          if (sum == 0) continue;
+          for (final (qty, batchId) in [(-sum, null), (sum, opening.id)]) {
+            openingMoves.add(StockMovement(
+              id: newId(), tenantId: tenantId, productId: editing.id, variantId: v, batchId: batchId,
+              type: StockMovementType.adjustment, qtyMilli: qty, note: 'opening batch', createdAt: t, updatedAt: t,
+            ));
+          }
+        }
+      }
       await ref.read(productServiceProvider).update(
             editing.copyWith(
             name: name,
@@ -233,7 +281,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     id: newId(), tenantId: tenantId, productId: editing.id, batchNo: b.batchNo, expiryDate: b.expiry,
                     qtyMilli: 0, createdAt: t, updatedAt: t,
                   ),
+              ?opening,
             ],
+            movements: openingMoves,
             serials: [
               if (features.serialWarranty)
                 for (final s in pending.imeis)
@@ -345,6 +395,12 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   @override
   Widget build(BuildContext context) {
     final f = ref.watch(tenantFeaturesProvider);
+    if (_isEdit && f.expiryBatch) {
+      // keep the opening-batch check (BUG-22) loaded
+      ref.watch(unbatchedStockProvider(_p!.id));
+      ref.watch(productBatchesProvider(_p.id));
+    }
+    final openingQty = _unbatchedNow(f);
     if (f.serialWarranty) ref.watch(knownSerialsProvider); // duplicate-IMEI check stays loaded
     final cost = int.tryParse(_cost.text) ?? 0;
     final price = int.tryParse(_price.text) ?? 0;
@@ -523,7 +579,10 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     warnDays: _expiryWarnDays,
                     onWarnDays: (d) => setState(() => _expiryWarnDays = d),
                     batchError: _errors['batchNo'],
-                    showBatch: !_isEdit,
+                    showBatch: !_isEdit || openingQty > 0,
+                    note: openingQty > 0
+                        ? 'လက်ရှိ Batch မရှိတဲ့ stock ${Qty.format(openingQty)} ခု ကို ဒီ Batch ထဲ ထည့်ပါမယ် · Batch နံပါတ် နဲ့ သက်တမ်းကုန်ရက် ထည့်ပါ'
+                        : null,
                   ),
                 if (f.serialWarranty)
                   SerialWarrantySection(

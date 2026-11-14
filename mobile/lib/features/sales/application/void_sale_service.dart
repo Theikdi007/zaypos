@@ -35,13 +35,35 @@ class VoidSaleService {
     if (sale == null) throw StateError('Unknown sale $saleId');
     if (sale.voided == voided) return;
 
+    // BUG-23: a phone of this sale that was already taken back (trade-in: its
+    // IMEI is in stock again as a newer row) is not returned a second time —
+    // its old row stays as history and no +1 is written for it.
+    final alreadyBack = <String>{};
+    if (voided && sale.lines.any((l) => l.serialId != null)) {
+      final inStock = await products.watchInStockSerialValues().first;
+      for (final l in sale.lines) {
+        if (l.serialId == null || l.productId == null) continue;
+        final row = (await products.watchSerials(l.productId!).first).where((s) => s.id == l.serialId).firstOrNull;
+        if (row != null && row.status == SerialStatus.sold && inStock.contains(row.serial)) alreadyBack.add(l.id);
+      }
+    }
+    // Un-void mirrors it: a line whose IMEI row was never returned (still sold
+    // by this very line) gets no second −1.
+    if (!voided) {
+      for (final l in sale.lines) {
+        if (l.serialId == null || l.productId == null) continue;
+        final row = (await products.watchSerials(l.productId!).first).where((s) => s.id == l.serialId).firstOrNull;
+        if (row != null && row.status == SerialStatus.sold && row.saleLineId == l.id) alreadyBack.add(l.id);
+      }
+    }
+
     await uow.run(UnitKind.voidSale, () async {
       await sales.setVoided(sale.id, voided);
       await stock.addAll(voided
-          ? movementsForSale(sale, StockMovementType.voidReturn, sign: 1)
-          : movementsForSale(sale, StockMovementType.sale, sign: -1, note: 'unvoid'));
+          ? movementsForSale(sale, StockMovementType.voidReturn, sign: 1, where: (l) => !alreadyBack.contains(l.id))
+          : movementsForSale(sale, StockMovementType.sale, sign: -1, note: 'unvoid', where: (l) => !alreadyBack.contains(l.id)));
       for (final l in sale.lines) {
-        if (l.serialId == null) continue;
+        if (l.serialId == null || alreadyBack.contains(l.id)) continue;
         await products.setSerialStatus(
           l.serialId!,
           voided ? SerialStatus.inStock : SerialStatus.sold,

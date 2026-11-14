@@ -51,10 +51,14 @@ class ExpiryBatchSection extends StatelessWidget {
     required this.onWarnDays,
     this.batchError,
     this.showBatch = true,
+    this.note,
   });
 
   /// False when editing a saved product: batches are received as stock, not edited here.
   final bool showBatch;
+
+  /// Extra line above the batch fields (e.g. the edit form's opening batch, BUG-22).
+  final String? note;
 
   final TextEditingController batchNo;
 
@@ -97,6 +101,9 @@ class ExpiryBatchSection extends StatelessWidget {
       title: 'သက်တမ်း နှင့် Batch',
       borderColor: AppColors.pharmacyBorder,
       children: [
+        if (note != null && showBatch && warnDays != noExpiry)
+          Text(note!, key: const ValueKey('openingBatchNote'),
+              style: AppText.s(12, weight: AppText.w600, color: AppColors.danger)),
         if (showBatch && warnDays != noExpiry)
         TwoCol(
           LabeledField(

@@ -261,6 +261,9 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
                        || Decide(existing.UpdatedAt, existing.DeletedAt, updatedAt, r.DeletedAt, restore: false) == LwwAction.Update;
             if (take)
             {
+                // An existing row turning back to in-stock (e.g. a void after a trade-in) is checked like a new one (BUG-23).
+                if (status == SerialStatus.InStock && existing.Status != SerialStatus.InStock && existing.DeletedAt is null && r.DeletedAt is null)
+                    _newInStockSerials.Add(existing.Id);
                 existing.Status = status;
                 existing.SaleLineId = r.SaleLineId;
                 if (r.Serial is not null) existing.Serial = SyncLimits.Serial.Apply(r.Serial)!;

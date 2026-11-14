@@ -55,8 +55,12 @@ class ProductService {
     List<ProductVariant> variants = const [],
     List<ProductBatch> batches = const [],
     List<ProductSerial> serials = const [],
+    List<StockMovement> movements = const [],
   }) async {
     if (product.price <= 0) throw ArgumentError.value(product.price, 'price', 'must be positive');
+    for (final m in movements) {
+      if (m.productId != product.id) throw ArgumentError('Movement for another product');
+    }
     for (final r in [...variants.map((v) => v.productId), ...batches.map((b) => b.productId), ...serials.map((s) => s.productId)]) {
       if (r != product.id) throw ArgumentError('Module row for another product');
     }
@@ -65,6 +69,7 @@ class ProductService {
       if (variants.isNotEmpty || batches.isNotEmpty || serials.isNotEmpty) {
         await products.addModules(variants: variants, batches: batches, serials: serials);
       }
+      if (movements.isNotEmpty) await stock.addAll(movements);
       if (serials.isNotEmpty) {
         await stock.addAll([
           restockMovement(

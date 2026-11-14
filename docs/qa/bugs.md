@@ -168,7 +168,7 @@ Format:
 - Blocks beta: no
 - Status: open
 
-## BUG-11 · TC-SEC-04 · Low · Dev SQL Server SA password committed
+## BUG-11 · TC-SEC-04 · Low · Dev SQL Server SA password committed — accepted risk (dev only, port bound to 127.0.0.1)
 - Found in: round 1 · `git grep`
 - Steps to reproduce: `git grep -n "MSSQL_SA_PASSWORD"`
 - Expected: no passwords in the repository.
@@ -205,6 +205,9 @@ Format:
   container's `MSSQL_SA_PASSWORD` (string compare → equal) and is found in `appsettings.Development.json` (`grep -F -c` → 1), and
   `sqlcmd -U sa` with the old value **logs in** (`SELECT 'login-…-OK'` returned, databases listed). Close when the sa password differs from
   the one in git history (container env / `ALTER LOGIN sa`, and appsettings.Development.json). Severity stays Low (dev machine, loopback only now).
+- **Status (owner, 2026-11-14): accepted risk (dev only, port bound to 127.0.0.1).** The dev SA password is still the one in git
+  history; the owner will change it later. Not a beta blocker: the container is reachable only from the Mac itself
+  (`127.0.0.1:1433`), no other device on the Wi-Fi can reach it, and no production / shared server uses this password.
 
 ## BUG-12 · TC-PROD-NEW-5 · High · Goods received for an IMEI / batch / size-colour product cannot be entered as IMEIs / a batch / a variant
 - Found in: round 2 · `mobile/test/qa/qa_round2_ui_test.dart` › "TC-PROD-NEW-5 …" (phone, pharmacy, fashion — 3 tests)
