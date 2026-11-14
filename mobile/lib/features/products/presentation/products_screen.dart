@@ -152,6 +152,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                             _ProductRow(
                               product: p,
                               showStock: features.stock,
+                              onEdit: () => context.push(Routes.editProduct(p.id)),
                               onRestock: features.stock ? () => _restock(p) : null,
                             ),
                         ],
@@ -173,12 +174,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 }
 
 class _ProductRow extends StatelessWidget {
-  const _ProductRow({required this.product, required this.showStock, this.onRestock});
+  const _ProductRow({required this.product, required this.showStock, required this.onEdit, this.onRestock});
 
   final ProductView product;
   final bool showStock;
 
-  /// Tap = "Stock ဖြည့်မယ်" (stock feature on).
+  /// Tap the row = edit the product.
+  final VoidCallback onEdit;
+
+  /// Tap the stock badge = "Stock ဖြည့်မယ်" (stock feature on).
   final VoidCallback? onRestock;
 
   @override
@@ -192,7 +196,7 @@ class _ProductRow extends StatelessWidget {
         ? ('${Qty.format(p.stockMilli)} ခု', AppColors.debtAvatarSoft, AppColors.debtInk)
         : ('${Qty.format(p.stockMilli)} ခု', AppColors.successBg, AppColors.success);
     return InkWell(
-      onTap: onRestock,
+      onTap: onEdit,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
@@ -215,13 +219,37 @@ class _ProductRow extends StatelessWidget {
               ),
             ),
             if (showStock) ...[
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                decoration: BoxDecoration(color: bg, borderRadius: AppRadius.chipR),
-                child: Text(
-                  label,
-                  style: AppText.s(12, weight: AppText.w700, color: fg),
+              const SizedBox(width: 4),
+              Semantics(
+                button: true,
+                label: 'Stock ဖြည့်မယ် · $label',
+                excludeSemantics: true,
+                child: InkWell(
+                  key: ValueKey('restock-${p.id}'),
+                  onTap: onRestock,
+                  borderRadius: AppRadius.chipR,
+                  // 48 px touch target around the badge.
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                            decoration: BoxDecoration(color: bg, borderRadius: AppRadius.chipR),
+                            child: Text(
+                              label,
+                              style: AppText.s(12, weight: AppText.w700, color: fg),
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          const Icon(Icons.add_circle_outline, size: 18, color: AppColors.primary),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],

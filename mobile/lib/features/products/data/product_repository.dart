@@ -23,6 +23,10 @@ abstract interface class ProductRepository {
   /// Sets the selling price (kyats); updatedAt moves to now (last-writer-wins).
   Future<void> setPrice(String productId, int price);
 
+  /// Replaces a saved product's own fields (name, prices, unit, alerts…);
+  /// updatedAt moves to now (last-writer-wins). Module rows and stock are untouched.
+  Future<void> update(Product product);
+
   /// Marks an IMEI/serial sold (with its sale line) or back in stock.
   Future<void> setSerialStatus(String serialId, SerialStatus status, {String? saleLineId});
 }

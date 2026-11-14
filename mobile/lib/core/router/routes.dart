@@ -22,6 +22,7 @@ abstract final class Routes {
   /// Products filtered to "Stock နည်း" (Dashboard low-stock card).
   static const productsLowStock = '/products?filter=low';
   static const addProduct = '/products/new';
+  static String editProduct(String id) => '/products/$id/edit';
   static const customers = '/customers';
   static const addCustomer = '/customers/new';
   static String customer(String id) => '/customers/$id';

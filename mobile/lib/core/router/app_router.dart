@@ -123,6 +123,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   parentNavigatorKey: _rootKey,
                   builder: (_, _) => const AddProductScreen(),
                 ),
+                GoRoute(
+                  path: ':id/edit',
+                  parentNavigatorKey: _rootKey,
+                  builder: (_, s) => EditProductScreen(productId: s.pathParameters['id']!),
+                ),
               ],
             ),
           ]),

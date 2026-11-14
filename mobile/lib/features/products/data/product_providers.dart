@@ -10,6 +10,10 @@ import 'product_repository.dart';
 /// Catalog master data (live).
 final catalogProvider = StreamProvider<List<Product>>((ref) => ref.watch(productRepositoryProvider).watchAll());
 
+/// One live product (edit form).
+final productByIdProvider =
+    StreamProvider.family<Product?, String>((ref, id) => ref.watch(productRepositoryProvider).watchById(id));
+
 /// Stock on hand + tracked flag per product (over the stock ledger, computed by the database).
 final stockByProductProvider =
     StreamProvider<Map<String, StockLevel>>((ref) => ref.watch(stockRepositoryProvider).watchStockByProduct());

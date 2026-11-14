@@ -50,7 +50,11 @@ class ExpiryBatchSection extends StatelessWidget {
     required this.warnDays,
     required this.onWarnDays,
     this.batchError,
+    this.showBatch = true,
   });
+
+  /// False when editing a saved product: batches are received as stock, not edited here.
+  final bool showBatch;
 
   final TextEditingController batchNo;
 
@@ -80,6 +84,7 @@ class ExpiryBatchSection extends StatelessWidget {
       title: 'သက်တမ်း နှင့် Batch',
       borderColor: AppColors.pharmacyBorder,
       children: [
+        if (showBatch)
         TwoCol(
           LabeledField(
             label: 'Batch နံပါတ်',
@@ -140,7 +145,11 @@ class SerialWarrantySection extends StatefulWidget {
     required this.onAddImei,
     required this.warrantyMonths,
     required this.onWarrantyChanged,
+    this.showSerials = true,
   });
+
+  /// False when editing a saved product: IMEIs are stock, entered when goods arrive.
+  final bool showSerials;
 
   final bool serial;
   final ValueChanged<bool> onSerialChanged;
@@ -183,6 +192,7 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
     return FormSection(
       borderColor: AppColors.phoneBorder,
       children: [
+        if (widget.showSerials)
         AppSwitchTile(
           title: 'တစ်လုံးချင်း IMEI / Serial မှတ်မယ်',
           description: 'ရောင်းတဲ့အခါ ဘယ်တစ်လုံးလဲ ရွေးရမယ်',
@@ -191,7 +201,7 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
           value: widget.serial,
           onChanged: widget.onSerialChanged,
         ),
-        if (widget.serial)
+        if (widget.serial && widget.showSerials)
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

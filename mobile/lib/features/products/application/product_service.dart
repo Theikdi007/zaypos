@@ -42,6 +42,13 @@ class ProductService {
     await uow.run(UnitKind.upsertProduct, () => products.setPrice(productId, price));
   }
 
+  /// Saves an edited product (Products → tap → edit form) as ONE
+  /// upsertProduct unit. [product.price] must be positive.
+  Future<void> update(Product product) async {
+    if (product.price <= 0) throw ArgumentError.value(product.price, 'price', 'must be positive');
+    await uow.run(UnitKind.upsertProduct, () => products.update(product));
+  }
+
   /// Many products (e.g. the preset catalog) as ONE upsertProduct unit.
   Future<void> importAll(List<Product> items) => uow.run(UnitKind.upsertProduct, () async {
         for (final p in items) {

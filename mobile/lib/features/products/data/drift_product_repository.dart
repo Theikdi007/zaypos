@@ -93,6 +93,18 @@ class DriftProductRepository implements ProductRepository {
   }
 
   @override
+  Future<void> update(Product product) async {
+    final rec = UnitRecorder.require();
+    final current = await (db.select(db.products)..where((p) => p.id.equals(product.id))).getSingleOrNull();
+    if (current == null) throw StateError('Unknown product ${product.id}');
+    final row = productRow(product.copyWith(updatedAt: nowUtc()));
+    // Keep identity/history columns as stored.
+    final updated = row.copyWith(tenantId: current.tenantId, createdAt: current.createdAt, deletedAt: Value(current.deletedAt));
+    await db.update(db.products).replace(updated);
+    rec.record(WireTable.products, productWire(updated));
+  }
+
+  @override
   Future<void> setSerialStatus(String serialId, SerialStatus status, {String? saleLineId}) async {
     final rec = UnitRecorder.require();
     final current = await (db.select(db.productSerials)..where((s) => s.id.equals(serialId))).getSingleOrNull();

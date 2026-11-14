@@ -143,7 +143,7 @@ void main() {
 
     // presets.first was sold once before tracking (ledger −1): counting 20 means 20 on hand.
     final target = presets.first;
-    await tester.tap(find.text(target.name));
+    await tester.tap(find.byKey(ValueKey('restock-${target.id}')));
     await tester.pumpAndSettle();
     await enterQty(tester, ['2', '0']);
 
@@ -158,7 +158,7 @@ void main() {
 
     // Tracked now: the next delivery is a plain restock.
     await openProducts(tester, c);
-    await tester.tap(find.text(target.name));
+    await tester.tap(find.byKey(ValueKey('restock-${target.id}')));
     await tester.pumpAndSettle();
     await enterQty(tester, ['5']);
     expect(uow.kinds.last, UnitKind.restock);

@@ -21,33 +21,64 @@ import '../../../core/utils/qty.dart';
 import '../../auth/data/session.dart';
 import '../../inventory/domain/stock_movement.dart';
 import '../application/product_service.dart';
+import '../data/product_providers.dart';
 import '../domain/product.dart';
 import '../domain/product_modules.dart';
 import 'sections/feature_sections.dart';
 
 /// One Add Product screen; sections appear according to [TenantFeatures].
+/// With [editing] the same form edits a saved product (Products → tap a row):
+/// its own fields only — stock, IMEIs, variants and batches are received
+/// through "Stock ဖြည့်မယ်", not edited here.
 class AddProductScreen extends ConsumerStatefulWidget {
-  const AddProductScreen({super.key});
+  const AddProductScreen({super.key, this.editing});
+
+  /// The product being edited; null = a new product.
+  final Product? editing;
 
   @override
   ConsumerState<AddProductScreen> createState() => _AddProductScreenState();
 }
 
+/// Edit route: looks the product up, then shows [AddProductScreen] in edit mode.
+class EditProductScreen extends ConsumerWidget {
+  const EditProductScreen({super.key, required this.productId});
+  final String productId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final product = ref.watch(productByIdProvider(productId));
+    return product.when(
+      data: (p) => p == null
+          ? Scaffold(body: Center(child: Text('ပစ္စည်း မတွေ့ပါ', style: AppText.s(15, color: AppColors.muted))))
+          : AddProductScreen(key: ValueKey(p.id), editing: p),
+      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (e, _) => Scaffold(body: Center(child: Text('$e'))),
+    );
+  }
+}
+
 class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   late final ShopTemplate _t = ref.read(shopTemplateProvider);
-  final _name = TextEditingController();
-  final _barcode = TextEditingController();
-  late final _cost = TextEditingController(text: '${_t.sampleCost}');
-  late final _price = TextEditingController(text: '${_t.samplePrice}');
-  final _wholesale = TextEditingController();
+  late final Product? _p = widget.editing;
+  bool get _isEdit => _p != null;
+  late final _name = TextEditingController(text: _p?.name ?? '');
+  late final _barcode = TextEditingController(text: _p?.barcode ?? '');
+  late final _cost = TextEditingController(text: '${_p?.cost ?? _t.sampleCost}');
+  late final _price = TextEditingController(text: _p == null ? '${_t.samplePrice}' : (_p.price > 0 ? '${_p.price}' : ''));
+  late final _wholesale = TextEditingController(text: _p?.wholesalePrice?.toString() ?? '');
   final _stock = TextEditingController();
-  final _alert = TextEditingController();
+  late final _alert = TextEditingController(text: _p == null ? '' : Qty.format(_p.lowAlertMilli));
   final _batchNo = TextEditingController();
   DateTime? _expiry;
-  int _expiryWarnDays = 30;
-  int _warrantyMonths = 6;
-  late String? _category = _t.categories.isEmpty ? null : _t.categories.first;
-  late String? _unit = _t.units.isEmpty ? null : _t.units.first;
+  late int _expiryWarnDays = _p?.expiryAlertDays ?? 30;
+  late int _warrantyMonths = _p == null ? 6 : (_p.warrantyMonths ?? 0);
+  late String? _category = _p?.category ?? (_t.categories.isEmpty ? null : _t.categories.first);
+  late String? _unit = _p != null ? (_p.unit.isEmpty && _t.units.isEmpty ? null : _p.unit) : (_t.units.isEmpty ? null : _t.units.first);
+
+  /// Template options plus the saved value when the template lacks it (e.g. a preset's category).
+  List<(String, String)> _options(List<String> template, String? current) =>
+      [for (final v in {...template, ?current}) (v, v)];
 
   bool _track = true;
   bool _serial = true;
@@ -118,6 +149,26 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         _showErrors = true;
         _errors = errors;
       });
+      return;
+    }
+    final editing = _p;
+    if (editing != null) {
+      await ref.read(productServiceProvider).update(editing.copyWith(
+            name: name,
+            cost: int.tryParse(_cost.text) ?? 0,
+            price: price,
+            wholesalePrice: () => features.quotation ? int.tryParse(_wholesale.text) : editing.wholesalePrice,
+            lowAlertMilli: Qty.parse(_alert.text, decimal: features.decimalQty) ?? editing.lowAlertMilli,
+            category: _category ?? defaultCategory,
+            unit: _unit ?? '',
+            barcode: () => barcode.isEmpty ? null : barcode,
+            warrantyMonths: () => features.serialWarranty
+                ? (_warrantyMonths > 0 ? _warrantyMonths : null)
+                : editing.warrantyMonths,
+            expiryAlertDays: () => features.expiryBatch ? _expiryWarnDays : editing.expiryAlertDays,
+            initial: String.fromCharCode(name.runes.first),
+          ));
+      if (mounted) context.pop();
       return;
     }
     final tenantId = ref.read(tenantIdProvider);
@@ -241,7 +292,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ScreenHeader(
-            title: 'ပစ္စည်းအသစ်',
+            title: _isEdit ? 'ပစ္စည်း ပြင်မယ်' : 'ပစ္စည်းအသစ်',
             leadingIcon: AppIcons.close,
             leadingLabel: 'ပိတ်ရန်',
             onBack: () => context.pop(),
@@ -256,7 +307,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               children: _gap14([
-                if (f.presetCatalog && _t.presetCount > 0)
+                if (!_isEdit && f.presetCatalog && _t.presetCount > 0)
                   PrimaryButton(
                     label: 'ကြိုတင်စာရင်း (${_t.presetCount}) ထဲက ရှာမယ်',
                     variant: ButtonVariant.soft,
@@ -336,7 +387,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                             ? const AppInput(hint: defaultCategory)
                             : AppSelect<String>(
                                 label: 'အမျိုးအစား',
-                                items: [for (final c in _t.categories) (c, c)],
+                                items: _options(_t.categories, _category),
                                 value: _category!,
                                 onChanged: (v) => setState(() => _category = v),
                               ),
@@ -347,7 +398,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                             ? const AppInput()
                             : AppSelect<String>(
                                 label: 'ယူနစ်',
-                                items: [for (final u in _t.units) (u, u)],
+                                items: _options(_t.units, _unit),
                                 value: _unit!,
                                 onChanged: (v) => setState(() => _unit = v),
                               ),
@@ -401,6 +452,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     warnDays: _expiryWarnDays,
                     onWarnDays: (d) => setState(() => _expiryWarnDays = d),
                     batchError: _errors['batchNo'],
+                    showBatch: !_isEdit,
                   ),
                 if (f.serialWarranty)
                   SerialWarrantySection(
@@ -410,8 +462,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     onAddImei: _addImei,
                     warrantyMonths: _warrantyMonths,
                     onWarrantyChanged: (m) => setState(() => _warrantyMonths = m),
+                    showSerials: !_isEdit,
                   ),
-                if (f.variants)
+                if (f.variants && !_isEdit)
                   VariantsSection(
                     sizes: _sizes,
                     colors: _colors,
@@ -420,7 +473,27 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     stock: _variantStock,
                     onStockChanged: (v, milli) => _variantStock[v] = milli,
                   ),
-                if (f.stock)
+                if (f.stock && _isEdit)
+                  FormSection(
+                    children: [
+                      LabeledField(
+                        label: 'နည်းရင် သတိပေး',
+                        small: true,
+                        child: AppInput(
+                          key: const ValueKey('lowAlert'),
+                          controller: _alert,
+                          fontSize: 16,
+                          hint: '5',
+                          keyboardType: numKb,
+                          inputFormatters: [qtyFormatter],
+                          semanticLabel: 'နည်းရင် သတိပေး',
+                        ),
+                      ),
+                      Text("Stock အရေအတွက်ကို ကုန်ပစ္စည်းစာရင်းမှ 'Stock ဖြည့်မယ်' နဲ့ ပြောင်းပါ",
+                          style: AppText.s(12, color: AppColors.muted)),
+                    ],
+                  ),
+                if (f.stock && !_isEdit)
                   FormSection(
                     children: [
                       AppSwitchTile(
