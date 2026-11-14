@@ -149,7 +149,7 @@ A blocked outbox still pulls (the owner keeps seeing other phones' sales).
 |---|---|
 | `sales, saleLines, payments, stockMovements, debtEntries, syncIssues` | insert or replace by id (server is truth; local copies are identical) |
 | `sales.voidedAt` | take the server value |
-| `products, productVariants, productBatches, customers, tenantFeatures, tenants` | replace only if `pulled.updatedAt >= local.updatedAt` **and** no pending outbox unit contains that id |
+| `products, productVariants, productBatches, customers, tenantFeatures, tenants` | replace only if `pulled.updatedAt >= local.updatedAt` **and** no pending outbox unit contains that id. When a push is `applied`, this phone's own rows of these tables with `updatedAt > serverTime + 5 min` (push answer) are clamped to it, exactly as the server stored them — otherwise a phone whose clock is ahead would refuse later edits from other phones |
 | `productSerials` | take the server row |
 | own `devices` row | `lastSeq = max(local, pulled)` |
 | `deletedAt` set | keep the row with `deletedAt` (screens hide it) |

@@ -52,9 +52,17 @@ class PullPage {
       );
 }
 
+/// `/sync/push` answer: one result per unit, and the server's clock
+/// (`serverTime`; null if the server did not send it).
+class PushResult {
+  const PushResult(this.results, {this.serverTime});
+  final List<UnitResult> results;
+  final DateTime? serverTime;
+}
+
 /// `/api/v1/sync/*`. Throws [ApiError].
 abstract interface class SyncApi {
-  Future<List<UnitResult>> push(String deviceId, List<PushUnit> units);
+  Future<PushResult> push(String deviceId, List<PushUnit> units);
   Future<PullPage> pull(String cursor, {int limit = 500});
 
   /// Owner only. Returns the updated syncIssues row.
@@ -77,10 +85,16 @@ class DioSyncApi implements SyncApi {
   }
 
   @override
-  Future<List<UnitResult>> push(String deviceId, List<PushUnit> units) => _call(
+  Future<PushResult> push(String deviceId, List<PushUnit> units) => _call(
         () => dio.post<dynamic>('/api/v1/sync/push',
             data: {'deviceId': deviceId, 'units': [for (final u in units) u.toJson()]}),
-        (j) => [for (final r in j['results'] as List) UnitResult.fromJson((r as Map).cast<String, dynamic>())],
+        (j) => PushResult(
+          [for (final r in j['results'] as List) UnitResult.fromJson((r as Map).cast<String, dynamic>())],
+          serverTime: switch (j['serverTime']) {
+            final String s => DateTime.tryParse(s)?.toUtc(),
+            _ => null,
+          },
+        ),
       );
 
   @override

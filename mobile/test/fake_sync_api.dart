@@ -30,7 +30,13 @@ class FakeSyncApi implements SyncApi {
   void Function()? onPush;
 
   @override
-  Future<List<UnitResult>> push(String deviceId, List<PushUnit> units) async {
+  Future<PushResult> push(String deviceId, List<PushUnit> units) async => PushResult(await _push(deviceId, units),
+      serverTime: serverTime);
+
+  /// `serverTime` of every push answer (null = not sent, like an older server).
+  DateTime? serverTime;
+
+  Future<List<UnitResult>> _push(String deviceId, List<PushUnit> units) async {
     onPush?.call();
     await Future<void>.delayed(delay);
     pushes.add(units);

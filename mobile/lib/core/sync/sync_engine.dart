@@ -205,9 +205,9 @@ class SyncEngine {
     while (true) {
       final batch = await store.nextBatch();
       if (batch.isEmpty) return null;
-      final List<UnitResult> results;
+      final PushResult result;
       try {
-        results = await api!.push(deviceId, [
+        result = await api!.push(deviceId, [
           for (final o in batch)
             PushUnit(
               unitId: o.unitId,
@@ -226,7 +226,11 @@ class SyncEngine {
       }
       _failures = 0;
       _pushAfter = null;
-      if (await store.applyResults(batch, results)) return null; // blocked by a rejected unit
+      // The server clamps future edit times to its clock + 5 min (README §3.3); do the
+      // same to this phone's copy so later edits from other phones are not refused (BUG-5).
+      final blocked = await store.applyResults(batch, result.results,
+          editTimeLimit: (result.serverTime ?? clock()).add(SyncStore.maxClockAhead));
+      if (blocked) return null; // blocked by a rejected unit
     }
   }
 
