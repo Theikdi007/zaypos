@@ -593,7 +593,7 @@ Format:
 - Suspected area: `mobile/lib/features/pos/presentation/module_pick_sheet.dart` `pickModuleUnit` — `free` excludes `cart.serialIds`
   (row ids), not the IMEI values already in the cart.
 - Blocks beta: no (needs an already-flagged duplicateSerial state; the cashier sees two lines with the same IMEI).
-- Status: open
+- Status: fixed in fb3fd12 — the IMEI picker excludes every IMEI number already in the cart (`cartSerialNumbers`); `m/scan_lookup_test.dart` › "BUG-28 …"; QA TC-POS-NEW-16 passes unchanged.
 
 ## BUG-29 · TC-UX-NEW-5, TC-UX-NEW-6 · Low · Rejected-unit screen: field labels show the internal table name ("အမည် · customers")
 - Found in: round 9 · `mobile/test/qa/qa_round9_sync_text_test.dart` › "TC-UX-NEW-5 …" and "TC-UX-NEW-6 …"
@@ -605,7 +605,7 @@ Format:
   developer's `m/no_english_test.dart` sample units have rows without ids, so no field is rendered and this line is never seen.
 - Suspected area: `mobile/lib/features/sync/presentation/rejected_unit_screen.dart` line ~166 `label: '${fieldLabel(f.column)} · ${f.table}'`.
 - Blocks beta: no (a rejection only happens after an app bug; the Burmese label before the "·" is right).
-- Status: open
+- Status: fixed in ab92a09 — labels are "<table> · <field>" in Burmese (`tableLabel` / `rowFieldLabel`, e.g. "ဖောက်သည် · အမည်"); unknown field → "အချက်အလက်တစ်ခု" (no longer "စာသားတစ်ခု" for numbers); `m/no_english_test.dart` now shows every editable field (sample rows with ids); QA TC-UX-NEW-5/6 pass unchanged.
 
 ## BUG-30 · TC-UX-NEW-7 · Low · Sync error for a row the app cannot read shows the exception text in English ("FormatException: syncIssues.kind …")
 - Found in: round 9 · `mobile/test/qa/qa_round9_sync_text_test.dart` › "TC-UX-NEW-7 a pulled row the app cannot read …"
@@ -616,7 +616,7 @@ Format:
   expected String, got Null)"`.
 - Suspected area: `mobile/lib/core/sync/sync_engine.dart` `_cycle` — `error = '${SyncMessages.unreadable} ($e)'`.
 - Blocks beta: no (only on an app / server version mismatch; the Burmese part says what to do).
-- Status: open
+- Status: fixed in b04dc07 — Burmese only (`SyncMessages.unreadable` / `.failed`); the raw error and stack go to the log (`dart:developer`, zaypos.sync); `m/sync_engine_test.dart` › BUG-30; QA TC-UX-NEW-7 passes unchanged.
 
 ## BUG-31 · TC-SYNC-NEW-14 · Medium · A field cleared on one phone is never cleared on the other phones (pulled NULLs are ignored)
 - Found in: round 9 · live `mobile/test/qa/live_qa_round9_test.dart` (scratch DB R9) and `mobile/test/qa/qa_round9_pull_null_test.dart` ›
@@ -637,7 +637,7 @@ Format:
   with `nullToAbsent: true`, so NULL columns are left out of the `ON CONFLICT DO UPDATE` and the old values stay. Local edits are not
   affected (`drift_product_repository.dart` `update` uses `replace`).
 - Blocks beta: **yes by the owner's exit rule** (Medium) — or the owner accepts it as a known risk for 3–5 shops.
-- Status: open
+- Status: fixed in 8b513b5 — pulled rows are applied whole (`toCompanion(false)`: NULL columns written) under the same last-writer-wins / pending-outbox rules. Both directions tested: Api `SyncTests` › "A_cleared_field_is_stored_as_null_and_pulled_as_an_explicit_null"; `m/pull_null_test.dart` (5 tests); live two phones `m/live_clear_fields_test.dart` (B clears barcode, wholesale price, expiry days, credit limit → empty on A; a duplicate barcode cleared on B is resolved on A; fails without the fix). QA TC-SYNC-NEW-14 and `live_qa_round9_test.dart` pass unchanged. Note: the app has no customer edit screen yet, so the live test records the upsertCustomer unit such an edit would send.
 
 ---
 
