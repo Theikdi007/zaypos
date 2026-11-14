@@ -46,6 +46,12 @@ class StockService {
   /// - IMEIs: [serials] become in-stock IMEI rows and stock grows by their count;
   /// - batch: into the existing [batchId], or into [newBatch] (created here);
   /// - size/colour: into [variantId].
+  ///
+  /// [openingCount] (the product is "Stock မမှတ်ရသေး"): the quantity is what
+  /// was counted, like the plain sheet (BUG-15). Earlier sales made before
+  /// tracking are zeroed with "opening count" adjustments — per batch / size,
+  /// so batch and size stock still add up to product stock — and the unit is
+  /// a stockAdjust.
   Future<StockMovement> receive({
     required String productId,
     required int qtyMilli,
@@ -53,6 +59,7 @@ class StockService {
     String? batchId,
     ProductBatch? newBatch,
     List<String> serials = const [],
+    bool openingCount = false,
   }) {
     if (qtyMilli <= 0) throw ArgumentError.value(qtyMilli, 'qtyMilli', 'must be positive');
     if (serials.isNotEmpty && qtyMilli != Qty.units(serials.length)) {
@@ -69,7 +76,30 @@ class StockService {
       variantId: variantId,
       batchId: newBatch?.id ?? batchId,
     );
-    return uow.run(UnitKind.restock, () async {
+    return uow.run(openingCount ? UnitKind.stockAdjust : UnitKind.restock, () async {
+      if (openingCount) {
+        final ledger = <(String?, String?), int>{};
+        for (final x in await stock.watchAll().first) {
+          if (x.productId != productId || x.deletedAt != null) continue;
+          ledger.update((x.variantId, x.batchId), (v) => v + x.qtyMilli, ifAbsent: () => x.qtyMilli);
+        }
+        await stock.addAll([
+          for (final MapEntry(key: (v, b), value: sum) in ledger.entries)
+            if (sum != 0)
+              StockMovement(
+                id: newId(),
+                tenantId: tenantId,
+                productId: productId,
+                variantId: v,
+                batchId: b,
+                type: StockMovementType.adjustment,
+                qtyMilli: -sum,
+                note: 'opening count',
+                createdAt: t,
+                updatedAt: t,
+              ),
+        ]);
+      }
       await products.addModules(
         batches: [?newBatch],
         serials: [

@@ -65,7 +65,20 @@ class ExpiryBatchSection extends StatelessWidget {
   final int warnDays;
   final ValueChanged<int> onWarnDays;
 
-  static const warnOptions = [(30, 'ရက် ၃၀ အလို'), (60, 'ရက် ၆၀ အလို'), (90, 'ရက် ၉၀ အလို')];
+  /// Product without an expiry (soap, diapers…): no expiryAlertDays, no batch needed.
+  static const noExpiry = 0;
+
+  static const warnOptions = [
+    (30, 'ရက် ၃၀ အလို'),
+    (60, 'ရက် ၆၀ အလို'),
+    (90, 'ရက် ၉၀ အလို'),
+    (noExpiry, 'သက်တမ်း မမှတ်ပါ'),
+  ];
+
+  /// Shown under the section (pharmacy decision, item 5).
+  static const help =
+      "သက်တမ်းမှတ်တဲ့ ပစ္စည်း (ဆေး စသည်) ကို Batch နံပါတ် + သက်တမ်းကုန်ရက်နဲ့ ဖြည့်/ရောင်းပါမယ်။ "
+      "သက်တမ်းမရှိတဲ့ ပစ္စည်း (ဆပ်ပြာ၊ ဒိုင်ပါ စသည်) ဆိုရင် 'သက်တမ်း မမှတ်ပါ' ရွေးပါ — Batch မလိုဘဲ ရိုးရိုးပစ္စည်းလို ဖြည့်/ရောင်းပါမယ်။";
 
   Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();
@@ -84,7 +97,7 @@ class ExpiryBatchSection extends StatelessWidget {
       title: 'သက်တမ်း နှင့် Batch',
       borderColor: AppColors.pharmacyBorder,
       children: [
-        if (showBatch)
+        if (showBatch && warnDays != noExpiry)
         TwoCol(
           LabeledField(
             label: 'Batch နံပါတ်',
@@ -122,14 +135,17 @@ class ExpiryBatchSection extends StatelessWidget {
           label: 'ကုန်ခါနီးရင် သတိပေးမယ်',
           small: true,
           child: AppSelect<int>(
+            key: const ValueKey('expiryWarn'),
             label: 'ကုန်ခါနီးရင် သတိပေးမယ်',
             items: warnOptions,
             value: warnDays,
             onChanged: onWarnDays,
           ),
         ),
-        Text('Batch တစ်ခုထက်ပိုရင် သက်တမ်းစောတာကို အရင်ရောင်းအောင် ညွှန်ပေးပါမယ် (FEFO)',
-            style: AppText.s(12, color: AppColors.muted)),
+        if (warnDays != noExpiry)
+          Text('Batch တစ်ခုထက်ပိုရင် သက်တမ်းစောတာကို အရင်ရောင်းအောင် ညွှန်ပေးပါမယ် (FEFO)',
+              style: AppText.s(12, color: AppColors.muted)),
+        Text(help, key: const ValueKey('expiryHelp'), style: AppText.s(12, color: AppColors.muted)),
       ],
     );
   }

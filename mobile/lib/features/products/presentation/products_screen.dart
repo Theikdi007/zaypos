@@ -111,6 +111,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           v.id: moves.where((m) => m.variantId == v.id && m.deletedAt == null).fold(0, (a, m) => a + m.qtyMilli),
       };
     }
+    final known = mode == RestockMode.imei ? await repo.watchAllSerialValues().first : const <String>{};
     if (!mounted) return true;
     final r = await showModuleRestockSheet(
       context,
@@ -122,12 +123,17 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       batches: batches,
       variants: variants,
       variantStock: variantStock,
+      knownSerials: known,
+      // Batches are required only for products that track expiry (item 5).
+      batchOptional: p.product.expiryAlertDays == null,
     );
     if (r == null || !mounted) return true;
     final t = nowUtc();
     await ref.read(stockServiceProvider).receive(
           productId: p.id,
           qtyMilli: r.qtyMilli,
+          // First count of an untracked product = what was counted (BUG-15).
+          openingCount: p.isUntracked,
           variantId: r.variantId,
           batchId: r.batchId,
           serials: r.imeis,

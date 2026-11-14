@@ -65,6 +65,12 @@ class FakeProductRepository implements ProductRepository {
       );
 
   @override
+  Stream<Set<String>> watchAllSerialValues() => db.watch(
+        {FakeTable.serials},
+        () => {for (final s in db.serials) if (s.deletedAt == null) s.serial},
+      );
+
+  @override
   Future<void> add(
     Product product, {
     List<ProductVariant> variants = const [],

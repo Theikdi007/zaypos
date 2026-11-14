@@ -84,6 +84,8 @@ Future<ModuleRestock?> showModuleRestockSheet(
   List<ProductBatch> batches = const [],
   List<ProductVariant> variants = const [],
   Map<String, int> variantStock = const {},
+  Set<String> knownSerials = const {},
+  bool batchOptional = false,
 }) =>
     showModalBottomSheet<ModuleRestock>(
       context: context,
@@ -99,6 +101,8 @@ Future<ModuleRestock?> showModuleRestockSheet(
         batches: batches,
         variants: variants,
         variantStock: variantStock,
+        knownSerials: knownSerials,
+        batchOptional: batchOptional,
       ),
     );
 
@@ -113,7 +117,19 @@ class ModuleRestockSheet extends ConsumerStatefulWidget {
     this.batches = const [],
     this.variants = const [],
     this.variantStock = const {},
+    this.knownSerials = const {},
+    this.batchOptional = false,
   });
+
+  /// Every IMEI the phone already knows (any product): refused as new IMEIs.
+  final Set<String> knownSerials;
+
+  /// The product does not track expiry (no expiryAlertDays): goods may go in
+  /// without a batch ("Batch မပါ", the default when it has no batch yet).
+  final bool batchOptional;
+
+  /// Batch choice meaning "no batch".
+  static const noBatch = '__none__';
 
   final RestockMode mode;
   final String productName;
@@ -143,7 +159,8 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
 
   // batch
   late final List<ProductBatch> _batches = [...widget.batches]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-  late String _batch = _batches.where((b) => !b.isExpired(_now)).firstOrNull?.id ?? ModuleRestockSheet.newBatch;
+  late String _batch = _batches.where((b) => !b.isExpired(_now)).firstOrNull?.id ??
+      (widget.batchOptional ? ModuleRestockSheet.noBatch : ModuleRestockSheet.newBatch);
   final _batchNo = TextEditingController();
   DateTime? _expiry;
 
@@ -170,7 +187,9 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
     final v = limits.normalize('productSerials.serial', _imei.text);
     if (v.isEmpty) return true;
     final error = limits.checkText('productSerials.serial', v, label: 'IMEI / Serial') ??
-        (_imeis.contains(v) || widget.serials.any((s) => s.serial == v) ? 'ဒီ IMEI ရှိပြီးသားပါ။' : null);
+        (_imeis.contains(v) || widget.knownSerials.contains(v) || widget.serials.any((s) => s.serial == v)
+            ? 'ဒီ IMEI ရှိပြီးသားပါ။'
+            : null);
     setState(() {
       _error = error;
       if (error == null) {
@@ -215,7 +234,10 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
         final isNew = _batch == ModuleRestockSheet.newBatch;
         if (isNew) {
           final limits = ref.read(syncLimitsProvider);
-          final error = limits.checkText('productBatches.batchNo', _batchNo.text.trim(), label: 'Batch နံပါတ်');
+          final no = _batchNo.text.trim();
+          // Same rule as the edit form (BUG-16): one batch number per product.
+          final error = limits.checkText('productBatches.batchNo', no, label: 'Batch နံပါတ်') ??
+              (widget.batches.any((b) => b.batchNo == no) ? 'ဒီ Batch ရှိပြီးသားပါ။' : null);
           if (error != null) {
             setState(() => _error = error);
             return;
@@ -225,7 +247,7 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
           context,
           ModuleRestock(
             qtyMilli: _milli,
-            batchId: isNew ? null : _batch,
+            batchId: isNew || _batch == ModuleRestockSheet.noBatch ? null : _batch,
             newBatchNo: isNew ? _batchNo.text.trim() : null,
             newBatchExpiry: isNew && _expiry != null ? DateTime.utc(_expiry!.year, _expiry!.month, _expiry!.day) : null,
           ),
@@ -351,8 +373,19 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
             label: '+ Batch အသစ်',
             onTap: () => setState(() => _batch = ModuleRestockSheet.newBatch),
           ),
+          if (widget.batchOptional)
+            _choice(
+              key: const ValueKey('restockBatch-none'),
+              selected: _batch == ModuleRestockSheet.noBatch,
+              label: 'Batch မပါ',
+              onTap: () => setState(() => _batch = ModuleRestockSheet.noBatch),
+            ),
         ],
       ),
+      if (widget.batchOptional) ...[
+        const SizedBox(height: 6),
+        Text('သက်တမ်း မမှတ်တဲ့ ပစ္စည်း · Batch မလိုပါ', style: AppText.s(12, color: AppColors.muted)),
+      ],
       if (isNew) ...[
         const SizedBox(height: 10),
         TwoCol(

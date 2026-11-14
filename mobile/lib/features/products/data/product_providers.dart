@@ -23,6 +23,10 @@ final productBatchesProvider = StreamProvider.family<List<ProductBatch>, String>
 final productSerialsProvider = StreamProvider.family<List<ProductSerial>, String>(
     (ref, id) => ref.watch(productRepositoryProvider).watchSerials(id));
 
+/// Every IMEI / serial the phone knows (any product): a new IMEI must not be one of them.
+final knownSerialsProvider =
+    StreamProvider<Set<String>>((ref) => ref.watch(productRepositoryProvider).watchAllSerialValues());
+
 /// Stock on hand per variant id (SUM of live movements).
 final variantStockProvider = StreamProvider<Map<String, int>>((ref) => ref.watch(stockRepositoryProvider).watchAll().map(
       (moves) {

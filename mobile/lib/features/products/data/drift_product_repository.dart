@@ -57,6 +57,17 @@ class DriftProductRepository implements ProductRepository {
       .watch();
 
   @override
+  Stream<Set<String>> watchAllSerialValues() {
+    final s = db.productSerials;
+    return (db.selectOnly(s)
+          ..addColumns([s.serial])
+          ..where(s.deletedAt.isNull()))
+        .map((r) => r.read(s.serial)!)
+        .watch()
+        .map((l) => l.toSet());
+  }
+
+  @override
   Future<void> add(
     Product product, {
     List<ProductVariant> variants = const [],

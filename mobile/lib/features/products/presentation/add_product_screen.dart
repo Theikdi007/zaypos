@@ -78,7 +78,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   final _pending = PendingModules();
   final _batchNo = TextEditingController();
   DateTime? _expiry;
-  late int _expiryWarnDays = _p?.expiryAlertDays ?? 30;
+  // New product: tracked (30 days). Edit: as saved; none = "သက်တမ်း မမှတ်ပါ" (item 5).
+  late int _expiryWarnDays = _p == null ? 30 : (_p.expiryAlertDays ?? ExpiryBatchSection.noExpiry);
   late int _warrantyMonths = _p == null ? 6 : (_p.warrantyMonths ?? 0);
   late String? _category = _p?.category ?? (_t.categories.isEmpty ? null : _t.categories.first);
   late String? _unit = _p != null ? (_p.unit.isEmpty && _t.units.isEmpty ? null : _p.unit) : (_t.units.isEmpty ? null : _t.units.first);
@@ -127,6 +128,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     final error = limits.checkText('productSerials.serial', v, label: 'IMEI / Serial');
     if (error != null) return error;
     if (_imeis.contains(v)) return 'ဒီ IMEI ထည့်ပြီးသားပါ။';
+    // Already on this phone (any product): refused (BUG-18).
+    if ((ref.read(knownSerialsProvider).value ?? const <String>{}).contains(v)) return 'ဒီ IMEI ရှိပြီးသားပါ။';
     setState(() => _imeis.add(v));
     return null;
   }
@@ -137,7 +140,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     final name = _name.text.trim();
     final price = int.tryParse(_price.text) ?? 0;
     final barcode = limits.normalize('products.barcode', _barcode.text);
-    final hasBatchInput = features.expiryBatch && (_batchNo.text.trim().isNotEmpty || _expiry != null);
+    final tracksExpiry = features.expiryBatch && _expiryWarnDays != ExpiryBatchSection.noExpiry;
+    final hasBatchInput = tracksExpiry && (_batchNo.text.trim().isNotEmpty || _expiry != null);
     final errors = <String, String>{
       for (final (key, error) in [
         ('name', limits.checkText('products.name', name, label: 'ပစ္စည်းအမည်')),
@@ -160,6 +164,12 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     }
     final editing = _p;
     if (editing != null) {
+      // A typed IMEI / batch / size not yet "+ ထည့်"-ed is added now, or blocks
+      // the save with its message — never dropped (BUG-17).
+      if (!(_pending.commitTyped?.call() ?? true)) {
+        setState(() => _showErrors = true);
+        return;
+      }
       final t = nowUtc();
       final tenantId = editing.tenantId;
       final pending = _pending;
@@ -179,7 +189,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             warrantyMonths: () => features.serialWarranty
                 ? (_warrantyMonths > 0 ? _warrantyMonths : null)
                 : editing.warrantyMonths,
-            expiryAlertDays: () => features.expiryBatch ? _expiryWarnDays : editing.expiryAlertDays,
+            expiryAlertDays: () => features.expiryBatch
+                ? (_expiryWarnDays == ExpiryBatchSection.noExpiry ? null : _expiryWarnDays)
+                : editing.expiryAlertDays,
             initial: String.fromCharCode(name.runes.first),
           ),
             variants: [
@@ -294,7 +306,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             tint: _t.tint.toARGB32(),
             initial: String.fromCharCode(name.runes.first),
             warrantyMonths: features.serialWarranty && _warrantyMonths > 0 ? _warrantyMonths : null,
-            expiryAlertDays: features.expiryBatch ? _expiryWarnDays : null,
+            expiryAlertDays: tracksExpiry ? _expiryWarnDays : null,
             createdAt: t,
             updatedAt: t,
           ),
@@ -309,6 +321,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   @override
   Widget build(BuildContext context) {
     final f = ref.watch(tenantFeaturesProvider);
+    if (f.serialWarranty) ref.watch(knownSerialsProvider); // duplicate-IMEI check stays loaded
     final cost = int.tryParse(_cost.text) ?? 0;
     final price = int.tryParse(_price.text) ?? 0;
     final margin = price - cost;

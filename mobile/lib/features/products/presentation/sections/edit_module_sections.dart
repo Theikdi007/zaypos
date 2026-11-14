@@ -23,6 +23,11 @@ class PendingModules {
   final variants = <({String size, String color})>[];
 
   bool get isEmpty => imeis.isEmpty && batches.isEmpty && variants.isEmpty;
+
+  /// Adds whatever is typed but not yet "+ ထည့်"-ed (BUG-17). Returns false
+  /// — with the reason shown under the field — if it is not valid, so the
+  /// form does not save. Set by [EditModuleSections].
+  bool Function()? commitTyped;
 }
 
 /// Edit form (BUG-12): lists the product's existing IMEIs / batches /
@@ -60,28 +65,50 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
   PendingModules get _p => widget.pending;
 
   @override
+  void initState() {
+    super.initState();
+    widget.pending.commitTyped = _commitTyped;
+  }
+
+  /// Typed-but-not-added IMEI / batch / size-colour: add it, or refuse save.
+  bool _commitTyped() {
+    var ok = true;
+    if (_imei.text.trim().isNotEmpty) ok &= _addImei();
+    if (_batchNo.text.trim().isNotEmpty) ok &= _addBatch();
+    if (_size.text.trim().isNotEmpty || _color.text.trim().isNotEmpty) ok &= _addVariant();
+    return ok;
+  }
+
+  @override
   void dispose() {
+    if (widget.pending.commitTyped == _commitTyped) widget.pending.commitTyped = null;
     for (final c in [_imei, _batchNo, _size, _color]) {
       c.dispose();
     }
     super.dispose();
   }
 
-  void _addImei() {
+  /// Each "add" returns false (with the reason shown) when refused.
+  bool _addImei() {
     final limits = ref.read(syncLimitsProvider);
     final v = limits.normalize('productSerials.serial', _imei.text);
-    if (v.isEmpty) return;
+    if (v.isEmpty) return true;
     final existing = ref.read(productSerialsProvider(widget.productId)).value ?? const [];
+    // Refused if this phone knows it already, on any product (BUG-18).
+    final known = ref.read(knownSerialsProvider).value ?? const <String>{};
     final error = limits.checkText('productSerials.serial', v, label: 'IMEI / Serial') ??
-        (_p.imeis.contains(v) || existing.any((s) => s.serial == v) ? 'ဒီ IMEI ရှိပြီးသားပါ။' : null);
+        (_p.imeis.contains(v) || known.contains(v) || existing.any((s) => s.serial == v)
+            ? 'ဒီ IMEI ရှိပြီးသားပါ။'
+            : null);
     setState(() => _imeiError = error);
-    if (error != null) return;
+    if (error != null) return false;
     _p.imeis.add(v);
     _imei.clear();
     widget.onChanged();
+    return true;
   }
 
-  void _addBatch() {
+  bool _addBatch() {
     final limits = ref.read(syncLimitsProvider);
     final no = _batchNo.text.trim();
     final existing = ref.read(productBatchesProvider(widget.productId)).value ?? const [];
@@ -90,14 +117,15 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
             ? 'ဒီ Batch ရှိပြီးသားပါ။'
             : null);
     setState(() => _batchError = error);
-    if (error != null) return;
+    if (error != null) return false;
     _p.batches.add((batchNo: no, expiry: _expiry == null ? null : DateTime.utc(_expiry!.year, _expiry!.month, _expiry!.day)));
     _batchNo.clear();
     setState(() => _expiry = null);
     widget.onChanged();
+    return true;
   }
 
-  void _addVariant() {
+  bool _addVariant() {
     final size = _size.text.trim(), color = _color.text.trim();
     final existing = ref.read(productVariantsProvider(widget.productId)).value ?? const [];
     final error = size.isEmpty || color.isEmpty
@@ -107,11 +135,12 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
             ? 'ဒီ Size / အရောင် ရှိပြီးသားပါ။'
             : null;
     setState(() => _variantError = error);
-    if (error != null) return;
+    if (error != null) return false;
     _p.variants.add((size: size, color: color));
     _size.clear();
     _color.clear();
     widget.onChanged();
+    return true;
   }
 
   Future<void> _pickExpiry() async {
@@ -129,6 +158,7 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
   Widget build(BuildContext context) {
     final f = widget.features;
     final now = DateTime.now();
+    if (f.serialWarranty) ref.watch(knownSerialsProvider); // keep the duplicate check loaded
     final List<ProductSerial> serials =
         f.serialWarranty ? ref.watch(productSerialsProvider(widget.productId)).value ?? const [] : const [];
     final List<ProductBatch> batches =
@@ -167,7 +197,7 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
                   semanticLabel: 'IMEI အသစ် ထည့်ရန်',
                   onSubmitted: (_) => _addImei(),
                 ),
-                _addImei,
+                () => _addImei(),
                 key: const ValueKey('addImei'),
               ),
               if (_imeiError != null) _errorText(_imeiError!),
@@ -236,7 +266,7 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
                 height: 44,
                 radius: 12,
                 fontSize: 14,
-                onPressed: _addBatch,
+                onPressed: () => _addBatch(),
               ),
               if (_batchError != null) _errorText(_batchError!),
               Text("Batch အသစ်ထဲ ပစ္စည်းကို 'Stock ဖြည့်မယ်' နဲ့ ထည့်ပါ", style: AppText.s(12, color: AppColors.muted)),
@@ -277,7 +307,7 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
                 height: 44,
                 radius: 12,
                 fontSize: 14,
-                onPressed: _addVariant,
+                onPressed: () => _addVariant(),
               ),
               if (_variantError != null) _errorText(_variantError!),
               Text("အသစ်ထဲ ပစ္စည်းကို 'Stock ဖြည့်မယ်' နဲ့ ထည့်ပါ", style: AppText.s(12, color: AppColors.muted)),

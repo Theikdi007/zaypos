@@ -12,6 +12,9 @@ abstract interface class ProductRepository {
   Stream<List<ProductBatch>> watchBatches(String productId);
   Stream<List<ProductSerial>> watchSerials(String productId);
 
+  /// Every live IMEI / serial value of the shop (any product, any status).
+  Stream<Set<String>> watchAllSerialValues();
+
   /// Saves a product together with its module rows.
   Future<void> add(
     Product product, {

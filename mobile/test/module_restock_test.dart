@@ -109,7 +109,8 @@ void main() {
       await tester.tap(inSheet(find.text('သိမ်းမယ်')));
       await tester.pumpAndSettle();
 
-      expect(kinds(c).sublist(n), [UnitKind.restock]);
+      // The product has no stock history yet ("Stock မမှတ်ရသေး"): its first count is an opening count (BUG-15).
+      expect(kinds(c).sublist(n), [UnitKind.stockAdjust]);
       final fresh = db(c).serials.where((s) => s.productId == p.id && s.status == SerialStatus.inStock).map((s) => s.serial);
       expect(fresh.toSet(), {'222222222222222', '333333333333333'});
       expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(2));
@@ -267,6 +268,13 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('addVariant')));
       await tester.pumpAndSettle();
       expect(find.text('ဒီ Size / အရောင် ရှိပြီးသားပါ။'), findsOneWidget);
+      // BUG-17: the refused size/colour is still typed → save is blocked, nothing written.
+      await tester.tap(find.text('သိမ်းမယ်').last);
+      await tester.pumpAndSettle();
+      expect(find.text('ပစ္စည်း ပြင်မယ်'), findsOneWidget, reason: 'still on the form');
+      expect(db(c).variants.where((v) => v.productId == q.id), hasLength(1));
+      await tester.enterText(field('newVariantSize'), '');
+      await tester.enterText(field('newVariantColor'), '');
       await tester.tap(find.text('သိမ်းမယ်').last);
       await tester.pumpAndSettle();
       expect(db(c).variants.where((v) => v.productId == q.id).map((v) => v.label).toSet(), {'M · အနက်', 'XL · အပြာ'});
