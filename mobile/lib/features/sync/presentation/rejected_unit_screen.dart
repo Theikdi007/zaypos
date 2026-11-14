@@ -113,6 +113,8 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
       'kind': o.kind,
       'clientTime': DateTime.fromMillisecondsSinceEpoch(o.clientTime, isUtc: true).toIso8601String(),
       'rejectReason': o.rejectReason,
+      'rejectCode': o.rejectCode,
+      'rejectData': o.rejectData,
       'rows': SyncStore.rowsOf(o),
     });
     await Clipboard.setData(ClipboardData(text: json));
@@ -154,7 +156,7 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
                 const SizedBox(height: 12),
                 Text('ဆာဗာရဲ့ အကြောင်းပြချက်', style: AppText.s(13, weight: AppText.w600)),
                 const SizedBox(height: 6),
-                AuthMessage(o.rejectReason ?? ''),
+                AuthMessage(rejectMessage(o.rejectCode, o.rejectData)),
                 const SizedBox(height: 20),
                 if (fields.isNotEmpty) ...[
                   Text('ပြင်ရန်', style: AppText.s(13, weight: AppText.w600)),

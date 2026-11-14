@@ -196,6 +196,9 @@ public class AccountTests(SqlServerFixture sql)
         ok.Outcome.Should().Be(UnitOutcome.Applied);
         tooLong.Outcome.Should().Be(UnitOutcome.Rejected);
         tooLong.Reason.Should().Be($"products.name is longer than {max} characters.");
+        // BUG-26: apps build the message from code + data (no English shown).
+        tooLong.Code.Should().Be(RejectCodes.FieldTooLong);
+        tooLong.Data.Should().BeEquivalentTo(new Dictionary<string, string> { ["field"] = "products.name", ["max"] = max.ToString() });
     }
 
     [Fact]

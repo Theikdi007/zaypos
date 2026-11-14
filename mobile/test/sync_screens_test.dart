@@ -74,6 +74,8 @@ void main() {
 
   Future<void> addRejectedProduct(WidgetTester tester, ProviderContainer c, TestShop shop, String name) async {
     api.outcome = (_) => UnitOutcome.rejected;
+    api.rejectCode = 'fieldTooLong';
+    api.rejectData = const {'field': 'products.name', 'max': '120'};
     await addProduct(tester, c, shop, name);
     await syncNow(tester, c);
   }
@@ -88,7 +90,9 @@ void main() {
     await tester.tap(find.text('Sync ပြဿနာ (၁)'));
     await settle(tester);
     expect(find.byType(SyncReviewScreen), findsOneWidget);
-    expect(find.text(api.rejectReason), findsOneWidget);
+    // BUG-26: the message is built from code + data; the server's English reason is never shown.
+    expect(find.text('“အမည်” က စာလုံး ၁၂၀ လုံးထက် ရှည်နေပါတယ်။'), findsOneWidget);
+    expect(find.text(api.rejectReason), findsNothing);
     expect(find.textContaining('ပစ္စည်းအသစ် · xxx'), findsOneWidget);
 
     await tester.tap(find.textContaining('ပစ္စည်းအသစ် · xxx'));

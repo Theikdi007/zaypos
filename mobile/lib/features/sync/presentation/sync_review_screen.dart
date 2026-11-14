@@ -58,7 +58,7 @@ class SyncReviewScreen extends ConsumerWidget {
                       for (final o in rejected)
                         CardListTile(
                           title: Text(unitSummary(o.kind, SyncStore.rowsOf(o)), style: AppText.s(14, weight: AppText.w600)),
-                          subtitle: Text(o.rejectReason ?? '', style: AppText.s(12, color: AppColors.muted)),
+                          subtitle: Text(rejectMessage(o.rejectCode, o.rejectData), style: AppText.s(12, color: AppColors.muted)),
                           trailing: const AppIcon(AppIcons.chevronRight, size: 18, color: AppColors.subtle),
                           onTap: () => context.push(Routes.rejectedUnit(o.seq)),
                         ),
@@ -72,7 +72,7 @@ class SyncReviewScreen extends ConsumerWidget {
                       for (final i in issues)
                         CardListTile(
                           title: Text(issueKindLabel(i.kind), style: AppText.s(14, weight: AppText.w600)),
-                          subtitle: Text('${i.detail}\n${entryDateLabel(i.createdAt, now)}',
+                          subtitle: Text('${issueMessage(i.kind, i.data)}\n${entryDateLabel(i.createdAt, now)}',
                               style: AppText.s(12, color: AppColors.muted)),
                           isThreeLine: true,
                           trailing: isOwner

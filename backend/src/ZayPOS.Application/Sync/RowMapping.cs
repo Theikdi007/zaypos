@@ -97,7 +97,7 @@ public static class RowMapping
     public static SyncIssueRow ToRow(this SyncIssue i) => new()
     {
         Id = i.Id, TenantId = i.TenantId, Kind = i.Kind, EntityTable = i.EntityTable, EntityId = i.EntityId,
-        Detail = i.Detail, DeviceId = i.DeviceId, ResolvedAt = i.ResolvedAt,
+        Detail = i.Detail, Data = i.Data, DeviceId = i.DeviceId, ResolvedAt = i.ResolvedAt,
         CreatedAt = i.CreatedAt, UpdatedAt = i.UpdatedAt, DeletedAt = i.DeletedAt,
     };
 }

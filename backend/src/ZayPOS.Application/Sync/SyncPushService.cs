@@ -51,7 +51,7 @@ public sealed class SyncPushService(IAppDb db, IDbErrors errors, TimeProvider cl
             }
             catch (SyncRejectException e)
             {
-                return await RecordRejectedAsync(caller, unit, e.Message, ct);
+                return await RecordRejectedAsync(caller, unit, e.Message, ct, e.Code, e.Fields);
             }
             catch (Exception e) when (attempt < MaxAttempts && errors.Classify(e) is DbErrorKind.Concurrency or DbErrorKind.Unique)
             {
@@ -61,7 +61,8 @@ public sealed class SyncPushService(IAppDb db, IDbErrors errors, TimeProvider cl
             catch (Exception e) when (errors.Classify(e) is DbErrorKind.Unique or DbErrorKind.ForeignKey
                                           or DbErrorKind.Check or DbErrorKind.Truncation)
             {
-                return await RecordRejectedAsync(caller, unit, "The database refused the unit: " + errors.Describe(e), ct);
+                return await RecordRejectedAsync(caller, unit, "The database refused the unit: " + errors.Describe(e), ct,
+                    RejectCodes.DatabaseRefused);
             }
         }
     }
@@ -78,7 +79,8 @@ public sealed class SyncPushService(IAppDb db, IDbErrors errors, TimeProvider cl
 
         // 2. Shape.
         if (unit.Kind is null || !UnitKinds.All.Contains(unit.Kind))
-            throw new SyncRejectException($"Unknown unit kind '{unit.Kind}'.");
+            throw new SyncRejectException($"Unknown unit kind '{unit.Kind}'.", RejectCodes.UnknownKind,
+                new Dictionary<string, string> { ["kind"] = unit.Kind ?? "" });
         var rows = SyncJson.ParseRows(unit.Rows);
         var applier = new UnitApplier(db, caller, unit with { ClientTime = unit.ClientTime is { } t ? SyncJson.ToUtcMs(t) : null }, rows, now);
 
@@ -107,7 +109,8 @@ public sealed class SyncPushService(IAppDb db, IDbErrors errors, TimeProvider cl
     }
 
     /// <summary>Nothing of the unit is kept; only the fact that it was rejected (so a retry answers the same).</summary>
-    private async Task<UnitResult> RecordRejectedAsync(SyncCaller caller, PushUnit unit, string reason, CancellationToken ct)
+    private async Task<UnitResult> RecordRejectedAsync(SyncCaller caller, PushUnit unit, string reason, CancellationToken ct,
+        string code = RejectCodes.Invalid, IReadOnlyDictionary<string, string>? data = null)
     {
         db.ChangeTracker.Clear();
         db.Set<ProcessedUnit>().Add(new ProcessedUnit
@@ -125,7 +128,7 @@ public sealed class SyncPushService(IAppDb db, IDbErrors errors, TimeProvider cl
             var done = await db.Set<ProcessedUnit>().AsNoTracking().FirstAsync(p => p.UnitId == unit.UnitId, ct);
             return new UnitResult(unit.UnitId, done.Outcome, null, []);
         }
-        return new UnitResult(unit.UnitId, UnitOutcome.Rejected, reason, []);
+        return new UnitResult(unit.UnitId, UnitOutcome.Rejected, reason, [], code, data);
     }
 }
 

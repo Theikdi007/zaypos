@@ -2,6 +2,8 @@
 // Inverse of wire.dart. Throws FormatException on a row that cannot be
 // stored, so the whole page is rolled back and the cursor stays put.
 
+import 'dart:convert';
+
 import '../../features/customers/domain/debt_entry.dart';
 import '../../features/inventory/domain/stock_movement.dart';
 import '../../features/products/domain/product_modules.dart';
@@ -241,6 +243,8 @@ class WireDecoder {
         entityTable: _so(j, 'entityTable') ?? '',
         entityId: _so(j, 'entityId') ?? '',
         detail: _so(j, 'detail') ?? '',
+        // A JSON object string; tolerate a server that sends the object itself.
+        data: switch (j['data']) { final String s => s, final Map m => jsonEncode(m), _ => null },
         deviceId: _so(j, 'deviceId'),
         resolvedAt: _to(j, 'resolvedAt'),
         createdAt: _t(j, 'createdAt', 'syncIssues'),

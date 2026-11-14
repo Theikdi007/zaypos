@@ -8494,6 +8494,15 @@ class $SyncIssuesTable extends SyncIssues
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  @override
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+    'data',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _deviceIdMeta = const VerificationMeta(
     'deviceId',
   );
@@ -8525,6 +8534,7 @@ class $SyncIssuesTable extends SyncIssues
     entityTable,
     entityId,
     detail,
+    data,
     deviceId,
     resolvedAt,
   ];
@@ -8588,6 +8598,12 @@ class $SyncIssuesTable extends SyncIssues
     } else if (isInserting) {
       context.missing(_detailMeta);
     }
+    if (data.containsKey('data')) {
+      context.handle(
+        _dataMeta,
+        this.data.isAcceptableOrUnknown(data['data']!, _dataMeta),
+      );
+    }
     if (data.containsKey('deviceId')) {
       context.handle(
         _deviceIdMeta,
@@ -8645,6 +8661,10 @@ class $SyncIssuesTable extends SyncIssues
         DriftSqlType.string,
         data['${effectivePrefix}detail'],
       )!,
+      data: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}data'],
+      ),
       deviceId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}deviceId'],
@@ -8688,7 +8708,12 @@ class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
   final String kind;
   final String entityTable;
   final String entityId;
+
+  /// Server's English text — never shown (BUG-26); the app builds the message from [kind] + [data].
   final String detail;
+
+  /// Structured fields as a JSON object string (barcode, productName, others, serial, amounts…). Null on old rows.
+  final String? data;
   final String? deviceId;
   final DateTime? resolvedAt;
   const SyncIssueRow({
@@ -8701,6 +8726,7 @@ class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
     required this.entityTable,
     required this.entityId,
     required this.detail,
+    this.data,
     this.deviceId,
     this.resolvedAt,
   });
@@ -8728,6 +8754,9 @@ class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
     map['entityTable'] = Variable<String>(entityTable);
     map['entityId'] = Variable<String>(entityId);
     map['detail'] = Variable<String>(detail);
+    if (!nullToAbsent || data != null) {
+      map['data'] = Variable<String>(data);
+    }
     if (!nullToAbsent || deviceId != null) {
       map['deviceId'] = Variable<String>(deviceId);
     }
@@ -8752,6 +8781,7 @@ class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
       entityTable: Value(entityTable),
       entityId: Value(entityId),
       detail: Value(detail),
+      data: data == null && nullToAbsent ? const Value.absent() : Value(data),
       deviceId: deviceId == null && nullToAbsent
           ? const Value.absent()
           : Value(deviceId),
@@ -8776,6 +8806,7 @@ class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
       entityTable: serializer.fromJson<String>(json['entityTable']),
       entityId: serializer.fromJson<String>(json['entityId']),
       detail: serializer.fromJson<String>(json['detail']),
+      data: serializer.fromJson<String?>(json['data']),
       deviceId: serializer.fromJson<String?>(json['deviceId']),
       resolvedAt: serializer.fromJson<DateTime?>(json['resolvedAt']),
     );
@@ -8793,6 +8824,7 @@ class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
       'entityTable': serializer.toJson<String>(entityTable),
       'entityId': serializer.toJson<String>(entityId),
       'detail': serializer.toJson<String>(detail),
+      'data': serializer.toJson<String?>(data),
       'deviceId': serializer.toJson<String?>(deviceId),
       'resolvedAt': serializer.toJson<DateTime?>(resolvedAt),
     };
@@ -8808,6 +8840,7 @@ class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
     String? entityTable,
     String? entityId,
     String? detail,
+    Value<String?> data = const Value.absent(),
     Value<String?> deviceId = const Value.absent(),
     Value<DateTime?> resolvedAt = const Value.absent(),
   }) => SyncIssueRow(
@@ -8820,6 +8853,7 @@ class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
     entityTable: entityTable ?? this.entityTable,
     entityId: entityId ?? this.entityId,
     detail: detail ?? this.detail,
+    data: data.present ? data.value : this.data,
     deviceId: deviceId.present ? deviceId.value : this.deviceId,
     resolvedAt: resolvedAt.present ? resolvedAt.value : this.resolvedAt,
   );
@@ -8836,6 +8870,7 @@ class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
           : this.entityTable,
       entityId: data.entityId.present ? data.entityId.value : this.entityId,
       detail: data.detail.present ? data.detail.value : this.detail,
+      data: data.data.present ? data.data.value : this.data,
       deviceId: data.deviceId.present ? data.deviceId.value : this.deviceId,
       resolvedAt: data.resolvedAt.present
           ? data.resolvedAt.value
@@ -8855,6 +8890,7 @@ class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
           ..write('entityTable: $entityTable, ')
           ..write('entityId: $entityId, ')
           ..write('detail: $detail, ')
+          ..write('data: $data, ')
           ..write('deviceId: $deviceId, ')
           ..write('resolvedAt: $resolvedAt')
           ..write(')'))
@@ -8872,6 +8908,7 @@ class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
     entityTable,
     entityId,
     detail,
+    data,
     deviceId,
     resolvedAt,
   );
@@ -8888,6 +8925,7 @@ class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
           other.entityTable == this.entityTable &&
           other.entityId == this.entityId &&
           other.detail == this.detail &&
+          other.data == this.data &&
           other.deviceId == this.deviceId &&
           other.resolvedAt == this.resolvedAt);
 }
@@ -8902,6 +8940,7 @@ class SyncIssuesCompanion extends UpdateCompanion<SyncIssueRow> {
   final Value<String> entityTable;
   final Value<String> entityId;
   final Value<String> detail;
+  final Value<String?> data;
   final Value<String?> deviceId;
   final Value<DateTime?> resolvedAt;
   final Value<int> rowid;
@@ -8915,6 +8954,7 @@ class SyncIssuesCompanion extends UpdateCompanion<SyncIssueRow> {
     this.entityTable = const Value.absent(),
     this.entityId = const Value.absent(),
     this.detail = const Value.absent(),
+    this.data = const Value.absent(),
     this.deviceId = const Value.absent(),
     this.resolvedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -8929,6 +8969,7 @@ class SyncIssuesCompanion extends UpdateCompanion<SyncIssueRow> {
     required String entityTable,
     required String entityId,
     required String detail,
+    this.data = const Value.absent(),
     this.deviceId = const Value.absent(),
     this.resolvedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -8950,6 +8991,7 @@ class SyncIssuesCompanion extends UpdateCompanion<SyncIssueRow> {
     Expression<String>? entityTable,
     Expression<String>? entityId,
     Expression<String>? detail,
+    Expression<String>? data,
     Expression<String>? deviceId,
     Expression<int>? resolvedAt,
     Expression<int>? rowid,
@@ -8964,6 +9006,7 @@ class SyncIssuesCompanion extends UpdateCompanion<SyncIssueRow> {
       if (entityTable != null) 'entityTable': entityTable,
       if (entityId != null) 'entityId': entityId,
       if (detail != null) 'detail': detail,
+      if (data != null) 'data': data,
       if (deviceId != null) 'deviceId': deviceId,
       if (resolvedAt != null) 'resolvedAt': resolvedAt,
       if (rowid != null) 'rowid': rowid,
@@ -8980,6 +9023,7 @@ class SyncIssuesCompanion extends UpdateCompanion<SyncIssueRow> {
     Value<String>? entityTable,
     Value<String>? entityId,
     Value<String>? detail,
+    Value<String?>? data,
     Value<String?>? deviceId,
     Value<DateTime?>? resolvedAt,
     Value<int>? rowid,
@@ -8994,6 +9038,7 @@ class SyncIssuesCompanion extends UpdateCompanion<SyncIssueRow> {
       entityTable: entityTable ?? this.entityTable,
       entityId: entityId ?? this.entityId,
       detail: detail ?? this.detail,
+      data: data ?? this.data,
       deviceId: deviceId ?? this.deviceId,
       resolvedAt: resolvedAt ?? this.resolvedAt,
       rowid: rowid ?? this.rowid,
@@ -9036,6 +9081,9 @@ class SyncIssuesCompanion extends UpdateCompanion<SyncIssueRow> {
     if (detail.present) {
       map['detail'] = Variable<String>(detail.value);
     }
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
+    }
     if (deviceId.present) {
       map['deviceId'] = Variable<String>(deviceId.value);
     }
@@ -9062,6 +9110,7 @@ class SyncIssuesCompanion extends UpdateCompanion<SyncIssueRow> {
           ..write('entityTable: $entityTable, ')
           ..write('entityId: $entityId, ')
           ..write('detail: $detail, ')
+          ..write('data: $data, ')
           ..write('deviceId: $deviceId, ')
           ..write('resolvedAt: $resolvedAt, ')
           ..write('rowid: $rowid')
@@ -9173,6 +9222,28 @@ class $OutboxTable extends Outbox with TableInfo<$OutboxTable, OutboxRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _rejectCodeMeta = const VerificationMeta(
+    'rejectCode',
+  );
+  @override
+  late final GeneratedColumn<String> rejectCode = GeneratedColumn<String>(
+    'rejectCode',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _rejectDataMeta = const VerificationMeta(
+    'rejectData',
+  );
+  @override
+  late final GeneratedColumn<String> rejectData = GeneratedColumn<String>(
+    'rejectData',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     seq,
@@ -9184,6 +9255,8 @@ class $OutboxTable extends Outbox with TableInfo<$OutboxTable, OutboxRow> {
     attempts,
     lastError,
     rejectReason,
+    rejectCode,
+    rejectData,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -9256,6 +9329,18 @@ class $OutboxTable extends Outbox with TableInfo<$OutboxTable, OutboxRow> {
         ),
       );
     }
+    if (data.containsKey('rejectCode')) {
+      context.handle(
+        _rejectCodeMeta,
+        rejectCode.isAcceptableOrUnknown(data['rejectCode']!, _rejectCodeMeta),
+      );
+    }
+    if (data.containsKey('rejectData')) {
+      context.handle(
+        _rejectDataMeta,
+        rejectData.isAcceptableOrUnknown(data['rejectData']!, _rejectDataMeta),
+      );
+    }
     return context;
   }
 
@@ -9303,6 +9388,14 @@ class $OutboxTable extends Outbox with TableInfo<$OutboxTable, OutboxRow> {
         DriftSqlType.string,
         data['${effectivePrefix}rejectReason'],
       ),
+      rejectCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rejectCode'],
+      ),
+      rejectData: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rejectData'],
+      ),
     );
   }
 
@@ -9333,8 +9426,14 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
   /// Network / server error (retryable).
   final String? lastError;
 
-  /// Server reason for `rejected` (needs a human).
+  /// Server reason for `rejected` (English; only copied for Support, never shown — BUG-26).
   final String? rejectReason;
+
+  /// Server reject code (fieldTooLong, notFound, …) — the shown message is built from it.
+  final String? rejectCode;
+
+  /// Reject fields as a JSON object string ({"field":"products.name","max":"150"}).
+  final String? rejectData;
   const OutboxRow({
     required this.seq,
     required this.unitId,
@@ -9345,6 +9444,8 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
     required this.attempts,
     this.lastError,
     this.rejectReason,
+    this.rejectCode,
+    this.rejectData,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -9366,6 +9467,12 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
     if (!nullToAbsent || rejectReason != null) {
       map['rejectReason'] = Variable<String>(rejectReason);
     }
+    if (!nullToAbsent || rejectCode != null) {
+      map['rejectCode'] = Variable<String>(rejectCode);
+    }
+    if (!nullToAbsent || rejectData != null) {
+      map['rejectData'] = Variable<String>(rejectData);
+    }
     return map;
   }
 
@@ -9384,6 +9491,12 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
       rejectReason: rejectReason == null && nullToAbsent
           ? const Value.absent()
           : Value(rejectReason),
+      rejectCode: rejectCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rejectCode),
+      rejectData: rejectData == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rejectData),
     );
   }
 
@@ -9404,6 +9517,8 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
       attempts: serializer.fromJson<int>(json['attempts']),
       lastError: serializer.fromJson<String?>(json['lastError']),
       rejectReason: serializer.fromJson<String?>(json['rejectReason']),
+      rejectCode: serializer.fromJson<String?>(json['rejectCode']),
+      rejectData: serializer.fromJson<String?>(json['rejectData']),
     );
   }
   @override
@@ -9421,6 +9536,8 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
       'attempts': serializer.toJson<int>(attempts),
       'lastError': serializer.toJson<String?>(lastError),
       'rejectReason': serializer.toJson<String?>(rejectReason),
+      'rejectCode': serializer.toJson<String?>(rejectCode),
+      'rejectData': serializer.toJson<String?>(rejectData),
     };
   }
 
@@ -9434,6 +9551,8 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
     int? attempts,
     Value<String?> lastError = const Value.absent(),
     Value<String?> rejectReason = const Value.absent(),
+    Value<String?> rejectCode = const Value.absent(),
+    Value<String?> rejectData = const Value.absent(),
   }) => OutboxRow(
     seq: seq ?? this.seq,
     unitId: unitId ?? this.unitId,
@@ -9444,6 +9563,8 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
     attempts: attempts ?? this.attempts,
     lastError: lastError.present ? lastError.value : this.lastError,
     rejectReason: rejectReason.present ? rejectReason.value : this.rejectReason,
+    rejectCode: rejectCode.present ? rejectCode.value : this.rejectCode,
+    rejectData: rejectData.present ? rejectData.value : this.rejectData,
   );
   OutboxRow copyWithCompanion(OutboxCompanion data) {
     return OutboxRow(
@@ -9460,6 +9581,12 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
       rejectReason: data.rejectReason.present
           ? data.rejectReason.value
           : this.rejectReason,
+      rejectCode: data.rejectCode.present
+          ? data.rejectCode.value
+          : this.rejectCode,
+      rejectData: data.rejectData.present
+          ? data.rejectData.value
+          : this.rejectData,
     );
   }
 
@@ -9474,7 +9601,9 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
           ..write('status: $status, ')
           ..write('attempts: $attempts, ')
           ..write('lastError: $lastError, ')
-          ..write('rejectReason: $rejectReason')
+          ..write('rejectReason: $rejectReason, ')
+          ..write('rejectCode: $rejectCode, ')
+          ..write('rejectData: $rejectData')
           ..write(')'))
         .toString();
   }
@@ -9490,6 +9619,8 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
     attempts,
     lastError,
     rejectReason,
+    rejectCode,
+    rejectData,
   );
   @override
   bool operator ==(Object other) =>
@@ -9503,7 +9634,9 @@ class OutboxRow extends DataClass implements Insertable<OutboxRow> {
           other.status == this.status &&
           other.attempts == this.attempts &&
           other.lastError == this.lastError &&
-          other.rejectReason == this.rejectReason);
+          other.rejectReason == this.rejectReason &&
+          other.rejectCode == this.rejectCode &&
+          other.rejectData == this.rejectData);
 }
 
 class OutboxCompanion extends UpdateCompanion<OutboxRow> {
@@ -9516,6 +9649,8 @@ class OutboxCompanion extends UpdateCompanion<OutboxRow> {
   final Value<int> attempts;
   final Value<String?> lastError;
   final Value<String?> rejectReason;
+  final Value<String?> rejectCode;
+  final Value<String?> rejectData;
   const OutboxCompanion({
     this.seq = const Value.absent(),
     this.unitId = const Value.absent(),
@@ -9526,6 +9661,8 @@ class OutboxCompanion extends UpdateCompanion<OutboxRow> {
     this.attempts = const Value.absent(),
     this.lastError = const Value.absent(),
     this.rejectReason = const Value.absent(),
+    this.rejectCode = const Value.absent(),
+    this.rejectData = const Value.absent(),
   });
   OutboxCompanion.insert({
     this.seq = const Value.absent(),
@@ -9537,6 +9674,8 @@ class OutboxCompanion extends UpdateCompanion<OutboxRow> {
     this.attempts = const Value.absent(),
     this.lastError = const Value.absent(),
     this.rejectReason = const Value.absent(),
+    this.rejectCode = const Value.absent(),
+    this.rejectData = const Value.absent(),
   }) : unitId = Value(unitId),
        kind = Value(kind),
        rowsJson = Value(rowsJson),
@@ -9551,6 +9690,8 @@ class OutboxCompanion extends UpdateCompanion<OutboxRow> {
     Expression<int>? attempts,
     Expression<String>? lastError,
     Expression<String>? rejectReason,
+    Expression<String>? rejectCode,
+    Expression<String>? rejectData,
   }) {
     return RawValuesInsertable({
       if (seq != null) 'seq': seq,
@@ -9562,6 +9703,8 @@ class OutboxCompanion extends UpdateCompanion<OutboxRow> {
       if (attempts != null) 'attempts': attempts,
       if (lastError != null) 'lastError': lastError,
       if (rejectReason != null) 'rejectReason': rejectReason,
+      if (rejectCode != null) 'rejectCode': rejectCode,
+      if (rejectData != null) 'rejectData': rejectData,
     });
   }
 
@@ -9575,6 +9718,8 @@ class OutboxCompanion extends UpdateCompanion<OutboxRow> {
     Value<int>? attempts,
     Value<String?>? lastError,
     Value<String?>? rejectReason,
+    Value<String?>? rejectCode,
+    Value<String?>? rejectData,
   }) {
     return OutboxCompanion(
       seq: seq ?? this.seq,
@@ -9586,6 +9731,8 @@ class OutboxCompanion extends UpdateCompanion<OutboxRow> {
       attempts: attempts ?? this.attempts,
       lastError: lastError ?? this.lastError,
       rejectReason: rejectReason ?? this.rejectReason,
+      rejectCode: rejectCode ?? this.rejectCode,
+      rejectData: rejectData ?? this.rejectData,
     );
   }
 
@@ -9621,6 +9768,12 @@ class OutboxCompanion extends UpdateCompanion<OutboxRow> {
     if (rejectReason.present) {
       map['rejectReason'] = Variable<String>(rejectReason.value);
     }
+    if (rejectCode.present) {
+      map['rejectCode'] = Variable<String>(rejectCode.value);
+    }
+    if (rejectData.present) {
+      map['rejectData'] = Variable<String>(rejectData.value);
+    }
     return map;
   }
 
@@ -9635,7 +9788,9 @@ class OutboxCompanion extends UpdateCompanion<OutboxRow> {
           ..write('status: $status, ')
           ..write('attempts: $attempts, ')
           ..write('lastError: $lastError, ')
-          ..write('rejectReason: $rejectReason')
+          ..write('rejectReason: $rejectReason, ')
+          ..write('rejectCode: $rejectCode, ')
+          ..write('rejectData: $rejectData')
           ..write(')'))
         .toString();
   }
@@ -14120,6 +14275,7 @@ typedef $$SyncIssuesTableCreateCompanionBuilder = SyncIssuesCompanion Function({
   required String entityTable,
   required String entityId,
   required String detail,
+  Value<String?> data,
   Value<String?> deviceId,
   Value<DateTime?> resolvedAt,
   Value<int> rowid,
@@ -14134,6 +14290,7 @@ typedef $$SyncIssuesTableUpdateCompanionBuilder = SyncIssuesCompanion Function({
   Value<String> entityTable,
   Value<String> entityId,
   Value<String> detail,
+  Value<String?> data,
   Value<String?> deviceId,
   Value<DateTime?> resolvedAt,
   Value<int> rowid,
@@ -14193,6 +14350,11 @@ class $$SyncIssuesTableFilterComposer
 
   ColumnFilters<String> get detail => $composableBuilder(
     column: $table.detail,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get data => $composableBuilder(
+    column: $table.data,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -14262,6 +14424,11 @@ class $$SyncIssuesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get deviceId => $composableBuilder(
     column: $table.deviceId,
     builder: (column) => ColumnOrderings(column),
@@ -14310,6 +14477,9 @@ class $$SyncIssuesTableAnnotationComposer
 
   GeneratedColumn<String> get detail =>
       $composableBuilder(column: $table.detail, builder: (column) => column);
+
+  GeneratedColumn<String> get data =>
+      $composableBuilder(column: $table.data, builder: (column) => column);
 
   GeneratedColumn<String> get deviceId =>
       $composableBuilder(column: $table.deviceId, builder: (column) => column);
@@ -14361,6 +14531,7 @@ class $$SyncIssuesTableTableManager
                 Value<String> entityTable = const Value.absent(),
                 Value<String> entityId = const Value.absent(),
                 Value<String> detail = const Value.absent(),
+                Value<String?> data = const Value.absent(),
                 Value<String?> deviceId = const Value.absent(),
                 Value<DateTime?> resolvedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -14374,6 +14545,7 @@ class $$SyncIssuesTableTableManager
                 entityTable: entityTable,
                 entityId: entityId,
                 detail: detail,
+                data: data,
                 deviceId: deviceId,
                 resolvedAt: resolvedAt,
                 rowid: rowid,
@@ -14389,6 +14561,7 @@ class $$SyncIssuesTableTableManager
                 required String entityTable,
                 required String entityId,
                 required String detail,
+                Value<String?> data = const Value.absent(),
                 Value<String?> deviceId = const Value.absent(),
                 Value<DateTime?> resolvedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -14402,6 +14575,7 @@ class $$SyncIssuesTableTableManager
                 entityTable: entityTable,
                 entityId: entityId,
                 detail: detail,
+                data: data,
                 deviceId: deviceId,
                 resolvedAt: resolvedAt,
                 rowid: rowid,
@@ -14450,6 +14624,8 @@ typedef $$OutboxTableCreateCompanionBuilder = OutboxCompanion Function({
   Value<int> attempts,
   Value<String?> lastError,
   Value<String?> rejectReason,
+  Value<String?> rejectCode,
+  Value<String?> rejectData,
 });
 typedef $$OutboxTableUpdateCompanionBuilder = OutboxCompanion Function({
   Value<int> seq,
@@ -14461,6 +14637,8 @@ typedef $$OutboxTableUpdateCompanionBuilder = OutboxCompanion Function({
   Value<int> attempts,
   Value<String?> lastError,
   Value<String?> rejectReason,
+  Value<String?> rejectCode,
+  Value<String?> rejectData,
 });
 
 class $$OutboxTableFilterComposer
@@ -14515,6 +14693,16 @@ class $$OutboxTableFilterComposer
 
   ColumnFilters<String> get rejectReason => $composableBuilder(
     column: $table.rejectReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rejectCode => $composableBuilder(
+    column: $table.rejectCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rejectData => $composableBuilder(
+    column: $table.rejectData,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -14572,6 +14760,16 @@ class $$OutboxTableOrderingComposer
     column: $table.rejectReason,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get rejectCode => $composableBuilder(
+    column: $table.rejectCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rejectData => $composableBuilder(
+    column: $table.rejectData,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$OutboxTableAnnotationComposer
@@ -14613,6 +14811,16 @@ class $$OutboxTableAnnotationComposer
     column: $table.rejectReason,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get rejectCode => $composableBuilder(
+    column: $table.rejectCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rejectData => $composableBuilder(
+    column: $table.rejectData,
+    builder: (column) => column,
+  );
 }
 
 class $$OutboxTableTableManager
@@ -14652,6 +14860,8 @@ class $$OutboxTableTableManager
                 Value<int> attempts = const Value.absent(),
                 Value<String?> lastError = const Value.absent(),
                 Value<String?> rejectReason = const Value.absent(),
+                Value<String?> rejectCode = const Value.absent(),
+                Value<String?> rejectData = const Value.absent(),
               }) => OutboxCompanion(
                 seq: seq,
                 unitId: unitId,
@@ -14662,6 +14872,8 @@ class $$OutboxTableTableManager
                 attempts: attempts,
                 lastError: lastError,
                 rejectReason: rejectReason,
+                rejectCode: rejectCode,
+                rejectData: rejectData,
               ),
           createCompanionCallback:
               ({
@@ -14674,6 +14886,8 @@ class $$OutboxTableTableManager
                 Value<int> attempts = const Value.absent(),
                 Value<String?> lastError = const Value.absent(),
                 Value<String?> rejectReason = const Value.absent(),
+                Value<String?> rejectCode = const Value.absent(),
+                Value<String?> rejectData = const Value.absent(),
               }) => OutboxCompanion.insert(
                 seq: seq,
                 unitId: unitId,
@@ -14684,6 +14898,8 @@ class $$OutboxTableTableManager
                 attempts: attempts,
                 lastError: lastError,
                 rejectReason: rejectReason,
+                rejectCode: rejectCode,
+                rejectData: rejectData,
               ),
           withReferenceMapper: (p0) => p0
               .map(

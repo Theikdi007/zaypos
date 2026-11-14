@@ -16,7 +16,48 @@ public sealed record PushUnit(Guid UnitId, string? Kind, DateTime? ClientTime, J
 
 public sealed record PushResponse(IReadOnlyList<UnitResult> Results, DateTime ServerTime);
 
-public sealed record UnitResult(Guid UnitId, UnitOutcome Outcome, string? Reason, IReadOnlyList<SyncIssueKind> Issues);
+/// <summary>
+/// <see cref="Reason"/> = English (logs, old apps). Apps show their own message from <see cref="Code"/> +
+/// <see cref="Data"/> (see <see cref="RejectCodes"/>); both null except for a fresh rejection.
+/// </summary>
+public sealed record UnitResult(Guid UnitId, UnitOutcome Outcome, string? Reason, IReadOnlyList<SyncIssueKind> Issues,
+    string? Code = null, IReadOnlyDictionary<string, string>? Data = null);
+
+/// <summary>SyncIssues.Data: the issue's structured fields as a camelCase JSON object that always fits the column.</summary>
+public static class SyncIssueData
+{
+    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+
+    /// <summary>If it would not fit, long texts are cut and name lists keep one name (othersCount stays exact).</summary>
+    public static string Serialize(Dictionary<string, object?> data)
+    {
+        var json = JsonSerializer.Serialize(data, Json);
+        if (json.Length <= SyncLimits.IssueDataMaxLength) return json;
+        var cut = data.ToDictionary(kv => kv.Key, kv => kv.Value switch
+        {
+            string s when s.Length > 100 => s[..100],
+            IEnumerable<string> names => names.Take(1).Select(n => n.Length > 100 ? n[..100] : n).ToList(),
+            var v => v,
+        });
+        return JsonSerializer.Serialize(cut, Json);
+    }
+}
+
+/// <summary>Stable codes of a rejected unit. Data keys: field (wire "table.column"), min, max, kind.</summary>
+public static class RejectCodes
+{
+    public const string FieldRequired = "fieldRequired";
+    public const string FieldEmpty = "fieldEmpty";
+    public const string FieldTooLong = "fieldTooLong";
+    public const string FieldNotAscii = "fieldNotAscii";
+    public const string FieldTooSmall = "fieldTooSmall";
+    public const string FieldTooLarge = "fieldTooLarge";
+    public const string UnknownKind = "unknownKind";
+    public const string NotFound = "notFound";
+    public const string DatabaseRefused = "databaseRefused";
+    /// <summary>Any other shape problem (only app bugs get here).</summary>
+    public const string Invalid = "invalid";
+}
 
 public sealed record PullResponse(PullChanges Changes, string Cursor, bool HasMore);
 
@@ -43,7 +84,12 @@ public static class UnitKinds
 }
 
 /// <summary>A shape/reference problem: the unit is <c>rejected</c> (README §3.1 step 2; only bugs get here).</summary>
-public sealed class SyncRejectException(string reason) : Exception(reason);
+public sealed class SyncRejectException(string reason, string code = RejectCodes.Invalid,
+    IReadOnlyDictionary<string, string>? data = null) : Exception(reason)
+{
+    public string Code { get; } = code;
+    public IReadOnlyDictionary<string, string>? Fields { get; } = data;
+}
 
 /// <summary>Pull cursor = 8-byte rowversion as 16 hex chars. "0" or empty = from the start.</summary>
 public static class SyncCursor

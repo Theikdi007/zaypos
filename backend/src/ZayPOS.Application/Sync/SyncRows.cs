@@ -167,6 +167,8 @@ public sealed class SyncIssueRow : SyncRow
     public string? EntityTable { get; init; }
     public Guid? EntityId { get; init; }
     public string? Detail { get; init; }
+    /// <summary>JSON object string: the issue's structured fields (see UnitApplier.Issue). Apps build the message from Kind + Data.</summary>
+    public string? Data { get; init; }
     public Guid? DeviceId { get; init; }
     public DateTime? ResolvedAt { get; init; }
 }

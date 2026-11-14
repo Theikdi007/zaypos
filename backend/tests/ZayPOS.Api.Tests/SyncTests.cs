@@ -105,6 +105,8 @@ public class SyncTests(SqlServerFixture sql)
 
         first.Outcome.Should().Be(UnitOutcome.Rejected);
         first.Reason.Should().Contain("stockMovements.productId");
+        first.Code.Should().Be(RejectCodes.NotFound);
+        first.Data.Should().BeEquivalentTo(new Dictionary<string, string> { ["field"] = "stockMovements.productId" });
         retry.Outcome.Should().Be(UnitOutcome.Rejected);
         await using var db = sql.CreateContext(shop.TenantId);
         (await db.Sales.AnyAsync()).Should().BeFalse("nothing of a rejected unit is kept");
@@ -399,6 +401,43 @@ public class SyncTests(SqlServerFixture sql)
         await PushOne(shop, ProductUnit(Guid.CreateVersion7(), "Coke A", Now(), barcode: "8850999320014"));
         var second = await PushOne(shop, ProductUnit(Guid.CreateVersion7(), "Coke B", Now(), barcode: "8850999320014"));
         second.Issues.Should().Equal(SyncIssueKind.DuplicateBarcode);
+
+        // BUG-26: structured fields for the app's own (Burmese) message, also on pull; English detail kept.
+        var issue = (await PullAll(shop)).Changes.SyncIssues.Single();
+        issue.Detail.Should().Be("Barcode 8850999320014 is also used by: Coke A.");
+        using var data = JsonDocument.Parse(issue.Data!);
+        data.RootElement.GetProperty("barcode").GetString().Should().Be("8850999320014");
+        data.RootElement.GetProperty("productName").GetString().Should().Be("Coke B");
+        data.RootElement.GetProperty("others").EnumerateArray().Select(e => e.GetString()).Should().Equal("Coke A");
+        data.RootElement.GetProperty("othersCount").GetInt32().Should().Be(1);
+    }
+
+    [Fact]
+    public void Issue_data_caps_the_other_names_and_always_fits_the_column()
+    {
+        var names = Enumerable.Range(1, 40).Select(i => new string('က', 150) + i).ToList();
+        var json = SyncIssueData.Serialize(new()
+        {
+            ["barcode"] = "1", ["productName"] = new string('ခ', 150), ["others"] = names.Take(SyncLimits.IssueDataMaxNames).ToList(),
+            ["othersCount"] = names.Count,
+        });
+        json.Length.Should().BeLessThanOrEqualTo(SyncLimits.IssueDataMaxLength);
+        JsonDocument.Parse(json).RootElement.GetProperty("othersCount").GetInt32().Should().Be(40);
+    }
+
+    [Fact]
+    public async Task Negative_stock_and_unknown_kind_carry_structured_fields()
+    {
+        var shop = await NewShop();
+        var product = await AddProduct(shop, stock: 1000);
+        await PushOne(shop, Checkout(shop, "A-0001", (product, 3000, 500)));
+        var unknown = await PushOne(shop, Unit("teleport", new { }));
+
+        using var data = JsonDocument.Parse((await PullAll(shop)).Changes.SyncIssues.Single().Data!);
+        data.RootElement.GetProperty("stockMilli").GetInt64().Should().Be(-2000);
+        data.RootElement.GetProperty("productName").GetString().Should().NotBeNullOrEmpty();
+        unknown.Code.Should().Be(RejectCodes.UnknownKind);
+        unknown.Data.Should().BeEquivalentTo(new Dictionary<string, string> { ["kind"] = "teleport" });
     }
 
     [Fact]

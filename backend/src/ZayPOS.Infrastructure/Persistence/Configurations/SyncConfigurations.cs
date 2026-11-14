@@ -27,6 +27,7 @@ internal sealed class SyncIssueConfiguration : IEntityTypeConfiguration<SyncIssu
         b.Property(x => x.Kind).CamelString(30);
         b.Property(x => x.EntityTable).Varchar(40);
         b.Property(x => x.Detail).Nvarchar(400);
+        b.Property(x => x.Data).Nvarchar(2000); // = SyncLimits.IssueDataMaxLength
 
         b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId).HasConstraintName("FK_SyncIssues_Tenant");
     }

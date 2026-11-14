@@ -1181,6 +1181,11 @@ namespace ZayPOS.Infrastructure.Persistence.Migrations
                         .HasPrecision(3)
                         .HasColumnType("datetime2(3)");
 
+                    b.Property<string>("Data")
+                        .HasMaxLength(2000)
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasPrecision(3)
                         .HasColumnType("datetime2(3)");

@@ -237,7 +237,11 @@ class SyncIssues extends Table with SyncedColumns {
   TextColumn get kind => text()();
   TextColumn get entityTable => text()();
   TextColumn get entityId => text()();
+  /// Server's English text — never shown (BUG-26); the app builds the message from [kind] + [data].
   TextColumn get detail => text()();
+
+  /// Structured fields as a JSON object string (barcode, productName, others, serial, amounts…). Null on old rows.
+  TextColumn get data => text().nullable()();
   TextColumn get deviceId => text().nullable()();
   IntColumn get resolvedAt => integer().map(const UtcMsConverter()).nullable()();
 }
@@ -270,8 +274,14 @@ class Outbox extends Table {
   /// Network / server error (retryable).
   TextColumn get lastError => text().nullable()();
 
-  /// Server reason for `rejected` (needs a human).
+  /// Server reason for `rejected` (English; only copied for Support, never shown — BUG-26).
   TextColumn get rejectReason => text().nullable()();
+
+  /// Server reject code (fieldTooLong, notFound, …) — the shown message is built from it.
+  TextColumn get rejectCode => text().nullable()();
+
+  /// Reject fields as a JSON object string ({"field":"products.name","max":"150"}).
+  TextColumn get rejectData => text().nullable()();
 }
 
 /// pullCursor, lastPushAt, lastPullAt, limitsJson, limitsEtag, …
@@ -309,14 +319,18 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
         onUpgrade: (m, from, to) async {
-          // schemaVersion 1 is the first schema; add steps here (drift_dev make-migrations).
-          throw StateError('No migration from schema $from to $to');
+          if (from < 2) {
+            // v2 (BUG-26): structured issue / reject fields; the app builds Burmese messages from them.
+            await m.addColumn(syncIssues, syncIssues.data);
+            await m.addColumn(outbox, outbox.rejectCode);
+            await m.addColumn(outbox, outbox.rejectData);
+          }
         },
       );
 

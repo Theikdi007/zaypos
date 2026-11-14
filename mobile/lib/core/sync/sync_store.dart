@@ -123,6 +123,8 @@ class SyncStore {
               await (db.update(db.outbox)..where((x) => x.seq.equals(o.seq))).write(OutboxCompanion(
                     status: const Value(OutboxStatus.rejected),
                     rejectReason: Value(r.reason ?? 'rejected'),
+                    rejectCode: Value(r.code),
+                    rejectData: Value(r.data.isEmpty ? null : jsonEncode(r.data)),
                     lastError: const Value(null),
                   ));
               return true;
@@ -334,6 +336,8 @@ class SyncStore {
               attempts: const Value(0),
               lastError: const Value(null),
               rejectReason: const Value(null),
+              rejectCode: const Value(null),
+              rejectData: const Value(null),
             ));
       });
 
