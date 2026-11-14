@@ -18,6 +18,7 @@ import '../../../core/widgets/stat_card.dart';
 import '../../auth/data/session.dart';
 import '../../customers/data/customer_providers.dart';
 import '../../products/data/product_providers.dart';
+import '../../products/presentation/products_screen.dart' show ProductFilter, productMatches;
 import '../../sales/data/sales_providers.dart';
 import '../../sales/presentation/widgets/sale_row.dart';
 import '../../sync/presentation/sync_chip.dart';
@@ -45,7 +46,8 @@ class DashboardScreen extends ConsumerWidget {
 
     final debtors = accounts.where((a) => a.hasDebt);
     final debtTotal = debtors.fold(0, (a, c) => a + c.balance);
-    final lowCount = products.where((p) => p.isLow || p.isOut).length;
+    // Same predicate as the Products "Stock နည်း" filter (untracked excluded).
+    final lowCount = products.where((p) => productMatches(ProductFilter.low, p)).length;
     final noPriceCount = products.where((p) => p.needsPrice).length;
 
     final debtCard = StatCard(

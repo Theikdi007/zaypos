@@ -161,13 +161,21 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       itemCount: items.length,
       itemBuilder: (_, i) {
         final p = items[i];
-        final low = p.stockMilli <= Qty.units(3);
+        final low = !p.isUntracked && p.stockMilli <= Qty.units(3);
+        final stockLabel = !features.stock
+            ? null
+            : p.isUntracked
+                // No room beside the price badge on a tile; the badge wins.
+                ? (p.needsPrice ? null : untrackedStockLabel)
+                : low
+                    ? 'ကျန် ${Qty.format(p.stockMilli)} ခု'
+                    : 'Stock ${Qty.format(p.stockMilli)}';
         return ProductTile(
           name: p.name,
           initial: p.initial,
           tint: Color(p.tint),
           price: p.price,
-          stockLabel: features.stock ? (low ? 'ကျန် ${Qty.format(p.stockMilli)} ခု' : 'Stock ${Qty.format(p.stockMilli)}') : null,
+          stockLabel: stockLabel,
           stockLow: low,
           qtyMilli: cart.qtyOf(p.id),
           needsPrice: p.needsPrice,

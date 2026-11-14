@@ -22,14 +22,21 @@ class DriftStockRepository implements StockRepository {
       .watch();
 
   @override
-  Stream<Map<String, int>> watchStockByProduct() {
+  Stream<Map<String, StockLevel>> watchStockByProduct() {
     final m = db.stockMovements;
     final sum = m.qtyMilli.sum();
+    // Same rule as [startsTracking]: any live restock/adjustment > 0.
+    final countsIn = m.qtyMilli.isBiggerThanValue(0) &
+        m.type.isIn([StockMovementType.restock.name, StockMovementType.adjustment.name]);
+    final tracked = CaseWhenExpression<int>(cases: [CaseWhen(countsIn, then: const Constant(1))], orElse: const Constant(0)).max();
     final q = db.selectOnly(m)
-      ..addColumns([m.productId, sum])
+      ..addColumns([m.productId, sum, tracked])
       ..where(m.deletedAt.isNull())
       ..groupBy([m.productId]);
-    return q.watch().map((rows) => {for (final r in rows) r.read(m.productId)!: r.read(sum) ?? 0});
+    return q.watch().map((rows) => {
+          for (final r in rows)
+            r.read(m.productId)!: StockLevel(r.read(sum) ?? 0, tracked: (r.read(tracked) ?? 0) > 0),
+        });
   }
 
   @override

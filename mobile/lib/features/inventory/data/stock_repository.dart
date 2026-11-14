@@ -7,9 +7,10 @@ abstract interface class StockRepository {
   /// Live movements, all products.
   Stream<List<StockMovement>> watchAll();
 
-  /// Stock on hand per product id (milli-units): SUM of live movements.
-  /// Products without movements are absent (= 0).
-  Stream<Map<String, int>> watchStockByProduct();
+  /// Stock on hand per product id (milli-units, SUM of live movements) and
+  /// whether it is tracked yet (see [startsTracking]). Products without
+  /// movements are absent (= [StockLevel.untracked]).
+  Stream<Map<String, StockLevel>> watchStockByProduct();
 
   Future<void> addAll(List<StockMovement> movements);
 }

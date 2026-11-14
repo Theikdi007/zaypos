@@ -497,7 +497,12 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
             .ToDictionaryAsync(x => x.Key, x => x.Sum, _ct);
     }
 
-    /// <summary>Flag when a product's ledger goes from >= 0 to below 0 in this unit (stock feature on).</summary>
+    /// <summary>
+    /// Flag when a product's ledger goes from >= 0 to below 0 in this unit (stock feature on).
+    /// Products whose stock is not tracked yet — no live restock/adjustment with qty > 0 ever,
+    /// e.g. imported presets — are skipped: their ledger sum means nothing yet.
+    /// Mobile twin: <c>startsTracking</c> in stock_movement.dart.
+    /// </summary>
     private async Task CheckNegativeStockAsync(Dictionary<Guid, long> before)
     {
         if (_stockTouched.Count == 0) return;
@@ -505,8 +510,15 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
             .Where(f => f.FeatureKey == FeatureKeys.Stock).Select(f => f.Enabled).FirstOrDefaultAsync(_ct);
         if (!stockOn) return;
 
+        var ids = _stockTouched.ToList();
+        var tracked = (await db.Set<StockMovement>()
+            .Where(m => ids.Contains(m.ProductId) && m.DeletedAt == null && m.QtyMilli > 0
+                && (m.Type == StockMovementType.Restock || m.Type == StockMovementType.Adjustment))
+            .Select(m => m.ProductId).Distinct().ToListAsync(_ct)).ToHashSet();
+
         foreach (var (productId, after) in await StockSumsAsync())
         {
+            if (!tracked.Contains(productId)) continue;
             if (after >= 0 || before.GetValueOrDefault(productId) < 0) continue;
             var name = await db.Set<Product>().Where(p => p.Id == productId).Select(p => p.Name).FirstOrDefaultAsync(_ct);
             Issue(SyncIssueKind.NegativeStock, "Products", productId,

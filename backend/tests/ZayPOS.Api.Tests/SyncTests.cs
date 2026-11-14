@@ -181,6 +181,40 @@ public class SyncTests(SqlServerFixture sql)
     }
 
     [Fact]
+    public async Task Untracked_products_never_raise_negativeStock_until_counted_in()
+    {
+        var shop = await NewShop(); // grocery: stock feature on
+        var preset = await AddProduct(shop, stock: 0); // imported preset: no movements
+        var counted = await AddProduct(shop, stock: 0);
+
+        // Sales, a void return and a negative adjustment do not start tracking.
+        var sale = Checkout(shop, "A-0001", (preset, 2000, 500));
+        (await PushOne(shop, sale)).Issues.Should().BeEmpty("never counted in: the ledger means nothing yet");
+        (await PushOne(shop, VoidUnit(shop, sale, null))).Issues.Should().BeEmpty();
+        (await PushOne(shop, Unit("stockAdjust", new { stockMovements = new[] { Movement(preset, -1000, "adjustment") } })))
+            .Issues.Should().BeEmpty();
+        (await PushOne(shop, Checkout(shop, "A-0002", (preset, 1000, 500)))).Issues.Should().BeEmpty();
+
+        // A deleted restock does not count either.
+        var t = Now();
+        (await PushOne(shop, Unit("restock", new
+        {
+            stockMovements = new[] { new { id = Guid.CreateVersion7(), productId = counted, type = "restock", qtyMilli = 5000L, createdAt = t, updatedAt = t, deletedAt = (DateTime?)t } },
+        }))).Outcome.Should().Be(UnitOutcome.Applied);
+        (await PushOne(shop, Checkout(shop, "A-0003", (counted, 1000, 500)))).Issues.Should().BeEmpty();
+
+        // Counted in (adjustment > 0, the mobile opening count): tracked from now on.
+        (await PushOne(shop, Unit("stockAdjust", new { stockMovements = new[] { Movement(counted, 3000, "adjustment") } })))
+            .Issues.Should().BeEmpty();
+        var r = await PushOne(shop, Checkout(shop, "A-0004", (counted, 4000, 500)));
+        r.Issues.Should().Equal(SyncIssueKind.NegativeStock);
+
+        await using var db = sql.CreateContext(shop.TenantId);
+        (await Stock(db, preset)).Should().Be(-2000);
+        (await db.SyncIssues.SingleAsync()).EntityId.Should().Be(counted);
+    }
+
+    [Fact]
     public async Task Pull_returns_rows_after_the_cursor_in_pages_and_never_another_tenants_rows()
     {
         var shop = await NewShop();
@@ -407,7 +441,7 @@ public class SyncTests(SqlServerFixture sql)
         var shop = await NewShop();
         var id = Guid.CreateVersion7();
         await PushOne(shop, ProductUnit(id, "gone", Now(), deletedAt: Now()));
-        var product = await AddProduct(shop, stock: 0);
+        var product = await AddProduct(shop, stock: 500); // tracked: selling 1000 goes negative
         await PushOne(shop, Checkout(shop, "A-0001", (product, 1000, 100))); // negative stock issue
 
         var page = await PullAll(shop);
@@ -422,7 +456,7 @@ public class SyncTests(SqlServerFixture sql)
     public async Task Owner_resolves_a_sync_issue_once_and_every_phone_pulls_it()
     {
         var shop = await NewShop();
-        var product = await AddProduct(shop, stock: 0);
+        var product = await AddProduct(shop, stock: 500); // tracked: selling 1000 goes negative
         await PushOne(shop, Checkout(shop, "A-0001", (product, 1000, 100))); // negative stock issue
         var cursor = (await PullAll(shop)).Cursor;
         Guid issueId;
@@ -449,7 +483,7 @@ public class SyncTests(SqlServerFixture sql)
     {
         var shop = await NewShop();
         var other = await NewShop();
-        var product = await AddProduct(shop, stock: 0);
+        var product = await AddProduct(shop, stock: 500); // tracked: selling 1000 goes negative
         await PushOne(shop, Checkout(shop, "A-0001", (product, 1000, 100)));
         Guid issueId;
         await using (var db = sql.CreateContext(shop.TenantId))

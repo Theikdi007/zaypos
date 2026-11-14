@@ -48,6 +48,26 @@ void main() {
       ]);
       expect(by, {'a': 5000, 'b': 1000});
     });
+
+    test('tracked only after a live restock/adjustment > 0', () {
+      final levels = stockLevels([
+        _m('sold', StockMovementType.sale, -2000),
+        _m('voided', StockMovementType.sale, -1000),
+        _m('voided', StockMovementType.voidReturn, 1000),
+        _m('down', StockMovementType.adjustment, -1000),
+        _m('deleted', StockMovementType.restock, 5000, deletedAt: DateTime.utc(2026)),
+        _m('restocked', StockMovementType.restock, 1000),
+        _m('counted', StockMovementType.adjustment, 3000),
+        _m('counted', StockMovementType.sale, -3000),
+      ]);
+      expect(levels, {
+        'sold': const StockLevel(-2000, tracked: false),
+        'voided': const StockLevel(0, tracked: false),
+        'down': const StockLevel(-1000, tracked: false),
+        'restocked': const StockLevel(1000, tracked: true),
+        'counted': const StockLevel(0, tracked: true),
+      });
+    });
   });
 
   group('ProductView (cached stock in the read model only)', () {

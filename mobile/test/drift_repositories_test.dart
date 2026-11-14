@@ -18,6 +18,7 @@ import 'package:zaypos_app/features/products/data/product_providers.dart';
 import 'package:zaypos_app/features/products/data/product_repository.dart';
 import 'package:zaypos_app/features/products/domain/product.dart';
 import 'package:zaypos_app/features/products/domain/product_modules.dart';
+import 'package:zaypos_app/features/products/domain/product_view.dart';
 import 'package:zaypos_app/features/inventory/domain/stock_movement.dart';
 import 'package:zaypos_app/features/reports/data/report_providers.dart';
 import 'package:zaypos_app/features/reports/domain/report.dart';
@@ -222,7 +223,28 @@ void main() {
   test('the stock read model is a SUM over the ledger', () async {
     final ledger = (await db.select(db.stockMovements).get()).where((m) => m.productId == SeedIds.water);
     expect(await stockOf(SeedIds.water), ledger.fold<int>(0, (a, m) => a + m.qtyMilli));
-    expect(await stockOf(SeedIds.coffee), 0, reason: 'no movements');
+    expect(await stockOf(SeedIds.coffee), 0, reason: 'counted in, then counted out');
+  });
+
+  test('tracked = any live restock/adjustment > 0 (SQL); sales and void returns do not start tracking', () async {
+    final p = Product(
+      id: newId(), tenantId: me.tenantId, name: 'ပဲဆီ', cost: 0, price: 0, category: 'စားသောက်ကုန်',
+      tint: 0xFFFEF3C7, initial: 'ပ', createdAt: nowUtc(), updatedAt: nowUtc(),
+    );
+    await c.read(productServiceProvider).importAll([p]);
+    Future<ProductView> view() async => (await settled(c, productsProvider)).firstWhere((x) => x.id == p.id);
+
+    expect((await view()).isUntracked, isTrue, reason: 'imported preset: no movements');
+    await sell(c, [draft(productId: p.id, name: p.name, qtyMilli: Qty.units(2), price: 100, cost: 0)]);
+    var v = await view();
+    expect((v.stockMilli, v.isUntracked, v.isOut, v.needsRestock), (-Qty.units(2), true, false, false));
+
+    await c.read(stockServiceProvider).restock(productId: p.id, qtyMilli: Qty.units(5));
+    for (var i = 0; i < 50 && (await view()).isUntracked; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 2));
+    }
+    v = await view();
+    expect((v.stockMilli, v.isUntracked), (Qty.units(3), false));
   });
 
   test('debt balances are a SQL SUM over the ledger: payments subtract, deleted entries ignored', () async {

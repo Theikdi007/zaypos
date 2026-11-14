@@ -6,6 +6,10 @@ import '../theme/app_text.dart';
 import '../utils/money_format.dart';
 import '../utils/qty.dart';
 
+/// Stock label for a product never counted in (no restock/adjustment > 0):
+/// grey, never "ကုန်", excluded from low/out counts.
+const untrackedStockLabel = 'Stock မမှတ်ရသေး';
+
 /// "ဈေးနှုန်း ထည့်ရန်": a product without a selling price (price 0).
 class NeedsPriceBadge extends StatelessWidget {
   const NeedsPriceBadge({super.key});

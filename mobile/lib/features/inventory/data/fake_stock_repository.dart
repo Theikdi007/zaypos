@@ -25,7 +25,9 @@ List<StockMovement> seedStock(String tenantId) {
     opening(SeedIds.soap, 2),
     opening(SeedIds.eggs, 15),
     opening(SeedIds.noodles, 60),
-    // coffee: no movements -> 0 (out of stock)
+    // coffee: counted in, then counted out -> tracked, 0 (out of stock)
+    opening(SeedIds.coffee, 10),
+    opening(SeedIds.coffee, -10),
   ];
 }
 
@@ -38,7 +40,7 @@ class FakeStockRepository implements StockRepository {
       db.watch({FakeTable.stock}, () => List.unmodifiable(db.stock.where((m) => m.deletedAt == null)));
 
   @override
-  Stream<Map<String, int>> watchStockByProduct() => db.watch({FakeTable.stock}, () => stockByProduct(db.stock));
+  Stream<Map<String, StockLevel>> watchStockByProduct() => db.watch({FakeTable.stock}, () => stockLevels(db.stock));
 
   @override
   Future<void> addAll(List<StockMovement> movements) async {
