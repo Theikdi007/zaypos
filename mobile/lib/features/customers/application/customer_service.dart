@@ -18,7 +18,7 @@ class CustomerService {
 
   /// Adds a customer; a non-zero [openingBalance] (kyats, from the paper
   /// book) is recorded as a ledger adjustment.
-  Future<void> create(Customer customer, {int openingBalance = 0}) => uow.run(() async {
+  Future<void> create(Customer customer, {int openingBalance = 0}) => uow.run(UnitKind.upsertCustomer, () async {
         await customers.add(customer);
         if (openingBalance != 0) {
           await debt.add(_entry(customer.tenantId, customer.id, DebtEntryType.adjustment, openingBalance,
@@ -34,7 +34,7 @@ class CustomerService {
     required PaymentMethod method,
   }) {
     if (amount <= 0) throw ArgumentError.value(amount, 'amount', 'must be positive');
-    return uow.run(() async {
+    return uow.run(UnitKind.payDebt, () async {
       final e = _entry(tenantId, customerId, DebtEntryType.payment, amount, method: method);
       await debt.add(e);
       return e;
@@ -59,7 +59,7 @@ class CustomerService {
 }
 
 final customerServiceProvider = Provider<CustomerService>((ref) => CustomerService(
-      uow: ref.read(unitOfWorkProvider),
-      customers: ref.read(customerRepositoryProvider),
-      debt: ref.read(debtRepositoryProvider),
+      uow: ref.watch(unitOfWorkProvider),
+      customers: ref.watch(customerRepositoryProvider),
+      debt: ref.watch(debtRepositoryProvider),
     ));

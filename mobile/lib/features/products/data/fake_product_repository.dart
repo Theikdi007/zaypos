@@ -71,6 +71,14 @@ class FakeProductRepository implements ProductRepository {
   }
 
   @override
+  Future<void> setPrice(String productId, int price) async {
+    final i = db.products.indexWhere((p) => p.id == productId);
+    if (i < 0) throw StateError('Unknown product $productId');
+    db.products[i] = db.products[i].copyWith(price: price, updatedAt: nowUtc());
+    db.touch({FakeTable.products});
+  }
+
+  @override
   Future<void> setSerialStatus(String serialId, SerialStatus status, {String? saleLineId}) async {
     final i = db.serials.indexWhere((s) => s.id == serialId);
     if (i < 0) throw StateError('Unknown serial $serialId');

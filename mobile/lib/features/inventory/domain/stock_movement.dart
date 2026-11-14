@@ -68,11 +68,41 @@ int stockOf(Iterable<StockMovement> movements) =>
     movements.where((m) => m.deletedAt == null).fold(0, (a, m) => a + m.qtyMilli);
 
 /// Stock per product id.
-Map<String, int> stockByProduct(Iterable<StockMovement> movements) {
-  final out = <String, int>{};
+Map<String, int> stockByProduct(Iterable<StockMovement> movements) =>
+    {for (final e in stockLevels(movements).entries) e.key: e.value.onHandMilli};
+
+/// Goods counted in: a restock or adjustment with a positive quantity. A
+/// product with none has never had its stock recorded ("Stock မမှတ်ရသေး"),
+/// so its ledger sum (≤ 0) means nothing yet — e.g. imported presets.
+/// Server twin: UnitApplier.CheckNegativeStockAsync.
+bool startsTracking(StockMovementType type, int qtyMilli) =>
+    qtyMilli > 0 && (type == StockMovementType.restock || type == StockMovementType.adjustment);
+
+/// Stock on hand plus whether the product's stock is tracked yet.
+class StockLevel {
+  const StockLevel(this.onHandMilli, {required this.tracked});
+  static const untracked = StockLevel(0, tracked: false);
+
+  final int onHandMilli;
+  final bool tracked;
+
+  @override
+  bool operator ==(Object other) => other is StockLevel && other.onHandMilli == onHandMilli && other.tracked == tracked;
+  @override
+  int get hashCode => Object.hash(onHandMilli, tracked);
+  @override
+  String toString() => 'StockLevel($onHandMilli, tracked: $tracked)';
+}
+
+/// [StockLevel] per product id; soft-deleted rows ignored. Products without
+/// live movements are absent (= [StockLevel.untracked]).
+Map<String, StockLevel> stockLevels(Iterable<StockMovement> movements) {
+  final out = <String, StockLevel>{};
   for (final m in movements) {
     if (m.deletedAt != null) continue;
-    out[m.productId] = (out[m.productId] ?? 0) + m.qtyMilli;
+    final prev = out[m.productId] ?? StockLevel.untracked;
+    out[m.productId] = StockLevel(prev.onHandMilli + m.qtyMilli,
+        tracked: prev.tracked || startsTracking(m.type, m.qtyMilli));
   }
   return out;
 }

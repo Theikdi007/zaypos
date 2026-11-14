@@ -6,6 +6,11 @@ import '../domain/debt_entry.dart';
 abstract interface class DebtRepository {
   /// Live entries, all customers, newest first.
   Stream<List<DebtEntry>> watchAll();
+
+  /// Balance owed per customer id (kyats): SUM of live entries' effects
+  /// (payment −amount, creditSale/adjustment +amount). Customers without
+  /// entries are absent (= 0).
+  Stream<Map<String, int>> watchBalances();
   Future<void> add(DebtEntry entry);
 }
 

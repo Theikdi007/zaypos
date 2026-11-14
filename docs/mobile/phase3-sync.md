@@ -240,7 +240,9 @@ All existing tests must still pass. STOP and show me a summary.
 
 STEP 2: API client (dio) + auth/session (§6), Register/Login wired to the backend, offline PIN unlock.
 STEP 3: SyncEngine (§5) + OfflineSyncChip + Settings sync section + "စစ်ရန်" list + rejected-unit screen (§7).
-STEP 4: presets import, devices screen, /sync/limits in all form validators, dev setup (§8).
+STEP 4: presets import, devices screen, /sync/limits in all form validators, dev setup (§8),
+PIN reset flow (OTP → new PIN via /auth/pin/reset; reachable from Login and from the unlock screen,
+also while locked out; on success the local PIN hash is replaced and the lockout cleared).
 
 Write the tests in §9 as you go. Run `flutter analyze` and `flutter test` after every step, commit and push to a
 branch `mobile-phase3`. Stop after STEP 1 and wait for my OK; after that continue step by step, stopping after each.

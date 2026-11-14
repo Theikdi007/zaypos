@@ -6,6 +6,24 @@ import '../theme/app_text.dart';
 import '../utils/money_format.dart';
 import '../utils/qty.dart';
 
+/// Stock label for a product never counted in (no restock/adjustment > 0):
+/// grey, never "ကုန်", excluded from low/out counts.
+const untrackedStockLabel = 'Stock မမှတ်ရသေး';
+
+/// "ဈေးနှုန်း ထည့်ရန်": a product without a selling price (price 0).
+class NeedsPriceBadge extends StatelessWidget {
+  const NeedsPriceBadge({super.key});
+
+  static const label = 'ဈေးနှုန်း ထည့်ရန်';
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: const BoxDecoration(color: AppColors.debtAvatarSoft, borderRadius: AppRadius.chipR),
+        child: Text(label, style: AppText.s(12, weight: AppText.w700, color: AppColors.debtInk)),
+      );
+}
+
 /// POS grid tile: tint block with initial, name, price, stock and qty badge.
 class ProductTile extends StatelessWidget {
   const ProductTile({
@@ -18,7 +36,11 @@ class ProductTile extends StatelessWidget {
     this.stockLabel,
     this.stockLow = false,
     this.qtyMilli = 0,
+    this.needsPrice = false,
   });
+
+  /// No price yet: the badge replaces the price (tapping asks for it).
+  final bool needsPrice;
 
   final String name;
   final String initial;
@@ -65,7 +87,9 @@ class ProductTile extends StatelessWidget {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Expanded(
-                        child: Text(formatMoney(price), style: AppText.s(15, weight: AppText.w700)),
+                        child: needsPrice
+                            ? const Align(alignment: Alignment.centerLeft, child: NeedsPriceBadge())
+                            : Text(formatMoney(price), style: AppText.s(15, weight: AppText.w700)),
                       ),
                       if (stockLabel != null)
                         Text(stockLabel!,

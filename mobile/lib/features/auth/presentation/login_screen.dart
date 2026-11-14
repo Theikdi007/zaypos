@@ -1,20 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/api/api_config.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../application/auth_controller.dart';
+import 'widgets/auth_message.dart';
 import 'widgets/phone_field.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final _phone = TextEditingController();
+  final _pin = TextEditingController();
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _phone.dispose();
+    _pin.dispose();
+    super.dispose();
+  }
+
+  /// Runs [action]; failures show as a message. Success changes the auth
+  /// status, and the router guard moves on to the app.
+  Future<void> _run(Future<void> Function(AuthController c) action) async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await action(ref.read(authControllerProvider.notifier));
+    } on AuthFailure catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final notice = ref.watch(authControllerProvider.select((s) => s.notice));
+    final showDemo = !ref.watch(isReleaseBuildProvider);
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
@@ -29,6 +68,10 @@ class LoginScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _brand(),
+                      if (notice != null) ...[
+                        const SizedBox(height: 20),
+                        AuthMessage(notice, isError: false),
+                      ],
                       const SizedBox(height: 28),
                       _form(context),
                       const SizedBox(height: 28),
@@ -40,8 +83,20 @@ class LoginScreen extends StatelessWidget {
                         height: 54,
                         radius: 14,
                         fontSize: 15,
-                        onPressed: () => context.push(Routes.register),
+                        onPressed: _busy ? null : () => context.push(Routes.register),
                       ),
+                      if (showDemo) ...[
+                        const SizedBox(height: 12),
+                        // Debug builds only: the offline sample shop (never synced).
+                        PrimaryButton(
+                          label: 'Demo ဆိုင် (offline · debug)',
+                          variant: ButtonVariant.outlineDark,
+                          height: 46,
+                          radius: 14,
+                          fontSize: 14,
+                          onPressed: _busy ? null : () => _run((c) => c.openDemo()),
+                        ),
+                      ],
                       const SizedBox(height: 28),
                       const Spacer(),
                       _offlineNote(),
@@ -80,11 +135,12 @@ class LoginScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const LabeledField(label: 'ဖုန်းနံပါတ်', child: PhoneField()),
+        LabeledField(label: 'ဖုန်းနံပါတ်', child: PhoneField(controller: _phone)),
         const SizedBox(height: 16),
         LabeledField(
           label: 'PIN နံပါတ် (၆ လုံး)',
           child: AppInput(
+            controller: _pin,
             height: 52,
             radius: 14,
             fontSize: 16,
@@ -103,17 +159,21 @@ class LoginScreen extends StatelessWidget {
         Align(
           alignment: Alignment.centerRight,
           child: InkWell(
-            onTap: () {},
+            onTap: _busy ? null : () => context.push(Routes.pinReset),
             child: Text('PIN မေ့နေပါသလား?',
                 style: AppText.s(13, weight: AppText.w600, color: AppColors.primary)),
           ),
         ),
+        if (_error != null) ...[
+          const SizedBox(height: 12),
+          AuthMessage(_error!),
+        ],
         const SizedBox(height: 16),
         PrimaryButton(
-          label: 'ဝင်မယ်',
+          label: _busy ? 'ဝင်နေသည်…' : 'ဝင်မယ်',
           height: 54,
           radius: 14,
-          onPressed: () => context.go(Routes.dashboard),
+          onPressed: _busy ? null : () => _run((c) => c.login(_phone.text, _pin.text)),
         ),
       ],
     );

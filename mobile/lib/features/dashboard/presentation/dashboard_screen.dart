@@ -12,14 +12,16 @@ import '../../../core/utils/myanmar.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/money_text.dart';
-import '../../../core/widgets/offline_sync_chip.dart';
+import '../../../core/sync/sync_providers.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../auth/data/session.dart';
 import '../../customers/data/customer_providers.dart';
 import '../../products/data/product_providers.dart';
+import '../../products/presentation/products_screen.dart' show ProductFilter, productMatches;
 import '../../sales/data/sales_providers.dart';
 import '../../sales/presentation/widgets/sale_row.dart';
+import '../../sync/presentation/sync_chip.dart';
 import '../domain/today_summary.dart';
 import '../../../core/widgets/async_view.dart';
 import '../../../core/utils/async_combine.dart';
@@ -44,7 +46,9 @@ class DashboardScreen extends ConsumerWidget {
 
     final debtors = accounts.where((a) => a.hasDebt);
     final debtTotal = debtors.fold(0, (a, c) => a + c.balance);
-    final lowCount = products.where((p) => p.isLow || p.isOut).length;
+    // Same predicate as the Products "Stock နည်း" filter (untracked excluded).
+    final lowCount = products.where((p) => productMatches(ProductFilter.low, p)).length;
+    final noPriceCount = products.where((p) => p.needsPrice).length;
 
     final debtCard = StatCard(
       label: 'အကြွေးရရန်',
@@ -57,7 +61,10 @@ class DashboardScreen extends ConsumerWidget {
       color: AppColors.ground,
       child: SafeArea(
         bottom: false,
-        child: ListView(
+        child: RefreshIndicator(
+          onRefresh: () => ref.read(syncEngineProvider).syncNow(manual: true),
+          child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.only(bottom: 20),
           children: [
             Padding(
@@ -74,8 +81,7 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  if (today.pendingSync > 0)
-                    OfflineSyncChip(label: 'Offline · sync ${mmDigits(today.pendingSync)} ခုစောင့်'),
+                  const SyncChip(),
                   AppIconButton(
                     icon: AppIcons.settings,
                     semanticLabel: 'Settings',
@@ -104,6 +110,11 @@ class DashboardScreen extends ConsumerWidget {
                     )
                   : debtCard,
             ),
+            if (noPriceCount > 0)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: _NeedsPriceCard(count: noPriceCount),
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: PrimaryButton(
@@ -133,6 +144,52 @@ class DashboardScreen extends ConsumerWidget {
               child: DividedColumn(children: [for (final s in recent) SaleRow(sale: s)]),
             ),
           ],
+        ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "ဈေးနှုန်း မထည့်ရသေးသော ပစ္စည်း n ခု" → Products filtered to them.
+class _NeedsPriceCard extends StatelessWidget {
+  const _NeedsPriceCard({required this.count});
+  final int count;
+
+  static String label(int n) => 'ဈေးနှုန်း မထည့်ရသေးသော ပစ္စည်း ${mmDigits(n)} ခု';
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      child: Material(
+        color: AppColors.debtBg,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          side: const BorderSide(color: AppColors.debtBorder),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => context.go(Routes.productsNeedingPrice),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(label(count), style: AppText.s(14, weight: AppText.w700, color: AppColors.debtInk)),
+                      const SizedBox(height: 2),
+                      Text('ဈေးနှုန်း မထည့်ရင် ရောင်းတဲ့အခါ မေးပါမယ်',
+                          style: AppText.s(12, color: AppColors.debtInk)),
+                    ],
+                  ),
+                ),
+                const AppIcon(AppIcons.chevronRight, size: 18, color: AppColors.debtInk),
+              ],
+            ),
+          ),
         ),
       ),
     );

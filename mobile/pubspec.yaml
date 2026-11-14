@@ -40,7 +40,12 @@ dependencies:
   intl: ^0.20.3
   flutter_svg: ^2.3.3
   uuid: ^4.6.0
-
+  drift: ^2.35.4
+  drift_flutter: ^0.3.1
+  dio: ^5.11.1
+  flutter_secure_storage: ^11.2.0
+  cryptography: ^2.9.0
+  connectivity_plus: ^7.3.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -51,6 +56,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  drift_dev: ^2.35.3
+  build_runner: ^2.17.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -73,10 +80,10 @@ flutter:
       fonts:
         - asset: assets/fonts/NotoSansMyanmar-Variable.ttf
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  # Bundled copy of GET /api/v1/sync/limits (offline fallback for form rules).
+  # Refresh from a running backend: curl -s http://127.0.0.1:5076/api/v1/sync/limits
+  assets:
+    - assets/sync/limits.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

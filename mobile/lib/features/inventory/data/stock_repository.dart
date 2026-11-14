@@ -6,10 +6,16 @@ import '../domain/stock_movement.dart';
 abstract interface class StockRepository {
   /// Live movements, all products.
   Stream<List<StockMovement>> watchAll();
+
+  /// Stock on hand per product id (milli-units, SUM of live movements) and
+  /// whether it is tracked yet (see [startsTracking]). Products without
+  /// movements are absent (= [StockLevel.untracked]).
+  Stream<Map<String, StockLevel>> watchStockByProduct();
+
   Future<void> addAll(List<StockMovement> movements);
 }
 
-/// Bound at the composition root (lib/app/fake_overrides.dart).
+/// Bound at the composition root (lib/app/drift_overrides.dart).
 final stockRepositoryProvider = Provider<StockRepository>(
   (_) => throw UnimplementedError('stockRepositoryProvider must be overridden'),
 );

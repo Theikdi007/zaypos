@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/sync/sync_limits.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
@@ -45,10 +46,32 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
     super.dispose();
   }
 
+  /// Field → message, from the server's rules (/sync/limits).
+  Map<String, String> _errors = {};
+
   Future<void> _save() async {
+    final limits = ref.read(syncLimitsProvider);
     final name = _name.text.trim();
-    if (name.isEmpty) {
-      setState(() => _showErrors = true);
+    // Stored as the server will store it (Myanmar digits → 0-9, other non-ASCII dropped).
+    final phone = limits.normalize('customers.phone', _phone.text);
+    final address = _address.text.trim();
+    final note = _note.text.trim();
+    final errors = <String, String>{
+      for (final (key, error) in [
+        ('name', limits.checkText('customers.name', name, label: 'အမည်')),
+        ('phone', limits.checkText('customers.phone', phone.isEmpty ? null : phone, label: 'ဖုန်းနံပါတ်')),
+        ('address', limits.checkText('customers.address', address.isEmpty ? null : address, label: 'လိပ်စာ')),
+        ('note', limits.checkText('customers.note', note.isEmpty ? null : note, label: 'မှတ်ချက်')),
+        ('limit', limits.checkNumber('customers.creditLimit', int.tryParse(_limit.text), label: 'အကြွေး ကန့်သတ်ချက်')),
+      ])
+        key: ?error,
+    };
+    if (name.isEmpty) errors['name'] ??= 'အမည် ထည့်ပါ။';
+    if (errors.isNotEmpty) {
+      setState(() {
+        _showErrors = true;
+        _errors = errors;
+      });
       return;
     }
     final t = nowUtc();
@@ -56,10 +79,10 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
       id: newId(),
       tenantId: ref.read(tenantIdProvider),
       name: name,
-      phone: _phone.text.trim(),
-      address: _address.text.trim().isEmpty ? null : _address.text.trim(),
+      phone: phone,
+      address: address.isEmpty ? null : address,
       creditLimit: int.tryParse(_limit.text),
-      note: _note.text.trim().isEmpty ? null : _note.text.trim(),
+      note: note.isEmpty ? null : note,
       createdAt: t,
       updatedAt: t,
     );
@@ -91,6 +114,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                     LabeledField(
                       label: 'အမည်',
                       required: true,
+                      error: _errors['name'],
                       child: AppInput(
                         controller: _name,
                         hint: 'ဥပမာ - ဦးအောင်ကျော်',
@@ -101,6 +125,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                     LabeledField(
                       label: 'ဖုန်းနံပါတ်',
                       helper: 'Viber နဲ့ အကြွေးသတိပေးစာ ပို့ဖို့ သုံးပါမယ်',
+                      error: _errors['phone'],
                       child: Row(
                         children: [
                           Expanded(
@@ -138,6 +163,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                     ),
                     LabeledField(
                       label: 'လိပ်စာ',
+                      error: _errors['address'],
                       child: AppInput(controller: _address, hint: 'ရပ်ကွက် / လမ်း', semanticLabel: 'လိပ်စာ'),
                     ),
                   ],
@@ -150,6 +176,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                     LabeledField(
                       label: 'အကြွေး ကန့်သတ်ချက် (Ks)',
                       helper: 'ဒီထက်ကျော်ရင် ရောင်းတဲ့အချိန် သတိပေးပါမယ်။ မထည့်ရင် ကန့်သတ်ချက်မရှိ',
+                      error: _errors['limit'],
                       child: AppInput(
                         controller: _limit,
                         hint: 'ဥပမာ - 100000',
@@ -170,6 +197,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                     ),
                     LabeledField(
                       label: 'မှတ်ချက်',
+                      error: _errors['note'],
                       child: AppInput(
                         controller: _note,
                         maxLines: 2,

@@ -3,7 +3,7 @@ import 'debt_entry.dart';
 
 /// Read model: a customer plus everything derived from their ledger.
 class CustomerAccount {
-  CustomerAccount(this.customer, List<DebtEntry> entries)
+  CustomerAccount(this.customer, List<DebtEntry> entries, {this.storedBalance})
       : entries = [...entries]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
   /// Days without activity after which an unpaid balance is "overdue".
@@ -18,8 +18,11 @@ class CustomerAccount {
   String get name => customer.name;
   String get initial => customer.initial;
 
+  /// The database's SUM over the ledger; null = sum [entries] here.
+  final int? storedBalance;
+
   /// Kyats owed (sum of ledger).
-  int get balance => debtBalance(entries);
+  int get balance => storedBalance ?? debtBalance(entries);
   bool get hasDebt => balance > 0;
 
   /// Entries shown in the history list (system void reversals hidden).
