@@ -217,46 +217,48 @@ class SyncStore {
           for (final (t, id) in _ids(rowsOf(o))) '$t:$id',
       };
 
-  /// §5.3 merge rules.
+  /// §5.3 merge rules. A taken row is applied WHOLE: `toCompanion(false)` writes NULL columns too, so a field
+  /// cleared on another phone (barcode, wholesale price, expiry days, credit limit, issue data…) is cleared here
+  /// (BUG-31 — `insertOnConflictUpdate(<data class>)` alone leaves NULL columns out of the UPDATE).
   Future<void> _merge(String table, Json j, Set<String> unpushed) async {
     final d = _decode;
     switch (table) {
       // Ledgers and issues: the server is the truth (sales.voidedAt included).
       case WireTable.sales:
-        await db.into(db.sales).insertOnConflictUpdate(d.sale(j));
+        await db.into(db.sales).insertOnConflictUpdate(d.sale(j).toCompanion(false));
       case WireTable.saleLines:
-        await db.into(db.saleLines).insertOnConflictUpdate(d.saleLine(j));
+        await db.into(db.saleLines).insertOnConflictUpdate(d.saleLine(j).toCompanion(false));
       case WireTable.payments:
-        await db.into(db.payments).insertOnConflictUpdate(d.payment(j));
+        await db.into(db.payments).insertOnConflictUpdate(d.payment(j).toCompanion(false));
       case WireTable.stockMovements:
-        await db.into(db.stockMovements).insertOnConflictUpdate(d.movement(j));
+        await db.into(db.stockMovements).insertOnConflictUpdate(d.movement(j).toCompanion(false));
       case WireTable.debtEntries:
-        await db.into(db.debtEntries).insertOnConflictUpdate(d.debt(j));
+        await db.into(db.debtEntries).insertOnConflictUpdate(d.debt(j).toCompanion(false));
       case 'syncIssues':
-        await db.into(db.syncIssues).insertOnConflictUpdate(d.issue(j));
+        await db.into(db.syncIssues).insertOnConflictUpdate(d.issue(j).toCompanion(false));
       case WireTable.productSerials:
-        await db.into(db.productSerials).insertOnConflictUpdate(d.serial(j));
+        await db.into(db.productSerials).insertOnConflictUpdate(d.serial(j).toCompanion(false));
 
       // Last-writer-wins, never over an unpushed local edit.
       case WireTable.products:
         final r = d.product(j);
-        if (await _takes(table, db.products, r.id, r.updatedAt, unpushed)) await db.into(db.products).insertOnConflictUpdate(r);
+        if (await _takes(table, db.products, r.id, r.updatedAt, unpushed)) await db.into(db.products).insertOnConflictUpdate(r.toCompanion(false));
       case WireTable.productVariants:
         final r = d.variant(j);
         if (await _takes(table, db.productVariants, r.id, r.updatedAt, unpushed)) {
-          await db.into(db.productVariants).insertOnConflictUpdate(r);
+          await db.into(db.productVariants).insertOnConflictUpdate(r.toCompanion(false));
         }
       case WireTable.productBatches:
         final r = d.batch(j);
         if (await _takes(table, db.productBatches, r.id, r.updatedAt, unpushed)) {
-          await db.into(db.productBatches).insertOnConflictUpdate(r);
+          await db.into(db.productBatches).insertOnConflictUpdate(r.toCompanion(false));
         }
       case WireTable.customers:
         final r = d.customer(j);
-        if (await _takes(table, db.customers, r.id, r.updatedAt, unpushed)) await db.into(db.customers).insertOnConflictUpdate(r);
+        if (await _takes(table, db.customers, r.id, r.updatedAt, unpushed)) await db.into(db.customers).insertOnConflictUpdate(r.toCompanion(false));
       case WireTable.tenants:
         final r = d.tenant(j);
-        if (await _takes(table, db.tenants, r.id, r.updatedAt, unpushed)) await db.into(db.tenants).insertOnConflictUpdate(r);
+        if (await _takes(table, db.tenants, r.id, r.updatedAt, unpushed)) await db.into(db.tenants).insertOnConflictUpdate(r.toCompanion(false));
       case WireTable.tenantFeatures:
         final r = d.feature(j);
         if (unpushed.contains('$table:${r.featureKey}')) return;
@@ -264,7 +266,7 @@ class SyncStore {
               ..where((f) => f.tenantId.equals(r.tenantId) & f.featureKey.equals(r.featureKey)))
             .getSingleOrNull();
         if (local == null || !r.updatedAt.isBefore(local.updatedAt)) {
-          await db.into(db.tenantFeatureFlags).insertOnConflictUpdate(r);
+          await db.into(db.tenantFeatureFlags).insertOnConflictUpdate(r.toCompanion(false));
         }
 
       // Devices: other phones as the server says; this phone's lastSeq never moves back.
@@ -274,7 +276,7 @@ class SyncStore {
           final local = await (db.select(db.devices)..where((x) => x.id.equals(r.id))).getSingleOrNull();
           if (local != null && local.lastSeq > r.lastSeq) r = r.copyWith(lastSeq: local.lastSeq);
         }
-        await db.into(db.devices).insertOnConflictUpdate(r);
+        await db.into(db.devices).insertOnConflictUpdate(r.toCompanion(false));
 
       default:
         // A table this app version does not know yet: ignore (forward compatible).

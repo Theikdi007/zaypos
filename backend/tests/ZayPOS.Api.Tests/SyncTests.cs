@@ -413,6 +413,51 @@ public class SyncTests(SqlServerFixture sql)
     }
 
     [Fact]
+    public async Task A_cleared_field_is_stored_as_null_and_pulled_as_an_explicit_null()
+    {
+        // BUG-31, both directions: phone B pushes the row with the fields cleared (null); the server stores null and
+        // the pull JSON carries "barcode": null etc. (not omitted), so phone A can clear its copy.
+        var shop = await NewShop();
+        var id = Guid.CreateVersion7();
+        var created = Now();
+        object Row(DateTime at, string? barcode, long? wholesalePrice, int? expiryAlertDays) => new
+        {
+            id, name = "ဆပ်ပြာ", category = "General", unit = "ခု", barcode, cost = 1000, price = 1500, wholesalePrice,
+            expiryAlertDays, lowAlertMilli = 0, tint = 0, initial = "က", createdAt = created, updatedAt = at,
+        };
+        (await PushOne(shop, Unit("upsertProduct", new { products = new[] { Row(created, "8850000099101", 1400, 30) } })))
+            .Outcome.Should().Be(UnitOutcome.Applied);
+        var customer = await AddCustomer(shop, creditLimit: 50_000);
+        (await PushOne(shop, Unit("upsertProduct", new { products = new[] { Row(created.AddMinutes(1), null, null, null) } })))
+            .Outcome.Should().Be(UnitOutcome.Applied);
+        (await PushOne(shop, Unit("upsertCustomer", new
+        {
+            customers = new[] { new { id = customer, name = "ဒေါ်ခင်မာ", phone = "09777123456", creditLimit = (long?)null,
+                createdAt = created, updatedAt = Now().AddMinutes(1) } },
+        }))).Outcome.Should().Be(UnitOutcome.Applied);
+
+        await using (var db = sql.CreateContext(shop.TenantId))
+        {
+            var p = await db.Products.SingleAsync(x => x.Id == id);
+            (p.Barcode, p.WholesalePrice, p.ExpiryAlertDays).Should().Be((null, null, null));
+            (await db.Customers.SingleAsync(x => x.Id == customer)).CreditLimit.Should().BeNull();
+        }
+
+        var raw = await (await shop.Http.GetAsync("/api/v1/sync/pull?cursor=0&limit=1000")).Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(raw);
+        var changes = doc.RootElement.GetProperty("changes");
+        var product = changes.GetProperty("products").EnumerateArray().Single(r => r.GetProperty("id").GetGuid() == id);
+        foreach (var k in new[] { "barcode", "wholesalePrice", "expiryAlertDays" })
+        {
+            product.TryGetProperty(k, out var v).Should().BeTrue($"{k} must be in the pull JSON");
+            v.ValueKind.Should().Be(JsonValueKind.Null, k);
+        }
+        var c = changes.GetProperty("customers").EnumerateArray().Single(r => r.GetProperty("id").GetGuid() == customer);
+        c.TryGetProperty("creditLimit", out var limit).Should().BeTrue();
+        limit.ValueKind.Should().Be(JsonValueKind.Null);
+    }
+
+    [Fact]
     public void Issue_data_caps_the_other_names_and_always_fits_the_column()
     {
         var names = Enumerable.Range(1, 40).Select(i => new string('က', 150) + i).ToList();
