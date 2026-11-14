@@ -30,9 +30,18 @@ class CustomerAccount {
 
   DateTime get lastActivityAt => entries.isEmpty ? customer.createdAt : entries.first.createdAt;
 
+  /// Ids of entries in this ledger (to find payment reversals).
+  late final Set<String> _ids = {for (final e in entries) e.id};
+
+  /// A payment that has been reversed (its reversal row is in the ledger).
+  bool isReversed(DebtEntry e) => e.type == DebtEntryType.payment && _ids.contains(paymentReversalId(e.id));
+
+  /// A payment that can still be reversed.
+  bool canReverse(DebtEntry e) => e.type == DebtEntryType.payment && e.deletedAt == null && !isReversed(e);
+
   DateTime? get lastPaymentAt {
     for (final e in entries) {
-      if (e.type == DebtEntryType.payment) return e.createdAt;
+      if (e.type == DebtEntryType.payment && !isReversed(e)) return e.createdAt;
     }
     return null;
   }

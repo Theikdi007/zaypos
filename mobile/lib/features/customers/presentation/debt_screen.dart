@@ -11,6 +11,7 @@ import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/money_text.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../application/customer_service.dart';
 import '../data/customer_providers.dart';
 import '../domain/debt_entry.dart';
 import 'pay_debt_sheet.dart';
@@ -121,7 +122,15 @@ class DebtScreen extends ConsumerWidget {
                 if (c.history.isNotEmpty) ...[
                   const SectionTitle('မှတ်တမ်း'),
                   AppCard(
-                    child: DividedColumn(children: [for (final h in c.history) _EntryRow(entry: h, now: now)]),
+                    child: DividedColumn(children: [
+                      for (final h in c.history)
+                        _EntryRow(
+                          entry: h,
+                          now: now,
+                          reversed: c.isReversed(h),
+                          onReverse: c.canReverse(h) ? () => _confirmReverse(context, ref, h) : null,
+                        ),
+                    ]),
                   ),
                 ],
               ],
@@ -133,17 +142,46 @@ class DebtScreen extends ConsumerWidget {
   }
 }
 
+/// BUG-4: a wrong payment is corrected with a reversal row, never deleted.
+Future<void> _confirmReverse(BuildContext context, WidgetRef ref, DebtEntry payment) async {
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text('ငွေပြန်ဆပ် ${formatKs(payment.amount)} ကို ပြန်ပယ်မလား?', style: AppText.s(16, weight: AppText.w700)),
+      content: Text(
+        'မှားသွင်းမိတဲ့ ငွေပြန်ဆပ်ကို ပြင်ဖို့ပါ။ မှတ်တမ်းကို မဖျက်ပါ — ပြန်ပယ်တဲ့ စာရင်းတစ်ကြောင်း ထပ်ထည့်ပြီး '
+        'ပေးရန်ကျန်ငွေ ${formatKs(payment.amount)} ပြန်တိုးပါမယ်။',
+        style: AppText.s(14),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('မလုပ်တော့ပါ')),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text('ပြန်ပယ်မယ်', style: AppText.s(14, weight: AppText.w700, color: AppColors.danger)),
+        ),
+      ],
+    ),
+  );
+  if (ok == true) await ref.read(customerServiceProvider).reversePayment(payment);
+}
+
 class _EntryRow extends StatelessWidget {
-  const _EntryRow({required this.entry, required this.now});
+  const _EntryRow({required this.entry, required this.now, this.reversed = false, this.onReverse});
   final DebtEntry entry;
   final DateTime now;
+
+  /// A payment that a later reversal row cancelled.
+  final bool reversed;
+
+  /// Tap a payment to reverse it (null = not reversible).
+  final VoidCallback? onReverse;
 
   @override
   Widget build(BuildContext context) {
     // Decreases (payments, negative adjustments) show as ↓ green.
     final pay = entry.effect < 0;
-    final fg = pay ? AppColors.success : AppColors.debt;
-    return Padding(
+    final fg = reversed ? AppColors.muted : pay ? AppColors.success : AppColors.debt;
+    final row = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
         children: [
@@ -161,14 +199,28 @@ class _EntryRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(entry.title, style: AppText.s(14, weight: AppText.w600)),
-                Text(entryDateLabel(entry.createdAt, now), style: AppText.s(12, color: AppColors.muted)),
+                Text(
+                  reversed
+                      ? '${entryDateLabel(entry.createdAt, now)} · ပြန်ပယ်ပြီး'
+                      : entryDateLabel(entry.createdAt, now),
+                  style: AppText.s(12, color: AppColors.muted),
+                ),
               ],
             ),
           ),
-          Text('${pay ? '− ' : '+ '}${formatMoney(entry.effect.abs())}',
-              style: AppText.s(15, weight: AppText.w700, color: fg)),
+          Text(
+            '${pay ? '− ' : '+ '}${formatMoney(entry.effect.abs())}',
+            style: AppText.s(15, weight: AppText.w700, color: fg)
+                .copyWith(decoration: reversed ? TextDecoration.lineThrough : null),
+          ),
         ],
       ),
+    );
+    if (onReverse == null) return row;
+    return Semantics(
+      button: true,
+      hint: 'ပြန်ပယ်ရန်',
+      child: InkWell(onTap: onReverse, child: row),
     );
   }
 }

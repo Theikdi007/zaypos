@@ -6,6 +6,11 @@ const _uuid = Uuid();
 /// merge on sync without collisions.
 String newId() => _uuid.v7();
 
+/// Deterministic id (UUID v5) for a row that must exist at most once per
+/// [key], whichever phone creates it — e.g. the reversal of one payment.
+/// Two phones produce the same id, and the server keeps the first.
+String derivedId(String key) => _uuid.v5(Namespace.url.value, 'zaypos:$key');
+
 /// Current time in UTC, truncated to whole milliseconds. All entity
 /// timestamps are stored in UTC (unix ms locally, ms ISO-8601 on the wire)
 /// and only converted to local time for display; truncating here keeps the
