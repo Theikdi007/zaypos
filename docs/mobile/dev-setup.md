@@ -23,7 +23,9 @@ Debug builds may talk plain HTTP to the Mac; release builds are HTTPS only
 3. In Xcode: **Window → Devices and Simulators** → select the iPhone →
    tick **Connect via network**. Unplug the cable; the iPhone and the Mac must be
    on the **same Wi-Fi**.
-4. The dev SQL Server container must be running (`docker ps` shows `zaypos-sql`), and the
+4. The dev SQL Server container must be running (`docker ps` shows `zaypos-sql` on
+   `127.0.0.1:1433` — loopback only, see docs/backend/README.md §6; only the API is
+   reachable from the phone), and the
    database must have every migration (otherwise e.g. the preset catalog is empty):
    ```sh
    cd ~/Developer/ZayPOS/backend

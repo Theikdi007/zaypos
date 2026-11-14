@@ -273,9 +273,23 @@ SQL Server does not run natively on macOS — use Docker Desktop
 (Settings → General → "Use Rosetta for x86/amd64 emulation on Apple Silicon"):
 
 ```bash
+# DEV-ONLY example password: local Docker on your Mac only. Never reuse it for a
+# shared, staging or production server, and never put it in appsettings*.json
+# that is committed (appsettings.Development.json is git-ignored).
 docker run -d --name zaypos-sql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Zaypos!Dev2026' \
-  -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest
+  -v zaypos-sql-data:/var/opt/mssql \
+  -p 127.0.0.1:1433:1433 mcr.microsoft.com/mssql/server:2022-latest
 ```
+
+`-p 127.0.0.1:1433:1433` publishes SQL Server on the Mac's loopback only, so other
+devices on the same Wi-Fi cannot reach it (the API is what the phone talks to).
+Check with `docker ps`: the port must read `127.0.0.1:1433->1433/tcp`, not `0.0.0.0:1433`.
+
+A container created earlier with `-p 1433:1433` keeps listening on every interface
+(a port binding cannot be changed in place). To fix it, recreate the container. If
+it was created **without** the `-v zaypos-sql-data:/var/opt/mssql` volume, its
+databases are lost with it: re-run `dotnet ef database update` afterwards (dev
+data only), or back up first.
 
 SSMS is Windows-only; on Mac use VS Code with the **SQL Server (mssql)** extension.
 
