@@ -594,6 +594,7 @@ Format:
   (row ids), not the IMEI values already in the cart.
 - Blocks beta: no (needs an already-flagged duplicateSerial state; the cashier sees two lines with the same IMEI).
 - Status: fixed in fb3fd12 — the IMEI picker excludes every IMEI number already in the cart (`cartSerialNumbers`); `m/scan_lookup_test.dart` › "BUG-28 …"; QA TC-POS-NEW-16 passes unchanged.
+- QA round 10: **verified.** `m/qa/qa_round9_scan_test.dart::TC-POS-NEW-16 …` PASS unchanged; `m/qa/qa_round10_imei_cart_test.dart` (TC-POS-NEW-17, 3 tests) PASS: tap → tap, scan → tap, tap → scan, trade-in rows (sold row + newer in-stock row, plus the twin on another product; the sold row is never listed), "ရောင်းစရာ IMEI မကျန်တော့ပါ" when the only IMEI is in the cart, an emptied cart offers the IMEI again; on fake repos and on Drift with rows written by checkout + "Stock ဖြည့်မယ်". Status line accurate.
 
 ## BUG-29 · TC-UX-NEW-5, TC-UX-NEW-6 · Low · Rejected-unit screen: field labels show the internal table name ("အမည် · customers")
 - Found in: round 9 · `mobile/test/qa/qa_round9_sync_text_test.dart` › "TC-UX-NEW-5 …" and "TC-UX-NEW-6 …"
@@ -606,6 +607,7 @@ Format:
 - Suspected area: `mobile/lib/features/sync/presentation/rejected_unit_screen.dart` line ~166 `label: '${fieldLabel(f.column)} · ${f.table}'`.
 - Blocks beta: no (a rejection only happens after an app bug; the Burmese label before the "·" is right).
 - Status: fixed in ab92a09 — labels are "<table> · <field>" in Burmese (`tableLabel` / `rowFieldLabel`, e.g. "ဖောက်သည် · အမည်"); unknown field → "အချက်အလက်တစ်ခု" (no longer "စာသားတစ်ခု" for numbers); `m/no_english_test.dart` now shows every editable field (sample rows with ids); QA TC-UX-NEW-5/6 pass unchanged.
+- QA round 10: **verified.** TC-UX-NEW-5 / -6 PASS unchanged; `m/qa/qa_round10_sync_text_test.dart::TC-UX-NEW-9 …` PASS: a unit with a row in every `editableColumns` table shows exactly the 16 Burmese labels ("ပစ္စည်း · အမည်" … "အကြွေးစာရင်း · မှတ်ချက်"); a row of an unknown table shows no field and none of its data; the validation errors on the screen are Burmese ("အမည် ထည့်ပါ။", "အမျိုးအစား စာလုံး ၆၀ လုံးထက် မပိုရပါ။", "Barcode မှာ ဂဏန်းနဲ့ အင်္ဂလိပ်စာလုံးပဲ ထည့်ပါ။", "IMEI / စီးရီးနံပါတ် မှာ …"). Status line accurate; note "unknown field → အချက်အလက်တစ်ခု" is the reject MESSAGE; an unknown column's field label would be "စာသား", but no such column can reach the screen (only `editableColumns` are shown). Cosmetic: "Batch · Batch".
 
 ## BUG-30 · TC-UX-NEW-7 · Low · Sync error for a row the app cannot read shows the exception text in English ("FormatException: syncIssues.kind …")
 - Found in: round 9 · `mobile/test/qa/qa_round9_sync_text_test.dart` › "TC-UX-NEW-7 a pulled row the app cannot read …"
@@ -617,6 +619,7 @@ Format:
 - Suspected area: `mobile/lib/core/sync/sync_engine.dart` `_cycle` — `error = '${SyncMessages.unreadable} ($e)'`.
 - Blocks beta: no (only on an app / server version mismatch; the Burmese part says what to do).
 - Status: fixed in b04dc07 — Burmese only (`SyncMessages.unreadable` / `.failed`); the raw error and stack go to the log (`dart:developer`, zaypos.sync); `m/sync_engine_test.dart` › BUG-30; QA TC-UX-NEW-7 passes unchanged.
+- QA round 10: **verified.** TC-UX-NEW-7 PASS unchanged; `m/qa/qa_round10_sync_text_test.dart::TC-UX-NEW-8 …` (2 tests) PASS: on the Settings sync card a FormatException → `SyncMessages.unreadable`; a TypeError (pulled `deletedAt` as a number) and "SqliteException(13): database or disk is full" → `SyncMessages.failed`; push network (SocketException text) / 500 (SqlException detail) / an unknown English code → the Burmese `apiErrorMessage`; never the raw text; a good cycle clears it. The first-download screen shows the same Burmese messages with "ပြန်ကြိုးစားမယ်". The sync chip has fixed labels only (sync_chip.dart). Status line accurate.
 
 ## BUG-31 · TC-SYNC-NEW-14 · Medium · A field cleared on one phone is never cleared on the other phones (pulled NULLs are ignored)
 - Found in: round 9 · live `mobile/test/qa/live_qa_round9_test.dart` (scratch DB R9) and `mobile/test/qa/qa_round9_pull_null_test.dart` ›
@@ -638,6 +641,42 @@ Format:
   affected (`drift_product_repository.dart` `update` uses `replace`).
 - Blocks beta: **yes by the owner's exit rule** (Medium) — or the owner accepts it as a known risk for 3–5 shops.
 - Status: fixed in 8b513b5 — pulled rows are applied whole (`toCompanion(false)`: NULL columns written) under the same last-writer-wins / pending-outbox rules. Both directions tested: Api `SyncTests` › "A_cleared_field_is_stored_as_null_and_pulled_as_an_explicit_null"; `m/pull_null_test.dart` (5 tests); live two phones `m/live_clear_fields_test.dart` (B clears barcode, wholesale price, expiry days, credit limit → empty on A; a duplicate barcode cleared on B is resolved on A; fails without the fix). QA TC-SYNC-NEW-14 and `live_qa_round9_test.dart` pass unchanged. Note: the app has no customer edit screen yet, so the live test records the upsertCustomer unit such an edit would send.
+- QA round 10: **verified**, with one regression found (BUG-32). Evidence: TC-SYNC-NEW-14 (Drift + live) PASS unchanged (live R10: `server: <NULL> · B: null · A: null`); `m/qa/qa_round10_pull_null_test.dart` TC-SYNC-NEW-16 (5 tests: every nullable column of every synced table cleared by a newer pull, deletedAt NULL = live again, equal updatedAt takes the pulled row, an OLDER row clears nothing on any LWW table, own device lastSeq stays max, an unpushed customer is untouched) and TC-SYNC-NEW-18 (the real edit form: Barcode / wholesale price cleared, warranty "မရှိ", "သက်တမ်း မမှတ်ပါ" → 4 explicit nulls in the unit → empty on phone A) PASS; the same tests on a worktree at e140618 fail where BUG-31 predicts. Live `m/qa/live_qa_round10_test.dart` (TC-SYNC-NEW-19) PASS: the real server's pull JSON, read through the app's DioSyncApi, has `barcode`, `wholesalePrice`, `warrantyMonths`, `expiryAlertDays`, `address`, `note`, `creditLimit` present with null; SQL shows NULL; phone A shows all 7 empty; both phones find one product for the old duplicate Barcode. Developer evidence re-run: `m/pull_null_test.dart` 5/5, live `m/live_clear_fields_test.dart` PASS, Api `SyncTests` › A_cleared_field… PASS. Status line: accurate for the LWW tables; but ledger rows (sales) are now applied whole without a pending-outbox check, which undoes an unpushed void → BUG-32. Not checked by QA: the status's "fails without the fix" for the live file (it was not run against an old server/app). For the owner: (1) the app has no customer edit screen (the pencil button does nothing, BUG-33), so a credit limit / address / note can be cleared only by a future edit screen — the sync part is proven at unit level and live; (2) after a duplicate Barcode is cleared, the `duplicateBarcode` issue stays open on every phone (live: `A open=(true), B open=(true)`) until the owner taps "စစ်ပြီး"; that resolution then reaches the other phones (live PASS). The data is consistent; whether the server should close the issue by itself is an owner decision.
+
+## BUG-32 · TC-SYNC-NEW-17 · Low · A pull can un-void a sale whose void has not been pushed yet (regression of 8b513b5)
+- Found in: round 10 · `mobile/test/qa/qa_round10_pull_null_test.dart` › "TC-SYNC-NEW-17 a sale voided on this phone …" and
+  "TC-SYNC-NEW-17 the same through the real SyncEngine on a flaky network …"
+- Steps to reproduce: phone A sells (checkout pushed and applied), the following pull drops (bad network) → the cashier voids the sale
+  → the void push fails (network, back-off) → the next automatic sync cycle skips the push (back-off) and pulls → the page contains the
+  server copy of that sale (voidedAt NULL — the echo of its own checkout). Any pull that re-sends the sale while its void is pending does
+  the same (e.g. the other phone un-voided it).
+- Expected: owner (BUG-31 hand-over): full-row apply "under the existing LWW and pending-outbox rules"; phase3-sync.md §5.3 lets ledger
+  rows be replaced only because "local copies are identical" — a sale with a pending void is not identical. The sale stays voided on A
+  until the void is pushed. Before 8b513b5 it did (NULL columns were skipped).
+- Actual: `Expected: not null  Actual: <null>` (sales.voidedAt), with the voidSale unit still pending in the outbox and the stock already
+  returned (`stock here is 5`). Sales history / the receipt show the sale as not voided, the day's totals count it again, and the sale
+  screen offers "void" a second time. The same two tests PASS on a worktree at e140618.
+- Suspected area: `mobile/lib/core/sync/sync_store.dart` `_merge`, `case WireTable.sales` (and the other ledger cases): whole-row
+  `insertOnConflictUpdate(...toCompanion(false))` without the `unpushed` check the LWW tables have.
+- Self-heals: when the void is pushed, the next pull brings voidedAt back; a second void by the cashier is skipped by the server and its
+  local ledger rows are dropped (sync_store.dart applyResults "skipped"), so no stock is lost for good.
+- Blocks beta: no (needs a void within one failed sync of the sale on a flaky network; wrong only until the next good sync).
+- Status: open
+
+## BUG-33 · TC-DEBT-NEW-6 · Low · Customer screen: the "ပြင်ဆင်ရန်" (edit) button does nothing — a customer can never be corrected
+- Found in: round 10 · `mobile/test/qa/qa_round10_customer_edit_test.dart` › "TC-DEBT-NEW-6 customer screen: the "ပြင်ဆင်ရန်" (edit)
+  button opens an edit form …"
+- Steps to reproduce: Customers → any customer ("အကြွေးစာရင်း") → tap the pencil button at the top right.
+- Expected: the button (semantics "ပြင်ဆင်ရန်" = edit) opens an edit form, so a wrong phone number / address or the credit limit can be
+  changed or removed. The owner's BUG-31 check itself asks to "clear … credit limit on phone B"; Add Customer promises a credit-limit
+  warning (BUG-7) that a shop cannot later relax.
+- Actual: `Expected: (true, true)  Actual: (false, false)` — no navigation, no field with the customer's name. `debt_screen.dart`:
+  `AppIconButton(icon: AppIcons.edit, size: 20, semanticLabel: 'ပြင်ဆင်ရန်', onPressed: () {})`, unchanged since d99efb7 (Phase 1). The
+  developer confirms "the app has NO customer edit screen" (round-10 hand-over); the sync side (upsertCustomer with nulls) works live.
+- Suspected area: `mobile/lib/features/customers/presentation/debt_screen.dart` (header trailing button); no customer edit route.
+- Blocks beta: no (workaround: add the customer again; the old debt history stays on the old entry). Owner decision: add a small edit
+  form (name, phone, address, credit limit, note) or hide the button for the beta.
+- Status: open
 
 ---
 
@@ -682,6 +721,16 @@ QA round 9 check of this section (fe1acaa): **accurate, with one correction and 
    upgrade). Addition: a phone that already has an issue keeps its old copy of the fields (BUG-31); the rejected-unit screen still shows
    the table name (BUG-29) and the Settings sync card can show an English exception for an unreadable row (BUG-30).
 4. QA round-8 points 2 ("issue text is English") and 4 (BUG-27) are out of date as the developer note says.
+
+QA round 10 check of this section (af191a5; bullets unchanged since round 9): **accurate**; the round-9 additions are out of date and
+two things are new (all proven by round-10 tests):
+1. Duplicate barcodes: clearing the Barcode on one phone now reaches every phone (BUG-31 fixed; live TC-SYNC-NEW-19). **New:** the
+   `duplicateBarcode` entry stays in "စစ်ရန်" on every phone until the owner taps "စစ်ပြီး" (the server does not close it when the
+   duplicate is gone); tell shops to fix the barcode first, then mark the entry.
+2. IMEI: "the in-cart check is for scans only" is out of date — taps are covered too (BUG-28 fixed; TC-POS-NEW-17).
+3. Sync texts: the rejected-unit labels and the sync error texts are Burmese now (BUG-29, BUG-30 fixed; TC-UX-NEW-8, -9).
+4. **New:** customers cannot be edited after they are saved (BUG-33): a wrong phone number or credit limit means adding the customer
+   again.
 
 ---
 
