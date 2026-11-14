@@ -104,6 +104,8 @@ class DashboardScreen extends ConsumerWidget {
                             label: 'Stock နည်းနေသည်',
                             value: '$lowCount မျိုး',
                             caption: 'မှာရန်လိုသည်',
+                            // Same filter as this count: the numbers match.
+                            onTap: () => context.go(Routes.productsLowStock),
                           ),
                         ),
                       ],

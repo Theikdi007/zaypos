@@ -18,6 +18,9 @@ abstract final class Routes {
 
   /// Products without a selling price (Dashboard card).
   static const productsNeedingPrice = '/products?filter=noPrice';
+
+  /// Products filtered to "Stock နည်း" (Dashboard low-stock card).
+  static const productsLowStock = '/products?filter=low';
   static const addProduct = '/products/new';
   static const customers = '/customers';
   static const addCustomer = '/customers/new';

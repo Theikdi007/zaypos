@@ -8,6 +8,7 @@ import 'package:zaypos_app/core/router/app_router.dart';
 import 'package:zaypos_app/core/router/routes.dart';
 import 'package:zaypos_app/core/utils/ids.dart';
 import 'package:zaypos_app/core/utils/qty.dart';
+import 'package:zaypos_app/core/widgets/common.dart' show FilterChips;
 import 'package:zaypos_app/core/widgets/product_tile.dart';
 import 'package:zaypos_app/features/auth/data/session.dart';
 import 'package:zaypos_app/features/inventory/domain/stock_movement.dart';
@@ -80,6 +81,27 @@ void main() {
     await openProducts(tester, c);
     expect(find.text('Stock နည်း ($expected)'), findsOneWidget);
     expect(find.text('Stock မမှတ်ရသေး (3)'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tapping the Dashboard low-stock card opens Products filtered to "Stock နည်း"', (tester) async {
+    final (c, presets) = await boot(tester);
+    final low = c.read(productsProvider).requireValue.where((p) => p.needsRestock).toList();
+
+    await tester.tap(find.text('Stock နည်းနေသည်'));
+    await tester.pumpAndSettle();
+
+    final screen = tester.widget<ProductsScreen>(find.byType(ProductsScreen));
+    expect(screen.initialFilter, ProductFilter.low);
+    final chips = tester.widget<FilterChips<ProductFilter>>(find.byType(FilterChips<ProductFilter>));
+    expect(chips.selected, ProductFilter.low);
+    for (final p in low) {
+      expect(find.text(p.name), findsOneWidget, reason: '${p.name} needs restock');
+    }
+    expect(find.text('ရေသန့် 1L'), findsNothing, reason: 'water has plenty');
+    for (final p in presets) {
+      expect(find.text(p.name), findsNothing, reason: 'untracked is not low');
+    }
     expect(tester.takeException(), isNull);
   });
 
