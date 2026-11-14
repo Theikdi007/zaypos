@@ -273,13 +273,32 @@ SQL Server does not run natively on macOS — use Docker Desktop
 (Settings → General → "Use Rosetta for x86/amd64 emulation on Apple Silicon"):
 
 ```bash
-# DEV-ONLY example password: local Docker on your Mac only. Never reuse it for a
-# shared, staging or production server, and never put it in appsettings*.json
-# that is committed (appsettings.Development.json is git-ignored).
-docker run -d --name zaypos-sql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Zaypos!Dev2026' \
+# <YOUR_DEV_SA_PASSWORD>: choose your own (SQL Server needs 8+ chars with upper,
+# lower, digit and symbol). Never commit it; never reuse it on a shared server.
+docker run -d --name zaypos-sql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='<YOUR_DEV_SA_PASSWORD>' \
   -v zaypos-sql-data:/var/opt/mssql \
   -p 127.0.0.1:1433:1433 mcr.microsoft.com/mssql/server:2022-latest
 ```
+
+The API reads it from the `ZayPOS` connection string. Set it in **one** of these
+places, both outside git:
+
+- `backend/src/ZayPOS.Api/appsettings.Development.json` (git-ignored): copy
+  `appsettings.Development.example.json` and replace `<your-local-sa-password>`.
+- or .NET user-secrets (the API project already has a `UserSecretsId`):
+  ```bash
+  cd backend/src/ZayPOS.Api
+  dotnet user-secrets set "ConnectionStrings:ZayPOS" \
+    "Server=localhost,1433;Database=ZayPOS;User Id=sa;Password=<YOUR_DEV_SA_PASSWORD>;TrustServerCertificate=True"
+  ```
+  User-secrets override `appsettings.Development.json` in Development.
+
+`dotnet ef` commands (`--startup-project src/ZayPOS.Api`) read the same settings.
+The integration tests do not need it: they start their own throw-away SQL Server
+(Testcontainers).
+
+A password that was ever committed stays in git history: if yours was, change it
+(recreate the container with a new `MSSQL_SA_PASSWORD`, update the setting above).
 
 `-p 127.0.0.1:1433:1433` publishes SQL Server on the Mac's loopback only, so other
 devices on the same Wi-Fi cannot reach it (the API is what the phone talks to).
