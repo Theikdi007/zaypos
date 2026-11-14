@@ -91,7 +91,9 @@ Future<ModulePickResult> pickModuleUnit(BuildContext context, WidgetRef ref, Pro
     }
   }
 
-  if (f.expiryBatch) {
+  // Batches only for products that track expiry; others sell as plain products,
+  // even with old batches: no batch sheet, no expired confirm (BUG-20).
+  if (f.expiryBatch && p.expiryAlertDays != null) {
     final batches = [...await products.watchBatches(p.id).first]..sort(_fefo);
     if (batches.isNotEmpty) {
       ModulePick pickOf(ProductBatch b) => (batchId: b.id, variantId: null, serialId: null, label: 'Batch ${b.batchNo}');

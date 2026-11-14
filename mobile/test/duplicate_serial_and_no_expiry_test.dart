@@ -269,4 +269,117 @@ void main() {
       expect(db(c).batches.where((x) => x.productId == p.id), hasLength(1));
     });
   });
+
+  // ================================================================ BUG-19 / 20 / 21
+  group('BUG-19 Add Product never drops a typed IMEI', () {
+    testWidgets('typed, not "+"-ed: saved with the product (stock 1)', (tester) async {
+      final c = await boot(tester, 'phone');
+      c.read(appRouterProvider).go(Routes.addProduct);
+      await tester.pumpAndSettle();
+      await tester.enterText(field('productName'), 'QA typed phone');
+      await tester.enterText(field('price'), '450000');
+      await tester.enterText(field('imei'), '351999999999991');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('သိမ်းမယ်').last);
+      await tester.pumpAndSettle();
+      final p = db(c).products.firstWhere((x) => x.name == 'QA typed phone');
+      expect(db(c).serials.where((s) => s.productId == p.id).map((s) => s.serial), ['351999999999991']);
+      expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(1));
+    });
+
+    testWidgets('typed IMEI that is refused (already known): save blocked with the message, nothing written', (tester) async {
+      final c = await boot(tester, 'phone');
+      final other = product(c, 'QA other phone');
+      final t = nowUtc();
+      await c.read(productServiceProvider).create(other, serials: [
+        ProductSerial(id: newId(), tenantId: other.tenantId, productId: other.id, serial: '351999999999992',
+            status: SerialStatus.inStock, createdAt: t, updatedAt: t),
+      ]);
+      c.read(appRouterProvider).go(Routes.addProduct);
+      await tester.pumpAndSettle();
+      await tester.enterText(field('productName'), 'QA blocked phone');
+      await tester.enterText(field('price'), '450000');
+      await tester.enterText(field('imei'), '351999999999992');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('သိမ်းမယ်').last);
+      await tester.pumpAndSettle();
+      expect(find.text('ဒီ IMEI ရှိပြီးသားပါ။'), findsOneWidget);
+      expect(db(c).products.where((x) => x.name == 'QA blocked phone'), isEmpty);
+    });
+  });
+
+  group('BUG-20 no expiryAlertDays = plain product, even with old batches', () {
+    testWidgets('old empty + expired batches: POS asks nothing (no batch sheet, no expired confirm); restock only "Batch မပါ"; '
+        'stock = all movements', (tester) async {
+      final c = await boot(tester, 'pharmacy');
+      final p = product(c, 'QA old-batch soap'); // expiryAlertDays null
+      final t = nowUtc();
+      final empty = ProductBatch(id: newId(), tenantId: p.tenantId, productId: p.id, batchNo: 'E0', qtyMilli: 0,
+          expiryDate: DateTime.utc(2030, 1, 1), createdAt: t, updatedAt: t);
+      final expired = ProductBatch(id: newId(), tenantId: p.tenantId, productId: p.id, batchNo: 'X1', qtyMilli: 0,
+          expiryDate: DateTime.utc(2020, 1, 1), createdAt: t, updatedAt: t);
+      await c.read(productServiceProvider).create(p, batches: [empty, expired], initialStock: [
+        restockMovement(tenantId: p.tenantId, productId: p.id, batchId: expired.id, qtyMilli: Qty.units(2)),
+        restockMovement(tenantId: p.tenantId, productId: p.id, qtyMilli: Qty.units(3)),
+      ]);
+
+      await openProducts(tester, c, p.name);
+      await tester.tap(find.byKey(ValueKey('restock-${p.id}')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('restockBatch-none')), findsOneWidget);
+      expect(find.byKey(ValueKey('restockBatch-${empty.id}')), findsNothing, reason: 'old batches not offered');
+      expect(find.byKey(const ValueKey('restockBatch-new')), findsNothing);
+      await keys(tester, ['4']);
+      await tester.tap(inSheet(find.text('သိမ်းမယ်')));
+      await tester.pumpAndSettle();
+      expect(db(c).stock.last.batchId, isNull);
+      expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(9), reason: '2 + 3 + 4: every movement counts');
+
+      c.read(appRouterProvider).go(Routes.pos);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ပစ္စည်းများ'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(EditableText).first, p.name);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(p.name).last);
+      await tester.pumpAndSettle();
+      expect(find.text('ဘယ် Batch လဲ?'), findsNothing);
+      expect(find.textContaining('သက်တမ်းကုန်နေပါပြီ'), findsNothing);
+      expect(c.read(cartProvider).lines.single.batchId, isNull);
+    });
+  });
+
+  group('BUG-21 expiry-tracked product: opening stock needs a batch number', () {
+    testWidgets('stock without batch no. → refused with the message; with batch no. → saved into that batch', (tester) async {
+      final c = await boot(tester, 'pharmacy');
+      c.read(appRouterProvider).go(Routes.addProduct);
+      await tester.pumpAndSettle();
+      await tester.enterText(field('productName'), 'QA tracked med');
+      await tester.enterText(field('price'), '1500');
+      await tester.enterText(field('stockQty'), '10');
+      await tester.tap(find.text('သိမ်းမယ်').last);
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Batch နံပါတ် ထည့်ပါ'), findsOneWidget);
+      expect(db(c).products.where((x) => x.name == 'QA tracked med'), isEmpty);
+
+      await tester.enterText(field('batchNo'), 'T1');
+      await tester.tap(find.text('သိမ်းမယ်').last);
+      await tester.pumpAndSettle();
+      final p = db(c).products.firstWhere((x) => x.name == 'QA tracked med');
+      final b = db(c).batches.singleWhere((x) => x.productId == p.id);
+      expect(stockWhere(c, (m) => m.batchId == b.id), Qty.units(10));
+      expect(stockWhere(c, (m) => m.productId == p.id && m.batchId == null), 0);
+    });
+
+    testWidgets('stock 0 needs no batch (received later through "Stock ဖြည့်မယ်")', (tester) async {
+      final c = await boot(tester, 'pharmacy');
+      c.read(appRouterProvider).go(Routes.addProduct);
+      await tester.pumpAndSettle();
+      await tester.enterText(field('productName'), 'QA med no stock');
+      await tester.enterText(field('price'), '1500');
+      await tester.tap(find.text('သိမ်းမယ်').last);
+      await tester.pumpAndSettle();
+      expect(db(c).products.where((x) => x.name == 'QA med no stock'), hasLength(1));
+    });
+  });
 }

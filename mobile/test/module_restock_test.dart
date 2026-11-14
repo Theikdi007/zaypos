@@ -54,6 +54,7 @@ void main() {
     return Product(
       id: newId(), tenantId: c.read(tenantIdProvider), name: name, cost: 400, price: 600, category: 'QA',
       tint: 0xFFDBEAFE, initial: 'Q', createdAt: t, updatedAt: t, lowAlertMilli: lowAlertMilli,
+      expiryAlertDays: 30, // medicines track expiry (only matters with the Batch feature on)
     );
   }
 

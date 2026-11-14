@@ -162,10 +162,14 @@ class SerialWarrantySection extends StatefulWidget {
     required this.warrantyMonths,
     required this.onWarrantyChanged,
     this.showSerials = true,
+    this.registerCommit,
   });
 
   /// False when editing a saved product: IMEIs are stock, entered when goods arrive.
   final bool showSerials;
+
+  /// Receives the "add what is typed" callback the form calls on save (BUG-19).
+  final ValueSetter<bool Function()>? registerCommit;
 
   final bool serial;
   final ValueChanged<bool> onSerialChanged;
@@ -188,6 +192,19 @@ class SerialWarrantySection extends StatefulWidget {
 class _SerialWarrantySectionState extends State<SerialWarrantySection> {
   final _imei = TextEditingController();
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.registerCommit?.call(_commitTyped);
+  }
+
+  /// A typed IMEI not yet added: add it now; false (message shown) if refused (BUG-19).
+  bool _commitTyped() {
+    if (!widget.serial || _imei.text.trim().isEmpty) return true;
+    _submit();
+    return _error == null;
+  }
 
   @override
   void dispose() {

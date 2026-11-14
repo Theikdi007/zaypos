@@ -124,8 +124,9 @@ class ModuleRestockSheet extends ConsumerStatefulWidget {
   /// Every IMEI the phone already knows (any product): refused as new IMEIs.
   final Set<String> knownSerials;
 
-  /// The product does not track expiry (no expiryAlertDays): goods may go in
-  /// without a batch ("Batch မပါ", the default when it has no batch yet).
+  /// The product does not track expiry (no expiryAlertDays): it restocks as a
+  /// plain product (BUG-20) — the only choice shown is "Batch မပါ"; old
+  /// batches are not offered and no new batch can be started here.
   final bool batchOptional;
 
   /// Batch choice meaning "no batch".
@@ -159,8 +160,9 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
 
   // batch
   late final List<ProductBatch> _batches = [...widget.batches]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-  late String _batch = _batches.where((b) => !b.isExpired(_now)).firstOrNull?.id ??
-      (widget.batchOptional ? ModuleRestockSheet.noBatch : ModuleRestockSheet.newBatch);
+  late String _batch = widget.batchOptional
+      ? ModuleRestockSheet.noBatch
+      : _batches.where((b) => !b.isExpired(_now)).firstOrNull?.id ?? ModuleRestockSheet.newBatch;
   final _batchNo = TextEditingController();
   DateTime? _expiry;
 
@@ -355,7 +357,7 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
         spacing: 8,
         runSpacing: 8,
         children: [
-          for (final b in _batches)
+          for (final b in widget.batchOptional ? const <ProductBatch>[] : _batches)
             _choice(
               key: ValueKey('restockBatch-${b.id}'),
               selected: _batch == b.id,
@@ -367,12 +369,13 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
               expired: b.isExpired(_now),
               onTap: () => setState(() => _batch = b.id),
             ),
-          _choice(
-            key: const ValueKey('restockBatch-new'),
-            selected: isNew,
-            label: '+ Batch အသစ်',
-            onTap: () => setState(() => _batch = ModuleRestockSheet.newBatch),
-          ),
+          if (!widget.batchOptional)
+            _choice(
+              key: const ValueKey('restockBatch-new'),
+              selected: isNew,
+              label: '+ Batch အသစ်',
+              onTap: () => setState(() => _batch = ModuleRestockSheet.newBatch),
+            ),
           if (widget.batchOptional)
             _choice(
               key: const ValueKey('restockBatch-none'),
@@ -384,7 +387,8 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
       ),
       if (widget.batchOptional) ...[
         const SizedBox(height: 6),
-        Text('သက်တမ်း မမှတ်တဲ့ ပစ္စည်း · Batch မလိုပါ', style: AppText.s(12, color: AppColors.muted)),
+        Text("သက်တမ်း မမှတ်တဲ့ ပစ္စည်း · Batch မလိုပါ (ပစ္စည်းမှာ 'ကုန်ခါနီးရင် သတိပေးမယ်' ရွေးမှ Batch နဲ့ ဖြည့်ပါမယ်)",
+            style: AppText.s(12, color: AppColors.muted)),
       ],
       if (isNew) ...[
         const SizedBox(height: 10),

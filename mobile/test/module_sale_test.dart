@@ -25,6 +25,7 @@ void main() {
     return Product(
       id: newId(), tenantId: tenantId, name: name, cost: 100, price: 1000,
       category: 'အထွေထွေ', tint: 0xFFDBEAFE, initial: name.characters.first, createdAt: t, updatedAt: t,
+      expiryAlertDays: 30, // medicines track expiry (only matters with the Batch feature on)
     );
   }
 

@@ -94,11 +94,14 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final repo = ref.read(productRepositoryProvider);
     final serials = f.serialWarranty ? await repo.watchSerials(p.id).first : const <ProductSerial>[];
     final variants = f.variants ? await repo.watchVariants(p.id).first : const <ProductVariant>[];
-    final batches = f.expiryBatch ? await repo.watchBatches(p.id).first : const <ProductBatch>[];
+    // Batches only for expiry-tracked products (BUG-20): others restock as plain products.
+    final tracksExpiry = f.expiryBatch && p.product.expiryAlertDays != null;
+    final batches = tracksExpiry ? await repo.watchBatches(p.id).first : const <ProductBatch>[];
     final mode = serials.isNotEmpty
         ? RestockMode.imei
         : variants.isNotEmpty
             ? RestockMode.variant
+            // Batch shop: expiry-tracked → batch required; others → "Batch မပါ" only (plain).
             : f.expiryBatch
                 ? RestockMode.batch
                 : null;
@@ -124,8 +127,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       variants: variants,
       variantStock: variantStock,
       knownSerials: known,
-      // Batches are required only for products that track expiry (item 5).
-      batchOptional: p.product.expiryAlertDays == null,
+      batchOptional: !tracksExpiry,
     );
     if (r == null || !mounted) return true;
     final t = nowUtc();

@@ -74,6 +74,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   late final _alert = TextEditingController(
       text: _p == null || _p.lowAlertMilli == noLowAlert ? '' : Qty.format(_p.lowAlertMilli));
 
+  /// Add Product: adds an IMEI typed but not yet "+"-ed (BUG-19).
+  bool Function()? _commitTypedImei;
+
   /// IMEIs / batches / sizes-colours added in the edit form (BUG-12).
   final _pending = PendingModules();
   final _batchNo = TextEditingController();
@@ -140,8 +143,23 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     final name = _name.text.trim();
     final price = int.tryParse(_price.text) ?? 0;
     final barcode = limits.normalize('products.barcode', _barcode.text);
+    // A typed IMEI not "+"-ed is added now, or blocks the save with its message (BUG-19).
+    if (!_isEdit && features.serialWarranty && !(_commitTypedImei?.call() ?? true)) {
+      setState(() => _showErrors = true);
+      return;
+    }
     final tracksExpiry = features.expiryBatch && _expiryWarnDays != ExpiryBatchSection.noExpiry;
     final hasBatchInput = tracksExpiry && (_batchNo.text.trim().isNotEmpty || _expiry != null);
+    // Opening stock of an expiry-tracked product must go into a batch (BUG-21).
+    final openingQty = Qty.parse(_stock.text, decimal: features.decimalQty) ?? 0;
+    final needsBatch = !_isEdit &&
+        tracksExpiry &&
+        features.stock &&
+        _track &&
+        !features.variants &&
+        !(features.serialWarranty && _serial) &&
+        openingQty > 0 &&
+        _batchNo.text.trim().isEmpty;
     final errors = <String, String>{
       for (final (key, error) in [
         ('name', limits.checkText('products.name', name, label: 'ပစ္စည်းအမည်')),
@@ -155,6 +173,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     };
     if (name.isEmpty) errors['name'] ??= 'ပစ္စည်းအမည် ထည့်ပါ။';
     if (price <= 0) errors['price'] = 'ရောင်းဈေး ထည့်ပါ။';
+    if (needsBatch) {
+      errors['batchNo'] = "သက်တမ်းမှတ်တဲ့ ပစ္စည်းမို့ Batch နံပါတ် ထည့်ပါ (သို့ 'သက်တမ်း မမှတ်ပါ' ရွေးပါ)။";
+    }
     if (errors.isNotEmpty) {
       setState(() {
         _showErrors = true;
@@ -510,6 +531,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     warrantyMonths: _warrantyMonths,
                     onWarrantyChanged: (m) => setState(() => _warrantyMonths = m),
                     showSerials: !_isEdit,
+                    registerCommit: (f) => _commitTypedImei = f,
                   ),
                 if (f.variants && !_isEdit)
                   VariantsSection(
