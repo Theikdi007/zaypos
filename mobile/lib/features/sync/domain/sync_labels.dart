@@ -242,7 +242,11 @@ String tableLabel(String table) => switch (table) {
     };
 
 /// "ဖောက်သည် · အမည်" — a rejected unit's editable field, all Burmese.
-String rowFieldLabel(String table, String column) => '${tableLabel(table)} · ${fieldLabel(column)}';
+/// When the field has the table's own name (a batch's "Batch"), it is the number: "Batch · နံပါတ်".
+String rowFieldLabel(String table, String column) {
+  final t = tableLabel(table), f = fieldLabel(column);
+  return '$t · ${f == t ? 'နံပါတ်' : f}';
+}
 
 /// Label of a column the app has no name for (never the internal name — BUG-26).
 const _unknownField = 'စာသား';

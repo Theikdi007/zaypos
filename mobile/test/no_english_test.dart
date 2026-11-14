@@ -185,7 +185,7 @@ void main() {
       }
       // BUG-29: the editable fields are shown (rows have ids) with Burmese table + field names.
       expect(labels, containsAll([
-        'ပစ္စည်း · အမည်', 'ပစ္စည်း · Barcode', 'ဖောက်သည် · ဖုန်း', 'ဆိုဒ် / အရောင် · ဆိုဒ်', 'Batch · Batch',
+        'ပစ္စည်း · အမည်', 'ပစ္စည်း · Barcode', 'ဖောက်သည် · ဖုန်း', 'ဆိုဒ် / အရောင် · ဆိုဒ်', 'Batch · နံပါတ်',
         'IMEI · IMEI / စီးရီးနံပါတ်', 'ပြေစာ · ဖောက်သည်အမည်', 'ပြေစာထဲက ပစ္စည်း · အမည်', 'Stock အဝင်အထွက် · မှတ်ချက်',
         'အကြွေးစာရင်း · မှတ်ချက်',
       ]));
