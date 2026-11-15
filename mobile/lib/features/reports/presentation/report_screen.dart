@@ -5,7 +5,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text.dart';
 import '../../../core/utils/money_format.dart';
-import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/money_text.dart';
 import '../../../core/widgets/segmented_tabs.dart';
@@ -50,7 +49,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       child: Text('အစီရင်ခံစာ', style: AppText.s(22, weight: AppText.w700)),
                     ),
                   ),
-                  SmallOutlineButton(icon: AppIcons.download, label: 'Excel', onPressed: () {}),
+                  // "Excel" export is hidden for the beta (BUG-46, beta backlog).
                 ],
               ),
               const SizedBox(height: 12),

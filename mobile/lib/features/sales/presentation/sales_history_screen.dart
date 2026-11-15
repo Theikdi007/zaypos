@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/sync/sync_providers.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text.dart';
 import '../../../core/utils/myanmar.dart';
 import '../../../core/widgets/app_icons.dart';
@@ -48,7 +49,9 @@ class _SalesHistoryScreenState extends ConsumerState<SalesHistoryScreen> {
           ScreenHeader(
             title: 'အရောင်းမှတ်တမ်း',
             onBack: () => context.pop(),
-            trailing: SmallOutlineButton(icon: AppIcons.calendar, label: 'ယနေ့', onPressed: () {}),
+            // The list shows today only; the date picker behind "ယနေ့" is in the beta backlog (BUG-46),
+            // so it is a label, not a button.
+            trailing: const _TodayLabel(),
             bottom: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -85,6 +88,32 @@ class _SalesHistoryScreenState extends ConsumerState<SalesHistoryScreen> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "ယနေ့" in the header: the period this list shows. Not tappable.
+class _TodayLabel extends StatelessWidget {
+  const _TodayLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppRadius.inputR,
+        border: Border.all(color: AppColors.border, width: 1.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const AppIcon(AppIcons.calendar, size: 16, color: AppColors.text),
+          const SizedBox(width: 6),
+          Text('ယနေ့', style: AppText.s(13, weight: AppText.w600)),
         ],
       ),
     );

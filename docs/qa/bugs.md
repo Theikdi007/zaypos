@@ -916,9 +916,12 @@ Format:
 - Suspected area: `mobile/lib/features/sales/presentation/receipt_image.dart` `ReceiptCard` / `_ReceiptBody` (no `sale.voided`
   branch); `sale_detail_screen.dart` offers "ပြေစာ ပို့မယ်" for voided sales. New with 71dfd5b (before, the button did nothing).
 - Blocks beta: no. Only the shop sends receipts, and only by choice; but a clean receipt for a cancelled sale can cause a dispute.
-- Status: open (beta backlog)
+- Status: fixed (developer, 2026-11-15, branch fix/beta-buttons). `ReceiptCard` draws a large red, tilted "ပယ်ဖျက်ပြီး" stamp
+  (`VoidedStamp`) across a voided sale's receipt. Share and save both render `ReceiptCard`, so every image of a voided sale
+  carries the stamp. Tests: `m/receipt_voided_test.dart` (3). In the real PNG the valid receipt has 0 red pixels and the voided one
+  has 40,767 of 1080 × 1098. The sale screen's share and the receipt screen's share and save are all stamped.
 
-## BUG-46 · TC-UX-NEW-10 · Low · Other buttons that look ready still do nothing (contact picker, debt "ဖုန်းခေါ်ရန်" / "Viber သတိပေး", Reports "Excel", checkout transfer photo)
+## BUG-46 · TC-UX-NEW-10 · Medium (owner; QA filed it Low) · Other buttons that look ready still do nothing (contact picker, debt "ဖုန်းခေါ်ရန်" / "Viber သတိပေး", Reports "Excel", checkout transfer photo)
 - Found in: round 13 · `mobile/test/qa/qa_round13_dead_buttons_test.dart::TC-UX-NEW-10 …` (the fixed "ပုံ သိမ်းမယ်" is the positive
   control and reacts). BUG-40's "Actual" already named the contact picker; 71dfd5b fixed only the receipt buttons.
 - Steps to reproduce: Customers → a debtor → tap the green phone icon, then "Viber သတိပေး"; Customers → + → the contact icon next to
@@ -933,7 +936,37 @@ Format:
 - Blocks beta: no under the current ratings (each is a secondary action with a manual workaround: call or message from the phone,
   pay screenshots stay in the customer's chat). But it is the same pattern BUG-40 was rated Medium for. Recommended before the beta:
   hide them, or tell shops which buttons are "coming later". Owner's call; if the owner rates "Viber သတိပေး" like BUG-40, it is Medium.
-- Status: open (beta backlog)
+- Severity: **Medium** (owner, 2026-11-15, the same rating as BUG-40). It blocks the beta.
+- Status: fixed (developer, 2026-11-15, branch fix/beta-buttons):
+  - Debtor screen "ဖုန်းခေါ်ရန်" opens `tel:` with the customer's phone (url_launcher). The number goes through `phoneKey`, so
+    Myanmar digits, spaces and "+95" all work. With no phone the button is disabled (grey, announced as disabled). It says
+    "ဖုန်းနံပါတ် မရှိလို့ ခေါ်လို့ မရပါ" under the name and in the screen-reader hint. If the dialer cannot open, the app shows
+    "ဖုန်းခေါ်လို့ မရပါ။".
+  - "Viber သတိပေး" opens the share sheet with a Burmese reminder that names the shop, the customer, the balance in Ks and today's
+    date ("၁၅ နိုဝင်ဘာ ၂၀၂၆"). If sharing fails, the app shows "သတိပေးစာ ပို့လို့ မရပါ။ ထပ်ကြိုးစားပါ။".
+  - Hidden for the beta (see the beta backlog below): the Add Customer contact picker, Reports "Excel", and the checkout
+    KBZPay/WavePay payment-screenshot box.
+  - Sales history "ယနေ့" is now a plain label, not a button. The list shows today only.
+  - Guard: `m/no_dead_handlers_test.dart` scans `lib/` and fails on any `onPressed/onTap/onLongPress/…` handler that is empty
+    (`() {}`, `() async {}`, `() => null`, comment-only) or starts with a TODO. It also checks itself on known good and bad snippets.
+  - Tests: `m/beta_buttons_test.dart` (13), `m/no_dead_handlers_test.dart` (3).
+  - QA's `m/qa/qa_round13_dead_buttons_test.dart` still looks for the three hidden controls. It now fails at "is on screen"
+    until QA updates it. Its call and Viber probes also print "NOTHING" when the real plugins run in a widget test. The
+    platform-channel reply needs real time (`runAsync`), not the fake clock. With real-time waits the same taps show
+    "ဖုန်းခေါ်လို့ မရပါ။" and "သတိပေးစာ ပို့လို့ မရပါ။ ထပ်ကြိုးစားပါ။" (no plugin in tests). `m/beta_buttons_test.dart` uses a fake
+    outlet instead. Android: a `tel:` DIAL entry is added to `<queries>` in the manifest.
+
+## Beta backlog: hidden for the beta (BUG-46, owner 2026-11-15)
+
+These controls were dead in round 13. They are removed from the screens for the beta, not just disabled. Each comes back only
+with a working implementation and a test.
+- **Add Customer: contact picker** ("ဖုန်းစာအုပ်ထဲက ရွေးရန်", next to the phone field). It needs contacts permission and a plugin.
+  `customers/presentation/add_customer_screen.dart`.
+- **Reports: "Excel" export.** It needs a file format and an export of the report period. `reports/presentation/report_screen.dart`.
+- **Checkout KBZPay / WavePay: payment-screenshot box** ("ငွေလွှဲပြေစာ ပုံ (မဖြစ်မနေ မဟုတ်ပါ)"). It needs a photo picker, and a
+  decision on whether the photo is stored or synced (see the photos limitation). `pos/presentation/checkout_screen.dart`.
+- **Sales history: date picker behind "ယနေ့".** It is a label for now, because the list shows today only.
+  `sales/presentation/sales_history_screen.dart`.
 
 ---
 
