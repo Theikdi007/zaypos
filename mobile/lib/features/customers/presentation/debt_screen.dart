@@ -12,9 +12,11 @@ import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/money_text.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../auth/data/session.dart';
 import '../application/customer_service.dart';
 import '../data/customer_providers.dart';
 import '../domain/debt_entry.dart';
+import 'debt_actions.dart';
 import 'pay_debt_sheet.dart';
 import '../../../core/widgets/async_view.dart';
 
@@ -31,6 +33,7 @@ class DebtScreen extends ConsumerWidget {
     if (c == null) return const Scaffold();
     final now = DateTime.now();
     final sub = [c.customer.phone, ?c.customer.address].where((s) => s.isNotEmpty).join(' · ');
+    final tel = telUri(c.customer.phone);
     final lastPaid = c.lastPaymentAt;
     final lastPaidLabel = lastPaid == null
         ? null
@@ -59,18 +62,21 @@ class DebtScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(c.name, style: AppText.s(17, weight: AppText.w700)),
-                        Text(sub, style: AppText.s(13, color: AppColors.muted)),
+                        if (sub.isNotEmpty) Text(sub, style: AppText.s(13, color: AppColors.muted)),
+                        if (tel == null) Text(debtNoPhoneHint, style: AppText.s(12, color: AppColors.muted)),
                       ],
                     ),
                   ),
                   AppIconButton(
+                    key: const ValueKey('debtCall'),
                     icon: AppIcons.phone,
                     size: 20,
                     circle: true,
-                    color: AppColors.success,
-                    background: AppColors.successBg,
-                    semanticLabel: 'ဖုန်းခေါ်ရန်',
-                    onPressed: () {},
+                    color: tel == null ? AppColors.muted : AppColors.success,
+                    background: tel == null ? AppColors.fillSoft : AppColors.successBg,
+                    semanticLabel: debtCallLabel,
+                    hint: tel == null ? debtNoPhoneHint : null,
+                    onPressed: tel == null ? null : () => _call(context, ref, tel),
                   ),
                 ],
               ),
@@ -103,14 +109,16 @@ class DebtScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: PrimaryButton(
-                      label: 'Viber သတိပေး',
-                      variant: ButtonVariant.outlineDark,
-                      icon: AppIcons.send,
-                      height: 52,
-                      radius: 14,
-                      fontSize: 14,
-                      onPressed: () {},
+                    child: Builder(
+                      builder: (btnContext) => PrimaryButton(
+                        label: debtRemindLabel,
+                        variant: ButtonVariant.outlineDark,
+                        icon: AppIcons.send,
+                        height: 52,
+                        radius: 14,
+                        fontSize: 14,
+                        onPressed: () => _remind(btnContext, ref, name: c.name, balance: c.balance),
+                      ),
                     ),
                   ),
                 ],
@@ -141,6 +149,35 @@ class DebtScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+void _snack(BuildContext context, String text) {
+  ScaffoldMessenger.maybeOf(context)
+    ?..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(text), duration: const Duration(seconds: 3)));
+}
+
+/// BUG-46: "ဖုန်းခေါ်ရန်" opens the phone app with the customer's number.
+Future<void> _call(BuildContext context, WidgetRef ref, Uri tel) async {
+  final ok = await ref.read(debtOutletProvider).call(tel);
+  if (!ok && context.mounted) _snack(context, debtCallFailedText);
+}
+
+/// BUG-46: "Viber သတိပေး" opens the share sheet with a Burmese reminder.
+Future<void> _remind(BuildContext context, WidgetRef ref, {required String name, required int balance}) async {
+  final text = debtReminderText(
+    shop: ref.read(sessionProvider).shopName,
+    customer: name,
+    balance: balance,
+    date: DateTime.now(),
+  );
+  final box = context.findRenderObject();
+  final origin = box is RenderBox && box.hasSize ? box.localToGlobal(Offset.zero) & box.size : null;
+  try {
+    await ref.read(debtOutletProvider).shareText(text, origin: origin);
+  } catch (_) {
+    if (context.mounted) _snack(context, debtRemindFailedText);
   }
 }
 

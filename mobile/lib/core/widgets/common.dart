@@ -17,9 +17,12 @@ class AppIconButton extends StatelessWidget {
     this.color = AppColors.text,
     this.background = AppColors.transparent,
     this.circle = false,
+    this.hint,
   });
 
   final String icon;
+
+  /// Null = disabled (announced as disabled).
   final VoidCallback? onPressed;
   final String semanticLabel;
   final double size;
@@ -27,12 +30,17 @@ class AppIconButton extends StatelessWidget {
   final Color background;
   final bool circle;
 
+  /// Read out after the label, and shown as a tooltip on long press (e.g. why it is disabled).
+  final String? hint;
+
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(circle ? 999 : 12);
-    return Semantics(
+    final button = Semantics(
       button: true,
+      enabled: onPressed != null,
       label: semanticLabel,
+      hint: hint,
       excludeSemantics: true,
       child: Material(
         color: background,
@@ -48,6 +56,7 @@ class AppIconButton extends StatelessWidget {
         ),
       ),
     );
+    return hint == null ? button : Tooltip(message: hint!, excludeFromSemantics: true, child: button);
   }
 }
 

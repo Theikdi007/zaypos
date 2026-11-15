@@ -200,39 +200,12 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                       label: 'ဖုန်းနံပါတ်',
                       helper: 'Viber နဲ့ အကြွေးသတိပေးစာ ပို့ဖို့ သုံးပါမယ်',
                       error: _errors['phone'],
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: AppInput(
-                              controller: _phone,
-                              hint: '09 xxx xxx xxx',
-                              keyboardType: TextInputType.phone,
-                              semanticLabel: 'ဖုန်းနံပါတ်',
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Semantics(
-                            button: true,
-                            label: 'ဖုန်းစာအုပ်ထဲက ရွေးရန်',
-                            excludeSemantics: true,
-                            child: Material(
-                              color: AppColors.surface,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: const BorderSide(color: AppColors.inputBorder, width: 1.5),
-                              ),
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(12),
-                                onTap: () {},
-                                child: const SizedBox(
-                                  width: 48,
-                                  height: 48,
-                                  child: Center(child: AppIcon(AppIcons.user, size: 20, color: AppColors.text)),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                      // The contact picker ("ဖုန်းစာအုပ်ထဲက ရွေးရန်") is hidden for the beta (BUG-46, beta backlog).
+                      child: AppInput(
+                        controller: _phone,
+                        hint: '09 xxx xxx xxx',
+                        keyboardType: TextInputType.phone,
+                        semanticLabel: 'ဖုန်းနံပါတ်',
                       ),
                     ),
                     LabeledField(

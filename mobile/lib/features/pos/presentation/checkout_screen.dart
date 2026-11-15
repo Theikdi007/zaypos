@@ -10,7 +10,6 @@ import '../../../core/utils/money_format.dart';
 import '../../../core/utils/qty.dart';
 import '../../../core/utils/thousands_formatter.dart';
 import '../../../core/widgets/common.dart';
-import '../../../core/widgets/dashed_box.dart';
 import '../../../core/widgets/money_text.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/qty_sheet.dart';
@@ -268,31 +267,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             ],
                           ),
                         ),
-                  _ => AppCard(
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text('ငွေလွှဲပြေစာ ပုံ (မဖြစ်မနေ မဟုတ်ပါ)',
-                              style: AppText.s(13, weight: AppText.w600, color: AppColors.textSecondary)),
-                          const SizedBox(height: 6),
-                          InkWell(
-                            onTap: () {},
-                            borderRadius: AppRadius.inputR,
-                            child: DashedBox(
-                              background: AppColors.fillSoft,
-                              child: SizedBox(
-                                height: 48,
-                                child: Center(
-                                  child: Text('+ ဓာတ်ပုံ ထည့်မယ်',
-                                      style: AppText.s(14, color: AppColors.textSecondary)),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  // KBZPay / Wave: the payment-screenshot box ("ငွေလွှဲပြေစာ ပုံ") is hidden for the beta
+                  // (BUG-46, beta backlog).
+                  _ => const SizedBox.shrink(),
                 },
               ],
             ),

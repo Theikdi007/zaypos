@@ -1,0 +1,104 @@
+Analyzing r14_sweep_test.dart...                                
+No issues found! (ran in 3.1s)
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           21.3s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:52446/CM4V5iTBBbY=/
+VMServiceFlutterDriver: Isolate found with number: 2802423700199343
+VMServiceFlutterDriver: Isolate 2802423700199343 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: TC-UX-NEW-11 every reachable tappable reacts (sweep: reports,sales)
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: QA_NOTE:SCREEN sales at /sales
+flutter: QA_SHOT:r14_sweep_screen_sales
+[runner] screenshot r14_sweep_screen_sales.png
+flutter: QA_NOTE:SEMA|sales|နောက်သို့|button without tap action
+flutter: QA_NOTE:SCREEN sales: 11 tappables: unlabelled@20,63 44x44 | အားလုံး | ငွေသား | KBZPay | WavePay | #A-1032 · ငွေသား ပစ္စည်း 4 မျိုး · နေ့လယ် 3:42 12,500 sync မလုပ်ရသေး | #A-1031 · KBZPay ပစ္စည်း 2 မျိုး · နေ့လယ် 3:15 6,800 sync မလုပ်ရသေး | #A-1030 · အကြွေး (ဦးအောင်ကျော်) ပစ္စည်း 6 မျိုး · နေ့လယ် 2:58 24,000 | #A-1029 · WavePay ပစ္စည်း 1 မျိုး · နေ့လယ် 2:31 3,200 | #A-1028 · ငွေသား ပစ္စည်း 5 မျိုး · နေ့လယ် 1:47 15,700 | #A-1027 · ငွေသား ပစ္စည်း 1 မျိုး · နေ့လယ် 1:20 4,500 ပယ်ဖျက်ပြီး
+-[WFIsolatedShortcutRunner init] Taking sandbox extensions for execution
+-[WFIsolatedShortcutRunner init]_block_invoke Sandbox extensions acquired
+Indexing for request: <WFToolKitIndexingRequest: 0x1020540c0>, changeset: .partial(updatedCount: 1 removedCount: 0 updated: ["com.zaypos.zayposApp"], removed: [], provenance: [VoiceShortcutClient.ToolKitIndexingReason.Changeset.Provenance.launchServicesSnapshot(<LaunchServicesSnapshot uuid=B7C778B3-F63F-40ED-9A2D-88199F3E0682, v=812)> ["com.apple.PreviewShell", "com.apple.MobileSMS", "com.apple.internal.ScreenTimeSettingsShield", "com.apple.EventViewService", "com.apple.ShazamEventsApp", "com.apple.quicklook.UIExtension", "com.apple.MediaRemoteAppIntentsExtension", "com.apple.AppStoreSettingsAppIntents", "com.apple.FamilyExtensionHost", "com.apple.SiriSetup.SiriSetupSettingsIntents", "com.apple.AccessoryNotifications.SourceSelection", "com.apple.DocumentManager.DockFolderViewService", "com.apple.Passbook", "com.apple.MediaRemoteUI", "com.apple.CustomerEngagementUIService", "com.apple.FontServices.FontIntents", "com.apple.UIKit.ColorPickerUIService", "com.apple.camera.settings.CameraSettingsAppIntentsExtension", "com.apple.AuthK<…>, priority: <decode: missing data>
+Type indexing (params + content items) took 0.000094s
+Action indexing took 0.000032s
+Indexed: 0
+Errored: 0
+Skipped: [:]
+Bundle cache: 0 hits, 0 misses
+Finished in 0.531670s
+-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
+flutter: QA_NOTE:SWEEP|sales|L1|unlabelled@20,63 44x44|NOTHING|20,63 44x44|ERRORS: GoError: There is nothing to pop
+flutter: QA_SHOT:r14_sweep_DEAD_sales_1
+[runner] screenshot r14_sweep_DEAD_sales_1.png
+flutter: QA_NOTE:SWEEP|sales|L1|အားလုံး|NOTHING|20,155 73x36|
+flutter: QA_SHOT:r14_sweep_DEAD_sales_2
+[runner] screenshot r14_sweep_DEAD_sales_2.png
+flutter: QA_NOTE:SWEEP|sales|L1|ငွေသား|reacts|101,155 71x36|+[အားလုံး|||noneisFalsenoneisFalsenonenone ⏎ ငွေသား|||noneisTruenoneisFalsenonenone] ; −[အားလုံး|||noneisTruenoneisFalsenonenone ⏎ ငွေသား|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|KBZPay|reacts|180,155 79x36|+[အားလုံး|||noneisFalsenoneisFalsenonenone ⏎ KBZPay|||noneisTruenoneisFalsenonenone] ; −[အားလုံး|||noneisTruenoneisFalsenonenone ⏎ KBZPay|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|WavePay|reacts|267,155 88x36|+[အားလုံး|||noneisFalsenoneisFalsenonenone ⏎ WavePay|||noneisTruenoneisFalsenonenone] ; −[အားလုံး|||noneisTruenoneisFalsenonenone ⏎ WavePay|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|#A-1032 · ငွေသား ပစ္စည်း 4 မျိုး · နေ့လယ် 3:42 12,500 sync မလုပ်ရသေး|reacts|20,215 350x69|+[အရောင်း #A-1032|||nonenonenonenonenonenone ⏎ sync မလုပ်ရသေး|||nonenonenonenonenonenone ⏎ ရက်စွဲ] ; −[အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone ⏎ ယနေ့|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|#A-1031 · KBZPay ပစ္စည်း 2 မျိုး · နေ့လယ် 3:15 6,800 sync မလုပ်ရသေး|reacts|20,284 350x67|+[အရောင်း #A-1031|||nonenonenonenonenonenone ⏎ sync မလုပ်ရသေး|||nonenonenonenonenonenone ⏎ ရက်စွဲ] ; −[အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone ⏎ ယနေ့|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|#A-1030 · အကြွေး (ဦးအောင်ကျော်) ပစ္စည်း 6 မျိုး · နေ့လယ် 2:58 24,000|reacts|20,351 350x69|+[အရောင်း #A-1030|||nonenonenonenonenonenone ⏎ Sync ပြီး|||nonenonenonenonenonenone ⏎ ရက်စွဲ] ; −[အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone ⏎ ယနေ့|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|#A-1029 · WavePay ပစ္စည်း 1 မျိုး · နေ့လယ် 2:31 3,200|reacts|20,420 350x67|+[အရောင်း #A-1029|||nonenonenonenonenonenone ⏎ Sync ပြီး|||nonenonenonenonenonenone ⏎ ရက်စွဲ] ; −[အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone ⏎ ယနေ့|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|#A-1028 · ငွေသား ပစ္စည်း 5 မျိုး · နေ့လယ် 1:47 15,700|reacts|20,487 350x69|+[အရောင်း #A-1028|||nonenonenonenonenonenone ⏎ Sync ပြီး|||nonenonenonenonenonenone ⏎ ရက်စွဲ] ; −[အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone ⏎ ယနေ့|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|#A-1027 · ငွေသား ပစ္စည်း 1 မျိုး · နေ့လယ် 1:20 4,500 ပယ်ဖျက်ပြီး|reacts|20,556 350x69|+[အရောင်း #A-1027|||nonenonenonenonenonenone ⏎ ပယ်ဖျက်ပြီး|||nonenonenonenonenonenone ⏎ ရက်စွဲ] ; −[အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone ⏎ ယနေ့|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SCREEN reports at /reports
+flutter: QA_SHOT:r14_sweep_screen_reports
+[runner] screenshot r14_sweep_screen_reports.png
+flutter: QA_NOTE:SEMA|reports|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|reports|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|reports|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|reports|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|reports|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SCREEN reports: 8 tappables: ဒီနေ့ | ဒီအပတ် | ဒီလ | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|reports|L1|ဒီနေ့|reacts|24,118 111x40|+[ဒီနေ့|||noneisTruenoneisFalsenonenone ⏎ ဒီအပတ်|||noneisFalsenoneisFalsenonenone ⏎ ရောင်းရငွေ · ယနေ့] ; −[ဒီနေ့|||noneisFalsenoneisFalsenonenone ⏎ ဒီအပတ်|||noneisTruenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|reports|L1|ဒီအပတ်|NOTHING|139,118 111x40|
+flutter: QA_SHOT:r14_sweep_DEAD_reports_13
+[runner] screenshot r14_sweep_DEAD_reports_13.png
+flutter: QA_NOTE:SWEEP|reports|L1|ဒီလ|reacts|255,118 111x40|+[ဒီအပတ်|||noneisFalsenoneisFalsenonenone ⏎ ဒီလ|||noneisTruenoneisFalsenonenone ⏎ ရောင်းရငွေ · နိုဝင်ဘာ ၁–၁၅] ; −[ဒီအပတ်|||noneisTruenoneisFalsenonenone ⏎ ဒီလ|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|reports|L1|ပင်မ|reacts|0,735 78x65|route /reports → / ; +[route=/ ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|reports|L1|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|reports|L1|ပစ္စည်း|reacts|156,735 78x65|route /reports → /products ; +[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|reports|L1|အကြွေး|reacts|234,735 78x65|route /reports → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|reports|L1|အစီရင်ခံစာ|NOTHING|312,735 78x65|
+flutter: QA_SHOT:r14_sweep_DEAD_reports_19
+[runner] screenshot r14_sweep_DEAD_reports_19.png
+flutter: QA_NOTE:SWEEP_DONE taps=19 dead=4 lost=0
+flutter: QA_NOTE:SWEEP_DEAD sales › L1 › unlabelled@20,63 44x44 || sales › L1 › အားလုံး || reports › L1 › ဒီအပတ် || reports › L1 › အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP_LOST none
+flutter: QA_NOTE:SEMA_DEAD 6: sales › နောက်သို့ || reports › ပင်မ || reports › ရောင်းမယ် || reports › ပစ္စည်း || reports › အကြွေး || reports › အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP_ERRORS GoError: There is nothing to pop
+flutter: 00:59 +0: TC-UX-NEW-11 every reachable tappable reacts (sweep: reports,sales) [E]
+flutter:   'package:flutter_test/src/binding.dart': Failed assertion: line 1912 pos 9: '_pendingExceptionDetails != null': A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.
+flutter:   dart:core-patch/errors_patch.dart 67:4         _AssertionError._doThrowNew
+  dart:core-patch/errors_patch.dart 49:5         _AssertionError._throwNew
+  package:flutter_test/src/binding.dart 1912:9   TestWidgetsFlutterBinding._runTest.handleUncaughtError
+  package:flutter_test/src/binding.dart 1921:13  TestWidgetsFlutterBinding._runTest.<fn>
+  dart:async/zone.dart 563:30                    _Zone._processUncaughtError
+  dart:async/zone.dart 789:5                     _CustomZone.handleUncaughtError
+  dart:async/future_impl.dart 886:24             Future._propagateToListeners
+  dart:async/future_impl.dart 738:5              Future._completeErrorObject
+  dart:async/future_impl.dart 742:5              Future._completeError
+[runner] flutter exit code 0

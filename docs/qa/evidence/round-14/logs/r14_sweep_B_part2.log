@@ -1,0 +1,1102 @@
+Analyzing r14_sweep_test.dart...                                
+No issues found! (ran in 3.1s)
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           21.7s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:53561/sNsIvRLY8PQ=/
+VMServiceFlutterDriver: Isolate found with number: 8523862135337015
+VMServiceFlutterDriver: Isolate 8523862135337015 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: TC-UX-NEW-11 every reachable tappable reacts (sweep: sales,sale_detail,sale_detail_voided,receipt,reports,products,products_noprice,products_low,add_product,edit_product)
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: QA_NOTE:SCREEN sales at /
+flutter: QA_SHOT:r14_sweep_screen_sales
+[runner] screenshot r14_sweep_screen_sales.png
+flutter: QA_NOTE:SEMA|sales|နောက်သို့|button without tap action
+flutter: QA_NOTE:SCREEN sales: 11 tappables: unlabelled@20,63 44x44 | အားလုံး | ငွေသား | KBZPay | WavePay | #A-1032 · ငွေသား ပစ္စည်း 4 မျိုး · နေ့လယ် 3:42 12,500 sync မလုပ်ရသေး | #A-1031 · KBZPay ပစ္စည်း 2 မျိုး · နေ့လယ် 3:15 6,800 sync မလုပ်ရသေး | #A-1030 · အကြွေး (ဦးအောင်ကျော်) ပစ္စည်း 6 မျိုး · နေ့လယ် 2:58 24,000 | #A-1029 · WavePay ပစ္စည်း 1 မျိုး · နေ့လယ် 2:31 3,200 | #A-1028 · ငွေသား ပစ္စည်း 5 မျိုး · နေ့လယ် 1:47 15,700 | #A-1027 · ငွေသား ပစ္စည်း 1 မျိုး · နေ့လယ် 1:20 4,500 ပယ်ဖျက်ပြီး
+flutter: QA_NOTE:SWEEP|sales|L1|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SEMA|sales › unlabelled@20,63 44x44|မင်္ဂလာပါ ရွှေဝါ ကုန်စုံဆိုင် ဆက်တင်|button without tap action
+flutter: QA_NOTE:SEMA|sales › unlabelled@20,63 44x44|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|sales › unlabelled@20,63 44x44|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|sales › unlabelled@20,63 44x44|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|sales › unlabelled@20,63 44x44|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|sales › unlabelled@20,63 44x44|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|sales|L2-open|unlabelled@20,63 44x44|8 tappables inside: unlabelled@326,72 44x44 | Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည် | ရောင်းမယ် | အားလုံးကြည့်ရန် | ပင်မ | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|sales › unlabelled@20,63 44x44|L2|unlabelled@326,72 44x44|reacts|326,72 44x44|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ဆိုင် လုပ်ဆောင်ချက်များ|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sales|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sales › unlabelled@20,63 44x44|L2|Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည်|reacts|201,326 169x111|route / → /products?filter=low ; +[route=/products?filter=low ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sales|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sales › unlabelled@20,63 44x44|L2|ရောင်းမယ်|reacts|20,453 350x56|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sales|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sales › unlabelled@20,63 44x44|L2|အားလုံးကြည့်ရန်|reacts|274,532 96x21|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sales|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sales › unlabelled@20,63 44x44|L2|ပင်မ|NOTHING-already-selected|0,735 78x65|
+flutter: QA_NOTE:SWEEP|sales › unlabelled@20,63 44x44|L2|ပစ္စည်း|reacts|156,735 78x65|route / → /products ; +[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sales|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sales › unlabelled@20,63 44x44|L2|အကြွေး|reacts|234,735 78x65|route / → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sales|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sales › unlabelled@20,63 44x44|L2|အစီရင်ခံစာ|reacts|312,735 78x65|route / → /reports ; +[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone ⏎ ဒီနေ့|||noneisFalsenoneisFalsenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sales|L1|အားလုံး|NOTHING-already-selected|20,155 73x36|
+flutter: QA_NOTE:SWEEP|sales|L1|ငွေသား|reacts|101,155 71x36|+[အားလုံး|||noneisFalsenoneisFalsenonenone ⏎ ငွေသား|||noneisTruenoneisFalsenonenone] ; −[အားလုံး|||noneisTruenoneisFalsenonenone ⏎ ငွေသား|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|KBZPay|reacts|180,155 79x36|+[အားလုံး|||noneisFalsenoneisFalsenonenone ⏎ KBZPay|||noneisTruenoneisFalsenonenone] ; −[အားလုံး|||noneisTruenoneisFalsenonenone ⏎ KBZPay|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|WavePay|reacts|267,155 88x36|+[အားလုံး|||noneisFalsenoneisFalsenonenone ⏎ WavePay|||noneisTruenoneisFalsenonenone] ; −[အားလုံး|||noneisTruenoneisFalsenonenone ⏎ WavePay|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|#A-1032 · ငွေသား ပစ္စည်း 4 မျိုး · နေ့လယ် 3:42 12,500 sync မလုပ်ရသေး|reacts|20,215 350x69|+[အရောင်း #A-1032|||nonenonenonenonenonenone ⏎ sync မလုပ်ရသေး|||nonenonenonenonenonenone ⏎ ရက်စွဲ] ; −[အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone ⏎ ယနေ့|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|#A-1031 · KBZPay ပစ္စည်း 2 မျိုး · နေ့လယ် 3:15 6,800 sync မလုပ်ရသေး|reacts|20,284 350x67|+[အရောင်း #A-1031|||nonenonenonenonenonenone ⏎ sync မလုပ်ရသေး|||nonenonenonenonenonenone ⏎ ရက်စွဲ] ; −[အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone ⏎ ယနေ့|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|#A-1030 · အကြွေး (ဦးအောင်ကျော်) ပစ္စည်း 6 မျိုး · နေ့လယ် 2:58 24,000|reacts|20,351 350x69|+[အရောင်း #A-1030|||nonenonenonenonenonenone ⏎ Sync ပြီး|||nonenonenonenonenonenone ⏎ ရက်စွဲ] ; −[အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone ⏎ ယနေ့|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|#A-1029 · WavePay ပစ္စည်း 1 မျိုး · နေ့လယ် 2:31 3,200|reacts|20,420 350x67|+[အရောင်း #A-1029|||nonenonenonenonenonenone ⏎ Sync ပြီး|||nonenonenonenonenonenone ⏎ ရက်စွဲ] ; −[အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone ⏎ ယနေ့|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|#A-1028 · ငွေသား ပစ္စည်း 5 မျိုး · နေ့လယ် 1:47 15,700|reacts|20,487 350x69|+[အရောင်း #A-1028|||nonenonenonenonenonenone ⏎ Sync ပြီး|||nonenonenonenonenonenone ⏎ ရက်စွဲ] ; −[အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone ⏎ ယနေ့|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|sales|L1|#A-1027 · ငွေသား ပစ္စည်း 1 မျိုး · နေ့လယ် 1:20 4,500 ပယ်ဖျက်ပြီး|reacts|20,556 350x69|+[အရောင်း #A-1027|||nonenonenonenonenonenone ⏎ ပယ်ဖျက်ပြီး|||nonenonenonenonenonenone ⏎ ရက်စွဲ] ; −[အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone ⏎ ယနေ့|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SCREEN sale_detail at /
+flutter: QA_SHOT:r14_sweep_screen_sale_detail
+[runner] screenshot r14_sweep_screen_sale_detail.png
+flutter: QA_NOTE:SEMA|sale_detail|နောက်သို့|button without tap action
+flutter: QA_NOTE:SCREEN sale_detail: 3 tappables: unlabelled@20,63 44x44 | ပြေစာ ပို့မယ် | ပယ်ဖျက်မယ်
+flutter: QA_NOTE:SWEEP|sale_detail|L1|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SEMA|sale_detail › unlabelled@20,63 44x44|မင်္ဂလာပါ ရွှေဝါ ကုန်စုံဆိုင် ဆက်တင်|button without tap action
+flutter: QA_NOTE:SEMA|sale_detail › unlabelled@20,63 44x44|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|sale_detail › unlabelled@20,63 44x44|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|sale_detail › unlabelled@20,63 44x44|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|sale_detail › unlabelled@20,63 44x44|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|sale_detail › unlabelled@20,63 44x44|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|sale_detail|L2-open|unlabelled@20,63 44x44|8 tappables inside: unlabelled@326,72 44x44 | Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည် | ရောင်းမယ် | အားလုံးကြည့်ရန် | ပင်မ | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|sale_detail › unlabelled@20,63 44x44|L2|unlabelled@326,72 44x44|reacts|326,72 44x44|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ဆိုင် လုပ်ဆောင်ချက်များ|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sale_detail › unlabelled@20,63 44x44|L2|Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည်|reacts|201,326 169x111|route / → /products?filter=low ; +[route=/products?filter=low ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sale_detail › unlabelled@20,63 44x44|L2|ရောင်းမယ်|reacts|20,453 350x56|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sale_detail › unlabelled@20,63 44x44|L2|အားလုံးကြည့်ရန်|reacts|274,532 96x21|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sale_detail › unlabelled@20,63 44x44|L2|ပင်မ|NOTHING-already-selected|0,735 78x65|
+flutter: QA_NOTE:SWEEP|sale_detail › unlabelled@20,63 44x44|L2|ပစ္စည်း|reacts|156,735 78x65|route / → /products ; +[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sale_detail › unlabelled@20,63 44x44|L2|အကြွေး|reacts|234,735 78x65|route / → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sale_detail › unlabelled@20,63 44x44|L2|အစီရင်ခံစာ|reacts|312,735 78x65|route / → /reports ; +[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone ⏎ ဒီနေ့|||noneisFalsenoneisFalsenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail|L1|ပြေစာ ပို့မယ်|reacts|20,732 170x54|platform: receipt.share ZayPOS-receipt-A-1032.png ; +[platform=1] ; −[platform=0]
+flutter: QA_NOTE:SWEEP|sale_detail|L1|ပယ်ဖျက်မယ်|reacts|200,732 170x54|+[ပယ်ဖျက်ပြီး|||nonenonenonenonenonenone ⏎ ပယ်ဖျက်ပြီးပါပြီ။|||nonenonenonenonenonenone ⏎ ပယ်ဖျက်မှု ပြန်ရုပ်|||nonenonenoneisFalsenonenone] ; −[sync မလုပ်ရသေး|||nonenonenonenonenonenone ⏎ ပယ်ဖျက်မယ်|||nonenonenoneisFalsenonenone]
+flutter: QA_NOTE:SCREEN sale_detail_voided at /
+flutter: QA_SHOT:r14_sweep_screen_sale_detail_voided
+[runner] screenshot r14_sweep_screen_sale_detail_voided.png
+flutter: QA_NOTE:SEMA|sale_detail_voided|နောက်သို့|button without tap action
+flutter: QA_NOTE:SCREEN sale_detail_voided: 3 tappables: unlabelled@20,63 44x44 | ပြေစာ ပို့မယ် | ပယ်ဖျက်မှု ပြန်ရုပ်
+flutter: QA_NOTE:SWEEP|sale_detail_voided|L1|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SEMA|sale_detail_voided › unlabelled@20,63 44x44|မင်္ဂလာပါ ရွှေဝါ ကုန်စုံဆိုင် ဆက်တင်|button without tap action
+flutter: QA_NOTE:SEMA|sale_detail_voided › unlabelled@20,63 44x44|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|sale_detail_voided › unlabelled@20,63 44x44|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|sale_detail_voided › unlabelled@20,63 44x44|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|sale_detail_voided › unlabelled@20,63 44x44|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|sale_detail_voided › unlabelled@20,63 44x44|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|sale_detail_voided|L2-open|unlabelled@20,63 44x44|8 tappables inside: unlabelled@326,72 44x44 | Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည် | ရောင်းမယ် | အားလုံးကြည့်ရန် | ပင်မ | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|sale_detail_voided › unlabelled@20,63 44x44|L2|unlabelled@326,72 44x44|reacts|326,72 44x44|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ဆိုင် လုပ်ဆောင်ချက်များ|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail_voided|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sale_detail_voided › unlabelled@20,63 44x44|L2|Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည်|reacts|201,326 169x111|route / → /products?filter=low ; +[route=/products?filter=low ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail_voided|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sale_detail_voided › unlabelled@20,63 44x44|L2|ရောင်းမယ်|reacts|20,453 350x56|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail_voided|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sale_detail_voided › unlabelled@20,63 44x44|L2|အားလုံးကြည့်ရန်|reacts|274,532 96x21|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail_voided|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sale_detail_voided › unlabelled@20,63 44x44|L2|ပင်မ|NOTHING-already-selected|0,735 78x65|
+flutter: QA_NOTE:SWEEP|sale_detail_voided › unlabelled@20,63 44x44|L2|ပစ္စည်း|reacts|156,735 78x65|route / → /products ; +[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail_voided|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sale_detail_voided › unlabelled@20,63 44x44|L2|အကြွေး|reacts|234,735 78x65|route / → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail_voided|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|sale_detail_voided › unlabelled@20,63 44x44|L2|အစီရင်ခံစာ|reacts|312,735 78x65|route / → /reports ; +[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone ⏎ ဒီနေ့|||noneisFalsenoneisFalsenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|sale_detail_voided|L1|ပြေစာ ပို့မယ်|reacts|20,732 170x54|platform: receipt.share ZayPOS-receipt-A-1031.png ; +[platform=2] ; −[platform=1]
+flutter: QA_NOTE:SWEEP|sale_detail_voided|L1|ပယ်ဖျက်မှု ပြန်ရုပ်|reacts|200,732 170x54|+[sync မလုပ်ရသေး|||nonenonenonenonenonenone ⏎ ပယ်ဖျက်မယ်|||nonenonenoneisFalsenonenone] ; −[ပယ်ဖျက်ပြီး|||nonenonenonenonenonenone ⏎ ပယ်ဖျက်ပြီးပါပြီ။|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SCREEN receipt at /
+flutter: QA_SHOT:r14_sweep_screen_receipt
+[runner] screenshot r14_sweep_screen_receipt.png
+flutter: QA_NOTE:SCREEN receipt: 4 tappables: ပြေစာ ပို့မယ် | ပုံ သိမ်းမယ် | နောက်တစ်ခု ရောင်းမယ် | ပင်မသို့
+flutter: QA_NOTE:SWEEP|receipt|L1|ပြေစာ ပို့မယ်|reacts|20,591 170x50|platform: receipt.share ZayPOS-receipt-A-1032.png ; +[platform=3] ; −[platform=2]
+flutter: QA_NOTE:SWEEP|receipt|L1|ပုံ သိမ်းမယ်|reacts|200,591 170x50|platform: receipt.save ZayPOS-receipt-A-1032 ; +[snack=1 ⏎ platform=4 ⏎ သိမ်းပြီးပါပြီ|||nonenonenonenonenonenone] ; −[snack=0 ⏎ platform=3]
+flutter: QA_NOTE:SWEEP|receipt|L1|နောက်တစ်ခု ရောင်းမယ်|reacts|20,668 350x56|route / → /pos ; +[route=/pos ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[route=/ ⏎ ရောင်းပြီးပါပြီ]
+flutter: QA_NOTE:SWEEP|receipt|L1|ပင်မသို့|reacts|20,734 350x48|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ဆက်တင်|||nonenonenonenonenoneisTrue] ; −[barriers=1 ⏎ ရောင်းပြီးပါပြီ]
+flutter: QA_NOTE:SEMA|receipt › ပင်မသို့|မင်္ဂလာပါ ရွှေဝါ ကုန်စုံဆိုင် ဆက်တင်|button without tap action
+flutter: QA_NOTE:SEMA|receipt › ပင်မသို့|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|receipt › ပင်မသို့|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|receipt › ပင်မသို့|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|receipt › ပင်မသို့|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|receipt › ပင်မသို့|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|receipt|L2-open|ပင်မသို့|8 tappables inside: unlabelled@326,72 44x44 | Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည် | ရောင်းမယ် | အားလုံးကြည့်ရန် | ပင်မ | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|receipt › ပင်မသို့|L2|unlabelled@326,72 44x44|reacts|326,72 44x44|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ဆိုင် လုပ်ဆောင်ချက်များ|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|receipt|L1-replay|ပင်မသို့|reacts|20,734 350x48|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ဆက်တင်|||nonenonenonenonenoneisTrue] ; −[barriers=1 ⏎ ရောင်းပြီးပါပြီ]
+flutter: QA_NOTE:SWEEP|receipt › ပင်မသို့|L2|Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည်|reacts|201,326 169x111|route / → /products?filter=low ; +[route=/products?filter=low ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|receipt|L1-replay|ပင်မသို့|reacts|20,734 350x48|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ဆက်တင်|||nonenonenonenonenoneisTrue] ; −[barriers=1 ⏎ ရောင်းပြီးပါပြီ]
+flutter: QA_NOTE:SWEEP|receipt › ပင်မသို့|L2|ရောင်းမယ်|reacts|20,453 350x56|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|receipt|L1-replay|ပင်မသို့|reacts|20,734 350x48|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ဆက်တင်|||nonenonenonenonenoneisTrue] ; −[barriers=1 ⏎ ရောင်းပြီးပါပြီ]
+flutter: QA_NOTE:SWEEP|receipt › ပင်မသို့|L2|အားလုံးကြည့်ရန်|reacts|274,532 96x21|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|receipt|L1-replay|ပင်မသို့|reacts|20,734 350x48|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ဆက်တင်|||nonenonenonenonenoneisTrue] ; −[barriers=1 ⏎ ရောင်းပြီးပါပြီ]
+flutter: QA_NOTE:SWEEP|receipt › ပင်မသို့|L2|ပင်မ|NOTHING-already-selected|0,735 78x65|
+flutter: QA_NOTE:SWEEP|receipt › ပင်မသို့|L2|ပစ္စည်း|reacts|156,735 78x65|route / → /products ; +[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|receipt|L1-replay|ပင်မသို့|reacts|20,734 350x48|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ဆက်တင်|||nonenonenonenonenoneisTrue] ; −[barriers=1 ⏎ ရောင်းပြီးပါပြီ]
+flutter: QA_NOTE:SWEEP|receipt › ပင်မသို့|L2|အကြွေး|reacts|234,735 78x65|route / → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|receipt|L1-replay|ပင်မသို့|reacts|20,734 350x48|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ဆက်တင်|||nonenonenonenonenoneisTrue] ; −[barriers=1 ⏎ ရောင်းပြီးပါပြီ]
+flutter: QA_NOTE:SWEEP|receipt › ပင်မသို့|L2|အစီရင်ခံစာ|reacts|312,735 78x65|route / → /reports ; +[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone ⏎ ဒီနေ့|||noneisFalsenoneisFalsenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SCREEN reports at /reports
+flutter: QA_SHOT:r14_sweep_screen_reports
+[runner] screenshot r14_sweep_screen_reports.png
+flutter: QA_NOTE:SEMA|reports|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|reports|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|reports|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|reports|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|reports|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SCREEN reports: 8 tappables: ဒီနေ့ | ဒီအပတ် | ဒီလ | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|reports|L1|ဒီနေ့|reacts|24,118 111x40|+[ဒီနေ့|||noneisTruenoneisFalsenonenone ⏎ ဒီအပတ်|||noneisFalsenoneisFalsenonenone ⏎ ရောင်းရငွေ · ယနေ့] ; −[ဒီနေ့|||noneisFalsenoneisFalsenonenone ⏎ ဒီအပတ်|||noneisTruenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|reports|L1|ဒီအပတ်|NOTHING-already-selected|139,118 111x40|
+flutter: QA_NOTE:SWEEP|reports|L1|ဒီလ|reacts|255,118 111x40|+[ဒီအပတ်|||noneisFalsenoneisFalsenonenone ⏎ ဒီလ|||noneisTruenoneisFalsenonenone ⏎ ရောင်းရငွေ · နိုဝင်ဘာ ၁–၁၅] ; −[ဒီအပတ်|||noneisTruenoneisFalsenonenone ⏎ ဒီလ|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|reports|L1|ပင်မ|reacts|0,735 78x65|route /reports → / ; +[route=/ ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|reports|L1|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|reports|L1|ပစ္စည်း|reacts|156,735 78x65|route /reports → /products ; +[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|reports|L1|အကြွေး|reacts|234,735 78x65|route /reports → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|reports|L1|အစီရင်ခံစာ|NOTHING-already-selected|312,735 78x65|
+flutter: QA_NOTE:SCREEN products at /products
+flutter: QA_SHOT:r14_sweep_screen_products
+[runner] screenshot r14_sweep_screen_products.png
+flutter: QA_NOTE:SEMA|products|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SCREEN products: 23 tappables: အားလုံး | Stock နည်း (3) | ကုန်သွားပြီ | ရ ရေသန့် 1L ဝယ်ဈေး 450 · ရောင်းဈေး 600 {Stock ဖြည့်မယ် · 48 ခု} 48 ခု  | 48 ခု  | ဆီ စားသုံးဆီ 1L ဝယ်ဈေး 5,600 · ရောင်းဈေး 6,200 {Stock ဖြည့်မယ် · 3 ခု} 3 ခု  | 3 ခု  | ဆ ဆန် ပေါ်ဆန်း (၁ ပြည်) ဝယ်ဈေး 6,800 · ရောင်းဈေး 7,400 {Stock ဖြည့်မယ် · 20 ခု} 20 ခု  | 20 ခု  | ပ ဆပ်ပြာမှုန့် 500g ဝယ်ဈေး 2,300 · ရောင်းဈေး 2,800 {Stock ဖြည့်မယ် · 2 ခု} 2 ခု  | 2 ခု  | ဥ ကြက်ဥ (၁၀ လုံး) ဝယ်ဈေး 4,000 · ရောင်းဈေး 4,500 {Stock ဖြည့်မယ် · 15 ခု} 15 ခု  <…>
+flutter: QA_NOTE:SWEEP|products|L1|အားလုံး|NOTHING-already-selected|20,174 73x36|
+flutter: QA_NOTE:SWEEP|products|L1|Stock နည်း (3)|reacts|101,174 118x36|+[အားလုံး|||noneisFalsenoneisFalsenonenone ⏎ Stock နည်း (3)|||noneisTruenoneisFalsenonenone] ; −[အားလုံး|||noneisTruenoneisFalsenonenone ⏎ Stock နည်း (3)|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|ကုန်သွားပြီ|reacts|227,174 90x36|+[အားလုံး|||noneisFalsenoneisFalsenonenone ⏎ ကုန်သွားပြီ|||noneisTruenoneisFalsenonenone] ; −[အားလုံး|||noneisTruenoneisFalsenonenone ⏎ ကုန်သွားပြီ|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|ရ ရေသန့် 1L ဝယ်ဈေး 450 · ရောင်းဈေး 600 {Stock ဖြည့်မယ် · 48 ခု} 48 ခု |reacts|20,234 350x72|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SEMA|products › 48 ခု |1|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |2|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |3|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |4|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |5|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |6|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |7|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |8|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |9|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |00|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |0|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |ဖျက်ရန်|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products › 48 ခု |အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|products|L2-open|48 ခု |17 tappables inside: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 00 | 0 | ⌫ | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|1|reacts|20,418 111x52|+[1 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|2|reacts|139,418 111x52|+[2 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|3|reacts|259,418 111x52|+[3 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|4|reacts|20,478 111x52|+[4 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|5|reacts|139,478 111x52|+[5 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|6|reacts|259,478 111x52|+[6 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|7|reacts|20,538 111x52|+[7 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|8|reacts|139,538 111x52|+[8 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|9|reacts|259,538 111x52|+[9 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဘူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|00|NOTHING|20,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 48 ခု _109
+[runner] screenshot r14_sweep_DEAD_products › 48 ခု _109.png
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|0|NOTHING|139,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 48 ခု _110
+[runner] screenshot r14_sweep_DEAD_products › 48 ခု _110.png
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|⌫|NOTHING|259,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 48 ခု _111
+[runner] screenshot r14_sweep_DEAD_products › 48 ခု _111.png
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|ပင်မ|reacts|0,735 78x65|route /products → / ; +[route=/ ⏎ barriers=2 ⏎ မင်္ဂလာပါ] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|ပစ္စည်း|NOTHING-already-selected|156,735 78x65|
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|အကြွေး|reacts|234,735 78x65|route /products → /customers ; +[route=/customers ⏎ barriers=2 ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|48 ခု |reacts|280,246 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 48 ခု |L2|အစီရင်ခံစာ|reacts|312,735 78x65|route /products → /reports ; +[route=/reports ⏎ barriers=2 ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1|ဆီ စားသုံးဆီ 1L ဝယ်ဈေး 5,600 · ရောင်းဈေး 6,200 {Stock ဖြည့်မယ် · 3 ခု} 3 ခု |reacts|20,306 350x72|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SEMA|products › 3 ခု |1|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |2|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |3|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |4|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |5|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |6|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |7|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |8|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |9|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |00|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |0|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |ဖျက်ရန်|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products › 3 ခု |အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|products|L2-open|3 ခု |17 tappables inside: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 00 | 0 | ⌫ | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|1|reacts|20,418 111x52|+[1 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|2|reacts|139,418 111x52|+[2 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|3|reacts|259,418 111x52|+[3 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|4|reacts|20,478 111x52|+[4 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|5|reacts|139,478 111x52|+[5 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|6|reacts|259,478 111x52|+[6 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|7|reacts|20,538 111x52|+[7 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|8|reacts|139,538 111x52|+[8 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|9|reacts|259,538 111x52|+[9 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|00|NOTHING|20,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 3 ခု _140
+[runner] screenshot r14_sweep_DEAD_products › 3 ခု _140.png
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|0|NOTHING|139,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 3 ခု _141
+[runner] screenshot r14_sweep_DEAD_products › 3 ခု _141.png
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|⌫|NOTHING|259,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 3 ခု _142
+[runner] screenshot r14_sweep_DEAD_products › 3 ခု _142.png
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|ပင်မ|reacts|0,735 78x65|route /products → / ; +[route=/ ⏎ barriers=2 ⏎ မင်္ဂလာပါ] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|ပစ္စည်း|NOTHING-already-selected|156,735 78x65|
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|အကြွေး|reacts|234,735 78x65|route /products → /customers ; +[route=/customers ⏎ barriers=2 ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|3 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 3 ခု |L2|အစီရင်ခံစာ|reacts|312,735 78x65|route /products → /reports ; +[route=/reports ⏎ barriers=2 ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1|ဆ ဆန် ပေါ်ဆန်း (၁ ပြည်) ဝယ်ဈေး 6,800 · ရောင်းဈေး 7,400 {Stock ဖြည့်မယ် · 20 ခု} 20 ခု |reacts|20,378 350x88|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SEMA|products › 20 ခု |1|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |2|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |3|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |4|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |5|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |6|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |7|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |8|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |9|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |00|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |0|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |ဖျက်ရန်|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products › 20 ခု |အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|products|L2-open|20 ခု |17 tappables inside: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 00 | 0 | ⌫ | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|1|reacts|20,418 111x52|+[1 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|2|reacts|139,418 111x52|+[2 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|3|reacts|259,418 111x52|+[3 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|4|reacts|20,478 111x52|+[4 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|5|reacts|139,478 111x52|+[5 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|6|reacts|259,478 111x52|+[6 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|7|reacts|20,538 111x52|+[7 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|8|reacts|139,538 111x52|+[8 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|9|reacts|259,538 111x52|+[9 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ပြည်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|00|NOTHING|20,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 20 ခု _171
+[runner] screenshot r14_sweep_DEAD_products › 20 ခု _171.png
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|0|NOTHING|139,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 20 ခု _172
+[runner] screenshot r14_sweep_DEAD_products › 20 ခု _172.png
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|⌫|NOTHING|259,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 20 ခု _173
+[runner] screenshot r14_sweep_DEAD_products › 20 ခု _173.png
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|ပင်မ|reacts|0,735 78x65|route /products → / ; +[route=/ ⏎ barriers=2 ⏎ မင်္ဂလာပါ] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|ပစ္စည်း|NOTHING-already-selected|156,735 78x65|
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|အကြွေး|reacts|234,735 78x65|route /products → /customers ; +[route=/customers ⏎ barriers=2 ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|20 ခု |reacts|280,398 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 20 ခု |L2|အစီရင်ခံစာ|reacts|312,735 78x65|route /products → /reports ; +[route=/reports ⏎ barriers=2 ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1|ပ ဆပ်ပြာမှုန့် 500g ဝယ်ဈေး 2,300 · ရောင်းဈေး 2,800 {Stock ဖြည့်မယ် · 2 ခု} 2 ခု |reacts|20,466 350x72|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SEMA|products › 2 ခု |1|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |2|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |3|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |4|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |5|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |6|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |7|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |8|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |9|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |00|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |0|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |ဖျက်ရန်|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products › 2 ခု |အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|products|L2-open|2 ခု |17 tappables inside: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 00 | 0 | ⌫ | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|1|reacts|20,418 111x52|+[1 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|2|reacts|139,418 111x52|+[2 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|3|reacts|259,418 111x52|+[3 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|4|reacts|20,478 111x52|+[4 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|5|reacts|139,478 111x52|+[5 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|6|reacts|259,478 111x52|+[6 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|7|reacts|20,538 111x52|+[7 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|8|reacts|139,538 111x52|+[8 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|9|reacts|259,538 111x52|+[9 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|00|NOTHING|20,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 2 ခု _202
+[runner] screenshot r14_sweep_DEAD_products › 2 ခု _202.png
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|0|NOTHING|139,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 2 ခု _203
+[runner] screenshot r14_sweep_DEAD_products › 2 ခု _203.png
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|⌫|NOTHING|259,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 2 ခု _204
+[runner] screenshot r14_sweep_DEAD_products › 2 ခု _204.png
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|ပင်မ|reacts|0,735 78x65|route /products → / ; +[route=/ ⏎ barriers=2 ⏎ မင်္ဂလာပါ] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|ပစ္စည်း|NOTHING-already-selected|156,735 78x65|
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|အကြွေး|reacts|234,735 78x65|route /products → /customers ; +[route=/customers ⏎ barriers=2 ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|2 ခု |reacts|288,478 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 2 ခု |L2|အစီရင်ခံစာ|reacts|312,735 78x65|route /products → /reports ; +[route=/reports ⏎ barriers=2 ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1|ဥ ကြက်ဥ (၁၀ လုံး) ဝယ်ဈေး 4,000 · ရောင်းဈေး 4,500 {Stock ဖြည့်မယ် · 15 ခု} 15 ခု |reacts|20,538 350x88|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SEMA|products › 15 ခု |1|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |2|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |3|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |4|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |5|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |6|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |7|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |8|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |9|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |00|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |0|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |ဖျက်ရန်|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products › 15 ခု |အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|products|L2-open|15 ခု |17 tappables inside: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 00 | 0 | ⌫ | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|1|reacts|20,418 111x52|+[1 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|2|reacts|139,418 111x52|+[2 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|3|reacts|259,418 111x52|+[3 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|4|reacts|20,478 111x52|+[4 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|5|reacts|139,478 111x52|+[5 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|6|reacts|259,478 111x52|+[6 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|7|reacts|20,538 111x52|+[7 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|8|reacts|139,538 111x52|+[8 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|9|reacts|259,538 111x52|+[9 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ကတ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|00|NOTHING|20,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 15 ခု _233
+[runner] screenshot r14_sweep_DEAD_products › 15 ခု _233.png
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|0|NOTHING|139,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 15 ခု _234
+[runner] screenshot r14_sweep_DEAD_products › 15 ခု _234.png
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|⌫|NOTHING|259,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 15 ခု _235
+[runner] screenshot r14_sweep_DEAD_products › 15 ခု _235.png
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|ပင်မ|reacts|0,735 78x65|route /products → / ; +[route=/ ⏎ barriers=2 ⏎ မင်္ဂလာပါ] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|ပစ္စည်း|NOTHING-already-selected|156,735 78x65|
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|အကြွေး|reacts|234,735 78x65|route /products → /customers ; +[route=/customers ⏎ barriers=2 ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|15 ခု |reacts|283,558 73x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 15 ခု |L2|အစီရင်ခံစာ|reacts|312,735 78x65|route /products → /reports ; +[route=/reports ⏎ barriers=2 ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1|က ကော်ဖီမစ် (၁၀ ထုပ်) ဝယ်ဈေး 3,000 · ရောင်းဈေး 3,500 {Stock ဖြည့်မယ် · ကုန်} ကုန် |reacts|20,626 350x72|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|အသစ်ထည့်မယ်|reacts|197,658 173x56|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်းအသစ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|ပင်မ|reacts|0,735 78x65|route /products → / ; +[route=/ ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|ပစ္စည်း|NOTHING-already-selected|156,735 78x65|
+flutter: QA_NOTE:SWEEP|products|L1|အကြွေး|reacts|234,735 78x65|route /products → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|အစီရင်ခံစာ|reacts|312,735 78x65|route /products → /reports ; +[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone ⏎ ဒီနေ့|||noneisFalsenoneisFalsenonenone] ; −[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SEMA|products › ကုန် |1|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |2|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |3|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |4|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |5|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |6|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |7|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |8|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |9|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |00|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |0|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |ဖျက်ရန်|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products › ကုန် |အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|products|L2-open|ကုန် |17 tappables inside: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 00 | 0 | ⌫ | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|1|reacts|20,418 111x52|+[1 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|2|reacts|139,418 111x52|+[2 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|3|reacts|259,418 111x52|+[3 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|4|reacts|20,478 111x52|+[4 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|5|reacts|139,478 111x52|+[5 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|6|reacts|259,478 111x52|+[6 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|7|reacts|20,538 111x52|+[7 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|8|reacts|139,538 111x52|+[8 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|9|reacts|259,538 111x52|+[9 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|00|NOTHING|20,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › ကုန် _270
+[runner] screenshot r14_sweep_DEAD_products › ကုန် _270.png
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|0|NOTHING|139,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › ကုန် _271
+[runner] screenshot r14_sweep_DEAD_products › ကုန် _271.png
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|⌫|NOTHING|259,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › ကုန် _272
+[runner] screenshot r14_sweep_DEAD_products › ကုန် _272.png
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|ပင်မ|reacts|0,735 78x65|route /products → / ; +[route=/ ⏎ barriers=2 ⏎ မင်္ဂလာပါ] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|ပစ္စည်း|NOTHING-already-selected|156,735 78x65|
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|အကြွေး|reacts|234,735 78x65|route /products → /customers ; +[route=/customers ⏎ barriers=2 ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|ကုန် |reacts|287,506 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › ကုန် |L2|အစီရင်ခံစာ|reacts|312,735 78x65|route /products → /reports ; +[route=/reports ⏎ barriers=2 ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1|ခ ခေါက်ဆွဲခြောက် ဝယ်ဈေး 700 · ရောင်းဈေး 900 {Stock ဖြည့်မယ် · 60 ခု} 60 ခု |reacts|20,566 350x72|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SEMA|products › 60 ခု |1|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |2|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |3|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |4|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |5|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |6|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |7|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |8|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |9|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |00|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |0|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |ဖျက်ရန်|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products › 60 ခု |အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|products|L2-open|60 ခု |17 tappables inside: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 00 | 0 | ⌫ | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|1|reacts|20,418 111x52|+[1 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|2|reacts|139,418 111x52|+[2 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|3|reacts|259,418 111x52|+[3 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|4|reacts|20,478 111x52|+[4 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|5|reacts|139,478 111x52|+[5 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|6|reacts|259,478 111x52|+[6 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|7|reacts|20,538 111x52|+[7 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|8|reacts|139,538 111x52|+[8 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|9|reacts|259,538 111x52|+[9 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|00|NOTHING|20,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 60 ခု _301
+[runner] screenshot r14_sweep_DEAD_products › 60 ခု _301.png
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|0|NOTHING|139,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 60 ခု _302
+[runner] screenshot r14_sweep_DEAD_products › 60 ခု _302.png
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|⌫|NOTHING|259,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products › 60 ခု _303
+[runner] screenshot r14_sweep_DEAD_products › 60 ခု _303.png
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|ပင်မ|reacts|0,735 78x65|route /products → / ; +[route=/ ⏎ barriers=2 ⏎ မင်္ဂလာပါ] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products|L1-replay|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|ပစ္စည်း|NOTHING-already-selected|156,735 78x65|
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|အကြွေး|reacts|234,735 78x65|route /products → /customers ; +[route=/customers ⏎ barriers=2 ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products|L1-replay|60 ခု |reacts|280,578 76x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products › 60 ခု |L2|အစီရင်ခံစာ|reacts|312,735 78x65|route /products → /reports ; +[route=/reports ⏎ barriers=2 ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone] ; −[route=/products ⏎ barriers=3]
+flutter: QA_NOTE:SCREEN products_noprice at /products?filter=noPrice
+flutter: QA_SHOT:r14_sweep_screen_products_noprice
+[runner] screenshot r14_sweep_screen_products_noprice.png
+flutter: QA_NOTE:SEMA|products_noprice|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products_noprice|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products_noprice|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products_noprice|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products_noprice|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SCREEN products_noprice: 10 tappables: အားလုံး | Stock နည်း (3) | ကုန်သွားပြီ | ဈေးနှုန်းမရှိ (0) | အသစ်ထည့်မယ် | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|products_noprice|L1|အားလုံး|reacts|20,174 73x36|+[အားလုံး|||noneisTruenoneisFalsenonenone ⏎ ရ ⏎ ရေသန့် 1L] ; −[အားလုံး|||noneisFalsenoneisFalsenonenone ⏎ ဈေးနှုန်းမရှိ (0)|||noneisTruenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|products_noprice|L1|Stock နည်း (3)|reacts|101,174 118x36|+[Stock နည်း (3)|||noneisTruenoneisFalsenonenone ⏎ ဆီ ⏎ စားသုံးဆီ 1L] ; −[Stock နည်း (3)|||noneisFalsenoneisFalsenonenone ⏎ ဈေးနှုန်းမရှိ (0)|||noneisTruenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|products_noprice|L1|ကုန်သွားပြီ|reacts|227,174 90x36|+[ကုန်သွားပြီ|||noneisTruenoneisFalsenonenone ⏎ က ⏎ ကော်ဖီမစ် (၁၀ ထုပ်)] ; −[ကုန်သွားပြီ|||noneisFalsenoneisFalsenonenone ⏎ ဈေးနှုန်းမရှိ (0)|||noneisTruenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|products_noprice|L1|ဈေးနှုန်းမရှိ (0)|NOTHING-already-selected|325,174 65x36|
+flutter: QA_NOTE:SWEEP|products_noprice|L1|အသစ်ထည့်မယ်|reacts|197,658 173x56|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်းအသစ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_noprice|L1|ပင်မ|reacts|0,735 78x65|route /products?filter=noPrice → / ; +[route=/ ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[route=/products?filter=noPrice ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_noprice|L1|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_noprice|L1|ပစ္စည်း|reacts|156,735 78x65|route /products?filter=noPrice → /products ; +[route=/products ⏎ အားလုံး|||noneisTruenoneisFalsenonenone ⏎ ရ] ; −[route=/products?filter=noPrice ⏎ အားလုံး|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|products_noprice|L1|အကြွေး|reacts|234,735 78x65|route /products?filter=noPrice → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/products?filter=noPrice ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_noprice|L1|အစီရင်ခံစာ|reacts|312,735 78x65|route /products?filter=noPrice → /reports ; +[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone ⏎ ဒီနေ့|||noneisFalsenoneisFalsenonenone] ; −[route=/products?filter=noPrice ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SCREEN products_low at /products?filter=low
+flutter: QA_SHOT:r14_sweep_screen_products_low
+[runner] screenshot r14_sweep_screen_products_low.png
+flutter: QA_NOTE:SEMA|products_low|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products_low|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products_low|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products_low|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products_low|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SCREEN products_low: 15 tappables: အားလုံး | Stock နည်း (3) | ကုန်သွားပြီ | ဆီ စားသုံးဆီ 1L ဝယ်ဈေး 5,600 · ရောင်းဈေး 6,200 {Stock ဖြည့်မယ် · 3 ခု} 3 ခု  | 3 ခု  | ပ ဆပ်ပြာမှုန့် 500g ဝယ်ဈေး 2,300 · ရောင်းဈေး 2,800 {Stock ဖြည့်မယ် · 2 ခု} 2 ခု  | 2 ခု  | က ကော်ဖီမစ် (၁၀ ထုပ်) ဝယ်ဈေး 3,000 · ရောင်းဈေး 3,500 {Stock ဖြည့်မယ် · ကုန်} ကုန်  | ကုန်  | အသစ်ထည့်မယ် | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|products_low|L1|အားလုံး|reacts|20,174 73x36|+[အားလုံး|||noneisTruenoneisFalsenonenone ⏎ Stock နည်း (3)|||noneisFalsenoneisFalsenonenone ⏎ ရ] ; −[အားလုံး|||noneisFalsenoneisFalsenonenone ⏎ Stock နည်း (3)|||noneisTruenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1|Stock နည်း (3)|NOTHING-already-selected|101,174 118x36|
+flutter: QA_NOTE:SWEEP|products_low|L1|ကုန်သွားပြီ|reacts|227,174 90x36|+[Stock နည်း (3)|||noneisFalsenoneisFalsenonenone ⏎ ကုန်သွားပြီ|||noneisTruenoneisFalsenonenone] ; −[Stock နည်း (3)|||noneisTruenoneisFalsenonenone ⏎ ကုန်သွားပြီ|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1|ဆီ စားသုံးဆီ 1L ဝယ်ဈေး 5,600 · ရောင်းဈေး 6,200 {Stock ဖြည့်မယ် · 3 ခု} 3 ခု |reacts|20,234 350x72|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |1|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |2|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |3|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |4|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |5|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |6|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |7|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |8|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |9|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |00|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |0|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |ဖျက်ရန်|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 3 ခု |အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|products_low|L2-open|3 ခု |17 tappables inside: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 00 | 0 | ⌫ | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|1|reacts|20,418 111x52|+[1 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|2|reacts|139,418 111x52|+[2 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|3|reacts|259,418 111x52|+[3 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|4|reacts|20,478 111x52|+[4 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|5|reacts|139,478 111x52|+[5 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|6|reacts|259,478 111x52|+[6 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|7|reacts|20,538 111x52|+[7 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|8|reacts|139,538 111x52|+[8 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|9|reacts|259,538 111x52|+[9 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ဗူး|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|00|NOTHING|20,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products_low › 3 ခု _345
+[runner] screenshot r14_sweep_DEAD_products_low › 3 ခု _345.png
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|0|NOTHING|139,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products_low › 3 ခု _346
+[runner] screenshot r14_sweep_DEAD_products_low › 3 ခု _346.png
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|⌫|NOTHING|259,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products_low › 3 ခု _347
+[runner] screenshot r14_sweep_DEAD_products_low › 3 ခု _347.png
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|ပင်မ|reacts|0,735 78x65|route /products?filter=low → / ; +[route=/ ⏎ barriers=2 ⏎ မင်္ဂလာပါ] ; −[route=/products?filter=low ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|ပစ္စည်း|reacts|156,735 78x65|route /products?filter=low → /products ; +[route=/products] ; −[route=/products?filter=low]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|အကြွေး|reacts|234,735 78x65|route /products?filter=low → /customers ; +[route=/customers ⏎ barriers=2 ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone] ; −[route=/products?filter=low ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|3 ခု |reacts|288,246 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 3 ခု |L2|အစီရင်ခံစာ|reacts|312,735 78x65|route /products?filter=low → /reports ; +[route=/reports ⏎ barriers=2 ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone] ; −[route=/products?filter=low ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products_low|L1|ပ ဆပ်ပြာမှုန့် 500g ဝယ်ဈေး 2,300 · ရောင်းဈေး 2,800 {Stock ဖြည့်မယ် · 2 ခု} 2 ခု |reacts|20,306 350x72|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |1|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |2|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |3|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |4|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |5|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |6|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |7|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |8|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |9|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |00|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |0|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |ဖျက်ရန်|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products_low › 2 ခု |အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|products_low|L2-open|2 ခု |17 tappables inside: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 00 | 0 | ⌫ | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|1|reacts|20,418 111x52|+[1 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|2|reacts|139,418 111x52|+[2 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|3|reacts|259,418 111x52|+[3 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|4|reacts|20,478 111x52|+[4 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|5|reacts|139,478 111x52|+[5 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|6|reacts|259,478 111x52|+[6 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|7|reacts|20,538 111x52|+[7 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|8|reacts|139,538 111x52|+[8 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|9|reacts|259,538 111x52|+[9 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|00|NOTHING|20,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products_low › 2 ခု _377
+[runner] screenshot r14_sweep_DEAD_products_low › 2 ခု _377.png
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|0|NOTHING|139,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products_low › 2 ခု _378
+[runner] screenshot r14_sweep_DEAD_products_low › 2 ခု _378.png
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|⌫|NOTHING|259,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products_low › 2 ခု _379
+[runner] screenshot r14_sweep_DEAD_products_low › 2 ခု _379.png
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|ပင်မ|reacts|0,735 78x65|route /products?filter=low → / ; +[route=/ ⏎ barriers=2 ⏎ မင်္ဂလာပါ] ; −[route=/products?filter=low ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|ပစ္စည်း|reacts|156,735 78x65|route /products?filter=low → /products ; +[route=/products] ; −[route=/products?filter=low]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|အကြွေး|reacts|234,735 78x65|route /products?filter=low → /customers ; +[route=/customers ⏎ barriers=2 ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone] ; −[route=/products?filter=low ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|2 ခု |reacts|288,318 68x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › 2 ခု |L2|အစီရင်ခံစာ|reacts|312,735 78x65|route /products?filter=low → /reports ; +[route=/reports ⏎ barriers=2 ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone] ; −[route=/products?filter=low ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products_low|L1|က ကော်ဖီမစ် (၁၀ ထုပ်) ဝယ်ဈေး 3,000 · ရောင်းဈေး 3,500 {Stock ဖြည့်မယ် · ကုန်} ကုန် |reacts|20,378 350x72|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SEMA|products_low › ကုန် |1|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |2|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |3|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |4|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |5|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |6|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |7|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |8|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |9|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |00|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |0|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |ဖျက်ရန်|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|products_low › ကုန် |အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|products_low|L2-open|ကုန် |17 tappables inside: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 00 | 0 | ⌫ | ပင်မ | ရောင်းမယ် | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|1|reacts|20,418 111x52|+[1 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|2|reacts|139,418 111x52|+[2 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|3|reacts|259,418 111x52|+[3 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|4|reacts|20,478 111x52|+[4 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|5|reacts|139,478 111x52|+[5 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|6|reacts|259,478 111x52|+[6 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|7|reacts|20,538 111x52|+[7 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|8|reacts|139,538 111x52|+[8 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|9|reacts|259,538 111x52|+[9 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenoneisFalsenonenone] ; −[0 ထုပ်|||nonenonenonenonenonenone ⏎ သိမ်းမယ်|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|00|NOTHING|20,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products_low › ကုန် _409
+[runner] screenshot r14_sweep_DEAD_products_low › ကုန် _409.png
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|0|NOTHING|139,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products_low › ကုန် _410
+[runner] screenshot r14_sweep_DEAD_products_low › ကုန် _410.png
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|⌫|NOTHING|259,598 111x52|
+flutter: QA_SHOT:r14_sweep_DEAD_products_low › ကုန် _411
+[runner] screenshot r14_sweep_DEAD_products_low › ကုန် _411.png
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|ပင်မ|reacts|0,735 78x65|route /products?filter=low → / ; +[route=/ ⏎ barriers=2 ⏎ မင်္ဂလာပါ] ; −[route=/products?filter=low ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|ပစ္စည်း|reacts|156,735 78x65|route /products?filter=low → /products ; +[route=/products] ; −[route=/products?filter=low]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|အကြွေး|reacts|234,735 78x65|route /products?filter=low → /customers ; +[route=/customers ⏎ barriers=2 ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone] ; −[route=/products?filter=low ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products_low|L1-replay|ကုန် |reacts|287,390 69x48|opened dialog/sheet ; +[barriers=3 ⏎ Scrim|||nonenonenonenonenonenone ⏎ Stock ဖြည့်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low › ကုန် |L2|အစီရင်ခံစာ|reacts|312,735 78x65|route /products?filter=low → /reports ; +[route=/reports ⏎ barriers=2 ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone] ; −[route=/products?filter=low ⏎ barriers=3]
+flutter: QA_NOTE:SWEEP|products_low|L1|အသစ်ထည့်မယ်|reacts|197,658 173x56|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်းအသစ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1|ပင်မ|reacts|0,735 78x65|route /products?filter=low → / ; +[route=/ ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[route=/products?filter=low ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1|ရောင်းမယ်|reacts|78,735 78x65|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1|ပစ္စည်း|reacts|156,735 78x65|route /products?filter=low → /products ; +[route=/products ⏎ အားလုံး|||noneisTruenoneisFalsenonenone ⏎ Stock နည်း (3)|||noneisFalsenoneisFalsenonenone] ; −[route=/products?filter=low ⏎ အားလုံး|||noneisFalsenoneisFalsenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1|အကြွေး|reacts|234,735 78x65|route /products?filter=low → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/products?filter=low ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|products_low|L1|အစီရင်ခံစာ|reacts|312,735 78x65|route /products?filter=low → /reports ; +[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone ⏎ ဒီနေ့|||noneisFalsenoneisFalsenonenone] ; −[route=/products?filter=low ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SCREEN add_product at /
+flutter: QA_SHOT:r14_sweep_screen_add_product
+[runner] screenshot r14_sweep_screen_add_product.png
+flutter: QA_NOTE:SEMA|add_product|ပိတ်ရန်|button without tap action
+flutter: QA_NOTE:SEMA|add_product|Barcode ဖတ်မယ်|button without tap action
+flutter: QA_NOTE:SCREEN add_product: 9 tappables: unlabelled@20,63 44x44 | unlabelled@20,135 88x88 | unlabelled@306,281 48x48 | စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့်  | ခု ဗူး ပြည် ပိဿာ ထုပ်  | {Stock မှတ်မယ်} | မလုပ်တော့ပါ | သိမ်းမယ် | unlabelled@306,142 48x48
+flutter: QA_NOTE:SWEEP|add_product|L1|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SEMA|add_product › unlabelled@20,63 44x44|မင်္ဂလာပါ ရွှေဝါ ကုန်စုံဆိုင် ဆက်တင်|button without tap action
+flutter: QA_NOTE:SEMA|add_product › unlabelled@20,63 44x44|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|add_product › unlabelled@20,63 44x44|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|add_product › unlabelled@20,63 44x44|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|add_product › unlabelled@20,63 44x44|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|add_product › unlabelled@20,63 44x44|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|add_product|L2-open|unlabelled@20,63 44x44|8 tappables inside: unlabelled@326,72 44x44 | Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည် | ရောင်းမယ် | အားလုံးကြည့်ရန် | ပင်မ | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|add_product › unlabelled@20,63 44x44|L2|unlabelled@326,72 44x44|reacts|326,72 44x44|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ဆိုင် လုပ်ဆောင်ချက်များ|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › unlabelled@20,63 44x44|L2|Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည်|reacts|201,326 169x111|route / → /products?filter=low ; +[route=/products?filter=low ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › unlabelled@20,63 44x44|L2|ရောင်းမယ်|reacts|20,453 350x56|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › unlabelled@20,63 44x44|L2|အားလုံးကြည့်ရန်|reacts|274,532 96x21|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › unlabelled@20,63 44x44|L2|ပင်မ|NOTHING-already-selected|0,735 78x65|
+flutter: QA_NOTE:SWEEP|add_product › unlabelled@20,63 44x44|L2|ပစ္စည်း|reacts|156,735 78x65|route / → /products ; +[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › unlabelled@20,63 44x44|L2|အကြွေး|reacts|234,735 78x65|route / → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › unlabelled@20,63 44x44|L2|အစီရင်ခံစာ|reacts|312,735 78x65|route / → /reports ; +[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone ⏎ ဒီနေ့|||noneisFalsenoneisFalsenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1|unlabelled@20,135 88x88|reacts|20,135 88x88|opened dialog/sheet ; +[barriers=2 ⏎ Scrim|||nonenonenonenonenonenone ⏎ ဓာတ်ပုံ ရိုက်မယ်|||noneisFalsenoneisFalsenoneisTrue] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product|L2-open|unlabelled@20,135 88x88|2 tappables inside:  ဓာတ်ပုံ ရိုက်မယ် |  ပုံ ရွေးမယ်
+flutter: QA_NOTE:SWEEP|add_product › unlabelled@20,135 88x88|L2| ဓာတ်ပုံ ရိုက်မယ်|reacts|0,698 390x56|platform: photo.pick PhotoSource.camera ; +[barriers=1 ⏎ platform=5 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue] ; −[barriers=2 ⏎ platform=4]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|unlabelled@20,135 88x88|reacts|20,135 88x88|opened dialog/sheet ; +[barriers=2 ⏎ Scrim|||nonenonenonenonenonenone ⏎ ဓာတ်ပုံ ရိုက်မယ်|||noneisFalsenoneisFalsenoneisTrue] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › unlabelled@20,135 88x88|L2| ပုံ ရွေးမယ်|reacts|0,754 390x56|platform: photo.pick PhotoSource.gallery ; +[barriers=1 ⏎ platform=6 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue] ; −[barriers=2 ⏎ platform=5]
+flutter: QA_NOTE:SWEEP|add_product|L1|unlabelled@306,281 48x48|reacts|306,281 48x48|platform: scanner.open "Barcode ဖတ်မယ်" ; +[platform=7] ; −[platform=6]
+flutter: QA_NOTE:SWEEP|add_product|L1|စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |reacts|48,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product|L2-open|စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |4 tappables inside: စားသောက်ကုန် | အချိုရည် | အိမ်သုံး | မုန့်
+flutter: QA_NOTE:SWEEP|add_product › စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |L2|စားသောက်ကုန်|reacts|32,371 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်းအသစ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |reacts|48,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |L2|အချိုရည်|reacts|32,419 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်းအသစ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |reacts|48,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |L2|အိမ်သုံး|reacts|32,467 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်းအသစ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |reacts|48,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |L2|မုန့်|reacts|32,515 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်းအသစ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|add_product|L1|ခု ဗူး ပြည် ပိဿာ ထုပ် |reacts|212,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product|L2-open|ခု ဗူး ပြည် ပိဿာ ထုပ် |5 tappables inside: ခု | ဗူး | ပြည် | ပိဿာ | ထုပ်
+flutter: QA_NOTE:SWEEP|add_product › ခု ဗူး ပြည် ပိဿာ ထုပ် |L2|ခု|reacts|196,371 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်းအသစ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|ခု ဗူး ပြည် ပိဿာ ထုပ် |reacts|212,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › ခု ဗူး ပြည် ပိဿာ ထုပ် |L2|ဗူး|reacts|196,419 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်းအသစ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|ခု ဗူး ပြည် ပိဿာ ထုပ် |reacts|212,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › ခု ဗူး ပြည် ပိဿာ ထုပ် |L2|ပြည်|reacts|196,467 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်းအသစ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|ခု ဗူး ပြည် ပိဿာ ထုပ် |reacts|212,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › ခု ဗူး ပြည် ပိဿာ ထုပ် |L2|ပိဿာ|reacts|196,515 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်းအသစ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|ခု ဗူး ပြည် ပိဿာ ထုပ် |reacts|212,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › ခု ဗူး ပြည် ပိဿာ ထုပ် |L2|ထုပ်|reacts|196,563 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်းအသစ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|add_product|L1|{Stock မှတ်မယ်}|reacts|302,688 52x32|+[Stock မှတ်မယ်|||nonenoneisFalsenonenoneisTrue] ; −[လက်ရှိ အရေအတွက် ⏎ နည်းရင် သတိပေး|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|add_product|L1|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SEMA|add_product › မလုပ်တော့ပါ|မင်္ဂလာပါ ရွှေဝါ ကုန်စုံဆိုင် ဆက်တင်|button without tap action
+flutter: QA_NOTE:SEMA|add_product › မလုပ်တော့ပါ|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|add_product › မလုပ်တော့ပါ|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|add_product › မလုပ်တော့ပါ|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|add_product › မလုပ်တော့ပါ|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|add_product › မလုပ်တော့ပါ|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|add_product|L2-open|မလုပ်တော့ပါ|8 tappables inside: unlabelled@326,72 44x44 | Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည် | ရောင်းမယ် | အားလုံးကြည့်ရန် | ပင်မ | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|add_product › မလုပ်တော့ပါ|L2|unlabelled@326,72 44x44|reacts|326,72 44x44|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ဆိုင် လုပ်ဆောင်ချက်များ|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › မလုပ်တော့ပါ|L2|Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည်|reacts|201,326 169x111|route / → /products?filter=low ; +[route=/products?filter=low ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › မလုပ်တော့ပါ|L2|ရောင်းမယ်|reacts|20,453 350x56|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › မလုပ်တော့ပါ|L2|အားလုံးကြည့်ရန်|reacts|274,532 96x21|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › မလုပ်တော့ပါ|L2|ပင်မ|NOTHING-already-selected|0,735 78x65|
+flutter: QA_NOTE:SWEEP|add_product › မလုပ်တော့ပါ|L2|ပစ္စည်း|reacts|156,735 78x65|route / → /products ; +[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › မလုပ်တော့ပါ|L2|အကြွေး|reacts|234,735 78x65|route / → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1-replay|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product › မလုပ်တော့ပါ|L2|အစီရင်ခံစာ|reacts|312,735 78x65|route / → /reports ; +[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone ⏎ ဒီနေ့|||noneisFalsenoneisFalsenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|add_product|L1|သိမ်းမယ်|reacts|143,732 227x54|+[ဥပမာ - ရေသန့် 1L ⏎ ပစ္စည်းအမည် ထည့်ပါ။|||nonenonenoneisFalsenoneisTrue] ; −[ဥပမာ - ရေသန့် 1L|||nonenonenoneisFalsenoneisTrue]
+flutter: QA_NOTE:SWEEP|add_product|L1|unlabelled@306,142 48x48|reacts|306,142 48x48|platform: scanner.open "Barcode ဖတ်မယ်" ; +[platform=8] ; −[platform=7]
+flutter: QA_NOTE:SCREEN edit_product at /
+flutter: QA_SHOT:r14_sweep_screen_edit_product
+[runner] screenshot r14_sweep_screen_edit_product.png
+flutter: QA_NOTE:SEMA|edit_product|ပိတ်ရန်|button without tap action
+flutter: QA_NOTE:SEMA|edit_product|Barcode ဖတ်မယ်|button without tap action
+flutter: QA_NOTE:SCREEN edit_product: 8 tappables: unlabelled@20,63 44x44 | unlabelled@20,135 88x88 | unlabelled@306,281 48x48 | စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့်  | ခု ဗူး ပြည် ပိဿာ ထုပ်  | မလုပ်တော့ပါ | သိမ်းမယ် | unlabelled@306,120 48x48
+flutter: QA_NOTE:SWEEP|edit_product|L1|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SEMA|edit_product › unlabelled@20,63 44x44|မင်္ဂလာပါ ရွှေဝါ ကုန်စုံဆိုင် ဆက်တင်|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › unlabelled@20,63 44x44|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › unlabelled@20,63 44x44|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › unlabelled@20,63 44x44|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › unlabelled@20,63 44x44|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › unlabelled@20,63 44x44|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|edit_product|L2-open|unlabelled@20,63 44x44|8 tappables inside: unlabelled@326,72 44x44 | Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည် | ရောင်းမယ် | အားလုံးကြည့်ရန် | ပင်မ | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|edit_product › unlabelled@20,63 44x44|L2|unlabelled@326,72 44x44|reacts|326,72 44x44|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ဆိုင် လုပ်ဆောင်ချက်များ|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › unlabelled@20,63 44x44|L2|Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည်|reacts|201,326 169x111|route / → /products?filter=low ; +[route=/products?filter=low ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › unlabelled@20,63 44x44|L2|ရောင်းမယ်|reacts|20,453 350x56|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › unlabelled@20,63 44x44|L2|အားလုံးကြည့်ရန်|reacts|274,532 96x21|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › unlabelled@20,63 44x44|L2|ပင်မ|NOTHING-already-selected|0,735 78x65|
+flutter: QA_NOTE:SWEEP|edit_product › unlabelled@20,63 44x44|L2|ပစ္စည်း|reacts|156,735 78x65|route / → /products ; +[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › unlabelled@20,63 44x44|L2|အကြွေး|reacts|234,735 78x65|route / → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|unlabelled@20,63 44x44|reacts|20,63 44x44|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › unlabelled@20,63 44x44|L2|အစီရင်ခံစာ|reacts|312,735 78x65|route / → /reports ; +[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone ⏎ ဒီနေ့|||noneisFalsenoneisFalsenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1|unlabelled@20,135 88x88|reacts|20,135 88x88|opened dialog/sheet ; +[barriers=2 ⏎ Scrim|||nonenonenonenonenonenone ⏎ ဓာတ်ပုံ ရိုက်မယ်|||noneisFalsenoneisFalsenoneisTrue] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product|L2-open|unlabelled@20,135 88x88|2 tappables inside:  ဓာတ်ပုံ ရိုက်မယ် |  ပုံ ရွေးမယ်
+flutter: QA_NOTE:SWEEP|edit_product › unlabelled@20,135 88x88|L2| ဓာတ်ပုံ ရိုက်မယ်|reacts|0,698 390x56|platform: photo.pick PhotoSource.camera ; +[barriers=1 ⏎ platform=9 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue] ; −[barriers=2 ⏎ platform=8]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|unlabelled@20,135 88x88|reacts|20,135 88x88|opened dialog/sheet ; +[barriers=2 ⏎ Scrim|||nonenonenonenonenonenone ⏎ ဓာတ်ပုံ ရိုက်မယ်|||noneisFalsenoneisFalsenoneisTrue] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › unlabelled@20,135 88x88|L2| ပုံ ရွေးမယ်|reacts|0,754 390x56|platform: photo.pick PhotoSource.gallery ; +[barriers=1 ⏎ platform=10 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue] ; −[barriers=2 ⏎ platform=9]
+flutter: QA_NOTE:SWEEP|edit_product|L1|unlabelled@306,281 48x48|reacts|306,281 48x48|platform: scanner.open "Barcode ဖတ်မယ်" ; +[platform=11] ; −[platform=10]
+flutter: QA_NOTE:SWEEP|edit_product|L1|စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |reacts|48,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product|L2-open|စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |4 tappables inside: စားသောက်ကုန် | အချိုရည် | အိမ်သုံး | မုန့်
+flutter: QA_NOTE:SWEEP|edit_product › စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |L2|စားသောက်ကုန်|reacts|32,371 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |reacts|48,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |L2|အချိုရည်|reacts|32,419 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |reacts|48,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |L2|အိမ်သုံး|reacts|32,467 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |reacts|48,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › စားသောက်ကုန် အချိုရည် အိမ်သုံး မုန့် |L2|မုန့်|reacts|32,515 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|edit_product|L1|ခု ဗူး ပြည် ပိဿာ ထုပ် |reacts|212,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product|L2-open|ခု ဗူး ပြည် ပိဿာ ထုပ် |5 tappables inside: ခု | ဗူး | ပြည် | ပိဿာ | ထုပ်
+flutter: QA_NOTE:SWEEP|edit_product › ခု ဗူး ပြည် ပိဿာ ထုပ် |L2|ခု|reacts|196,275 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|ခု ဗူး ပြည် ပိဿာ ထုပ် |reacts|212,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › ခု ဗူး ပြည် ပိဿာ ထုပ် |L2|ဗူး|reacts|196,323 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|ခု ဗူး ပြည် ပိဿာ ထုပ် |reacts|212,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › ခု ဗူး ပြည် ပိဿာ ထုပ် |L2|ပြည်|reacts|196,371 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|ခု ဗူး ပြည် ပိဿာ ထုပ် |reacts|212,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: QA_NOTE:SWEEP|edit_product › ခု ဗူး ပြည် ပိဿာ ထုပ် |L2|ပိဿာ|reacts|196,419 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|ခု ဗူး ပြည် ပိဿာ ထုပ် |reacts|212,373 131x45|opened dialog/sheet ; +[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone ⏎ Popup menu|||nonenonenonenonenonenone] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › ခု ဗူး ပြည် ပိဿာ ထုပ် |L2|ထုပ်|reacts|196,467 171x48|+[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue ⏎ ပစ္စည်း ပြင်မယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ Dismiss|||nonenonenonenonenonenone]
+flutter: QA_NOTE:SWEEP|edit_product|L1|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SEMA|edit_product › မလုပ်တော့ပါ|မင်္ဂလာပါ ရွှေဝါ ကုန်စုံဆိုင် ဆက်တင်|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › မလုပ်တော့ပါ|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › မလုပ်တော့ပါ|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › မလုပ်တော့ပါ|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › မလုပ်တော့ပါ|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › မလုပ်တော့ပါ|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|edit_product|L2-open|မလုပ်တော့ပါ|8 tappables inside: unlabelled@326,72 44x44 | Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည် | ရောင်းမယ် | အားလုံးကြည့်ရန် | ပင်မ | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|edit_product › မလုပ်တော့ပါ|L2|unlabelled@326,72 44x44|reacts|326,72 44x44|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ဆိုင် လုပ်ဆောင်ချက်များ|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › မလုပ်တော့ပါ|L2|Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည်|reacts|201,326 169x111|route / → /products?filter=low ; +[route=/products?filter=low ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › မလုပ်တော့ပါ|L2|ရောင်းမယ်|reacts|20,453 350x56|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › မလုပ်တော့ပါ|L2|အားလုံးကြည့်ရန်|reacts|274,532 96x21|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › မလုပ်တော့ပါ|L2|ပင်မ|NOTHING-already-selected|0,735 78x65|
+flutter: QA_NOTE:SWEEP|edit_product › မလုပ်တော့ပါ|L2|ပစ္စည်း|reacts|156,735 78x65|route / → /products ; +[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › မလုပ်တော့ပါ|L2|အကြွေး|reacts|234,735 78x65|route / → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|မလုပ်တော့ပါ|reacts|20,732 113x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › မလုပ်တော့ပါ|L2|အစီရင်ခံစာ|reacts|312,735 78x65|route / → /reports ; +[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone ⏎ ဒီနေ့|||noneisFalsenoneisFalsenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1|သိမ်းမယ်|reacts|143,732 227x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SEMA|edit_product › သိမ်းမယ်|မင်္ဂလာပါ ရွှေဝါ ကုန်စုံဆိုင် ဆက်တင်|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › သိမ်းမယ်|ပင်မ|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › သိမ်းမယ်|ရောင်းမယ်|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › သိမ်းမယ်|ပစ္စည်း|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › သိမ်းမယ်|အကြွေး|button without tap action
+flutter: QA_NOTE:SEMA|edit_product › သိမ်းမယ်|အစီရင်ခံစာ|button without tap action
+flutter: QA_NOTE:SWEEP|edit_product|L2-open|သိမ်းမယ်|8 tappables inside: unlabelled@326,72 44x44 | Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည် | ရောင်းမယ် | အားလုံးကြည့်ရန် | ပင်မ | ပစ္စည်း | အကြွေး | အစီရင်ခံစာ
+flutter: QA_NOTE:SWEEP|edit_product › သိမ်းမယ်|L2|unlabelled@326,72 44x44|reacts|326,72 44x44|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ဆိုင် လုပ်ဆောင်ချက်များ|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|သိမ်းမယ်|reacts|143,732 227x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › သိမ်းမယ်|L2|Stock နည်းနေသည် 3 မျိုး မှာရန်လိုသည်|reacts|201,326 169x111|route / → /products?filter=low ; +[route=/products?filter=low ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|သိမ်းမယ်|reacts|143,732 227x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › သိမ်းမယ်|L2|ရောင်းမယ်|reacts|20,453 350x56|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ ရောင်းမယ်|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|သိမ်းမယ်|reacts|143,732 227x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › သိမ်းမယ်|L2|အားလုံးကြည့်ရန်|reacts|274,532 96x21|+[barriers=1 ⏎ နောက်သို့|||nonenonenonenonenoneisTrue ⏎ အရောင်းမှတ်တမ်း|||nonenonenonenonenonenone] ; −[barriers=2 ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|သိမ်းမယ်|reacts|143,732 227x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › သိမ်းမယ်|L2|ပင်မ|NOTHING-already-selected|0,735 78x65|
+flutter: QA_NOTE:SWEEP|edit_product › သိမ်းမယ်|L2|ပစ္စည်း|reacts|156,735 78x65|route / → /products ; +[route=/products ⏎ ကုန်ပစ္စည်း|||nonenonenonenonenonenone ⏎ စုစုပေါင်း 7 မျိုး|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|သိမ်းမယ်|reacts|143,732 227x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › သိမ်းမယ်|L2|အကြွေး|reacts|234,735 78x65|route / → /customers ; +[route=/customers ⏎ ဖောက်သည် · အကြွေး|||nonenonenonenonenonenone ⏎ စုစုပေါင်း ရရန်ကျန်|||nonenonenonenonenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1-replay|သိမ်းမယ်|reacts|143,732 227x54|opened dialog/sheet ; +[barriers=2 ⏎ မင်္ဂလာပါ ⏎ ရွှေဝါ ကုန်စုံဆိုင်] ; −[barriers=1 ⏎ ပိတ်ရန်|||nonenonenonenonenoneisTrue]
+flutter: QA_NOTE:SWEEP|edit_product › သိမ်းမယ်|L2|အစီရင်ခံစာ|reacts|312,735 78x65|route / → /reports ; +[route=/reports ⏎ အစီရင်ခံစာ|||nonenonenonenonenonenone ⏎ ဒီနေ့|||noneisFalsenoneisFalsenonenone] ; −[route=/ ⏎ မင်္ဂလာပါ]
+flutter: QA_NOTE:SWEEP|edit_product|L1|unlabelled@306,120 48x48|reacts|306,120 48x48|platform: scanner.open "Barcode ဖတ်မယ်" ; +[platform=12] ; −[platform=11]
+flutter: QA_NOTE:SWEEP_DONE taps=551 dead=30 lost=0
+flutter: QA_NOTE:SWEEP_DEAD products › 48 ခု  › L2 › 00 || products › 48 ခု  › L2 › 0 || products › 48 ခု  › L2 › ⌫ || products › 3 ခု  › L2 › 00 || products › 3 ခု  › L2 › 0 || products › 3 ခု  › L2 › ⌫ || products › 20 ခု  › L2 › 00 || products › 20 ခု  › L2 › 0 || products › 20 ခု  › L2 › ⌫ || products › 2 ခု  › L2 › 00 || products › 2 ခု  › L2 › 0 || products › 2 ခု  › L2 › ⌫ || products › 15 ခု  › L2 › 00 || products › 15 ခု  › L2 › 0 || products › 15 ခု  › L2 › ⌫ || products › ကုန်  › L2 › 00 || products › ကုန်  › L2 › 0 || products › ကုန်  › L2 › ⌫ || products › 60 ခု  › L2 › 00 || products › 60 ခု  › L2 › 0 || products › 60 ခု  › L2 › ⌫ || products_low › 3 ခု  › L2 › 00 || products_low <…>
+flutter: QA_NOTE:SWEEP_LOST none
+flutter: QA_NOTE:SEMA_DEAD 251: sales › နောက်သို့ || sales › unlabelled@20,63 44x44 › မင်္ဂလာပါ ရွှေဝါ ကုန်စုံဆိုင် ဆက်တင် || sales › unlabelled@20,63 44x44 › ပင်မ || sales › unlabelled@20,63 44x44 › ရောင်းမယ် || sales › unlabelled@20,63 44x44 › ပစ္စည်း || sales › unlabelled@20,63 44x44 › အကြွေး || sales › unlabelled@20,63 44x44 › အစီရင်ခံစာ || sale_detail › နောက်သို့ || sale_detail › unlabelled@20,63 44x44 › မင်္ဂလာပါ ရွှေဝါ ကုန်စုံဆိုင် ဆက်တင် || sale_detail › unlabelled@20,63 44x44 › ပင်မ || sale_detail › unlabelled@20,63 44x44 › ရောင်းမယ် || sale_detail › unlabelled@20,63 44x44 › ပစ္စည်း || sale_detail › unlabelled@20,63 44x44 › အကြွေး || sale_detail › unlabell<…>
+flutter: QA_NOTE:SWEEP_ERRORS none
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following TestFailure was thrown running a test:
+flutter: Expected: empty
+flutter:   Actual: [
+flutter:             'products › 48 ခု  › L2 › 00',
+flutter:             'products › 48 ခု  › L2 › 0',
+flutter:             'products › 48 ခု  › L2 › ⌫',
+flutter:             'products › 3 ခု  › L2 › 00',
+flutter:             'products › 3 ခု  › L2 › 0',
+flutter:             'products › 3 ခု  › L2 › ⌫',
+flutter:             'products › 20 ခု  › L2 › 00',
+flutter:             'products › 20 ခု  › L2 › 0',
+flutter:             'products › 20 ခု  › L2 › ⌫',
+flutter:             'products › 2 ခု  › L2 › 00',
+flutter:             'products › 2 ခု  › L2 › 0',
+flutter:             'products › 2 ခု  › L2 › ⌫',
+flutter:             'products › 15 ခု  › L2 › 00',
+flutter:             'products › 15 ခု  › L2 › 0',
+flutter:             'products › 15 ခု  › L2 › ⌫',
+flutter:             'products › ကုန်  › L2 › 00',
+flutter:             'products › ကုန်  › L2 › 0',
+flutter:             'products › ကုန်  › L2 › ⌫',
+flutter:             'products › 60 ခု  › L2 › 00',
+flutter:             'products › 60 ခု  › L2 › 0',
+flutter:             'products › 60 ခု  › L2 › ⌫',
+flutter:             'products_low › 3 ခု  › L2 › 00',
+flutter:             'products_low › 3 ခု  › L2 › 0',
+flutter:             'products_low › 3 ခု  › L2 › ⌫',
+flutter:             ...
+flutter:           ]
+flutter: controls that do nothing: [products › 48 ခု  › L2 › 00, products › 48 ခု  › L2 › 0, products › 48
+flutter: ခု  › L2 › ⌫, products › 3 ခု  › L2 › 00, products › 3 ခု  › L2 › 0, products › 3 ခု  › L2 › ⌫,
+flutter: products › 20 ခု  › L2 › 00, products › 20 ခု  › L2 › 0, products › 20 ခု  › L2 › ⌫, products › 2
+flutter: ခု  › L2 › 00, products › 2 ခု  › L2 › 0, products › 2 ခု  › L2 › ⌫, products › 15 ခု  › L2 ›
+flutter: 00, products › 15 ခု  › L2 › 0, products › 15 ခု  › L2 › ⌫, products › ကုန်  › L2 › 00, products
+flutter: › ကုန်  › L2 › 0, products › ကုန်  › L2 › ⌫, products › 60 ခု  › L2 › 00, products › 60 ခု  › L2
+flutter: › 0, products › 60 ခု  › L2 › ⌫, products_low › 3 ခု  › L2 › 00, products_low › 3 ခု  › L2 › 0,
+flutter: products_low › 3 ခု  › L2 › ⌫, products_low › 2 ခု  › L2 › 00, products_low › 2 ခု  › L2 › 0,
+flutter: products_low › 2 ခု  › L2 › ⌫, products_low › ကုန်  › L2 › 00, products_low › ကုန်  › L2 › 0,
+flutter: products_low › ကုန်  › L2 › ⌫]
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r14_sweep_test.dart:512:5)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: This was caught by the test expectation on the following line:
+flutter:   file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r14_sweep_test.dart line 512
+flutter: The test description was:
+flutter:   TC-UX-NEW-11 every reachable tappable reacts (sweep:
+flutter:   sales,sale_detail,sale_detail_voided,receipt,reports,products,products_noprice,products_low,add_product,edit_product)
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 21:14 +0: TC-UX-NEW-11 every reachable tappable reacts (sweep: sales,sale_detail,sale_detail_voided,receipt,reports,products,products_noprice,products_low,add_product,edit_product) [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: TC-UX-NEW-11 every reachable tappable reacts (sweep: sales,sale_detail,sale_detail_voided,receipt,reports,products,products_noprice,products_low,add_product,edit_product)
+flutter:
+flutter: 21:14 +0 -1: (tearDownAll)
+flutter: 21:14 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: TC-UX-NEW-11 every reachable tappable reacts (sweep: sales,sale_detail,sale_detail_voided,receipt,reports,products,products_noprice,products_low,add_product,edit_product)
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Expected: empty
+  Actual: [
+            'products › 48 ခု  › L2 › 00',
+            'products › 48 ခု  › L2 › 0',
+            'products › 48 ခု  › L2 › ⌫',
+            'products › 3 ခု  › L2 › 00',
+            'products › 3 ခု  › L2 › 0',
+            'products › 3 ခု  › L2 › ⌫',
+            'products › 20 ခု  › L2 › 00',
+            'products › 20 ခု  › L2 › 0',
+            'products › 20 ခု  › L2 › ⌫',
+            'products › 2 ခု  › L2 › 00',
+            'products › 2 ခု  › L2 › 0',
+            'products › 2 ခု  › L2 › ⌫',
+            'products › 15 ခု  › L2 › 00',
+            'products › 15 ခု  › L2 › 0',
+            'products › 15 ခု  › L2 › ⌫',
+            'products › ကုန်  › L2 › 00',
+            'products › ကုန်  › L2 › 0',
+            'products › ကုန်  › L2 › ⌫',
+            'products › 60 ခု  › L2 › 00',
+            'products › 60 ခု  › L2 › 0',
+            'products › 60 ခု  › L2 › ⌫',
+            'products_low › 3 ခု  › L2 › 00',
+            'products_low › 3 ခု  › L2 › 0',
+            'products_low › 3 ခု  › L2 › ⌫',
+            ...
+          ]
+controls that do nothing: [products › 48 ခု  › L2 › 00, products
+› 48 ခု  › L2 › 0, products › 48 ခု  › L2 › ⌫, products › 3 ခု
+ › L2 › 00, products › 3 ခု  › L2 › 0, products › 3 ခု  › L2 ›
+⌫, products › 20 ခု  › L2 › 00, products › 20 ခု  › L2 › 0,
+products › 20 ခု  › L2 › ⌫, products › 2 ခု  › L2 › 00,
+products › 2 ခု  › L2 › 0, products › 2 ခု  › L2 › ⌫, products
+› 15 ခု  › L2 › 00, products › 15 ခု  › L2 › 0, products › 15
+ခု  › L2 › ⌫, products › ကုန်  › L2 › 00, products › ကုန်  ›
+L2 › 0, products › ကုန်  › L2 › ⌫, products › 60 ခု  › L2 › 00,
+products › 60 ခု  › L2 › 0, products › 60 ခု  › L2 › ⌫,
+products_low › 3 ခု  › L2 › 00, products_low › 3 ခု  › L2 › 0,
+products_low › 3 ခု  › L2 › ⌫, products_low › 2 ခု  › L2 › 00,
+products_low › 2 ခု  › L2 › 0, products_low › 2 ခု  › L2 › ⌫,
+products_low › ကုန်  › L2 › 00, products_low › ကုန်  › L2 › 0,
+products_low › ကုန်  › L2 › ⌫]
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r14_sweep_test.dart:512:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r14_sweep_test.dart line 512
+The test description was:
+  TC-UX-NEW-11 every reachable tappable reacts (sweep:
+  sales,sale_detail,sale_detail_voided,receipt,reports,products,products_noprice,products_low,add_product,edit_product)
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+Leaving the application running.
+[runner] flutter exit code 1

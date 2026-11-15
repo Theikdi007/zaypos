@@ -50,7 +50,7 @@ flutter drive --keep-app-running --driver=test_driver/integration_test.dart --ta
           print -r -- "[runner] photos count ${#files}" >> $LOG
           if (( ${#files} )); then
             print -r -- "[runner] photos newest ${files[1]:t} $(stat -f '%Sm' ${files[1]}) $(sips -g pixelWidth -g pixelHeight ${files[1]} | awk '/pixel/{printf "%s=%s ", $1, $2}')" >> $LOG
-            cp ${files[1]} "$EVD/photos_newest_${id}.${files[1]:e:l}"
+            cp ${files[1]} "$EVD/photos_${RUN}_${id}.${files[1]:e:l}"
           fi ;;
         apptmp)
           tmp=$(xcrun simctl get_app_container $UDID com.zaypos.zayposApp data)/Library/Caches  # path_provider temp dir on iOS
@@ -58,7 +58,12 @@ flutter drive --keep-app-running --driver=test_driver/integration_test.dart --ta
             print -r -- "[runner] app tmp ${f#$tmp/} $(stat -f '%Sm' $f) $(sips -g pixelWidth -g pixelHeight $f | awk '/pixel/{printf "%s=%s ", $1, $2}')" >> $LOG
           done
           newest=($tmp/**/ZayPOS-receipt-*.png(N.om[1]))
-          (( ${#newest} )) && cp ${newest[1]} "$EVD/apptmp_newest_${id}.png" ;;
+          (( ${#newest} )) && cp ${newest[1]} "$EVD/apptmp_${RUN}_${id}.png" ;;
+        # QA round 14 (BUG-46): what iOS logged about opening a tel: URL in the last 2 minutes.
+        syslog_tel)
+          xcrun simctl spawn $UDID log show --last 2m --style compact \
+            --predicate 'eventMessage CONTAINS[c] "tel:" OR eventMessage CONTAINS[c] "openURL" OR eventMessage CONTAINS[c] "canOpenURL"' 2>&1 \
+            | grep -v '^Timestamp' | tail -25 | sed 's/^/[runner] syslog /' >> $LOG ;;
       esac
       touch "$QA_DIR/ack_cmd_$id" ;;
   esac

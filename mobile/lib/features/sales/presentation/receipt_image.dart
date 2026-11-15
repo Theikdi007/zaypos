@@ -43,13 +43,51 @@ class ReceiptCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final body = _ReceiptBody(sale: sale, shop: shop, date: mmReceiptDate(sale.createdAt));
     return DashedBox(
       color: AppColors.inputBorder,
       strokeWidth: 1,
       radius: 18,
       background: AppColors.surface,
       padding: const EdgeInsets.all(20),
-      child: _ReceiptBody(sale: sale, shop: shop, date: mmReceiptDate(sale.createdAt)),
+      child: sale.voided
+          ? Stack(
+              children: [
+                body,
+                const Positioned.fill(child: Center(child: VoidedStamp())),
+              ],
+            )
+          : body,
+    );
+  }
+}
+
+const receiptVoidedStampText = 'ပယ်ဖျက်ပြီး';
+
+/// BUG-45: the large red stamp across a voided sale's receipt, so a shared or
+/// saved image of a cancelled sale can never pass for a valid receipt.
+class VoidedStamp extends StatelessWidget {
+  const VoidedStamp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Transform.rotate(
+        angle: -0.26,
+        child: Container(
+          key: const ValueKey('receiptVoidedStamp'),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.surface.withValues(alpha: 0.82),
+            border: Border.all(color: AppColors.danger, width: 4),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            receiptVoidedStampText,
+            style: AppText.s(34, weight: AppText.w700, color: AppColors.danger),
+          ),
+        ),
+      ),
     );
   }
 }
