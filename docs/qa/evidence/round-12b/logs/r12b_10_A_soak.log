@@ -1,0 +1,77 @@
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           22.9s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:57635/xHuU6V6FVpk=/
+VMServiceFlutterDriver: Isolate found with number: 3080377579473159
+VMServiceFlutterDriver: Isolate 3080377579473159 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: TC-UX-06 60 minutes of normal use
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: QA_CMD:mem:0_mem
+[runner] 12:38:38 cmd mem
+flutter: QA_CMD:mem:1_mem
+[runner] 12:38:56 cmd mem
+flutter: QA_SHOT:ux06_soak_001
+[runner] screenshot ux06_soak_001.png
+flutter: QA_CMD:mem:2_mem
+[runner] 12:44:04 cmd mem
+flutter: QA_SHOT:ux06_soak_009
+[runner] screenshot ux06_soak_009.png
+flutter: QA_CMD:mem:3_mem
+[runner] 12:49:08 cmd mem
+flutter: QA_SHOT:ux06_soak_017
+[runner] screenshot ux06_soak_017.png
+flutter: Some possible finders for the widgets at Offset(370.0, 614.3):
+flutter:   find.byType(SliverList)
+flutter:   find.byType(SliverPadding)
+flutter:   find.byType(Viewport)
+flutter:   find.byType(Scrollable)
+flutter:   find.byType(ListView)
+flutter:   find.byElementType(InheritedModelElement<_ModalRouteAspect>)
+flutter:   find.byElementType(InheritedModelElement<Object>)
+Unhandled exception:
+DriverError: Failed to fulfill RequestData due to remote error
+Original error: ext.flutter.driver: (112) Service has disappeared
+Original stack trace:
+#0      new _OutstandingRequest (package:vm_service/src/vm_service.dart:280:34)
+#1      VmService._call.<anonymous closure> (package:vm_service/src/vm_service.dart:1962:25)
+#2      VmService._call (package:vm_service/src/vm_service.dart:1974:8)
+#3      VmService.callServiceExtension (package:vm_service/src/vm_service.dart:1913:14)
+#4      VMServiceFlutterDriver.sendCommand (package:flutter_driver/src/driver/vmservice_driver.dart:327:12)
+#5      FlutterDriver.requestData (package:flutter_driver/src/driver/driver.dart:585:13)
+#6      integrationDriver (package:integration_test/integration_test_driver.dart:71:42)
+<asynchronous suspension>
+
+
+#0      VMServiceFlutterDriver.sendCommand (package:flutter_driver/src/driver/vmservice_driver.dart:340:7)
+<asynchronous suspension>
+#1      FlutterDriver.requestData (package:flutter_driver/src/driver/driver.dart:585:7)
+<asynchronous suspension>
+#2      integrationDriver (package:integration_test/integration_test_driver.dart:71:29)
+<asynchronous suspension>
+Leaving the application running.
+[runner] flutter exit code 1

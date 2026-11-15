@@ -1,0 +1,141 @@
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           23.3s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:58083/xgucvUNerRY=/
+VMServiceFlutterDriver: Isolate found with number: 266200984459703
+VMServiceFlutterDriver: Isolate 266200984459703 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: QA_CMD:font_ax5:0_font_ax5
+[runner] 12:43:28 cmd font_ax5
+flutter: QA_NOTE:screen 390.0x844.0 pt, textScaler(14)=43.64705882352941 (×3.1176470588235294)
+flutter: QA_SHOT:ax5_ux03_unlock
+[runner] screenshot ax5_ux03_unlock.png
+flutter: QA_NOTE:[ax5] unlock screen at open: keypad "0" key at y=801..861, screen height 844 → below the screen (scroll needed)
+flutter: QA_NOTE:[ax5] wrong PIN #1: message for this attempt after 391 ms: "PIN မှားနေပါတယ်။ နောက်ထပ် ၄ ကြိမ် ကြိုးစားလို့ရပါတယ်။"
+flutter: QA_NOTE:[ax5] keypad "0" key at y=722..782 (screen height 844) after scrolling it into view
+flutter: QA_NOTE:[ax5] wrong PIN #2: message for this attempt after 355 ms: "PIN မှားနေပါတယ်။ နောက်ထပ် ၃ ကြိမ် ကြိုးစားလို့ရပါတယ်။"
+flutter: QA_NOTE:[ax5] wrong PIN #3: message for this attempt after 386 ms: "PIN မှားနေပါတယ်။ နောက်ထပ် ၂ ကြိမ် ကြိုးစားလို့ရပါတယ်။"
+flutter: QA_SHOT:ax5_pin05_wrong_pin_3x
+[runner] screenshot ax5_pin05_wrong_pin_3x.png
+flutter: QA_SHOT:ax5_ux03_dashboard
+[runner] screenshot ax5_ux03_dashboard.png
+flutter: QA_SHOT:ax5_ux03_dashboard_scrolled
+[runner] screenshot ax5_ux03_dashboard_scrolled.png
+flutter: QA_SHOT:ax5_ux03_pos
+[runner] screenshot ax5_ux03_pos.png
+flutter: QA_SHOT:ax5_ux03_pos_scrolled
+[runner] screenshot ax5_ux03_pos_scrolled.png
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "ပစ္စည်းများ" (ignoring all but first): [
+flutter:   Text("ပစ္စည်းများ", inherit: true, color: Color(alpha: 1.0000, red: 0.2941, green: 0.3333, blue: 0.3882, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 14.0, weight: 700, height: 1.6x, decoration: Color(alpha: 1.0000, red: 0.2941, green: 0.3333, blue: 0.3882, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(108.5, 384.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: The finder corresponds to this RenderBox: RenderParagraph#1170f relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(RenderDecoratedBox#0ef8e@Offset(96.5, 215.0), RenderStack#ca903@Offset(108.5, 384.0), RenderCustomMultiChildLayoutBox#812d2@Offset(108.5, 384.0), _RenderInkFeatures#7b49d@Offset(108.5, 384.0), RenderPhysicalModel#d7794@Offset(108.5, 384.0), RenderSemanticsAnnotations#94d73@Offset(108.5, 384.0), RenderRepaintBoundary#e3854@Offset(108.5, 384.0), RenderIgnorePointer#cf6e6@Offset(108.5, 384.0), RenderRepaintBoundary#ad563@Offset(108.5, 384.0), RenderSemanticsAnnotations#b152b@Offset(108.5, 384.0), RenderOffstage#90cca@Offset(108.5, 384.0), RenderSemanticsAnnotations#7cc8b@Offset(108.5, 384.0), _RenderTheater#e09d7@Offset(108.5, 384.0), RenderAbsorbPointer#51fdb@Offset(108.5, 384.0), RenderPointerListener#c2fa8@Offset(108.5, 384.0), RenderSemanticsAnnotations#b0c7a@Offset(108.5, 384.0), RenderSemanticsAnnotations#91591@Offset(108.5, 384.0), RenderSemanticsAnnotations#b3f28@Offset(108.5, 384.0), RenderTapRegionSurface#97c4e@Offset(108.5, 384.0),<…>
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      tapText (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/qa_harness.dart:157:16)
+flutter: <asynchronous suspension>
+flutter: #4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:97:59)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter: QA_CMD:font_default:1_font_default
+[runner] 12:43:44 cmd font_default
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following StateError was thrown running a test:
+flutter: Bad state: No element
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #0      Iterable.first (dart:core/iterable.dart:663:7)
+flutter: #1      _FirstFinderMixin.filter (package:flutter_test/src/finders.dart:1383:28)
+flutter: #3      Iterable.single (dart:core/iterable.dart:694:13)
+flutter: #4      WidgetController.element (package:flutter_test/src/controller.dart:888:30)
+flutter: #5      WidgetController.ensureVisible (package:flutter_test/src/controller.dart:2389:32)
+flutter: #6      tapText (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/qa_harness.dart:155:16)
+flutter: #7      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:98:13)
+flutter: <asynchronous suspension>
+flutter: #8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #10     TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: (elided one frame from dart:async-patch)
+flutter:
+flutter: The test description was:
+flutter:   TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 00:16 +0: TC-PIN-05 + TC-UX-03 on the small phone with the largest font [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+flutter:
+flutter: 00:16 +0 -1: (tearDownAll)
+flutter: 00:16 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.first (dart:core/iterable.dart:663:7)
+#1      _FirstFinderMixin.filter (package:flutter_test/src/finders.dart:1383:28)
+#3      Iterable.single (dart:core/iterable.dart:694:13)
+#4      WidgetController.element (package:flutter_test/src/controller.dart:888:30)
+#5      WidgetController.ensureVisible (package:flutter_test/src/controller.dart:2389:32)
+#6      tapText (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/qa_harness.dart:155:16)
+#7      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:98:13)
+<asynchronous suspension>
+#8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#10     TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+(elided one frame from dart:async-patch)
+
+The test description was:
+  TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+Leaving the application running.
+[runner] flutter exit code 1

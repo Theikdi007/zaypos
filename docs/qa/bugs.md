@@ -780,6 +780,95 @@ Format:
 - Blocks beta: no (typing "09…", "+959…" or the last digits works).
 - Status: open (beta backlog)
 
+## Found in round 12b (iOS simulators, 2026-11-15)
+
+## BUG-40 · TC-POS-11 · Medium · Receipt "Viber ပို့မယ်" and "ပုံ သိမ်းမယ်" (and the sale's "ပြေစာ ပို့မယ်") do nothing
+- Found in: round 12b · iPhone 17 simulator, `mobile/integration_test/qa/r12b_03_products_pos_test.dart` and
+  `r12b_05_a_pin_customers_test.dart`; screenshots `docs/qa/evidence/round-12b/pos11_receipt.png`, `pos11_after_viber_tap.png`,
+  `pos11_after_save_image_tap.png`, `pos11_sale_detail_send_receipt_tap.png`
+- Steps to reproduce: sell anything → receipt "ရောင်းပြီးပါပြီ" → tap "Viber ပို့မယ်", then "ပုံ သိမ်းမယ်". Or Sales → a sale →
+  "ပြေစာ ပို့မယ်".
+- Expected (TC-POS-11): the share sheet opens with the receipt (Viber is one of the targets) / the receipt image is saved to Photos.
+- Actual: nothing happens. No share sheet, dialog or message, and the screen stays on the receipt:
+  `tap "Viber ပို့မယ်": route /sales/…/receipt → /sales/…/receipt, in-app sheets/dialogs/snackbars=0`, and the same for
+  "ပုံ သိမ်းမယ်" and "ပြေစာ ပို့မယ်". The same holds for the customer form's "ဖုန်းစာအုပ်ထဲက ရွေးရန်" (contact picker) button.
+- Suspected area: the buttons have empty handlers: `mobile/lib/features/sales/presentation/sale_receipt_screen.dart:90` and `:102`,
+  `sale_detail_screen.dart:136`, `customers/presentation/add_customer_screen.dart:226` (`onTap: () {}`). The app has no share /
+  image-save / contacts package in `pubspec.yaml`. This was not visible before because TC-POS-11 was always MANUAL.
+- Blocks beta: owner's decision. It is rated Medium because a button on every receipt looks ready but does nothing, and nothing in
+  the app replaces it (a screenshot is the only workaround). Under the owner's exit rule ("no Medium open"), the beta needs either
+  the feature or the buttons hidden (and shops told that receipts are shown on screen only).
+- Status: open
+
+## BUG-41 · TC-AUTH-NEW-3 · Low · Login / Register / PIN-reset fields silently drop Myanmar digits (typed or pasted)
+- Found in: round 12b · iPhone 17e simulator, `mobile/integration_test/qa/r12b_04_b_signin_reset_test.dart` (step "reset");
+  screenshots `auth3_B_reset_phone_myanmar_digits.png`, `auth3_B_reset_otp_pin_myanmar_digits.png`
+- Steps to reproduce: Unlock → "PIN မေ့နေပါသလား?" → enter the phone as "၀၉ ၇၉၀ ၉၁၇ ၀၅၁" (Myanmar digits, e.g. pasted from a
+  contact) → "ကုဒ်ပို့မယ်"; enter the SMS code and the new PIN in Myanmar digits.
+- Expected: the number reaches the BUG-34 normalizer, which accepts Myanmar digits (sign-in, register and reset all go through it),
+  or at least a message says to use 0-9.
+- Actual: `reset phone field after injecting Myanmar digits "၀၉ ၇၉၀ ၉၁၇ ၀၅၁": keeps "   "` (only the spaces);
+  `OTP field after injecting "၀၀၇၄၈၀": keeps ""`; `new-PIN field after injecting "၂၂၂၂၂၂": keeps ""`. No message is shown. The same
+  formatters are on Login and Register. The text was injected (simulator), so a real Myanmar keyboard on the phone pad may never
+  produce these digits. Pasting does.
+- Suspected area: input formatters with ASCII-only classes: `mobile/lib/features/auth/presentation/widgets/phone_field.dart:26`
+  (`[0-9 ]`), `pin_reset_screen.dart:115`, `login_screen.dart:153`, `register_screen.dart:404` (`digitsOnly`).
+- Blocks beta: no (ASCII digits work; the iOS phone/number pads type ASCII). The owner's real-iPhone check (MANUAL item 4) decides
+  whether the Myanmar keyboard can reach these fields at all.
+- Status: open
+
+## BUG-42 · TC-UX-03 · Low · With "Larger Accessibility Sizes" the POS screen is unusable and the PIN keypad starts below the screen
+- Found in: round 12b · iPhone 17e simulator (390×844 pt), `simctl ui content_size accessibility-extra-extra-extra-large` (text ×3.12),
+  `mobile/integration_test/qa/r12b_09_large_font_test.dart` (QA_FONT=ax5); screenshots `ax5_ux03_unlock.png`,
+  `ax5_pin05_wrong_pin_3x.png`, `ax5_ux03_pos.png`
+- Steps to reproduce: iOS Settings → Accessibility → Display & Text Size → Larger Text → "Larger Accessibility Sizes" ON, slider at
+  the maximum → open the app (locked) → unlock → POS.
+- Expected: the unlock keypad and the POS screen stay usable (TC-UX-03, "largest system font → no overflow").
+- Actual: Unlock: `keypad "0" key at y=801..861, screen height 844 → below the screen (scroll needed)`. The page scrolls, but a
+  wrong-PIN message pushes the keypad further down. POS: the dark cart bar covers almost the whole screen ("ပစ္စည်း 0 ခု" wraps one
+  letter per line), so the product list and tabs behind it cannot be tapped. No Flutter overflow error is raised.
+  At the largest size WITHOUT accessibility sizes (×1.35) every screen passes (`[xxxl] layout problems: none`).
+- Suspected area: no text-scale limit in the app (`MaterialApp` builder in `mobile/lib/main.dart`; no `textScaler` clamp anywhere);
+  POS `_CartBar` in `pos_screen.dart`.
+- Blocks beta: no (needs the accessibility sizes switched on).
+- Status: open
+
+## BUG-43 · TC-UX-NEW-6 · Low · After an upgrade from a schema-v1 install, existing "စစ်ရန်" issues never get their details (barcode, product names)
+- Found in: round 12b · iPhone 17e simulator, round-8 build (e7cd138, Drift v1) seeded by
+  `mobile/integration_test/qa/r12b_07_upgrade_seed_r8_test.dart`, this build installed over it by `r12b_07_upgrade_check_test.dart`;
+  log `docs/qa/evidence/round-12b/logs/r12b_07_B_upgrade_head_run1.log`
+- Steps to reproduce: on the round-8 build, add two products with the same barcode 8850000099003 and sync (the server records a
+  `duplicateBarcode` issue, "စစ်ရန် (1)") → install the current build over it → unlock → Settings → "ယခု sync လုပ်မယ်" → "စစ်ရန်".
+- Expected (TC-UX-NEW-6): after the pull the issue reads "Barcode 8850000099003 ကို “Mirinda can” နဲ့ “Fanta can” …".
+- Actual: only the generic text "ဒီ Barcode ကို ပစ္စည်းတွေမှာ သုံးထားပါတယ်။ ရောင်းတဲ့အခါ ဘယ်ပစ္စည်းလဲ ရွေးခိုင်းပါမယ်။" (no English,
+  but no barcode and no product names), also after a manual sync:
+  `Expected: at least one matching candidate / Actual: _TextContainingWidgetFinder:<Found 0 widgets with text containing 8850000099003: []>`.
+  Upgrade itself is fine: opens locked, old PIN works, `PRAGMA user_version=2`, 25 products / 3 customers / 16 sales kept.
+- Cause (observed, no fix): the v1→v2 migration only adds the `data` column; the pull cursor is not reset, and the server re-sends
+  an issue only when its `updatedAt` changes. So issues pulled before the upgrade keep `data = NULL` for good. The Drift-level
+  QA test (m/qa/qa_round9_sync_text_test.dart::TC-UX-NEW-6) passes because it simulates the re-send.
+- Suspected area: `mobile/lib/core/db/app_database.dart` `migration.onUpgrade` (`from < 2`), pull cursor in `syncState`.
+- Blocks beta: no. Only phones that ran a round-8-or-older build and already had issues are affected (the owner's test phones);
+  the text is Burmese and the owner can still find both products by the barcode.
+- Note: QA's on-device test had been relaxed to `textContaining('Barcode')` for its passing rerun. The barcode assertion is
+  restored in `r12b_07_upgrade_check_test.dart` (it fails until this bug is fixed).
+- Status: open
+
+## BUG-44 · TC-UX-03 · Low · Largest standard text size (no accessibility sizes): POS "အမြန်ရောင်း" overflows by 78 px on a 390×844 phone
+- Found in: round 12b · iPhone 17e simulator (390×844 pt), `simctl ui content_size extra-extra-extra-large` (text ×1.35),
+  `mobile/integration_test/qa/r12b_09_large_font_test.dart` (QA_FONT=xxxl), log `logs/r12b_09_B_xxxl_rerun.log`, screenshot
+  `xxxl_ux03_pos.png`
+- Steps to reproduce: iOS Settings → Display & Text Size → Larger Text, "Larger Accessibility Sizes" OFF, slider at the maximum →
+  open the app (a shop with the quick-sale feature on, e.g. grocery) → POS (opens on "အမြန်ရောင်း").
+- Expected (TC-UX-03): no overflow at the largest system font.
+- Actual: `[xxxl] layout problems: {A RenderFlex overflowed by 78 pixels on the bottom. @ /pos}`. The "+ ခြင်းထဲထည့်မယ်" button is
+  partly under the dark cart bar (its upper part is still visible; QA did not check whether a tap there adds the amount). In the first xxxl run (12:42) POS
+  had opened on "ပစ္စည်းများ" and there was no overflow. That is why it was not reported then.
+- Suspected area: `mobile/lib/features/pos/presentation/pos_screen.dart` `_quickSale` (fixed-height column above `_CartBar`, not
+  scrollable); no text-scale clamp in the app (see BUG-42).
+- Blocks beta: no (most of the button is visible; the shop owner can lower the text size one step).
+- Status: open
+
 ---
 
 ## Known limitations for the beta (owner, 2026-11-14)

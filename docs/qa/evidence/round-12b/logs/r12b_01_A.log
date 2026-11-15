@@ -1,0 +1,15 @@
+00:00 +0: loading /Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_01_fresh_offline_test.dart
+Running Xcode build...                                          
+Xcode build done.                                           39.8s
+00:00 +0: TC-UX-01 fresh install, API down: Login + Register render Burmese text
+QA_NOTE:login button font: Inter fallback=[NotoSansMyanmar]
+QA_SHOT:ux01_login_fresh_offline
+[runner] screenshot ux01_login_fresh_offline.png
+QA_SHOT:ux01_register_step1_offline
+[runner] screenshot ux01_register_step1_offline.png
+QA_SHOT:ux01_register_send_code_offline
+[runner] screenshot ux01_register_send_code_offline.png
+QA_NOTE:register texts after send (offline): [အဆင့် 1 / 4, ဖုန်းနံပါတ် အတည်ပြုမယ်, မက်ဆေ့ချ်နဲ့ OTP ကုဒ် ၆ လုံး ပို့ပေးပါမယ်, ဖုန်းနံပါတ်, +95, 9 xxx xxx xxx, အင်တာနက် မရပါ။ လိုင်းရမှ ပြန်ကြိုးစားပါ။, ကုဒ်ပို့မယ်]
+00:11 +1: (tearDownAll)
+00:11 +1: All tests passed!
+[runner] flutter exit code 0

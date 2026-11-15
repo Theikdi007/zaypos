@@ -1,0 +1,52 @@
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           19.4s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:56894/JGK3CxNbH-Y=/
+VMServiceFlutterDriver: Isolate found with number: 8001099912918099
+VMServiceFlutterDriver: Isolate 8001099912918099 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: TC-UX-05 kill during checkout (check, delay 300 ms)
+VMServiceFlutterDriver: Connected to Flutter application.
+-[WFIsolatedShortcutRunner init] Taking sandbox extensions for execution
+-[WFIsolatedShortcutRunner init]_block_invoke Sandbox extensions acquired
+Indexing for request: <WFToolKitIndexingRequest: 0x1054540c0>, changeset: .partial(updatedCount: 1 removedCount: 0 updated: ["com.zaypos.zayposApp"], removed: [], provenance: [VoiceShortcutClient.ToolKitIndexingReason.Changeset.Provenance.launchServicesSnapshot(<LaunchServicesSnapshot uuid=A6ACA09E-A732-4952-96DD-437BC6B4D1BF, v=856)> ["com.apple.telephony.SettingsCellularAppIntentsExtension", "com.apple.SupportFlow", "com.apple.MusicKit.UI", "com.apple.intelligenceflow.IntelligenceFlowAppIntentsExtension", "com.apple.EmojiPoster", "com.apple.coreidv.CoreIDVUIService", "com.apple.HealthPrivacyService", "com.apple.VideoSubscriberAccount.Intents", "com.apple.AppleAccountIntents", "com.apple.reminders", "com.apple.UIKit.OverlayUI", "com.apple.LocalAuthenticationUIService", "com.apple.HomeCaptiveViewService", "com.apple.siri.parsec.HashtagImagesApp", "com.apple.SiriSetup.SiriSetupSettingsIntents", "com.apple.NetworkEndpointPickerUI", "com.apple.PassKit.PassbookStubAppIntentsExtension", "com.apple.AutoFillSuggestions", "com.apple.He<…>, priority: <decode: missing data>
+Type indexing (params + content items) took 0.000083s
+Action indexing took 0.000036s
+Indexed: 0
+Errored: 0
+Skipped: [:]
+Bundle cache: 0 hits, 0 misses
+Finished in 0.411164s
+-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
+flutter: QA_NOTE:after reopen: before sales,stock,outbox=4,6.0,0; now 4,6.0,0; new sales=0, newest #null total=null lines=0
+flutter: QA_SHOT:ux05_after_reopen_300ms
+[runner] screenshot ux05_after_reopen_300ms.png
+flutter: 00:05 +1: (tearDownAll)
+flutter: 00:05 +2: All tests passed!
+All tests passed.
+Leaving the application running.
+[runner] flutter exit code 0

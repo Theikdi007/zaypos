@@ -174,3 +174,129 @@ Scope: BUG-36 only; no full regression, no live runs.
 - Counts: targeted run, 16 tests: 15 passed, 1 failed (the new BUG-39 probe). `flutter analyze`: no issues.
 - TC-DEBT-NEW-9: FAIL → PASS. TC-DEBT-NEW-11: new, FAIL (Low).
 - **Verdict: still Go** for the 3–5 shop beta. BUG-39 is Low and does not block it.
+
+## QA round 12b (iOS simulators, 2026-11-15, beta-polish @ 071a507)
+
+> ### No-go for the 3–5 shop beta as it stands. One Medium is open (BUG-40); everything else is Go.
+>
+> Under the owner's exit rule ("no Medium open"), the beta waits for **BUG-40**: the receipt buttons "Viber ပို့မယ်" /
+> "ပုံ သိမ်းမယ်" and the sale's "ပြေစာ ပို့မယ်" do nothing. Either make them work or hide them, and tell shops that the receipt is
+> shown on screen only. When that is done, the verdict is Go. No crash, no data loss and no sync error was found. The 60-minute
+> soak ran clean.
+
+Scope: the MANUAL/"Both" cases that a simulator can run, end to end on the real app (`flutter drive`, debug build) against the
+API on localhost:5076 with scratch DB `ZayPOS_QA_20261115_R12B`. Phone A = iPhone 17 (F48AF54E…), phone B = iPhone 17e
+(B0B2B653…, 390×844 pt, the smallest iOS 27 simulator). Camera, Bluetooth scanner, battery/heat, airplane mode and the Myanmar
+keyboard were replaced by injection (picked bytes, scanned text, key events, stopping the API, injected text). Those halves stay
+with the owner. Evidence: `docs/qa/evidence/round-12b/*.png` and `logs/*.log`. No product code was changed and nothing was committed.
+
+### Results per case
+
+| Case | Result | Evidence (`m/integration_test/qa/…`, logs in `evidence/round-12b/logs/`) | Note |
+|---|---|---|---|
+| TC-UX-01 | **PASS** (sim) | r12b_01_fresh_offline_test.dart · r12b_01_A.log | App deleted, API stopped, fresh install: Login/Register Myanmar text renders (bundled NotoSansMyanmar fallback); offline error in Burmese |
+| TC-RPT-NEW-1 (debug) | PASS | r12b_02_register_test.dart · r12b_02_A.log | Registered shop A through the 4 screens; empty week → "ရောင်းအား မရှိသေးပါ", 7 bars "0". All expects passed; the run then hung after its last screenshot ("did not complete", QA harness) |
+| TC-PROD-NEW-34 | MANUAL (sim half OK) | r12b_03_products_pos_test.dart · r12b_03_A.log | PNG saved and shown; broken bytes → "ဓာတ်ပုံ သိမ်းလို့ မရပါ", no crash. Raw HEIC bytes → same message, as expected, because the real picker re-encodes to JPEG (`maxWidth`/`imageQuality`). The real HEIC photo stays with the owner |
+| TC-POS-NEW-9 | MANUAL (sim half OK) | r12b_03 | Injected scan → +1; unknown code → "ဒီ Barcode နဲ့ ပစ္စည်း မရှိသေးပါ"; cancel leaves the cart alone |
+| TC-POS-NEW-10 | MANUAL (sim half OK) | r12b_03 | HID burst + Enter in the focused search box → same line 1→2, search box empty |
+| TC-POS-11 | **FAIL → BUG-40 (Medium)** | r12b_03, r12b_05_a_pin_customers_test.dart (r12b_05_A_rerun.log) | The three buttons do nothing (empty `onTap`, no share package) |
+| TC-AUTH-NEW-3 | **FAIL → BUG-41 (Low)** | r12b_04_b_signin_reset_test.dart (r12b_04_B_signin/reset.log), r12b_05 | Sign-in typed "09 790 917 051" → same shop; reset → new PIN 222222 works, old PIN refused on A. Myanmar digits in phone/OTP/PIN fields are dropped silently |
+| TC-DEBT-NEW-8 | PASS | r12b_05 | "09790011002" vs saved "09 790 011 002" → dialog names Daw Mya; search "790 011" finds her. First try (r12b_05_A.log) failed to find "QA r12b Daw Mya" in the list. The test was edited at 12:09, probably to tap the "အားလုံး" tab (the default tab lists only debtors), and the rerun passed. The first try's source was not kept |
+| TC-SYNC-NEW-28 | PASS | r12b_06_void_twice_test.dart (A + B together) | A offline void → 7 (right); back online, every 30 s for 4 min → 7; manual sync → 7, voided on both. The Known-limitation double count did not appear in this run |
+| TC-UX-NEW-6 (device upgrade r8 → head) | **FAIL → BUG-43 (Low)** | r12b_07_upgrade_seed_r8_test.dart (on e7cd138) + r12b_07_upgrade_check_test.dart · r12b_07_B_upgrade_head_run1.log | Opens locked, old PIN, `user_version=2`, nothing lost, Burmese text. But the pre-upgrade duplicate-barcode issue never gets its barcode/product names. The passing rerun used a relaxed assertion; QA restored the original assertion |
+| TC-UX-05 | **PASS** (sim) | r12b_08_kill_checkout_test.dart · kill/check 0 ms and 300 ms | 0 ms: whole sale kept (3→4 sales, 1 line, stock 7→6). 300 ms: nothing saved, stock unchanged. Never half. The `kill_*` logs exit 1 ("Service has disappeared") because the app is killed by design; the `check_*` runs pass |
+| TC-PIN-05 | MANUAL (sim half OK) | r12b_09_large_font_test.dart · r12b_09_B_ax5.log, r12b_09_B_xxxl_rerun.log | Error 355–394 ms after the 6th digit, tries-left 4→3→2. The first xxxl run reported ~20 s per try. The rerun did not reproduce it; cause not found |
+| TC-UX-03 | **FAIL → BUG-42, BUG-44 (Low)** | r12b_09 (xxxl ×1.35 and ax5 ×3.12 on 390×844) | ax5: POS unusable, PIN keypad below the screen (BUG-42). xxxl rerun: POS quick-sale overflows 78 px (BUG-44; the first xxxl run opened POS on "ပစ္စည်းများ" and missed it). Every other screen at xxxl: no layout error, "လက်ရှိ အကြွေး" shown |
+| TC-UX-06 | **PASS** (sim) | r12b_10_soak_test.dart · r12b_10_A_soak_rerun.log + r12b_10_A_soak_rerun_memory.log | See below |
+
+**Soak (TC-UX-06).** The first try (12:38–12:49) was **not** an app crash. At 12:49:59 *both* simulators (A and B) shut down
+together. The two `dtdeviceinfod` reports in `~/Library/Logs/DiagnosticReports` (A's and B's) show SIGKILL `XPC_EXIT_REASON_SIGTERM_TIMEOUT`
+with the parent launchd_sim already gone. There is no Runner/ZayPOS crash report. The Mac then idle-slept (pmset 12:52) and
+rebooted at 14:59. The last screenshot (ux06_soak_017, 12:49) shows the app working normally. The rerun (15:12–16:13, with
+`caffeinate` and a per-minute RSS sampler): **60 min, 94 loops, 94 sales** (app 22→116 sales = server 116; stock 188→94), **no
+framework errors, no crash**, exit 0. RSS was 600–700 MB only in the first 2 minutes of the debug build. After that it stayed flat
+at 300–350 MB (318 MB at minute 5, 324 MB at minute 60), with dips to 138–205 MB. No growth trend, so no memory bug filed.
+
+**Side runs, not counted:** r12b_09_B_ax5_firsttry (QA's first wait loop read a stale message), r12b_07_B_upgrade_head_run1 (= the
+BUG-43 evidence), r12b_05_A (see TC-DEBT-NEW-8), three `TIMEOUT_*.png` from overwritten early attempts. The first xxxl screenshots were
+overwritten by the rerun; its notes remain in `r12b_09_B_xxxl.log`.
+
+### Case totals after round 12b (199 cases)
+
+| Section | PASS | FAIL | BLOCKED | MANUAL |
+|---|---|---|---|---|
+| 1 AUTH | 13 | 2 | 0 | 0 |
+| 2 PIN | 4 | 0 | 0 | 1 |
+| 3 FEAT | 5 | 0 | 0 | 0 |
+| 4 PROD | 46 | 0 | 0 | 2 |
+| 5 POS | 25 | 1 | 0 | 2 |
+| 6 SALE | 4 | 0 | 0 | 0 |
+| 7 DEBT | 16 | 1 | 0 | 0 |
+| 8 RPT | 7 | 1 | 0 | 0 |
+| 9 SYNC | 44 | 0 | 0 | 0 |
+| 10 DEV | 4 | 0 | 0 | 0 |
+| 11 SEC | 6 | 0 | 0 | 0 |
+| 12 UX | 13 | 2 | 0 | 0 |
+| **Total** | **187** | **7** | **0** | **5** |
+
+FAIL rows: TC-POS-11 (BUG-40, Medium); TC-AUTH-NEW-2 (BUG-37), TC-AUTH-NEW-3 (BUG-41), TC-DEBT-NEW-11 (BUG-39), TC-RPT-NEW-4 (BUG-38),
+TC-UX-03 (BUG-42, BUG-44), TC-UX-NEW-6 (BUG-43), all Low.
+
+### Suites (end of round 12b)
+
+| Suite | Result |
+|---|---|
+| `cd mobile && flutter analyze` | No issues found |
+| `cd mobile && flutter test` | **587 passed, 14 skipped, 2 failed** (known: TC-RPT-NEW-4 → BUG-38, TC-DEBT-NEW-11 → BUG-39) |
+| `cd backend && dotnet test` | Domain 20/0/0, Api 120/0/0, QA **39 passed / 4 failed** (known: TC_AUTH_NEW_2 → BUG-37) |
+| Simulator runs | 14 cases above; logs per run in `evidence/round-12b/logs/` |
+
+### New bugs (round 12b)
+
+- **BUG-40 · Medium** · TC-POS-11 · Receipt "Viber ပို့မယ်" / "ပုံ သိမ်းမယ်" and the sale's "ပြေစာ ပို့မယ်" do nothing (also the
+  customer form's contact-picker button). **Blocks the beta under the exit rule.**
+- **BUG-41 · Low** · TC-AUTH-NEW-3 · Login / Register / PIN-reset fields silently drop Myanmar digits (typed or pasted).
+- **BUG-42 · Low** · TC-UX-03 · With "Larger Accessibility Sizes", POS is unusable and the PIN keypad starts below the screen.
+- **BUG-43 · Low** · TC-UX-NEW-6 · After an upgrade from a schema-v1 install, old "စစ်ရန်" issues never get their barcode/product
+  names (no re-pull after the v2 migration).
+- **BUG-44 · Low** · TC-UX-03 · Largest standard text size: POS "အမြန်ရောင်း" overflows by 78 px on a 390×844 phone.
+
+### Release recommendation (3–5 shop beta)
+
+**No-go until BUG-40 is closed** (fixed, or the buttons hidden and shops told). This is the owner's own rule: no Medium open.
+Everything else supports Go:
+- no Critical or High bug;
+- a kill during checkout never leaves a half sale;
+- a fresh offline install renders Myanmar;
+- an upgrade from round 8 keeps all data and the session;
+- two phones voiding one sale end correct;
+- one hour of use: no crash, no errors, no memory growth.
+
+The four new Lows go to the beta backlog.
+
+### MANUAL cases for the owner (real phone, in this order)
+
+1. TC-POS-11 (after the BUG-40 change): receipt share to Viber / save image, or check the buttons are gone.
+2. TC-UX-01: real phone, airplane mode ON, delete + install + open → Myanmar text (simulator PASS; the real network stack is not covered).
+3. TC-RPT-NEW-1 in a **release** build (debug build PASS on the simulator).
+4. TC-AUTH-NEW-3 with the real Myanmar keyboard: can it type into the phone / OTP / PIN fields at all (decides BUG-41's weight).
+5. TC-POS-NEW-9: real camera scan, including a denied camera permission.
+6. TC-POS-NEW-10: Bluetooth HID scanner.
+7. TC-PROD-NEW-34: camera photo, a real iPhone HEIC photo, a denied permission, phone B shows the initial.
+8. TC-PIN-05: low-end Android, PIN 3× → no stall.
+9. TC-UX-03: a real small phone at the largest standard text size. Check POS "အမြန်ရောင်း" (BUG-44) and the screens listed in the round-12 list.
+10. TC-UX-06: one hour on a real phone for battery and heat (the app's stability is covered by the simulator soak).
+11. TC-UX-05 once on a real phone (simulator PASS).
+12. TC-SYNC-NEW-28 with two real phones in airplane mode (steps in the round-12 list above).
+
+### New test files (round 12b, uncommitted)
+
+- `mobile/integration_test/qa/qa_harness.dart`, `run_qa.sh` (runner: screenshots, host commands, logs) and
+  `mobile/test_driver/integration_test.dart`; `integration_test` added to `mobile/pubspec.yaml` dev_dependencies.
+- `mobile/integration_test/qa/r12b_01_fresh_offline_test.dart` … `r12b_10_soak_test.dart` (11 test files, incl. the round-8 seed
+  file that runs on e7cd138).
+- `r12b_07_upgrade_check_test.dart`: the barcode assertion (BUG-43) was restored. It fails until the bug is fixed.
+
+Cleanup: the API on 5076 was stopped. **The scratch DB `ZayPOS_QA_20261115_R12B` was NOT dropped.** The permission system refused
+the `DROP DATABASE`, so the owner must drop it by name. The dev DB `ZayPOS` was not touched. The simulators' text size is back to
+default (`large`).

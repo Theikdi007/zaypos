@@ -1,0 +1,472 @@
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           22.6s
+-[WFIsolatedShortcutRunner init] Taking sandbox extensions for execution
+-[WFIsolatedShortcutRunner init]_block_invoke Sandbox extensions acquired
+Indexing for request: <WFToolKitIndexingRequest: 0x1060540c0>, changeset: .partial(updatedCount: 1 removedCount: 0 updated: ["com.zaypos.zayposApp"], removed: [], provenance: [VoiceShortcutClient.ToolKitIndexingReason.Changeset.Provenance.launchServicesSnapshot(<LaunchServicesSnapshot uuid=35EDBA0B-54C4-45E7-B241-08E55706C880, v=768)> ["com.apple.Preferences.DictionarySettingsExtension", "com.apple.Stickers.UserGenerated", "com.apple.SystemIntents", "com.apple.DocumentsApp", "com.apple.Home.HomeControlService", "com.apple.AccessibilityUIServer", "com.apple.siri.parsec.HashtagImagesApp", "com.apple.NanoUniverse.AegirProxyApp", "com.apple.mobiletimer.TimerIntentsExtension", "com.apple.mobiletimer.WorldClockIntentsExtension", "com.apple.ProximityReaderSceneUI", "com.apple.Preferences.DisplayAndBrightnessSettingsExtension", "com.apple.FontServices.FontIntents", "com.apple.livetranscriptionui", "com.apple.PeopleMessageService", "com.apple.Maps.MapsIntents", "com.apple.health.HealthIntentsExtension", "com.apple.ControlCenter.ControlC<…>, priority: <decode: missing data>
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:56401/qyfgKT6fjdw=/
+VMServiceFlutterDriver: Isolate found with number: 7094080941043559
+VMServiceFlutterDriver: Isolate 7094080941043559 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: QA_CMD:font_xxxl:0_font_xxxl
+[runner] 12:22:59 cmd font_xxxl
+Type indexing (params + content items) took 0.001566s
+Action indexing took 0.001833s
+Indexed: 0
+Errored: 0
+Skipped: [:]
+Bundle cache: 0 hits, 0 misses
+Finished in 0.983255s
+-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
+flutter: QA_NOTE:screen 390.0x844.0 pt, textScaler(14)=43.64705882352941 (×3.1176470588235294)
+flutter: QA_SHOT:ux03_xxxl_unlock
+[runner] screenshot ux03_xxxl_unlock.png
+flutter: QA_NOTE:wrong PIN #1: error after 441 ms: "PIN မှားနေပါတယ်။ နောက်ထပ် ၄ ကြိမ် ကြိုးစားလို့ရပါတယ်။"
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "9" (ignoring all but last): [
+flutter:   Text("9", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(312.3, 1052.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(312.3, 1052.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#413a4 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#bea16(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#7e0de(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:39:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "9" (ignoring all but last): [
+flutter:   Text("9", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(312.3, 1052.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(312.3, 1052.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#413a4 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#861e6(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#4aa06(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:39:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "9" (ignoring all but last): [
+flutter:   Text("9", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(312.3, 1052.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(312.3, 1052.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#413a4 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#c0f91(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#803c7(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:39:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "9" (ignoring all but last): [
+flutter:   Text("9", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(312.3, 1052.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(312.3, 1052.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#413a4 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#314cc(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#eaf4a(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:39:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "9" (ignoring all but last): [
+flutter:   Text("9", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(312.3, 1052.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(312.3, 1052.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#413a4 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#d020a(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#877ca(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:39:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "9" (ignoring all but last): [
+flutter:   Text("9", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(312.3, 1052.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(312.3, 1052.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#413a4 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#672fb(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#a54da(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:39:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter: QA_NOTE:wrong PIN #2: error after 66 ms: "PIN မှားနေပါတယ်။ နောက်ထပ် ၄ ကြိမ် ကြိုးစားလို့ရပါတယ်။"
+flutter: QA_NOTE:wrong PIN #3: error after 66 ms: "PIN မှားနေပါတယ်။ နောက်ထပ် ၄ ကြိမ် ကြိုးစားလို့ရပါတယ်။"
+flutter: QA_SHOT:pin05_wrong_pin_3x
+[runner] screenshot pin05_wrong_pin_3x.png
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "9" (ignoring all but last): [
+flutter:   Text("9", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(312.3, 1052.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(312.3, 1052.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#413a4 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#7d4d8(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#be6d8(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:39:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "9" (ignoring all but last): [
+flutter:   Text("9", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(312.3, 1052.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(312.3, 1052.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#413a4 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#c283d(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#c9dae(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:39:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "9" (ignoring all but last): [
+flutter:   Text("9", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(312.3, 1052.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(312.3, 1052.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#413a4 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#08007(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#9a9e0(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:39:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "9" (ignoring all but last): [
+flutter:   Text("9", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(312.3, 1052.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(312.3, 1052.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#413a4 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#06b1a(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#05935(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:39:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "9" (ignoring all but last): [
+flutter:   Text("9", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(312.3, 1052.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(312.3, 1052.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#413a4 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#d7dcd(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#661e3(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:39:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "9" (ignoring all but last): [
+flutter:   Text("9", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(312.3, 1052.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(312.3, 1052.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#413a4 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#c1e0b(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#dc2a2(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:39:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "2" (ignoring all but last): [
+flutter:   Text("2", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(195.0, 912.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(195.0, 912.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#d28a9 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#e126b(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#f01fd(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      unlockIfLocked (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/qa_harness.dart:171:18)
+flutter: #4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:51:11)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "2" (ignoring all but last): [
+flutter:   Text("2", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(195.0, 912.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(195.0, 912.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#d28a9 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#85338(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#d0a57(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      unlockIfLocked (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/qa_harness.dart:171:18)
+flutter: <asynchronous suspension>
+flutter: #4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:51:5)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "2" (ignoring all but last): [
+flutter:   Text("2", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(195.0, 912.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(195.0, 912.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#d28a9 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#5a34c(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#9b533(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      unlockIfLocked (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/qa_harness.dart:171:18)
+flutter: <asynchronous suspension>
+flutter: #4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:51:5)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "2" (ignoring all but last): [
+flutter:   Text("2", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(195.0, 912.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(195.0, 912.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#d28a9 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#2c792(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#c4279(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      unlockIfLocked (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/qa_harness.dart:171:18)
+flutter: <asynchronous suspension>
+flutter: #4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:51:5)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "2" (ignoring all but last): [
+flutter:   Text("2", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(195.0, 912.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(195.0, 912.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#d28a9 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#e9940(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#4231d(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      unlockIfLocked (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/qa_harness.dart:171:18)
+flutter: <asynchronous suspension>
+flutter: #4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:51:5)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with text "2" (ignoring all but last): [
+flutter:   Text("2", inherit: true, color: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), family: Inter, familyFallback: [NotoSansMyanmar], size: 22.0, weight: 600, height: 1.2x, decoration: Color(alpha: 1.0000, red: 0.0667, green: 0.0941, blue: 0.1529, colorSpace: ColorSpace.sRGB), dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+flutter: ]" derived an Offset (Offset(195.0, 912.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: Indeed, Offset(195.0, 912.0) is outside the bounds of the root of the render tree, Size(390.0, 844.0).
+flutter: The finder corresponds to this RenderBox: RenderParagraph#d28a9 relayoutBoundary=up1
+flutter: The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#d38ac(_ReusableRenderView#18841), HitTestEntry<HitTestTarget>#4be16(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      unlockIfLocked (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/qa_harness.dart:171:18)
+flutter: <asynchronous suspension>
+flutter: #4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:51:5)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter: 00:27 +0: TC-PIN-05 + TC-UX-03 on the small phone with the largest font [E]
+flutter:   'package:flutter_test/src/binding.dart': Failed assertion: line 1912 pos 9: '_pendingExceptionDetails != null': A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.
+flutter:   dart:core-patch/errors_patch.dart 67:4         _AssertionError._doThrowNew
+  dart:core-patch/errors_patch.dart 49:5         _AssertionError._throwNew
+  package:flutter_test/src/binding.dart 1912:9   TestWidgetsFlutterBinding._runTest.handleUncaughtError
+  package:flutter_test/src/binding.dart 1921:13  TestWidgetsFlutterBinding._runTest.<fn>
+  dart:async/zone.dart 563:30                    _Zone._processUncaughtError
+  dart:async/zone.dart 789:5                     _CustomZone.handleUncaughtError
+  dart:async/future_impl.dart 886:24             Future._propagateToListeners
+  dart:async/future_impl.dart 738:5              Future._completeErrorObject
+  dart:async/future_impl.dart 742:5              Future._completeError

@@ -1,0 +1,49 @@
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                            9.5s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:54667/V7HcAyw_Qpo=/
+VMServiceFlutterDriver: Isolate found with number: 209026473571539
+VMServiceFlutterDriver: Isolate 209026473571539 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: B: sign in with spaces, then PIN reset typed in Myanmar digits
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: QA_NOTE:reset phone field after injecting Myanmar digits "၀၉ ၇၉၀ ၉၁၇ ၀၅၁": keeps "   "
+flutter: QA_SHOT:auth3_B_reset_phone_myanmar_digits
+[runner] screenshot auth3_B_reset_phone_myanmar_digits.png
+flutter: QA_NOTE:phone re-typed in ASCII to continue
+flutter: QA_NOTE:OTP field after injecting "၀၀၇၄၈၀": keeps ""
+flutter: QA_NOTE:new-PIN field after injecting "၂၂၂၂၂၂": keeps ""
+flutter: QA_SHOT:auth3_B_reset_otp_pin_myanmar_digits
+[runner] screenshot auth3_B_reset_otp_pin_myanmar_digits.png
+flutter: QA_NOTE:B after reset: shop="QA r12b ကုန်စုံ"
+flutter: QA_SHOT:auth3_B_after_reset
+[runner] screenshot auth3_B_after_reset.png
+flutter: 00:24 +1: (tearDownAll)
+flutter: 00:24 +2: All tests passed!
+All tests passed.
+Leaving the application running.
+[runner] flutter exit code 0

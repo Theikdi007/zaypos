@@ -1,0 +1,58 @@
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                            9.4s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:54543/zzeguBhoDs4=/
+VMServiceFlutterDriver: Isolate found with number: 113550767492867
+VMServiceFlutterDriver: Isolate 113550767492867 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: B: sign in with spaces, then PIN reset typed in Myanmar digits
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: QA_NOTE:login phone field keeps: "09 790 917 051"
+flutter: QA_SHOT:auth3_B_login_spaces
+[runner] screenshot auth3_B_login_spaces.png
+-[WFIsolatedShortcutRunner init] Taking sandbox extensions for execution
+-[WFIsolatedShortcutRunner init]_block_invoke Sandbox extensions acquired
+Indexing for request: <WFToolKitIndexingRequest: 0x1024540c0>, changeset: .partial(updatedCount: 1 removedCount: 1 updated: ["com.zaypos.zayposApp"], removed: ["com.apple.siri.SiriCrisisAppIntentsExtension"], provenance: [VoiceShortcutClient.ToolKitIndexingReason.Changeset.Provenance.appIntentsChange(<LinkSnapshot> ["com.apple.BarcodeScanner", "com.apple.intelligenceplatform.IntelligencePlatform.IntelligencePlatformDataActionsAppIntentsExtension", "com.apple.intelligenceplatformd", "com.apple.siri.AudioAppIntentsExtension", "com.apple.siri", "com.apple.HearingApp", "com.apple.-FinanceKit-AppIntents", "com.apple.siri.-FlowToolTypes-AppIntents", "com.apple.ClassKit.ClassKitAppIntents", "com.apple.Maps", "com.apple.AppIntents", "com.apple.musicrecognition", "com.apple.contacts.autocomplete.appintentextension", "com.apple.-Photos-AppIntents", "com.apple.ShortcutsActions", "com.apple.MediaRemoteAppIntentsExtension", "com.apple.Contacts.AppIntents", "com.apple.reminders", "com.apple.MobileSMS", "com.apple.Preferences", "com.apple.gms<…>, priority: <decode: missing data>
+Type indexing (params + content items) took 0.000080s
+Action indexing took 0.000029s
+Indexed: 0
+Errored: 0
+Skipped: [:]
+Bundle cache: 0 hits, 0 misses
+Finished in 0.559590s
+-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
+flutter: QA_NOTE:B signed in: shop="QA r12b ကုန်စုံ"
+flutter: QA_SHOT:auth3_B_dashboard_after_login
+[runner] screenshot auth3_B_dashboard_after_login.png
+flutter: QA_NOTE:B products after first sync: [QA r12b ပုံပျက်, QA r12b HEIC, QA r12b ဆပ်ပြာ, ကော်ဖီမစ် 3 in 1, ကြက်သွန်နီ, ကြက်သွန်ဖြူ, ကြက်ဥ, ငံပြာရည်, ဆန် (ပေါ်ဆန်း), ဆပ်ပြာခဲ, ဆပ်ပြာမှုန့်, ဆား, ပဲဆီ, ဖယောင်းတိုင်, ဘီစကွတ်, မီးခြစ်, ရေသန့် 1L, လက်ဖက်ခြောက်, သကြား, သွားတိုက်ဆေး, အချိုမှုန့်, အချိုရည် ဗူး, အသင့်စား ခေါက်ဆွဲ]
+flutter: QA_SHOT:auth3_B_products_pulled
+[runner] screenshot auth3_B_products_pulled.png
+flutter: 00:21 +1: (tearDownAll)
+flutter: 00:21 +2: All tests passed!
+All tests passed.
+Leaving the application running.
+[runner] flutter exit code 0
