@@ -662,6 +662,7 @@ Format:
   local ledger rows are dropped (sync_store.dart applyResults "skipped"), so no stock is lost for good.
 - Blocks beta: no (needs a void within one failed sync of the sale on a flaky network; wrong only until the next good sync).
 - Status: fixed in 17180db — general rule: a pull never overwrites a row of an unsent or blocked outbox unit, any table (ledgers included); the skipped rows are pulled again (cursor rewound) once their unit is sent; a blocked unit keeps them protected. `m/pending_rows_pull_test.dart` (void fails to send → not undone, day totals stay correct, re-pull after the send; product + stock movement; rejected unit); QA TC-SYNC-NEW-17 passes unchanged.
+- QA round 11: **verified**, live included. TC-SYNC-NEW-17 (2 tests) PASS unchanged. `m/qa/qa_round11_pending_pull_test.dart` (9 tests, all PASS): ONE pending unit holding a row of each of the 14 synced tables (tenants, tenantFeatures, devices, products, variants, batches, serials, customers, sales, saleLines, payments, stockMovements, debtEntries, syncIssues) is untouched by a page of changed server copies, while a bystander row on the same page is merged; all 14 keys are remembered with the page start; after the send the cursor goes back and the server copies are taken (TC-SYNC-NEW-20). Rejected → protected; another unit's result does not rewind; "resend" keeps it protected; applied → rewind to the EARLIEST skipped page (TC-SYNC-NEW-20). Two units over one row, one applied and one rejected → no rewind until the second is sent (TC-SYNC-NEW-21). **The server kept the other phone's newer copy (last-writer-wins lost):** without the rewind the phone would keep its own copy for good; with it, it converges (TC-SYNC-NEW-21, and live). A row skipped on two pages of one pull and again in a later cycle gives one rewind to the earliest start and no duplicates (TC-SYNC-NEW-21). A file database closed and reopened between the skip and the send keeps the state (TC-SYNC-NEW-22). First download with a unit recorded meanwhile: the row is skipped, the push afterwards rewinds to "0", the next cycle downloads again; nothing is duplicated and the app opens once (TC-SYNC-NEW-22). voidSale "skipped" (the other phone voided first): A's own return rows are dropped, the re-pull gives B's voidedAt, one return, stock 5, today 0 (TC-SYNC-NEW-23). The screens while the void is unsent and after the send: dashboard 150 Ks / "1 ကြိမ်", sales history 150 Ks, sale detail "ပယ်ဖျက်ပြီး" (not "ပယ်ဖျက်မယ်"), report 150 Ks (TC-SYNC-NEW-24). Live `m/qa/live_qa_round11_test.dart` (TC-SYNC-NEW-27) PASS on the real server: `A while its edit is unsent: name=QA r11 Daw Mya (A) repullKeys=["customers:…"]` → `after A sent: A=(QA r11 Daw Mya (B), 09790011102, null, 20000) server=(same)`; void: `during: voidedAt=2026-11-14 16:31:06.966Z today=0 outbox=(voidSale) repullKeys has sale=true`; the end state on A and on B equals the server row for row (`sales: 1, saleLines: 1, payments: 1, stockMovements: 3, customers: 1, products: 3, syncIssues: 2`). Status line: accurate. Two notes, neither from this fix: (1) if both phones void the same sale and A's void is not sent yet, A shows the stock returned twice (`stock … 7 (true: 5)`) until A's push is answered "skipped". B's return row is not part of A's unit, so the rule does not cover it. This was already so before 17180db (by code reading) and it corrects itself. (2) A rewind on the first download re-downloads the whole shop once (correct, only slower).
 
 ## BUG-33 · TC-DEBT-NEW-6 · Low · Customer screen: the "ပြင်ဆင်ရန်" (edit) button does nothing — a customer can never be corrected
 - Found in: round 10 · `mobile/test/qa/qa_round10_customer_edit_test.dart` › "TC-DEBT-NEW-6 customer screen: the "ပြင်ဆင်ရန်" (edit)
@@ -677,6 +678,35 @@ Format:
 - Blocks beta: no (workaround: add the customer again; the old debt history stays on the old entry). Owner decision: add a small edit
   form (name, phone, address, credit limit, note) or hide the button for the beta.
 - Status: fixed in ae22869 — "ပြင်ဆင်ရန်" opens the Add Customer form in edit mode (name, phone, address, credit limit, note; current balance next to the limit; a lower limit is allowed; no opening balance). Same rules as Add plus a duplicate-phone warning (new on Add too). One upsertCustomer unit, whole row. `m/customer_edit_test.dart`; QA test check changed from "route changed" to "edit form opened" (owner approved, see commit).
+- QA round 11: **verified**, with one new Low gap (BUG-34). TC-DEBT-NEW-6 PASS with the developer's edited check. QA reviewed that edit and accepts it. The claim is true: `uri before=/customers/<id> after=/customers/<id> top=/customers/<id>/edit (ImperativeRouteMatch)` (`m/qa/qa_round11_customer_edit_test.dart` › "TC-DEBT-NEW-6 review …" now asserts the pushed route is on top). `m/qa/qa_round11_customer_edit_test.dart` TC-DEBT-NEW-7 (3 tests, PASS): ဦးသန်းထွန်း (owes 96,000) shows "96,000 Ks" next to the limit; a limit of 50,000 is saved; at checkout on credit the warning shows the new limit and "96,600"; clearing it removes the warning. The seeded placeholder phone "09 7xx xxx 102" can be kept unchanged (no error, no warning); typing it for another customer warns with "“ဒေါ်ခင်မာ”"; a Myanmar-digit phone is stored as 0-9 and matched. No English on the form, its errors or the dialog. Live (TC-SYNC-NEW-27): B's edit (name, phone, address cleared, limit 50,000 → 20,000) reaches A. Developer evidence re-run: `m/customer_edit_test.dart` 3/3. Gap: the duplicate-phone check compares the exact text, so "09 790 011 002" or "09-790-011-002" against "09790011002" gives no warning → BUG-34.
+
+## BUG-34 · TC-DEBT-NEW-8 · Low · Duplicate-phone warning misses the same number typed with spaces or dashes
+- Found in: round 11 · `mobile/test/qa/qa_round11_customer_edit_test.dart` › "TC-DEBT-NEW-8 the same number typed with spaces …"
+- Steps to reproduce: customer ဒေါ်မြ has phone "09790011002" → edit another customer (or Add Customer) → type "09 790 011 002"
+  (the field's own hint is "09 xxx xxx xxx"; the sample customers are stored with spaces) or "09-790-011-002" → "သိမ်းမယ်".
+- Expected: owner: "Same validation as add (duplicate phone warning)". It is the same phone number, so "ဒီ ဖုန်းနံပါတ် ရှိပြီးသားပါ"
+  should show (warn, don't block).
+- Actual: `Expected: (true, true)  Actual: (false, false)`. No dialog on Edit or on Add; both numbers are saved and the shop now has two
+  customers with one number.
+- Suspected area: `mobile/lib/features/customers/presentation/add_customer_screen.dart` `_confirmDuplicatePhone`: compares
+  `limits.normalize('customers.phone', …)`, which only trims, maps Myanmar digits and drops non-ASCII. Spaces, dashes and a "+95"
+  prefix stay.
+- Blocks beta: no (a warning only; nothing is lost).
+- Status: open
+
+## BUG-35 · TC-RPT-NEW-1 · Low · Report screen: the 7-day chart breaks when the last 7 days have no sales (NaN bar heights)
+- Found in: round 11 (while checking day totals for BUG-32) · `mobile/test/qa/qa_round11_sync_history_test.dart` › "TC-RPT-NEW-1 …"
+- Steps to reproduce: a new shop (or one whose sales of the last 7 days are all voided) → Reports ("အစီရင်ခံစာ").
+- Expected: the chart shows 7 empty bars with "0", like any other day without sales.
+- Actual: 14 layout errors: `BoxConstraints has NaN values in minHeight and maxHeight` (thrown building the bar Container) and
+  `A RenderFlex overflowed by 99868 pixels on the bottom` (report_screen.dart:221). A debug build shows error boxes in the chart.
+  The release-build look is not known (asserts are off); the owner should check it on a phone (MANUAL list).
+- Suspected area: `mobile/lib/features/reports/presentation/report_screen.dart` `_WeekChart.build`:
+  `height: (days[i].amount / max * 120)` with `max == 0` → 0/0. This was there before this round; no earlier test opened the report
+  with an empty week.
+- Blocks beta: no (data and totals are correct; only the chart). New shops see this screen on day 1, so it is worth fixing before
+  the beta.
+- Status: open
 
 ---
 
@@ -733,6 +763,17 @@ two things are new (all proven by round-10 tests):
 3. Sync texts: the rejected-unit labels and the sync error texts are Burmese now (BUG-29, BUG-30 fixed; TC-UX-NEW-8, -9).
 4. **New:** customers cannot be edited after they are saved (BUG-33): a wrong phone number or credit limit means adding the customer
    again.
+
+QA round 11 check of this section (dbf2b5f): **accurate**. The round-10 additions 1 and 4 are out of date, and there are three
+additions (all proven by round-11 tests unless marked):
+1. Duplicate barcodes: correct. The server closes the issue after the barcode is cleared, changed or deleted, on every phone, and keeps
+   it in "ပြီးသွားတဲ့ ကိစ္စများ" (TC-SYNC-NEW-25..27, live). A later duplicate is a new entry. Addition (by code reading): it closes only
+   when a product change reaches the server, so an entry whose duplicate was fixed before this server version stays open until any
+   product in that shop is edited and synced, or until "စစ်ပြီး" is tapped.
+2. Customers can be edited now (BUG-33 fixed). Addition: the duplicate-phone warning does not see the same number written with spaces
+   or dashes (BUG-34).
+3. Addition: if two phones void the same sale and one of them is offline, that phone shows the stock returned twice until it syncs
+   (TC-SYNC-NEW-23; it corrects itself).
 
 ---
 
