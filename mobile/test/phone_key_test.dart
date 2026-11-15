@@ -40,6 +40,20 @@ void main() {
       expect(samePhone('09790011002', '09790011003'), isFalse);
     });
 
+    test('BUG-36: a search query is partial — a leading "959" stays digits; only "+95" becomes "0"', () {
+      expect(phoneSearchKey('959123'), '959123');
+      expect(phoneSearchKey('959 123'), '959123');
+      expect(phoneSearchKey('၉၅၉-၁၂၃'), '959123');
+      expect(phoneSearchKey('+95977'), '0977');
+      expect(phoneSearchKey('+95 9-77'), '0977');
+      expect(phoneSearchKey('0977'), '0977');
+      final stored = phoneKey('09 777 959 123');
+      for (final q in ['959123', '959 123', '0977', '+95977', '777.959']) {
+        expect(stored.contains(phoneSearchKey(q)), isTrue, reason: q);
+      }
+      expect(phoneKey('959777959123'), '09777959123', reason: 'full numbers keep the full normalizer');
+    });
+
     test('normalizeMmPhone (OTP sign-in) is built on the same key', () {
       for (final input in ['09.790.011.002', '+၉၅၉၇၉၀၀၁၁၀၀၂', '9 790 011 002', '959-790-011-002']) {
         expect(normalizeMmPhone(input), '+959790011002', reason: input);
@@ -139,12 +153,22 @@ void main() {
         await tester.tap(tabs.first); // customers without debt are on the "all" tab
         await tester.pumpAndSettle();
       }
-      for (final q in ['09790011002', '+959790011', '959-790-011', '၀၉၇၉၀ ၀၁၁', '790.011']) {
+      for (final q in ['09790011002', '+959790011', '+95 9-790-011', '၀၉၇၉၀ ၀၁၁', '790.011']) {
         await tester.enterText(find.byType(EditableText).first, q);
         await tester.pumpAndSettle();
         expect(find.textContaining('ဒေါ်မြ ဖုန်းတူ'), findsOneWidget, reason: q);
         expect(find.textContaining('ကိုဘ ဖုန်းကွဲ'), findsNothing, reason: q);
       }
+      // BUG-36: partial numbers that start with "959"
+      await add(c, 'ကိုစိုး', '09 777 959 123');
+      for (final q in ['959123', '0977', '+95977']) {
+        await tester.enterText(find.byType(EditableText).first, q);
+        await tester.pumpAndSettle();
+        expect(find.textContaining('ကိုစိုး'), findsOneWidget, reason: q);
+      }
+      await tester.enterText(find.byType(EditableText).first, '959');
+      await tester.pumpAndSettle();
+      expect(find.textContaining('ဒေါ်မြ ဖုန်းတူ'), findsNothing, reason: '"959" alone is not "09" (it lists only numbers containing 959)');
       await tester.enterText(find.byType(EditableText).first, 'ကိုဘ');
       await tester.pumpAndSettle();
       expect(find.textContaining('ကိုဘ ဖုန်းကွဲ'), findsOneWidget, reason: 'names still match');

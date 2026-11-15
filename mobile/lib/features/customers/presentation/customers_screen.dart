@@ -26,9 +26,10 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
   _Tab _tab = _Tab.debt;
   String _query = '';
 
-  /// "09 790-011" and "+959790011" find the customer stored as "09790011002" (BUG-34).
+  /// "09 790-011" and "+959790011" find the customer stored as "09790011002" (BUG-34); "959123" finds
+  /// "09 777 959 123" (BUG-36: the query is partial, see [phoneSearchKey]).
   bool _phoneMatches(String phone) {
-    final q = phoneKey(_query);
+    final q = phoneSearchKey(_query);
     return q.isNotEmpty && phoneKey(phone).contains(q);
   }
 
