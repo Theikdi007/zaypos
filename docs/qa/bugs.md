@@ -920,6 +920,17 @@ Format:
   (`VoidedStamp`) across a voided sale's receipt. Share and save both render `ReceiptCard`, so every image of a voided sale
   carries the stamp. Tests: `m/receipt_voided_test.dart` (3). In the real PNG the valid receipt has 0 red pixels and the voided one
   has 40,767 of 1080 × 1098. The sale screen's share and the receipt screen's share and save are all stamped.
+- QA round 14: **verified** on the iPhone 17 simulator (3f89623, real share_plus + gal, Photos add permission granted).
+  `m/integration_test/qa/r14_bug45_voided_test.dart` (QA_STEP = valid | void_detail | void_receipt), logs `evidence/round-14/logs/r14_bug45_A_*.log`.
+  The PNGs the app wrote were copied off the simulator (Photos DCIM and the app's Caches folder), and the stamp's red (#B91C1C ± 40)
+  was counted on the host:
+  `r14_bug45_valid_saved_E-0118.png 1080x765 red=0`, `r14_bug45_valid_shared_E-0118.png red=0`,
+  `r14_bug45_void_detail_shared_E-0117.png red=38194 (4.62%) bbox=(192,195)-(887,569)` (sale screen → share),
+  `r14_bug45_void_receipt_shared_E-0117.png red=38194` (receipt screen → share), `r14_bug45_void_receipt_saved_IMG_0010.png red=38194`
+  (receipt screen → save, Photos 9 → 10). The stamp "ပယ်ဖျက်ပြီး" is large, tilted and readable; the shop, receipt no., total and
+  "ကျေးဇူးတင်ပါတယ်" stay readable around it. On screen: the voided receipt screen shows 1 stamp widget, the valid one 0
+  (`r14_bug45_voided_receipt_screen.png`, `r14_bug45_valid_receipt_screen.png`). Snackbar "သိမ်းပြီးပါပြီ" both times, no failure
+  message, no framework error. TC-SALE-NEW-1 → PASS.
 
 ## BUG-46 · TC-UX-NEW-10 · Medium (owner; QA filed it Low) · Other buttons that look ready still do nothing (contact picker, debt "ဖုန်းခေါ်ရန်" / "Viber သတိပေး", Reports "Excel", checkout transfer photo)
 - Found in: round 13 · `mobile/test/qa/qa_round13_dead_buttons_test.dart::TC-UX-NEW-10 …` (the fixed "ပုံ သိမ်းမယ်" is the positive
@@ -955,6 +966,33 @@ Format:
     platform-channel reply needs real time (`runAsync`), not the fake clock. With real-time waits the same taps show
     "ဖုန်းခေါ်လို့ မရပါ။" and "သတိပေးစာ ပို့လို့ မရပါ။ ထပ်ကြိုးစားပါ။" (no plugin in tests). `m/beta_buttons_test.dart` uses a fake
     outlet instead. Android: a `tel:` DIAL entry is added to `<queries>` in the manifest.
+- QA round 14: **verified** (3f89623). iPhone 17 simulator, shop A, real url_launcher and share_plus; the debt outlet was only
+  wrapped to record what the real plugin was asked and answered (`m/integration_test/qa/r14_debt_actions_test.dart`,
+  `evidence/round-14/logs/r14_debt_A.log`, PASS):
+  - "ဖုန်းခေါ်ရန်" for QA r12b ဒေါ်ခင်မြင့်မြင့်သန်း (phone "09 790 011 077") → `outlet.call(tel:09790011077) → false (real
+    url_launcher)` and the snackbar "ဖုန်းခေါ်လို့ မရပါ။" (`r14_debt_call_after.png`). The simulator has no Phone app, so iOS
+    refuses to open `tel:`; the iOS log (`syslog_tel`) shows no openURL line. This is the expected simulator result: the right
+    URL is launched and the app's failure path works. The dialer itself is MANUAL (real phone).
+  - No phone (new customer "QA r14 ဖုန်းမရှိ"): the hint "ဖုန်းနံပါတ် မရှိလို့ ခေါ်လို့ မရပါ" shows under the name, the icon is grey;
+    semantics `label="ဖုန်းခေါ်ရန်" hint="ဖုန်းနံပါတ် မရှိလို့ ခေါ်လို့ မရပါ" isButton=true enabled=isFalse tap=false`; a tap
+    calls nothing and shows nothing; a long press shows the hint as a tooltip (`r14_debt_nophone*.png`). VoiceOver is not
+    available on the simulator, so what it reads aloud is MANUAL; the semantics node it reads is as specified.
+  - "Viber သတိပေး" opens the iOS share sheet (text preview, Reminders / Copy / Save to Files; Viber is not installed) with
+    `မင်္ဂလာပါ QA r12b ဒေါ်ခင်မြင့်မြင့်သန်း (…) ⏎ QA r12b ကုန်စုံ မှ အကြွေး သတိပေးစာ ဖြစ်ပါတယ်။ ⏎ ၁၅ နိုဝင်ဘာ ၂၀၂၆ နေ့အထိ
+    ပေးရန်ကျန်ငွေ 45,000 Ks ရှိပါတယ်။ ⏎ အဆင်ပြေတဲ့အချိန် ပေးချေပေးပါ။ ကျေးဇူးတင်ပါတယ်။` (shop, customer, balance, today: all
+    true; `r14_debt_viber_share_sheet.png`).
+  - Hidden controls: absent, and the screens around them are intact (`m/qa/qa_round13_dead_buttons_test.dart` TC-UX-NEW-10 PASS: the
+    phone field now spans the name field's width, 36..354; no layout exception for KBZPay / WavePay; "ယနေ့" has no tap handler and is
+    not a semantics button). Simulator screenshots `r14_sweep_screen_{add_customer,reports,checkout_KBZPay,checkout_WavePay,sales}.png`.
+  - Guard `m/no_dead_handlers_test.dart`: right for today's code (QA's wider scan finds nothing either), but too narrow to keep it
+    that way. It checks only Flutter's own names (onPressed, onTap, …), while the app passes taps as `onBack` (13×), `onKey` (7×),
+    `onPick`, `onScan`, `onEdit`, `onRestock`, `onResend`, `onReverse` and Switch / tab `onChanged`. It also misses an empty method
+    passed by name (`onTap: _noop`) and log-only bodies: 7 of 7 such snippets pass it (`m/qa/qa_round14_handlers_test.dart`,
+    TC-UX-NEW-12, which scans every `on<Name>:` and passes). No static scan sees a control that has no handler at all (BUG-49, BUG-50).
+  - Simulator sweep (TC-UX-NEW-11, `m/integration_test/qa/r14_sweep_test.dart`, iPhone 17e): 30 screens and every dialog / sheet
+    they open, 1,186 taps. **No dead control** in the BUG-40/46 sense. Every NOTHING is by design (the already selected tab / chip,
+    "0" / "00" / "⌫" on an empty amount, the quantity sheet's "1" over a prefilled 1) or a boundary no-op (BUG-50). Separate findings:
+    BUG-47 … BUG-50 under "Found in round 14".
 
 ## Beta backlog: hidden for the beta (BUG-46, owner 2026-11-15)
 
@@ -967,6 +1005,72 @@ with a working implementation and a test.
   decision on whether the photo is stored or synced (see the photos limitation). `pos/presentation/checkout_screen.dart`.
 - **Sales history: date picker behind "ယနေ့".** It is a label for now, because the list shows today only.
   `sales/presentation/sales_history_screen.dart`.
+
+QA round 14 check of this list: **accurate**. All four are gone from the screens on the simulator (sweep TC-UX-NEW-11: none of
+them is among the tappables of Add Customer, Reports, Checkout KBZPay / WavePay or Sales) and in `m/qa/qa_round13_dead_buttons_test.dart`.
+One remark: "ယနေ့" kept the bordered box and calendar icon of the old button, so it still looks tappable (BUG-49).
+
+## Found in round 14 (2026-11-15, fix/beta-buttons @ 3f89623)
+
+## BUG-47 · TC-DEBT-NEW-12 · Low · "Viber သတိပေး" sends a debt reminder of "0 Ks" to a customer who owes nothing
+- Found in: round 14 · `mobile/test/qa/qa_round14_debt_test.dart::TC-DEBT-NEW-12 …`; iPhone 17 simulator `r14_debt_nophone.png`
+  (customer with 0 Ks, the button is enabled)
+- Steps to reproduce: Customers → "အားလုံး" → a customer with no debt (or one who overpaid) → "Viber သတိပေး".
+- Expected: no debt reminder for a balance of 0 or less: the button is hidden or disabled (like "ဖုန်းခေါ်ရန်" without a phone).
+- Actual: `TC-DEBT-NEW-12 balance=0 button shown=true shared=[မင်္ဂလာပါ QA r14 အကြွေးမရှိ ⏎ … မှ အကြွေး သတိပေးစာ ဖြစ်ပါတယ်။ ⏎
+  ၁၅ နိုဝင်ဘာ ၂၀၂၆ နေ့အထိ ပေးရန်ကျန်ငွေ 0 Ks ရှိပါတယ်။ …]`. After an overpayment the text would name a negative amount
+  (TC-DEBT-04: the balance can go negative).
+- Suspected area: `customers/presentation/debt_screen.dart` (the "Viber သတိပေး" button has no balance condition), `debt_actions.dart`
+  `debtReminderText`.
+- Blocks beta: no. The shop sees the text in the share sheet before sending it.
+
+## BUG-48 · TC-UX-NEW-13 · Low · Screen readers: enabled icon buttons, the bottom navigation, the PIN / amount keypad and other buttons have no "activate" action
+- Found in: round 14 · `mobile/test/qa/qa_round14_debt_test.dart::TC-UX-NEW-13 …`; simulator semantics audit in
+  `r14_sweep_test.dart` (`SEMA|…` lines in `evidence/round-14/logs/r14_sweep_B_part*.log`); `r14_debt_actions_test.dart` log line
+  `call button semantics: … enabled=Tristate.isTrue tap=false`
+- Steps to reproduce: turn on TalkBack (Android) or VoiceOver (iOS) → open a debtor → focus "ဖုန်းခေါ်ရန်" → double-tap. Same for the
+  bottom navigation items, the PIN keypad digits, the POS amount keypad, "Barcode ဖတ်မယ်", "Stock ဖြည့်မယ်", the checkout quantity
+  buttons and the back button.
+- Expected: an enabled button can be activated with the screen reader (its semantics node has the tap action).
+- Actual: `debtor "ဖုန်းခေါ်ရန်" (phone present): label="ဖုန်းခေါ်ရန်" button=true enabled=Tristate.isTrue tap=false`,
+  `bottom nav "ပစ္စည်း": label="ပစ္စည်း" button=true … tap=false`. They are wrapped in `Semantics(button: true, excludeSemantics: true)`
+  without `onTap`, so the InkWell's tap action is dropped. Simulator audit on all 30 swept screens (`SEMA_DEAD` lines): the 5 bottom
+  nav items, back "နောက်သို့", close "ပိတ်ရန်", the dashboard settings gear ("… ဆက်တင်"), keypad 0-9 / 00 / "ဖျက်ရန်" (POS quick sale,
+  restock and quantity sheets; the PIN keypad uses the same `NumericKeypad`), checkout "လျှော့ရန်" / "တိုးရန်" /
+  "အရေအတွက် … ပြောင်းရန်", "Barcode ဖတ်မယ်", "Stock ဖြည့်မယ် · …", the debtor's "ဖုန်းခေါ်ရန်". Also "Viber သတိပေး" and the other
+  PrimaryButtons are not announced as buttons (`button=false`; they do have the tap action).
+- Suspected area: `core/widgets/common.dart` `AppIconButton`, `core/widgets/app_bottom_nav.dart`, `core/widgets/numeric_keypad.dart`,
+  `pos_screen.dart` scan button, `products_screen.dart` restock, `checkout_screen.dart` qty / step buttons, `PrimaryButton`.
+- Blocks beta: no for sighted users (a finger tap works). iOS VoiceOver may fall back to a simulated touch; Android TalkBack usually
+  does not. MANUAL check on a real phone; if TalkBack cannot unlock the app or switch tabs, rate it Medium.
+
+## BUG-49 · TC-UX-NEW-14 · Low · Things that look like their tappable twins do nothing (dashboard debt card, dashboard recent sales, sales "ယနေ့")
+- Found in: round 14 · `mobile/test/qa/qa_round14_lookalike_test.dart::TC-UX-NEW-14 …`; simulator screenshots
+  `r14_sweep_screen_dashboard.png`, `r14_sweep_screen_sales.png`
+- Steps to reproduce: Dashboard → tap "အကြွေးရရန်" (next to "Stock နည်းနေသည်"); tap a row under "နောက်ဆုံး အရောင်းများ". Sales → tap
+  "ယနေ့".
+- Expected: the owner's rule for BUG-40/46: what looks like a control does something, or does not look like one. E.g. the debt card
+  opens Customers (debtors), a recent sale opens the sale (as on the Sales screen).
+- Actual: `twin "Stock နည်းနေသည်" card: / → /products?filter=low`, `"အကြွေးရရန်" card: / → /`, `recent sale row: / → /`. "ယနေ့" is a
+  bordered box with a calendar icon, drawn exactly like the old button (BUG-46 removed only its handler).
+- Suspected area: `dashboard/presentation/dashboard_screen.dart` (`debtCard` has no `onTap`; `SaleRow` without `onTap`),
+  `sales_history_screen.dart` `_TodayLabel`.
+- Blocks beta: no. They are display elements without an action label; QA rates them Low. Owner's call if "looks tappable" counts as a
+  control under the BUG-46 rule.
+
+## BUG-50 · TC-UX-NEW-15 · Low · Buttons that silently do nothing in their "not yet" state (POS "ငွေရှင်းမယ်" with an empty cart, quick sale "+ ခြင်းထဲထည့်မယ်" at 0 Ks, checkout "−" at 1)
+- Found in: round 14 · `mobile/test/qa/qa_round14_lookalike_test.dart::TC-UX-NEW-15 …`; simulator sweep `r14_sweep_test.dart`
+  (`logs/r14_sweep_B_part1.log`, `logs/r14_sweep_B_part4_checkout.log`), screenshot `r14_sweep_DEAD_pos_quick_38.png`
+- Steps to reproduce: POS with an empty cart → tap the green "ငွေရှင်းမယ် ›" in the dark cart bar. POS "အမြန်ရောင်း" with the amount at 0
+  → "+ ခြင်းထဲထည့်မယ်". Checkout with one line at quantity 1 → "−".
+- Expected: a control that cannot act yet looks disabled, or says why (owner's rule: no control that looks ready and does nothing).
+- Actual: `TC-UX-NEW-15 empty cart: onPressed=null (disabled) dimWhenDisabled=false dimmed=false`: the disabled button is drawn in full
+  colour (PrimaryButton dims only with `dimWhenDisabled`). Sweep: `SWEEP|pos_quick|L1|+ ခြင်းထဲထည့်မယ်|NOTHING|20,627 350x48|` (enabled,
+  `_addQuick` returns at 0), `SWEEP|checkout_cash|L1|−|NOTHING|164,147 36x36|` (enabled, `setQty` only above 1), same on KBZPay, WavePay
+  and အကြွေး. No message, no visual change.
+- Suspected area: `core/widgets/primary_button.dart` (`dimWhenDisabled` defaults to false), `pos/presentation/pos_screen.dart`
+  `_addQuick` and the cart bar, `pos/presentation/checkout_screen.dart` `_stepBtn` "−".
+- Blocks beta: no. Each is the boundary state of a working control and the screen shows why (0 Ks, 0 items, quantity 1).
 
 ---
 
