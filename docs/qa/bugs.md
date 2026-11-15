@@ -731,7 +731,10 @@ Format:
 - Suspected area: `mobile/lib/features/customers/presentation/customers_screen.dart` `_phoneMatches` runs the QUERY through
   `phoneKey`, which rewrites a leading "959" as "09" (international prefix) even when the query is a partial number.
 - Blocks beta: no (search by name or by other digits still works).
-- Status: open (beta backlog)
+- Status: fixed (developer, 2026-11-15) — the search QUERY goes through `phoneSearchKey` (`mobile/lib/core/utils/phone.dart`):
+  Myanmar digits → 0-9, spaces/dashes/dots/brackets dropped, and only an explicit "+95" becomes "0" ("+95977" → "0977"); a leading
+  "959" stays digits. The stored phone and full-number comparisons (duplicate warning, sign-in) keep `phoneKey`. Tests:
+  `m/phone_key_test.dart` ("959123" finds "09 777 959 123"; "0977" and "+95977" still find it; "959" alone is not "09").
 
 ## BUG-37 · TC-AUTH-NEW-2 · Low · Server accepts phone numbers in other scripts' digits and stores a non-ASCII "+959…"
 - Found in: round 12 · `backend/tests/ZayPOS.QA.Tests/QaRound12Tests.cs` › `TC_AUTH_NEW_2_…` (4 tests)
@@ -772,9 +775,11 @@ Format:
   ပြန်ဝယ်ရင် 'Stock ဖြည့်မယ်' ကနေ လက်ခံပါ" (no "ပစ္စည်းအသစ်" offer; a product barcode with the same code still wins); a trade-in is
   received only with "Stock ဖြည့်မယ်". Unknown IMEIs and IMEIs of deleted products still go to "ပစ္စည်းအသစ် ထည့်မယ်". Only in shops
   with IMEI tracking on.
-- **Two phones voiding the same sale while one is offline** (owner, 2026-11-15): the offline phone shows the stock returned twice
-  (e.g. 1 sold, voided on both → +2 instead of +1) until its next sync. The server applies the void once, and after the sync the phone
-  takes the server's copy and shows the right stock (TC-SYNC-NEW-23). Nothing is lost; tell shops that only one phone should void a sale.
+- **Two phones voiding the same sale while one is offline** (owner, 2026-11-15; wording corrected per QA round 12, TC-SYNC-NEW-28):
+  while that phone is offline its stock is right. After it comes back online, for up to 10 minutes or until a manual sync
+  ("ယခု sync လုပ်မယ်" in Settings, or pull-to-refresh on the dashboard / sales list), it shows the stock returned twice (e.g. 1 sold,
+  voided on both → +2 instead of +1). Then its void is sent, the server applies it only once, and the phone shows the right stock
+  (TC-SYNC-NEW-23). Today's total is right the whole time. Nothing is lost; tell shops that only one phone should void a sale.
 - **Sync issue texts** (BUG-26, 7df5f1f): the app builds them in Burmese from the server's structured fields. Issues raised before
   this server version have no fields and show a shorter Burmese sentence (e.g. "ဒီ Barcode ကို ပစ္စည်းတွေမှာ သုံးထားပါတယ်…" without
   the names).
