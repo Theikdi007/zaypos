@@ -697,6 +697,7 @@ Format:
   re-written with spaces is not a change"), customer search, the sign-in same-shop check, and `normalizeMmPhone` (OTP) is built on it.
   The server's `PhoneNumbers.Normalize` now maps Myanmar digits too (before, .NET's `\d` let them through unconverted). Stored phones
   are unchanged (kept as typed). Tests: `m/phone_key_test.dart` (7), `b/…/AuthRulesTests.cs` (+4 cases); QA's TC-DEBT-NEW-8 passes.
+- QA round 12: **verified**, with two new Low gaps (backlog BUG-36, BUG-37). TC-DEBT-NEW-8 PASS. `m/qa/qa_round12_phone_test.dart` › TC-DEBT-NEW-10 PASS: the warning also shows when the OTHER customer is stored as "+95 9 790 011 002" or "09 (790) 011-003" and the new one is typed "09790011002", "၀၉၇၉၀၀၁၁၀၀၂" or "959.790.011.003"; the own number re-typed as "+95 …" gives no warning. Search (TC-DEBT-NEW-9): 11 of 14 partial queries find the customer ("0979001", "+95 9 790", "၀၉၇၉၀ ၀၁၁", "011002", "+95 9 420 123 456", "၄၅၆" …); the 3 that start with "959" do not → BUG-36 (a regression: 2 of them worked at 16aaa33). Sign-in, live on the real API (`m/qa/live_qa_round12_test.dart`, TC-AUTH-NEW-3, PASS): OTP asked in Myanmar digits, register typed "09.790.917.041", phone B signs in with "+95 9 790 917 041", phone A signs in again in Myanmar digits while it has an UNSENT unit (same shop → allowed, both products kept), PIN reset asked "959-790-917-041" and done in Myanmar digits, phone C signs in dotted with the new PIN (old PIN refused); owner phone stored "+959790917041"; a raw register-OTP in Myanmar digits → `409 phone_registered`. Server (`b/ZayPOS.QA.Tests/QaRound12Tests.cs` › TC_AUTH_NEW_1, PASS): one account and one 3-per-hour OTP limit across Myanmar-digit, dotted, spaced and dashed forms; Users.Phone ASCII. Gap: other-script digits (Shan ႐-႙, Arabic-Indic, full-width) still pass .NET's `\d` and become a non-ASCII "+959…" → BUG-37. Developer evidence re-run: `m/phone_key_test.dart` 7/7, `b/…/AuthRulesTests.cs` PASS.
 
 ## BUG-35 · TC-RPT-NEW-1 · Low · Report screen: the 7-day chart breaks when the last 7 days have no sales (NaN bar heights)
 - Found in: round 11 (while checking day totals for BUG-32) · `mobile/test/qa/qa_round11_sync_history_test.dart` › "TC-RPT-NEW-1 …"
@@ -713,6 +714,47 @@ Format:
 - Status: fixed (developer, 2026-11-15) — `_WeekChart` never divides by a zero week: bars are flat (height 0) and
   "ရောင်းအား မရှိသေးပါ" shows over the chart; the semantics label says the same. Tests: `m/report_empty_week_test.dart` (2; the
   empty-week test fails without the fix); QA's TC-RPT-NEW-1 passes.
+- QA round 12: **verified**. TC-RPT-NEW-1 PASS. `m/qa/qa_round12_report_test.dart`: a week where only some days have sales (3 days ago 20,000; 2 days ago 60,000 voided; today 40,000) → no layout error, no empty message, bars `[0, 0, 0, 60, 0, 0, 120]`, labels `[0, 0, 0, 20, 0, 0, 40]`, the voided day flat, total 60,000 Ks / "2 ကြိမ်" (TC-RPT-NEW-2). A week whose sales were all voided, plus one sale 8 days ago → "ရောင်းအား မရှိသေးပါ", 7 flat bars labelled "0", the semantics label says so, on the "ဒီနေ့", "ဒီလ" and "ဒီအပတ်" tabs; 0 Ks / "0 ကြိမ်"; the first new sale removes the message and gives `[0, 0, 0, 0, 0, 0, 120]` (TC-RPT-NEW-3). Developer evidence re-run: `m/report_empty_week_test.dart` 2/2. Found next to it (it was already there before the fix): the screen-reader label says "ယနေ့နေ့" → backlog BUG-38.
+
+---
+
+## Beta backlog (Low, found in round 12; do not block the beta)
+
+## BUG-36 · TC-DEBT-NEW-9 · Low · Customer search: a number typed from its middle that starts with "959" finds nothing (regression of 205c5d7)
+- Found in: round 12 · `mobile/test/qa/qa_round12_phone_test.dart` › "TC-DEBT-NEW-9 customer search with partial numbers …"
+- Steps to reproduce: customer ကိုစိုး with phone "09 777 959 123" → Customers → "အားလုံး" → search "959123" (or "959 123", "၉၅၉၁၂၃").
+- Expected: the customer is found; "959123" is part of the number (phone.dart: "a partial number typed into search is returned with
+  only those steps applied"). At 16aaa33 (before the fix) "959123" and "959 123" found him.
+- Actual: `TC-DEBT-NEW-9 queries that do not find the customer: [959123, 959 123, ၉၅၉၁၂၃]` (the other 11 queries work). The same test
+  run on an export of 16aaa33 misses `[၉၅၉၁၂၃, 0979001, ၀၉၇၉၀ ၀၁၁, 0942012, +95 9 420 123 456]`, so 205c5d7 fixed five and broke two.
+  Also, the query "959" alone becomes "09" and lists every customer.
+- Suspected area: `mobile/lib/features/customers/presentation/customers_screen.dart` `_phoneMatches` runs the QUERY through
+  `phoneKey`, which rewrites a leading "959" as "09" (international prefix) even when the query is a partial number.
+- Blocks beta: no (search by name or by other digits still works).
+- Status: open (beta backlog)
+
+## BUG-37 · TC-AUTH-NEW-2 · Low · Server accepts phone numbers in other scripts' digits and stores a non-ASCII "+959…"
+- Found in: round 12 · `backend/tests/ZayPOS.QA.Tests/QaRound12Tests.cs` › `TC_AUTH_NEW_2_…` (4 tests)
+- Steps to reproduce: `POST /api/v1/auth/otp {"phone":"09႗႙႐႐႑႑႐႐႒","purpose":"register"}` (Shan digits U+1090–1099, which are in the
+  Myanmar Unicode block), or "+959" + Arabic-Indic digits, or "09" + full-width digits.
+- Expected: the same rule as the app (the doc comment says "the same rules as the app's phoneKey/normalizeMmPhone"): the app's Dart
+  `\d` is 0-9 only and refuses these, so the server should refuse them (400) or map them to 0-9.
+- Actual: `Normalize("09႗႙႐႐႑႑႐႐႒") returned "+959႗႙႐႐႑႑႐႐႒"`, same for Arabic-Indic and full-width; the API answers 202 and "sends"
+  an SMS to `+959႗႙႐႐႑႑႐႐႒`; a shop could be registered under that number.
+- Suspected area: `backend/src/ZayPOS.Application/Auth/AuthRules.cs` `PhoneNumbers.Subscriber()` — `^\d{7,9}$` without
+  `RegexOptions.ECMAScript` matches every Unicode decimal digit; `ToAsciiDigits` maps only ၀-၉. Already so before 205c5d7.
+- Blocks beta: no (the app never sends such a number; only a hand-made API call).
+- Status: open (beta backlog)
+
+## BUG-38 · TC-RPT-NEW-4 · Low · Report chart screen-reader label: "အမြင့်ဆုံးက ယနေ့နေ့ 40K" and short weekday names
+- Found in: round 12 · `mobile/test/qa/qa_round12_report_test.dart` › "TC-RPT-NEW-4 …"
+- Steps to reproduce: a sale today only → Reports → TalkBack / VoiceOver on the 7-day chart.
+- Expected: "… အမြင့်ဆုံးက ယနေ့ 40K" (ယနေ့ = today); on other days the full weekday name ("သောကြာနေ့").
+- Actual: `today peak="… အမြင့်ဆုံးက ယနေ့နေ့ 40K"`, `other peak="… အမြင့်ဆုံးက သောနေ့ 90K"`. The label adds "နေ့" to the chart's short
+  axis names. Already so before d8cb91e.
+- Suspected area: `mobile/lib/features/reports/presentation/report_screen.dart` `_WeekChart` semantics label (`${peak.day}နေ့`).
+- Blocks beta: no (screen readers only).
+- Status: open (beta backlog)
 
 ---
 
@@ -783,6 +825,17 @@ additions (all proven by round-11 tests unless marked):
    or dashes (BUG-34).
 3. Addition: if two phones void the same sale and one of them is offline, that phone shows the stock returned twice until it syncs
    (TC-SYNC-NEW-23; it corrects itself).
+
+QA round 12 check of this section (ee662f3): **accurate**; the round-11 addition 2 (BUG-34) is out of date. One correction to the new
+"two phones voiding" bullet (proven by `m/qa/qa_round12_void_twice_test.dart`, TC-SYNC-NEW-28):
+1. **While the phone is offline its stock is right** (1 sold of 5, voided: 5). The double count starts when it comes back **online**:
+   its earlier failed sends put it in a push back-off (5 s … 10 min) and the automatic sync (back online, the timer) only downloads,
+   which brings the other phone's return: 6. It stays 6 for automatic syncs until the back-off ends (still 6 nine minutes later),
+   then the void is sent, answered "skipped" and the phone shows 5 with one return. A manual sync ("ယခု sync လုပ်မယ်" in Settings, or pull-to-refresh on the dashboard / sales list) fixes it at
+   once. Suggested wording: "after it comes back online, for up to 10 minutes or until a manual sync". Today's total is right (0)
+   the whole time. The example "+2 instead of +1" is right for 1 sold.
+2. Customers: the duplicate-phone warning now sees spaces, dashes, dots, "+95 9 …" and Myanmar digits (BUG-34 fixed). Customer
+   search misses partial numbers that start with "959" (BUG-36, backlog).
 
 ---
 
