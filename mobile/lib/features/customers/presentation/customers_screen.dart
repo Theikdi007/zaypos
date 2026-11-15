@@ -6,6 +6,7 @@ import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text.dart';
+import '../../../core/utils/phone.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/money_text.dart';
 import '../data/customer_providers.dart';
@@ -25,6 +26,12 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
   _Tab _tab = _Tab.debt;
   String _query = '';
 
+  /// "09 790-011" and "+959790011" find the customer stored as "09790011002" (BUG-34).
+  bool _phoneMatches(String phone) {
+    final q = phoneKey(_query);
+    return q.isNotEmpty && phoneKey(phone).contains(q);
+  }
+
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(customerAccountsProvider);
@@ -40,7 +47,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
               _Tab.overdue => c.isOverdue(now),
               _Tab.all => true,
             })
-        .where((c) => _query.isEmpty || c.name.contains(_query) || c.customer.phone.replaceAll(' ', '').contains(_query.replaceAll(' ', '')))
+        .where((c) => _query.isEmpty || c.name.contains(_query) || _phoneMatches(c.customer.phone))
         .toList();
     final top = MediaQuery.paddingOf(context).top;
 

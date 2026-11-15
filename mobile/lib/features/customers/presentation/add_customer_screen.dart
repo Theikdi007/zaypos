@@ -7,6 +7,7 @@ import '../../../core/sync/sync_limits.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text.dart';
 import '../../../core/utils/money_format.dart';
+import '../../../core/utils/phone.dart';
 import '../../../core/widgets/app_icons.dart';
 import '../../../core/widgets/common.dart';
 import '../../../core/widgets/primary_button.dart';
@@ -66,9 +67,8 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
 
   /// Another live customer already has this phone number: warn, don't block (same as the barcode warning).
   Future<bool> _confirmDuplicatePhone(String phone) async {
-    final limits = ref.read(syncLimitsProvider);
     final others = (ref.read(customersProvider).value ?? await ref.read(customerRepositoryProvider).watchAll().first)
-        .where((o) => o.id != widget.customerId && limits.normalize('customers.phone', o.phone) == phone)
+        .where((o) => o.id != widget.customerId && samePhone(o.phone, phone))
         .toList();
     if (others.isEmpty || !mounted) return true;
     return await showDialog<bool>(
@@ -134,8 +134,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
     }
     final editing = _editing;
     if (_isEdit && editing == null) return; // not loaded yet
-    final oldPhone = editing == null ? null : limits.normalize('customers.phone', editing.phone);
-    if (phone.isNotEmpty && phone != oldPhone && !await _confirmDuplicatePhone(phone)) return;
+    if (phone.isNotEmpty && !samePhone(phone, editing?.phone) && !await _confirmDuplicatePhone(phone)) return;
     if (!mounted) return;
     if (editing != null) {
       await ref.read(customerServiceProvider).update(editing.copyWith(
