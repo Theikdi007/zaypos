@@ -284,6 +284,9 @@ class Outbox extends Table {
   TextColumn get rejectData => text().nullable()();
 }
 
+/// syncState key of the pull cursor (SyncStateKeys.pullCursor).
+const pullCursorStateKey = 'pullCursor';
+
 /// pullCursor, lastPushAt, lastPullAt, limitsJson, limitsEtag, …
 @DataClassName('SyncStateRow')
 class SyncState extends Table {
@@ -321,6 +324,23 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 2;
 
+  /// Tables that live only on this phone (never pulled from the server).
+  static const localOnlyTables = {'outbox', 'syncState'};
+
+  /// Schema versions whose migration adds columns to a PULLED table (BUG-43).
+  ///
+  /// The server sends a row again only when it changes, so rows pulled before
+  /// the upgrade would keep the new columns empty for good. Upgrading past any
+  /// version listed here resets the pull cursor, and the next sync downloads
+  /// every row again with the new columns (rows of unsent local units are still
+  /// protected by the merge, BUG-32). There is one cursor for all tables, so the
+  /// reset re-downloads them all.
+  ///
+  /// RULE: a migration that adds a column to a table not in [localOnlyTables]
+  /// must list its version here. test/db_migration_test.dart compares every
+  /// pair of schema snapshots in drift_schemas/ and fails if one is missing.
+  static const pullResetVersions = {2};
+
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
@@ -330,6 +350,9 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(syncIssues, syncIssues.data);
             await m.addColumn(outbox, outbox.rejectCode);
             await m.addColumn(outbox, outbox.rejectData);
+          }
+          if (pullResetVersions.any((v) => v > from && v <= to)) {
+            await writeState(pullCursorStateKey, '0');
           }
         },
       );

@@ -4,6 +4,8 @@
 <dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Barcode / IMEI scan နဲ့ ပစ္စည်းဓာတ်ပုံ ရိုက်ဖို့ ကင်မရာ သုံးပါမယ်။</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>ပြေစာပုံကို ဓာတ်ပုံများထဲ သိမ်းဖို့ ခွင့်ပြုပေးပါ။</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>ပစ္စည်းဓာတ်ပုံ ရွေးဖို့ ဓာတ်ပုံများကို ဖွင့်ပါမယ်။</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,6 +14,7 @@ import '../data/auth_api.dart';
 import '../data/session.dart';
 import 'widgets/auth_message.dart';
 import 'widgets/phone_field.dart';
+import '../../../core/utils/digit_input.dart';
 
 /// Forgotten PIN (from Login, or from the unlock screen — also while locked
 /// out): phone → SMS code → new PIN. On success the app signs in with the new
@@ -112,7 +112,7 @@ class _PinResetScreenState extends ConsumerState<PinResetScreen> {
           obscure: obscure,
           keyboardType: TextInputType.number,
           semanticLabel: label,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
+          inputFormatters: digitInput(maxLength: 6),
         ),
       );
 

@@ -57,6 +57,16 @@ class ProductTile extends StatelessWidget {
   final int qtyMilli;
   final VoidCallback onTap;
 
+  /// Grid row height that fits the tile at [scaler]: 160 at normal text, taller
+  /// at large system text sizes so the price never overflows (BUG-44). Matches
+  /// the layout below: padding 20, image 56, gaps 12, name ≤ 2 lines, price line.
+  static double extent(TextScaler scaler) {
+    final name = scaler.scale(14) * 1.4 * 2;
+    final price = scaler.scale(15) * AppText.lineHeight;
+    final h = 20 + 56 + 12 + name + price + 4;
+    return h < 160 ? 160 : h.ceilToDouble();
+  }
+
   @override
   Widget build(BuildContext context) {
     final inCart = qtyMilli > 0;
@@ -96,7 +106,12 @@ class ProductTile extends StatelessWidget {
                           ),
                   ),
                   const SizedBox(height: 6),
-                  Text(name, style: AppText.s(14, weight: AppText.w600, height: 1.4)),
+                  Flexible(
+                    child: Text(name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.s(14, weight: AppText.w600, height: 1.4)),
+                  ),
                   const SizedBox(height: 6),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -105,12 +120,20 @@ class ProductTile extends StatelessWidget {
                       Expanded(
                         child: needsPrice
                             ? const Align(alignment: Alignment.centerLeft, child: NeedsPriceBadge())
-                            : Text(formatMoney(price), style: AppText.s(15, weight: AppText.w700)),
+                            // One line; a long price at a large text size shrinks instead of wrapping (BUG-44).
+                            : FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(formatMoney(price), maxLines: 1, style: AppText.s(15, weight: AppText.w700)),
+                              ),
                       ),
-                      if (stockLabel != null)
+                      if (stockLabel != null) ...[
+                        const SizedBox(width: 4),
                         Text(stockLabel!,
+                            maxLines: 1,
                             style: AppText.s(11,
                                 color: stockLow ? AppColors.danger : AppColors.muted)),
+                      ],
                     ],
                   ),
                 ],

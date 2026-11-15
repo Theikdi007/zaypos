@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text.dart';
 import '../../../../core/widgets/common.dart';
+import '../../../../core/utils/digit_input.dart';
 
 /// "+95 | 9 xxx xxx xxx" field (height 52, radius 14).
 class PhoneField extends StatelessWidget {
@@ -23,7 +23,7 @@ class PhoneField extends StatelessWidget {
       hint: '9 xxx xxx xxx',
       keyboardType: TextInputType.phone,
       semanticLabel: semanticLabel,
-      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9 ]'))],
+      inputFormatters: phoneInput(),
       prefix: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

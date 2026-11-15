@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -21,6 +20,7 @@ import '../data/auth_api.dart';
 import '../data/session.dart';
 import 'widgets/auth_message.dart';
 import 'widgets/phone_field.dart';
+import '../../../core/utils/digit_input.dart';
 
 enum CatalogStart { preset, quick, import }
 
@@ -400,10 +400,7 @@ class _StepPhoneState extends State<_StepPhone> {
                       focusNode: _otpFocus,
                       keyboardType: TextInputType.number,
                       showCursor: false,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(6),
-                      ],
+                      inputFormatters: digitInput(maxLength: 6),
                       decoration: const InputDecoration.collapsed(hintText: null).copyWith(filled: false),
                     ),
                   ),

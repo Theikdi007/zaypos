@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +12,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../application/auth_controller.dart';
 import 'widgets/auth_message.dart';
 import 'widgets/phone_field.dart';
+import '../../../core/utils/digit_input.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -149,10 +149,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             obscure: true,
             keyboardType: TextInputType.number,
             semanticLabel: 'PIN နံပါတ်',
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(6),
-            ],
+            inputFormatters: digitInput(maxLength: 6),
           ),
         ),
         const SizedBox(height: 16),

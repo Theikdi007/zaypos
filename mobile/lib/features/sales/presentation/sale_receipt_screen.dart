@@ -5,16 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text.dart';
-import '../../../core/utils/money_format.dart';
-import '../../../core/utils/myanmar.dart';
 import '../../../core/widgets/app_icons.dart';
-import '../../../core/widgets/dashed_box.dart';
-import '../../../core/widgets/money_text.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../auth/data/session.dart';
-import '../../../core/utils/qty.dart';
 import '../data/sales_providers.dart';
-import '../domain/sale.dart';
+import 'receipt_image.dart';
 import '../../../core/widgets/async_view.dart';
 
 class SaleReceiptScreen extends ConsumerWidget {
@@ -30,7 +25,6 @@ class SaleReceiptScreen extends ConsumerWidget {
     final sale = async.requireValue;
     if (sale == null) return const Scaffold();
     final pad = MediaQuery.paddingOf(context);
-    final date = mmReceiptDate(sale.createdAt);
 
     return Scaffold(
       body: Column(
@@ -66,40 +60,37 @@ class SaleReceiptScreen extends ConsumerWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: DashedBox(
-                    color: AppColors.inputBorder,
-                    strokeWidth: 1,
-                    radius: 18,
-                    background: AppColors.surface,
-                    padding: const EdgeInsets.all(20),
-                    child: _ReceiptBody(sale: sale, shop: shop, date: date),
-                  ),
+                  child: ReceiptCard(sale: sale, shop: shop),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                   child: Row(
                     children: [
                       Expanded(
-                        child: PrimaryButton(
-                          label: 'Viber ပို့မယ်',
-                          variant: ButtonVariant.outline,
-                          icon: AppIcons.send,
-                          height: 50,
-                          radius: 14,
-                          fontSize: 14,
-                          onPressed: () {},
+                        child: Builder(
+                          builder: (context) => PrimaryButton(
+                            label: receiptShareText,
+                            variant: ButtonVariant.outline,
+                            icon: AppIcons.send,
+                            height: 50,
+                            radius: 14,
+                            fontSize: 14,
+                            onPressed: () => shareReceipt(context, ref, sale),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: PrimaryButton(
-                          label: 'ပုံ သိမ်းမယ်',
-                          variant: ButtonVariant.outline,
-                          icon: AppIcons.image,
-                          height: 50,
-                          radius: 14,
-                          fontSize: 14,
-                          onPressed: () {},
+                        child: Builder(
+                          builder: (context) => PrimaryButton(
+                            label: receiptSaveText,
+                            variant: ButtonVariant.outline,
+                            icon: AppIcons.image,
+                            height: 50,
+                            radius: 14,
+                            fontSize: 14,
+                            onPressed: () => saveReceipt(context, ref, sale),
+                          ),
                         ),
                       ),
                     ],
@@ -129,66 +120,6 @@ class SaleReceiptScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ReceiptBody extends StatelessWidget {
-  const _ReceiptBody({required this.sale, required this.shop, required this.date});
-
-  final Sale sale;
-  final String shop;
-  final String date;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget divider() => Container(height: 1, color: AppColors.border);
-    Widget gap() => const SizedBox(height: 10);
-    Widget small(String l, String r) => Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(l, style: AppText.s(13, color: AppColors.textSecondary)),
-            Text(r, style: AppText.s(13, color: AppColors.textSecondary)),
-          ],
-        );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(shop, textAlign: TextAlign.center, style: AppText.s(16, weight: AppText.w700)),
-        Text('ပြေစာ #${sale.no} · $date', textAlign: TextAlign.center, style: AppText.s(12, color: AppColors.muted)),
-        gap(),
-        divider(),
-        for (final l in sale.lines) ...[
-          gap(),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: Text('${l.name} × ${Qty.format(l.qtyMilli)}', style: AppText.s(14))),
-              const SizedBox(width: 12),
-              Text(formatMoney(l.total), style: AppText.s(14, weight: AppText.w600)),
-            ],
-          ),
-        ],
-        gap(),
-        divider(),
-        gap(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('စုစုပေါင်း', style: AppText.s(17, weight: AppText.w700)),
-            MoneyText(sale.total, size: 17),
-          ],
-        ),
-        if (sale.method == PaymentMethod.cash && sale.received != null) ...[
-          gap(),
-          small('ငွေသား လက်ခံ', formatMoney(sale.received!)),
-          gap(),
-          small('ပြန်အမ်း', formatMoney(sale.change! < 0 ? 0 : sale.change!)),
-        ],
-        const SizedBox(height: 14),
-        Text('ကျေးဇူးတင်ပါတယ်', textAlign: TextAlign.center, style: AppText.s(12, color: AppColors.muted)),
-      ],
     );
   }
 }

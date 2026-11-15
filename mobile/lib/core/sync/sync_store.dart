@@ -10,7 +10,7 @@ import 'wire_decode.dart';
 
 /// syncState keys (docs/mobile/phase3-sync.md §3.2).
 abstract final class SyncStateKeys {
-  static const pullCursor = 'pullCursor';
+  static const pullCursor = pullCursorStateKey;
   static const lastPushAt = 'lastPushAt';
   static const lastPullAt = 'lastPullAt';
 

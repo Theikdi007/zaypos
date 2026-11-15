@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -44,6 +45,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   String? _cat; // null = all
   String _query = '';
   String _amount = '';
+  /// Measured height of the floating cart bar (it grows with the text size, BUG-44).
+  double _cartBarHeight = 72;
   final _quickName = TextEditingController();
   final _search = TextEditingController();
 
@@ -269,7 +272,17 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               Expanded(child: mode == PosMode.products ? _productGrid(cart) : _quickSale(cart)),
             ],
           ),
-          Positioned(left: 12, right: 12, bottom: 16 + MediaQuery.paddingOf(context).bottom, child: _CartBar(cart: cart)),
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 16 + MediaQuery.paddingOf(context).bottom,
+            child: _HeightListener(
+              onHeight: (h) {
+                if (mounted && (h - _cartBarHeight).abs() > 0.5) setState(() => _cartBarHeight = h);
+              },
+              child: _CartBar(cart: cart),
+            ),
+          ),
         ],
         ),
       ),
@@ -306,6 +319,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     ];
   }
 
+  /// Bottom padding of the lists, so their last row scrolls fully above the
+  /// floating cart bar at any text size (BUG-44): bar + its 16 margin + the
+  /// home-indicator inset + 16 air.
+  double _listBottomPadding(BuildContext context) =>
+      _cartBarHeight + 16 + MediaQuery.paddingOf(context).bottom + 16;
+
   Widget _productGrid(Cart cart) {
     final features = ref.watch(tenantFeaturesProvider);
     final async = ref.watch(productsProvider);
@@ -316,12 +335,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         .where((p) => _query.isEmpty || p.name.contains(_query))
         .toList();
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 120),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      padding: EdgeInsets.fromLTRB(20, 14, 20, _listBottomPadding(context)),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        mainAxisExtent: 160,
+        mainAxisExtent: ProductTile.extent(MediaQuery.textScalerOf(context)),
       ),
       itemCount: items.length,
       itemBuilder: (_, i) {
@@ -354,7 +373,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   Widget _quickSale(Cart cart) {
     final quick = cart.quickLines;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, _listBottomPadding(context)),
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -407,6 +426,34 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         ],
       ],
     );
+  }
+}
+
+/// Reports its child's height after layout.
+class _HeightListener extends SingleChildRenderObjectWidget {
+  const _HeightListener({required this.onHeight, required super.child});
+  final ValueChanged<double> onHeight;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderHeightListener(onHeight);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderHeightListener renderObject) => renderObject.onHeight = onHeight;
+}
+
+class _RenderHeightListener extends RenderProxyBox {
+  _RenderHeightListener(this.onHeight);
+  ValueChanged<double> onHeight;
+  double? _last;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final h = size.height;
+    if (h != _last) {
+      _last = h;
+      WidgetsBinding.instance.addPostFrameCallback((_) => onHeight(h));
+    }
   }
 }
 
