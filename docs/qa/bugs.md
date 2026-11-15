@@ -735,6 +735,12 @@ Format:
   Myanmar digits → 0-9, spaces/dashes/dots/brackets dropped, and only an explicit "+95" becomes "0" ("+95977" → "0977"); a leading
   "959" stays digits. The stored phone and full-number comparisons (duplicate warning, sign-in) keep `phoneKey`. Tests:
   `m/phone_key_test.dart` ("959123" finds "09 777 959 123"; "0977" and "+95977" still find it; "959" alone is not "09").
+- QA round 12b (BUG-36 re-test, bf97726): **verified**. `m/qa/qa_round12_phone_test.dart::TC-DEBT-NEW-9 …` now passes
+  (`queries that do not find the customer: []`); `m/qa/qa_round12b_bug36_test.dart::TC-DEBT-NEW-9 r12b …` passes ("959" lists only
+  numbers containing 959; "959123", "၉၅၉၁၂၃", "959 124", "959-125", "+95 9 777", "+95977", "0977", "၀၉၇၇၇" find the customers stored
+  as "09 …", "+95 9 …" and "959…"; names still match); the duplicate warning still names "09777959123" when "959777959123",
+  "+95 9 777 959 123" or "၉၅၉၇၇၇၉၅၉၁၂၃" is typed. Side effect of the fix: a FULL number typed "959…" no longer finds its
+  customer → BUG-39 (Low, backlog). The Known-limitation bullet "two phones voiding" matches the round-12 suggested wording.
 
 ## BUG-37 · TC-AUTH-NEW-2 · Low · Server accepts phone numbers in other scripts' digits and stores a non-ASCII "+959…"
 - Found in: round 12 · `backend/tests/ZayPOS.QA.Tests/QaRound12Tests.cs` › `TC_AUTH_NEW_2_…` (4 tests)
@@ -757,6 +763,21 @@ Format:
   axis names. Already so before d8cb91e.
 - Suspected area: `mobile/lib/features/reports/presentation/report_screen.dart` `_WeekChart` semantics label (`${peak.day}နေ့`).
 - Blocks beta: no (screen readers only).
+- Status: open (beta backlog)
+
+## BUG-39 · TC-DEBT-NEW-11 · Low · Customer search: a full number typed "959…" (international form without "+") finds nothing (side effect of the BUG-36 fix)
+- Found in: round 12b · `mobile/test/qa/qa_round12b_bug36_test.dart` › "TC-DEBT-NEW-11 r12b probe: a FULL number typed in the
+  international form without "+" …"
+- Steps to reproduce: customer ကိုစိုး with phone "09 777 959 123" → Customers → "အားလုံး" → search "959777959123" or
+  "959 777 959 123" (e.g. copied from a Viber/Telegram contact shown without "+").
+- Expected: the customer is found. phoneKey / samePhone treat "959777959123" as the same number as "09777959123" (the duplicate
+  warning names him for exactly this input), and before ea3c59e this search found him (`_phoneMatches` used `phoneKey(_query)`).
+- Actual: `r12b full 959… query: {959777959123: {}, 959 777 959 123: {}, 959777959125: {}}` — nothing found, also for a customer
+  stored as "959777959125". "+959777959123", "09777959123" and any partial query work.
+- Suspected area: `mobile/lib/core/utils/phone.dart` `phoneSearchKey` / `customers_screen.dart` `_phoneMatches`: the bare "959"
+  prefix is never rewritten, so a full international number cannot match the stored "09…" key. (Not a fix: matching either
+  `phoneSearchKey(q)` or `phoneKey(q)` would cover both BUG-36 and this.)
+- Blocks beta: no (typing "09…", "+959…" or the last digits works).
 - Status: open (beta backlog)
 
 ---

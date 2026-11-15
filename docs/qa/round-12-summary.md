@@ -159,3 +159,18 @@ Then the phone halves of the **Both** cases, newest first:
 - `mobile/test/qa/qa_round12_void_twice_test.dart`: TC-SYNC-NEW-28 (passes; documents the Known limitation).
 - `mobile/test/qa/live_qa_round12_test.dart`: TC-AUTH-NEW-3 live (passes).
 - `backend/tests/ZayPOS.QA.Tests/QaRound12Tests.cs`: TC_AUTH_NEW_1 (passes), TC_AUTH_NEW_2 ×4 (fail → BUG-37).
+
+## QA round 12b (BUG-36 re-test, beta-polish @ bf97726)
+
+Scope: BUG-36 only; no full regression, no live runs.
+
+- **BUG-36: verified.** `m/qa/qa_round12_phone_test.dart` TC-DEBT-NEW-9 and TC-DEBT-NEW-10 pass; `m/phone_key_test.dart` and
+  `m/customer_edit_test.dart` pass; new `m/qa/qa_round12b_bug36_test.dart`: edge cases ("959" alone, "+95 9 777", "၉၅၉၁၂၃", numbers stored
+  as "+95 9 …" / "959…", name search) pass, and the duplicate warning still matches "959777959123" vs "09777959123".
+- **New, BUG-39 (Low, beta backlog), TC-DEBT-NEW-11:** a FULL number typed "959777959123" (no "+") no longer finds the customer
+  "09 777 959 123". It worked before ea3c59e. You can type "09…", "+959…" or the last digits instead.
+- Docs in bf97726: the BUG-36 status text is accurate. The "two phones voiding" Known-limitation bullet matches the round-12
+  suggested wording.
+- Counts: targeted run, 16 tests: 15 passed, 1 failed (the new BUG-39 probe). `flutter analyze`: no issues.
+- TC-DEBT-NEW-9: FAIL → PASS. TC-DEBT-NEW-11: new, FAIL (Low).
+- **Verdict: still Go** for the 3–5 shop beta. BUG-39 is Low and does not block it.
