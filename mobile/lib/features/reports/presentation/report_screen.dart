@@ -193,8 +193,10 @@ class _WeekChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final max = days.map((d) => d.amount).reduce((a, b) => a > b ? a : b);
-    final peak = days.firstWhere((d) => d.amount == max);
+    final max = days.isEmpty ? 0 : days.map((d) => d.amount).reduce((a, b) => a > b ? a : b);
+    // BUG-35: a week without sales (a new shop on day 1) has max 0 — never divide by it.
+    final empty = max <= 0;
+    final peak = empty ? null : days.firstWhere((d) => d.amount == max);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -208,42 +210,54 @@ class _WeekChart extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Semantics(
-          label: 'နောက်ဆုံး ၇ ရက် နေ့စဉ်ရောင်းရငွေ ဇယား၊ အမြင့်ဆုံးက ${peak.day}နေ့ ${(max / 1000).round()}K',
+          label: peak == null
+              ? 'နောက်ဆုံး ၇ ရက် နေ့စဉ်ရောင်းရငွေ ဇယား၊ ရောင်းအား မရှိသေးပါ'
+              : 'နောက်ဆုံး ၇ ရက် နေ့စဉ်ရောင်းရငွေ ဇယား၊ အမြင့်ဆုံးက ${peak.day}နေ့ ${(max / 1000).round()}K',
           excludeSemantics: true,
           child: SizedBox(
             height: 170,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                for (var i = 0; i < days.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text('${(days[i].amount / 1000).round()}',
-                            style: AppText.s(11, weight: AppText.w600, color: AppColors.textSecondary, height: 1.4)),
-                        const SizedBox(height: 4),
-                        Container(
-                          height: (days[i].amount / max * 120).roundToDouble(),
-                          decoration: BoxDecoration(
-                            color: i == days.length - 1 ? AppColors.primary : AppColors.chartBar,
-                            borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(6), bottom: Radius.circular(2)),
-                          ),
+            child: Stack(children: [
+              Positioned.fill(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    for (var i = 0; i < days.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text('${(days[i].amount / 1000).round()}',
+                                style: AppText.s(11, weight: AppText.w600, color: AppColors.textSecondary, height: 1.4)),
+                            const SizedBox(height: 4),
+                            Container(
+                              height: empty ? 0 : (days[i].amount / max * 120).roundToDouble(),
+                              decoration: BoxDecoration(
+                                color: i == days.length - 1 ? AppColors.primary : AppColors.chartBar,
+                                borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(6), bottom: Radius.circular(2)),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(days[i].day,
+                                maxLines: 1,
+                                overflow: TextOverflow.visible,
+                                softWrap: false,
+                                style: AppText.s(11, color: AppColors.muted, height: 1.4)),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(days[i].day,
-                            maxLines: 1,
-                            overflow: TextOverflow.visible,
-                            softWrap: false,
-                            style: AppText.s(11, color: AppColors.muted, height: 1.4)),
-                      ],
-                    ),
-                  ),
-                ],
-              ],
-            ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (empty)
+                Center(
+                  child: Text('ရောင်းအား မရှိသေးပါ',
+                      key: const ValueKey('weekChartEmpty'),
+                      style: AppText.s(14, weight: AppText.w600, color: AppColors.muted)),
+                ),
+            ]),
           ),
         ),
       ],
