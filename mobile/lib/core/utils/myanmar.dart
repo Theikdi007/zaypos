@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 const _digits = ['၀', '၁', '၂', '၃', '၄', '၅', '၆', '၇', '၈', '၉'];
 
 /// 3 -> "၃"
@@ -15,8 +13,20 @@ const mmMonths = [
 
 const mmMonthsShort = ['ဇန်', 'ဖေ', 'မတ်', 'ဧ', 'မေ', 'ဇွန်', 'ဇူ', 'ဩ', 'စက်', 'အောက်', 'နို', 'ဒီ'];
 
-/// "4:05 PM" (local time).
-String timeLabel(DateTime t) => DateFormat('h:mm a', 'en_US').format(t.toLocal());
+/// "ညနေ 4:05" (local time, 12-hour with the Burmese time of day — BUG-9):
+/// နံနက် 0–11, နေ့လယ် 12–15, ညနေ 16–18, ည 19–23.
+String timeLabel(DateTime t) {
+  final l = t.toLocal();
+  final period = l.hour < 12
+      ? 'နံနက်'
+      : l.hour < 16
+          ? 'နေ့လယ်'
+          : l.hour < 19
+              ? 'ညနေ'
+              : 'ည';
+  final h = l.hour % 12 == 0 ? 12 : l.hour % 12;
+  return '$period $h:${l.minute.toString().padLeft(2, '0')}';
+}
 
 /// Whole calendar days between [t] and [now] in local time.
 int daysAgo(DateTime t, DateTime now) {
@@ -31,7 +41,7 @@ String dayLabel(DateTime t, DateTime now) {
   return '${mmMonthsShort[l.month - 1]} ${mmDigits(l.day)}';
 }
 
-/// Debt history date: "ယခုလေးတင်" / "ယနေ့ 2:58 PM" / "နို ၇ · 10:12 AM".
+/// Debt history date: "ယခုလေးတင်" / "ယနေ့ နေ့လယ် 2:58" / "နို ၇ · နံနက် 10:12".
 String entryDateLabel(DateTime t, DateTime now) {
   if (now.difference(t).inMinutes.abs() < 1) return 'ယခုလေးတင်';
   final d = dayLabel(t, now);
@@ -47,7 +57,7 @@ String agoLabel(DateTime t, DateTime now) {
   return '${mmDigits(d)} ရက်အရင်';
 }
 
-/// "၁၀ နိုဝင်ဘာ ၂၀၂၆ · 4:05 PM"
+/// "၁၀ နိုဝင်ဘာ ၂၀၂၆ · ညနေ 4:05"
 String mmReceiptDate(DateTime t) {
   final d = t.toLocal();
   return '${mmDigits(d.day)} ${mmMonths[d.month - 1]} ${mmDigits(d.year)} · ${timeLabel(d)}';

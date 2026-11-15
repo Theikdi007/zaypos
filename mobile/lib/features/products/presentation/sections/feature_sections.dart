@@ -12,10 +12,13 @@ import '../../../../core/utils/qty.dart';
 
 /// Accent square scan button.
 class ScanSquare extends StatelessWidget {
-  const ScanSquare({super.key, this.size = 48, this.iconSize = 22, required this.label});
+  const ScanSquare({super.key, this.size = 48, this.iconSize = 22, required this.label, this.onTap});
   final double size;
   final double iconSize;
   final String label;
+
+  /// Opens the camera scanner; null = disabled.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +31,7 @@ class ScanSquare extends StatelessWidget {
         borderRadius: AppRadius.inputR,
         child: InkWell(
           borderRadius: AppRadius.inputR,
-          onTap: () {},
+          onTap: onTap,
           child: SizedBox(
             width: size,
             height: size,
@@ -150,7 +153,7 @@ class ExpiryBatchSection extends StatelessWidget {
           ),
         ),
         if (warnDays != noExpiry)
-          Text('Batch တစ်ခုထက်ပိုရင် သက်တမ်းစောတာကို အရင်ရောင်းအောင် ညွှန်ပေးပါမယ် (FEFO)',
+          Text('Batch တစ်ခုထက်ပိုရင် သက်တမ်းစောတာကို အရင်ရောင်းအောင် ညွှန်ပေးပါမယ်',
               style: AppText.s(12, color: AppColors.muted)),
         Text(help, key: const ValueKey('expiryHelp'), style: AppText.s(12, color: AppColors.muted)),
       ],
@@ -170,7 +173,11 @@ class SerialWarrantySection extends StatefulWidget {
     required this.onWarrantyChanged,
     this.showSerials = true,
     this.registerCommit,
+    this.onScanImei,
   });
+
+  /// Camera scan of an IMEI (returns the code, or null if closed).
+  final Future<String?> Function()? onScanImei;
 
   /// False when editing a saved product: IMEIs are stock, entered when goods arrive.
   final bool showSerials;
@@ -219,6 +226,14 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
     super.dispose();
   }
 
+  /// Scanned IMEI is added like a typed one.
+  Future<void> _scan() async {
+    final code = await widget.onScanImei!();
+    if (code == null || !mounted) return;
+    _imei.text = code;
+    _submit();
+  }
+
   void _submit() {
     final v = _imei.text.trim();
     if (v.isEmpty) return;
@@ -234,7 +249,7 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
       children: [
         if (widget.showSerials)
         AppSwitchTile(
-          title: 'တစ်လုံးချင်း IMEI / Serial မှတ်မယ်',
+          title: 'တစ်လုံးချင်း IMEI / စီးရီးနံပါတ် မှတ်မယ်',
           description: 'ရောင်းတဲ့အခါ ဘယ်တစ်လုံးလဲ ရွေးရမယ်',
           titleSize: 15,
           padding: EdgeInsets.zero,
@@ -261,14 +276,15 @@ class _SerialWarrantySectionState extends State<SerialWarrantySection> {
                   const SizedBox(width: 8),
                   Semantics(
                     button: true,
-                    label: 'IMEI scan',
+                    label: 'IMEI ဖတ်မယ်',
                     excludeSemantics: true,
                     child: Material(
                       color: AppColors.primary,
                       borderRadius: AppRadius.inputR,
                       child: InkWell(
+                        key: const ValueKey('imeiScan'),
                         borderRadius: AppRadius.inputR,
-                        onTap: () {},
+                        onTap: widget.onScanImei == null ? null : _scan,
                         child: const SizedBox(
                           width: 44,
                           height: 44,
@@ -354,11 +370,11 @@ class VariantsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final variants = variantsOf(sizes, colors);
     return FormSection(
-      title: 'Size နှင့် အရောင်',
+      title: 'ဆိုဒ် နှင့် အရောင်',
       borderColor: AppColors.fashionBorder,
       children: [
         LabeledField(
-          label: 'Size',
+          label: 'ဆိုဒ်',
           small: true,
           child: Wrap(
             spacing: 8,
@@ -428,7 +444,7 @@ class VariantsSection extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Variant (${variants.length})',
+                    Text('ဆိုဒ် / အရောင် (${variants.length})',
                         style: AppText.s(12, weight: AppText.w700, color: AppColors.textSecondary)),
                     Text('Stock', style: AppText.s(12, weight: AppText.w700, color: AppColors.textSecondary)),
                   ],

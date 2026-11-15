@@ -24,7 +24,7 @@ void main() {
   setUpAll(loadAppFonts);
 
   // ---------------------------------------------------------------- TC-SYNC-02
-  testWidgets('TC-SYNC-02 offline: 3 sales → chip "Offline · sync ၃ ခုစောင့်"; online → pushed in order, "Sync ပြီး"',
+  testWidgets('TC-SYNC-02 offline: 3 sales → chip "လိုင်းမရှိ · Sync ၃ ခုစောင့်"; online → pushed in order, "Sync ပြီး"',
       (tester) async {
     final db = memoryDb();
     addTearDown(() => tester.runAsync(db.close));
@@ -52,7 +52,7 @@ void main() {
       nos.add((await drive(tester, () => sell(c, [water]))).no);
     }
     await drive(tester, () => Future<void>.delayed(const Duration(seconds: 3))); // debounced sync → network error
-    expect(find.text('Offline · sync ၃ ခုစောင့်'), findsOneWidget);
+    expect(find.text('လိုင်းမရှိ · Sync ၃ ခုစောင့်'), findsOneWidget);
 
     // Back online.
     api.pushErrors.clear();

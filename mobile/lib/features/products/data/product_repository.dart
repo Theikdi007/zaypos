@@ -16,6 +16,9 @@ abstract interface class ProductRepository {
   /// IMEI is not in it: a traded-in phone can be received again.
   Stream<Set<String>> watchInStockSerialValues();
 
+  /// Every live row with this IMEI / serial value (any product, any status).
+  Stream<List<ProductSerial>> watchSerialRows(String serial);
+
   /// Saves a product together with its module rows.
   Future<void> add(
     Product product, {

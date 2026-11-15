@@ -1,0 +1,74 @@
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           13.7s
+-[WFIsolatedShortcutRunner init] Taking sandbox extensions for execution
+-[WFIsolatedShortcutRunner init]_block_invoke Sandbox extensions acquired
+Indexing for request: <WFToolKitIndexingRequest: 0x101c540c0>, changeset: .partial(updatedCount: 1 removedCount: 0 updated: ["com.zaypos.zayposApp"], removed: [], provenance: [VoiceShortcutClient.ToolKitIndexingReason.Changeset.Provenance.launchServicesSnapshot(<LaunchServicesSnapshot uuid=A6ACA09E-A732-4952-96DD-437BC6B4D1BF, v=824)> ["com.apple.PreviewShell", "com.apple.AccessorySetupUI", "com.apple.SafariViewService", "com.apple.ActivityProgress.ActivityProgressUI", "com.apple.AmbientTester.AmbientSettingsAppIntentsExtension", "com.apple.siri", "com.apple.CustomerEngagementUIService", "com.apple.Fitness", "com.apple.TelephonyUtilities.FaceTimeMessageStoreIntentsExtension", "com.apple.siri.SiriNotebookAppIntentsExtension", "com.apple.generativepartnerservice.GenerativePartnerSettingsExtension", "com.apple.chrono.WidgetRenderer-StandBy", "com.apple.Posters.UnityPosterApp", "com.apple.Bridge", "com.yammobots.marvelo", "com.apple.AppleCashStickerPackHost", "com.apple.omniSearch.SearchToolExtension", "com.apple.UIKit.ColorPickerU<…>, priority: <decode: missing data>
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:55613/14YsHdXfQus=/
+VMServiceFlutterDriver: Isolate found with number: 380030299799935
+VMServiceFlutterDriver: Isolate 380030299799935 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: TC-SYNC-NEW-28 two phones void one sale (A)
+Type indexing (params + content items) took 0.000094s
+Action indexing took 0.000225s
+Indexed: 0
+Errored: 0
+Skipped: [:]
+Bundle cache: 0 hits, 0 misses
+VMServiceFlutterDriver: Connected to Flutter application.
+Finished in 0.483832s
+-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
+flutter: QA_NOTE:A: stock before 7.0, after selling 1 and syncing 6.0; sale #E-0002 pending=true
+flutter: QA_NOTE:flag raised: A_sold 01a1ddbb-f543-7154-a69d-c02d6507a67e
+flutter: QA_NOTE:flag seen: B_synced
+flutter: QA_CMD:api_stop:0_api_stop
+[runner] 12:15:03 cmd api_stop
+nothing on 5076
+flutter: QA_NOTE:A offline: voided; stock 7.0 (expected 7.0)
+flutter: QA_SHOT:sync28_A_voided_offline
+[runner] screenshot sync28_A_voided_offline.png
+flutter: QA_NOTE:A offline after 2.5 min: stock 7.0
+flutter: QA_SHOT:sync28_A_offline_after_wait
+[runner] screenshot sync28_A_offline_after_wait.png
+flutter: QA_NOTE:flag raised: A_voided_offline
+flutter: QA_NOTE:flag seen: B_voided
+flutter: QA_SHOT:sync28_A_back_online_1min
+[runner] screenshot sync28_A_back_online_1min.png
+flutter: QA_NOTE:A back online, stock every 30 s (no manual sync): [+0s 7.0, +30s 7.0, +60s 7.0, +90s 7.0, +120s 7.0, +150s 7.0, +180s 7.0, +210s 7.0, +240s 7.0]
+flutter: QA_SHOT:sync28_A_back_online_4min_products
+[runner] screenshot sync28_A_back_online_4min_products.png
+flutter: QA_NOTE:A after "ယခု sync လုပ်မယ်": stock 7.0 (right = 7.0), sale voided=true
+flutter: QA_SHOT:sync28_A_after_manual_sync
+[runner] screenshot sync28_A_after_manual_sync.png
+flutter: QA_SHOT:sync28_A_sale_detail_final
+[runner] screenshot sync28_A_sale_detail_final.png
+flutter: QA_NOTE:flag raised: A_done 7.0
+flutter: 08:05 +1: (tearDownAll)
+flutter: 08:05 +2: All tests passed!
+All tests passed.
+Leaving the application running.
+[runner] flutter exit code 0

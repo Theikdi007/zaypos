@@ -18,6 +18,7 @@ import '../features/devices/data/fake_device_repository.dart';
 import '../features/inventory/data/fake_stock_repository.dart';
 import '../features/inventory/data/stock_repository.dart';
 import '../features/products/data/fake_product_repository.dart';
+import '../features/products/data/product_photos.dart';
 import '../features/products/data/product_repository.dart';
 import '../features/reports/data/fake_report_repository.dart';
 import '../features/reports/data/report_repository.dart';
@@ -56,6 +57,9 @@ List<Override> fakeOverrides({BootState? boot}) => [
   }),
   reportRepositoryProvider.overrideWith((ref) => FakeReportRepository(ref.read(fakeDatabaseProvider))),
   featureRepositoryProvider.overrideWith((ref) => FakeFeatureRepository(ref.read(fakeDatabaseProvider))),
+  // Product photos in memory, compressed inline (no isolate / plugin in tests).
+  photoFilesProvider.overrideWith((_) => MemoryPhotoFiles()),
+  photoCompressorProvider.overrideWithValue((raw) async => compressPhoto(raw)),
   // No server and no Drift outbox behind the fakes: sync is off.
   syncEngineProvider.overrideWithValue(SyncEngine.disabled()),
   connectivityProvider.overrideWithValue(const Stream<bool>.empty()),

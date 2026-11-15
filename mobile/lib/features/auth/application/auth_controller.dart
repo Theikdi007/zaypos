@@ -56,7 +56,7 @@ abstract final class AuthMessages {
   static const badPin = 'PIN ၆ လုံး ထည့်ပါ။';
 
   static String outboxBlocks(int n) =>
-      'ဒီဖုန်းမှာ server ကို မပို့ရသေးတဲ့ စာရင်း ${mmNumber(n)} ခု ရှိနေပါတယ်။ '
+      'ဒီဖုန်းမှာ ဆာဗာကို မပို့ရသေးတဲ့ စာရင်း ${mmNumber(n)} ခု ရှိနေပါတယ်။ '
       'တခြားဆိုင်နဲ့ ဝင်ရင် ဒီစာရင်းတွေ ပျောက်သွားမှာမို့ ခွင့်မပြုပါ။ '
       'မူလဆိုင်နဲ့ ပြန်ဝင်ပြီး sync လုပ်ပြီးမှ ပြောင်းပါ။';
 
@@ -68,7 +68,7 @@ abstract final class AuthMessages {
   static String locked(Duration left) =>
       'PIN မှားတာ များသွားလို့ ${mmNumber(minutesUp(left))} မိနစ် ပိတ်ထားပါတယ်။';
 
-  static const demoUnavailable = 'Demo ဆိုင်ကို debug build မှာပဲ သုံးလို့ရပါတယ်။';
+  static const demoUnavailable = 'စမ်းသပ်ဆိုင်ကို စမ်းသပ်ဗားရှင်းမှာပဲ သုံးလို့ရပါတယ်။';
 
   static const presetsFailed =
       'ဆိုင်ဖွင့်ပြီးပါပြီ။ ကြိုတင်ပစ္စည်းစာရင်း ဒေါင်းလို့ မရပါ — ပစ္စည်းတွေကို ကိုယ်တိုင် ထည့်ပါ။';
@@ -183,7 +183,7 @@ class AuthController extends Notifier<AuthState> {
   Future<void> resetPin({required String rawPhone, required String otp, required String newPin}) async {
     final phone = _phone(rawPhone);
     _pin(newPin);
-    if (!RegExp(r'^\d{6}$').hasMatch(otp.trim())) throw const AuthFailure('validation', 'SMS ကုဒ် ၆ လုံး ထည့်ပါ။');
+    if (!RegExp(r'^\d{6}$').hasMatch(otp.trim())) throw const AuthFailure('validation', 'OTP ကုဒ် ၆ လုံး ထည့်ပါ။');
     final check = await _guard(phone);
     try {
       await _api.resetPin(phone: phone, otp: otp.trim(), newPin: newPin);

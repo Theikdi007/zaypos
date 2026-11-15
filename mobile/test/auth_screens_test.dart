@@ -170,12 +170,12 @@ void main() {
 
   testWidgets('the demo shop button exists only in debug builds', (tester) async {
     await boot(tester);
-    expect(find.textContaining('Demo ဆိုင်'), findsOneWidget);
+    expect(find.textContaining('စမ်းသပ်ဆိုင်'), findsOneWidget);
   });
 
   testWidgets('release build: no demo shop button', (tester) async {
     await boot(tester, release: true);
-    expect(find.textContaining('Demo ဆိုင်'), findsNothing);
+    expect(find.textContaining('စမ်းသပ်ဆိုင်'), findsNothing);
     expect(find.text('ဝင်မယ်'), findsOneWidget);
   });
 

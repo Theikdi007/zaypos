@@ -129,7 +129,7 @@ void main() {
       expect(dupIssues, hasLength(1), reason: 'phone $name: ONE duplicateSerial in "စစ်ရန်" (all: ${issues.map((i) => i.kind)})');
       expect(dupIssues.single.detail, contains(dup));
       expect(dupIssues.single.resolvedAt, isNull);
-      expect(issueKindLabel('duplicateSerial'), 'IMEI / Serial တူ ဖုန်း နှစ်လုံး stock ထဲ ရှိနေ');
+      expect(issueKindLabel('duplicateSerial'), 'IMEI / စီးရီးနံပါတ် တူ ဖုန်း နှစ်လုံး stock ထဲ ရှိနေ');
       final rows = (await c.read(productRepositoryProvider).watchSerials(ph.id).first).where((s) => s.serial == dup);
       expect(rows.map((s) => s.status), [SerialStatus.inStock, SerialStatus.inStock], reason: 'phone $name keeps both rows');
       expect(await stockOf(c, ph.id), Qty.units(3), reason: 'phone $name');

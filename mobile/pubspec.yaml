@@ -46,8 +46,16 @@ dependencies:
   flutter_secure_storage: ^11.2.0
   cryptography: ^2.9.0
   connectivity_plus: ^7.3.2
+  mobile_scanner: ^7.5.0
+  image_picker: ^1.2.4
+  image: ^4.13.0
+  path_provider: ^2.1.6
+  share_plus: ^13.3.1
+  gal: ^3.0.1
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to

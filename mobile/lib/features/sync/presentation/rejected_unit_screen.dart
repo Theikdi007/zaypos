@@ -46,10 +46,26 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
 
   @override
   void dispose() {
+    _disposeFields();
+    super.dispose();
+  }
+
+  void _disposeFields() {
     for (final f in _fields ?? const <_Field>[]) {
       f.controller.dispose();
     }
-    super.dispose();
+  }
+
+  /// Another unit in the same screen (route replaced): rebuild its fields.
+  @override
+  void didUpdateWidget(RejectedUnitScreen old) {
+    super.didUpdateWidget(old);
+    if (old.seq != widget.seq) {
+      _disposeFields();
+      _fields = null;
+      _fieldErrors = {};
+      _error = null;
+    }
   }
 
   List<_Field> _fieldsOf(Map<String, dynamic> rows) => [
@@ -113,12 +129,14 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
       'kind': o.kind,
       'clientTime': DateTime.fromMillisecondsSinceEpoch(o.clientTime, isUtc: true).toIso8601String(),
       'rejectReason': o.rejectReason,
+      'rejectCode': o.rejectCode,
+      'rejectData': o.rejectData,
       'rows': SyncStore.rowsOf(o),
     });
     await Clipboard.setData(ClipboardData(text: json));
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Copy ကူးပြီးပါပြီ။ Viber မှာ Support ကို paste လုပ်ပြီး ပို့ပေးပါ။')),
+      const SnackBar(content: Text('ကူးယူပြီးပါပြီ။ Viber မှာ အကူအညီဌာနကို ကူးထည့်ပြီး ပို့ပေးပါ။')),
     );
   }
 
@@ -152,30 +170,30 @@ class _RejectedUnitScreenState extends ConsumerState<RejectedUnitScreen> {
               children: [
                 Semantics(header: true, child: Text(unitSummary(o.kind, rows), style: AppText.s(17, weight: AppText.w700))),
                 const SizedBox(height: 12),
-                Text('Server ရဲ့ အကြောင်းပြချက်', style: AppText.s(13, weight: AppText.w600)),
+                Text('ဆာဗာရဲ့ အကြောင်းပြချက်', style: AppText.s(13, weight: AppText.w600)),
                 const SizedBox(height: 6),
-                AuthMessage(o.rejectReason ?? ''),
+                AuthMessage(rejectMessage(o.rejectCode, o.rejectData)),
                 const SizedBox(height: 20),
                 if (fields.isNotEmpty) ...[
                   Text('ပြင်ရန်', style: AppText.s(13, weight: AppText.w600)),
                   const SizedBox(height: 6),
                   for (final f in fields) ...[
                     LabeledField(
-                      label: '${fieldLabel(f.column)} · ${f.table}',
+                      label: rowFieldLabel(f.table, f.column),
                       error: _fieldErrors[f],
                       child: AppInput(controller: f.controller, height: 46, semanticLabel: fieldLabel(f.column)),
                     ),
                     const SizedBox(height: 10),
                   ],
                 ] else
-                  Text('ဒီစာရင်းမှာ ပြင်စရာ စာသား မရှိပါ။ App update ပြီးရင် ပြန်ပို့ကြည့်ပါ (သို့) Support ကို ပို့ပါ။',
+                  Text('ဒီစာရင်းမှာ ပြင်စရာ စာသား မရှိပါ။ အက်ပ် အပ်ဒိတ်ပြီးရင် ပြန်ပို့ကြည့်ပါ (သို့) အကူအညီဌာနကို ပို့ပါ။',
                       style: AppText.s(13, color: AppColors.muted)),
                 if (_error != null) ...[const SizedBox(height: 8), AuthMessage(_error!)],
                 const SizedBox(height: 16),
                 PrimaryButton(label: 'ပြင်ပြီး ပြန်ပို့မယ်', onPressed: _busy ? null : _resend),
                 const SizedBox(height: 10),
                 PrimaryButton(
-                  label: 'Support ကို ပို့မယ်',
+                  label: 'အကူအညီဌာနကို ပို့မယ်',
                   variant: ButtonVariant.outlineDark,
                   onPressed: _busy ? null : () => _copyForSupport(o),
                 ),

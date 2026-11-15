@@ -255,7 +255,7 @@ void main() {
       expect(db(c).batches.where((b) => b.productId == p.id).map((b) => b.batchNo).toSet(), {'OLD', 'TYPED'});
     });
 
-    testWidgets('fashion: size typed without colour → save blocked with "Size နဲ့ အရောင် ထည့်ပါ။", nothing written',
+    testWidgets('fashion: size typed without colour → save blocked with "ဆိုဒ် နဲ့ အရောင် ထည့်ပါ။", nothing written',
         (tester) async {
       final c = await boot(tester, 'fashion');
       final p = newProduct(c, 'QA R4 typed size');
@@ -267,7 +267,7 @@ void main() {
       final n = kinds(c).length;
       await saveForm(tester);
       expect(find.text('ပစ္စည်း ပြင်မယ်'), findsOneWidget, reason: 'still on the form');
-      expect(find.text('Size နဲ့ အရောင် ထည့်ပါ။'), findsOneWidget);
+      expect(find.text('ဆိုဒ် နဲ့ အရောင် ထည့်ပါ။'), findsOneWidget);
       expect(kinds(c).length, n);
       expect(db(c).variants.where((v) => v.productId == p.id), hasLength(1));
     });

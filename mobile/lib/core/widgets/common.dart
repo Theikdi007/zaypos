@@ -256,11 +256,14 @@ class PillChip extends StatelessWidget {
 
 /// Gray rounded search field with leading search icon.
 class SearchField extends StatelessWidget {
-  const SearchField({super.key, required this.hint, required this.semanticLabel, this.onChanged});
+  const SearchField({super.key, required this.hint, required this.semanticLabel, this.onChanged, this.controller});
 
   final String hint;
   final String semanticLabel;
   final ValueChanged<String>? onChanged;
+
+  /// Optional: lets the screen clear the text (e.g. after a barcode scan).
+  final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -277,6 +280,7 @@ class SearchField extends StatelessWidget {
               label: semanticLabel,
               textField: true,
               child: TextField(
+                controller: controller,
                 onChanged: onChanged,
                 style: AppText.s(15),
                 textInputAction: TextInputAction.search,
@@ -521,6 +525,7 @@ class InitialAvatar extends StatelessWidget {
     this.size = 42,
     this.fontSize = 16,
     this.radius,
+    this.image,
   });
 
   final String initial;
@@ -532,17 +537,32 @@ class InitialAvatar extends StatelessWidget {
   /// null = circle.
   final double? radius;
 
+  /// A photo instead of the initial (falls back to the initial if it fails).
+  final ImageProvider? image;
+
   @override
   Widget build(BuildContext context) {
+    final letter = Text(initial, style: AppText.s(fontSize, weight: AppText.w700, color: fg, height: 1.2));
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
+      clipBehavior: image == null ? Clip.none : Clip.antiAlias,
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(radius ?? size / 2),
       ),
-      child: Text(initial, style: AppText.s(fontSize, weight: AppText.w700, color: fg, height: 1.2)),
+      child: image == null
+          ? letter
+          : Image(
+              key: const ValueKey('productPhoto'),
+              image: image!,
+              fit: BoxFit.cover,
+              width: size,
+              height: size,
+              gaplessPlayback: true,
+              errorBuilder: (_, _, _) => letter,
+            ),
     );
   }
 }

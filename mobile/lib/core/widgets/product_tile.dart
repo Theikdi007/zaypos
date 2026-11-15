@@ -37,10 +37,14 @@ class ProductTile extends StatelessWidget {
     this.stockLow = false,
     this.qtyMilli = 0,
     this.needsPrice = false,
+    this.image,
   });
 
   /// No price yet: the badge replaces the price (tapping asks for it).
   final bool needsPrice;
+
+  /// Product photo (shown instead of the initial); null = none.
+  final ImageProvider? image;
 
   final String name;
   final String initial;
@@ -52,6 +56,16 @@ class ProductTile extends StatelessWidget {
   /// Quantity in the cart (milli-units).
   final int qtyMilli;
   final VoidCallback onTap;
+
+  /// Grid row height that fits the tile at [scaler]: 160 at normal text, taller
+  /// at large system text sizes so the price never overflows (BUG-44). Matches
+  /// the layout below: padding 20, image 56, gaps 12, name ≤ 2 lines, price line.
+  static double extent(TextScaler scaler) {
+    final name = scaler.scale(14) * 1.4 * 2;
+    final price = scaler.scale(15) * AppText.lineHeight;
+    final h = 20 + 56 + 12 + name + price + 4;
+    return h < 160 ? 160 : h.ceilToDouble();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,12 +89,29 @@ class ProductTile extends StatelessWidget {
                   Container(
                     height: 56,
                     alignment: Alignment.center,
+                    clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(color: tint, borderRadius: AppRadius.inputR),
-                    child: Text(initial,
-                        style: AppText.s(22, weight: AppText.w700, color: AppColors.textStrong)),
+                    child: image == null
+                        ? Text(initial, style: AppText.s(22, weight: AppText.w700, color: AppColors.textStrong))
+                        : Image(
+                            key: const ValueKey('productPhoto'),
+                            image: image!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 56,
+                            gaplessPlayback: true,
+                            // A broken file shows the initial, never an error box.
+                            errorBuilder: (_, _, _) =>
+                                Text(initial, style: AppText.s(22, weight: AppText.w700, color: AppColors.textStrong)),
+                          ),
                   ),
                   const SizedBox(height: 6),
-                  Text(name, style: AppText.s(14, weight: AppText.w600, height: 1.4)),
+                  Flexible(
+                    child: Text(name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.s(14, weight: AppText.w600, height: 1.4)),
+                  ),
                   const SizedBox(height: 6),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -89,12 +120,20 @@ class ProductTile extends StatelessWidget {
                       Expanded(
                         child: needsPrice
                             ? const Align(alignment: Alignment.centerLeft, child: NeedsPriceBadge())
-                            : Text(formatMoney(price), style: AppText.s(15, weight: AppText.w700)),
+                            // One line; a long price at a large text size shrinks instead of wrapping (BUG-44).
+                            : FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(formatMoney(price), maxLines: 1, style: AppText.s(15, weight: AppText.w700)),
+                              ),
                       ),
-                      if (stockLabel != null)
+                      if (stockLabel != null) ...[
+                        const SizedBox(width: 4),
                         Text(stockLabel!,
+                            maxLines: 1,
                             style: AppText.s(11,
                                 color: stockLow ? AppColors.danger : AppColors.muted)),
+                      ],
                     ],
                   ),
                 ],

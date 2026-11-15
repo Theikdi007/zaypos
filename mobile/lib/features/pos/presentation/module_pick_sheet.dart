@@ -35,6 +35,18 @@ class PickCancelled extends ModulePickResult {
   const PickCancelled();
 }
 
+/// The IMEI / serial numbers of every cart line that has one, whichever product it was picked from.
+Future<Set<String>> cartSerialNumbers(ProductRepository products, Cart cart) async {
+  final ids = cart.serialIds;
+  if (ids.isEmpty) return const {};
+  final productIds = {for (final l in cart.lines) if (l.serialId != null) ?l.productId};
+  return {
+    for (final pid in productIds)
+      for (final s in await products.watchSerials(pid).first)
+        if (ids.contains(s.id)) s.serial,
+  };
+}
+
 /// BUG-2: before a module product goes into the cart, find out WHICH unit:
 /// - IMEI / serial (serialWarranty): always asked; only in-stock IMEIs not
 ///   already in the cart are offered.
@@ -51,7 +63,11 @@ Future<ModulePickResult> pickModuleUnit(BuildContext context, WidgetRef ref, Pro
     final serials = await products.watchSerials(p.id).first;
     if (serials.isNotEmpty) {
       final inCart = cart.serialIds;
-      final free = serials.where((s) => s.status == SerialStatus.inStock && !inCart.contains(s.id)).toList();
+      // BUG-28: an IMEI NUMBER already in the cart (any product's row — duplicateSerial) is not offered again.
+      final inCartNumbers = await cartSerialNumbers(products, cart);
+      final free = serials
+          .where((s) => s.status == SerialStatus.inStock && !inCart.contains(s.id) && !inCartNumbers.contains(s.serial))
+          .toList();
       if (!context.mounted) return const PickCancelled();
       return _sheet(
         context,
@@ -75,7 +91,7 @@ Future<ModulePickResult> pickModuleUnit(BuildContext context, WidgetRef ref, Pro
       if (!context.mounted) return const PickCancelled();
       return _sheet(
         context,
-        title: 'ဘယ် Size / အရောင် လဲ?',
+        title: 'ဘယ် ဆိုဒ် / အရောင် လဲ?',
         subtitle: p.name,
         empty: '',
         options: [

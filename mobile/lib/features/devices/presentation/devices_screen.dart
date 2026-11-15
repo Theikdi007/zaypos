@@ -73,7 +73,7 @@ class DevicesScreen extends ConsumerWidget {
             child: session.isDemo
                 ? Padding(
                     padding: const EdgeInsets.all(24),
-                    child: Text('Demo ဆိုင်မှာ ဖုန်းစာရင်း မရှိပါ။', style: AppText.s(14, color: AppColors.muted)),
+                    child: Text('စမ်းသပ်ဆိုင်မှာ ဖုန်းစာရင်း မရှိပါ။', style: AppText.s(14, color: AppColors.muted)),
                   )
                 : RefreshIndicator(
                     onRefresh: () => ref.refresh(remoteDevicesProvider.future),

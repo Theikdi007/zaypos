@@ -15,6 +15,7 @@ import '../../inventory/application/stock_service.dart';
 import '../../../core/utils/ids.dart';
 import '../../inventory/data/stock_repository.dart';
 import '../../inventory/presentation/restock_sheet.dart';
+import '../data/product_photos.dart';
 import '../data/product_providers.dart';
 import '../data/product_repository.dart';
 import '../domain/product.dart';
@@ -161,6 +162,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final async = ref.watch(productsProvider);
     if (!async.hasValue) return AsyncView(value: async, data: (_) => const SizedBox());
     final all = async.requireValue;
+    final photos = ref.watch(productPhotosProvider).value ?? const {};
     int count(ProductFilter f) => all.where((p) => productMatches(f, p)).length;
     final lowCount = count(ProductFilter.low);
     final untrackedCount = count(ProductFilter.untracked);
@@ -232,6 +234,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           for (final p in rows)
                             _ProductRow(
                               product: p,
+                              image: photos[p.id],
                               showStock: features.stock,
                               onEdit: () => context.push(Routes.editProduct(p.id)),
                               onRestock: features.stock ? () => _restock(p) : null,
@@ -255,9 +258,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 }
 
 class _ProductRow extends StatelessWidget {
-  const _ProductRow({required this.product, required this.showStock, required this.onEdit, this.onRestock});
+  const _ProductRow({required this.product, required this.showStock, required this.onEdit, this.onRestock, this.image});
 
   final ProductView product;
+
+  /// Product photo (this phone only); null = the initial.
+  final ImageProvider? image;
   final bool showStock;
 
   /// Tap the row = edit the product.
@@ -282,7 +288,8 @@ class _ProductRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
-            InitialAvatar(initial: p.initial, bg: Color(p.tint), fg: AppColors.textStrong, size: 44, radius: 12),
+            InitialAvatar(
+                initial: p.initial, bg: Color(p.tint), fg: AppColors.textStrong, size: 44, radius: 12, image: image),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

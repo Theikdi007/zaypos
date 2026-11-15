@@ -188,7 +188,7 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
     final limits = ref.read(syncLimitsProvider);
     final v = limits.normalize('productSerials.serial', _imei.text);
     if (v.isEmpty) return true;
-    final error = limits.checkText('productSerials.serial', v, label: 'IMEI / Serial') ??
+    final error = limits.checkText('productSerials.serial', v, label: 'IMEI / စီးရီးနံပါတ်') ??
         (_imeis.contains(v) || widget.knownSerials.contains(v) || widget.serials.any((s) => s.serial == v && s.status == SerialStatus.inStock)
             ? 'ဒီ IMEI ရှိပြီးသားပါ။'
             : null);
@@ -275,7 +275,7 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
               switch (widget.mode) {
                 RestockMode.imei => '${widget.productName} · ဝင်လာတဲ့ ဖုန်းတစ်လုံးချင်း IMEI ထည့်ပါ',
                 RestockMode.batch => '${widget.productName} · ဘယ် Batch ထဲ ဝင်လာလဲ',
-                RestockMode.variant => '${widget.productName} · ဘယ် Size / အရောင် ဝင်လာလဲ',
+                RestockMode.variant => '${widget.productName} · ဘယ် ဆိုဒ် / အရောင် ဝင်လာလဲ',
               },
               style: AppText.s(13, color: AppColors.muted),
             ),
@@ -304,7 +304,7 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
               child: AppInput(
                 key: const ValueKey('imei'),
                 controller: _imei,
-                hint: 'IMEI 15 လုံး (scan / ရိုက်)',
+                hint: 'IMEI 15 လုံး (စကင်ဖတ် / ရိုက်)',
                 keyboardType: TextInputType.number,
                 semanticLabel: 'IMEI ထည့်ရန်',
                 onSubmitted: (_) => _addImei(),

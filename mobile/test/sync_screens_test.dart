@@ -74,6 +74,8 @@ void main() {
 
   Future<void> addRejectedProduct(WidgetTester tester, ProviderContainer c, TestShop shop, String name) async {
     api.outcome = (_) => UnitOutcome.rejected;
+    api.rejectCode = 'fieldTooLong';
+    api.rejectData = const {'field': 'products.name', 'max': '120'};
     await addProduct(tester, c, shop, name);
     await syncNow(tester, c);
   }
@@ -88,17 +90,19 @@ void main() {
     await tester.tap(find.text('Sync ပြဿနာ (၁)'));
     await settle(tester);
     expect(find.byType(SyncReviewScreen), findsOneWidget);
-    expect(find.text(api.rejectReason), findsOneWidget);
+    // BUG-26: the message is built from code + data; the server's English reason is never shown.
+    expect(find.text('“အမည်” က စာလုံး ၁၂၀ လုံးထက် ရှည်နေပါတယ်။'), findsOneWidget);
+    expect(find.text(api.rejectReason), findsNothing);
     expect(find.textContaining('ပစ္စည်းအသစ် · xxx'), findsOneWidget);
 
     await tester.tap(find.textContaining('ပစ္စည်းအသစ် · xxx'));
     await settle(tester);
     expect(find.byType(RejectedUnitScreen), findsOneWidget);
     await tester.enterText(find.byType(EditableText).first, 'ဆပ်ပြာ');
-    await tester.ensureVisible(find.text('Support ကို ပို့မယ်'));
+    await tester.ensureVisible(find.text('အကူအညီဌာနကို ပို့မယ်'));
     await tester.pumpAndSettle();
     expect(find.text('ပြင်ပြီး ပြန်ပို့မယ်'), findsOneWidget);
-    expect(find.text('Support ကို ပို့မယ်'), findsOneWidget);
+    expect(find.text('အကူအညီဌာနကို ပို့မယ်'), findsOneWidget);
     expect(find.textContaining('ဖျက်'), findsNothing, reason: 'no delete button');
     api.outcome = (_) => UnitOutcome.applied;
     await tester.ensureVisible(find.text('ပြင်ပြီး ပြန်ပို့မယ်')); // below the edit fields
@@ -114,7 +118,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Support ကို ပို့မယ် copies the unit JSON with the reason', (tester) async {
+  testWidgets('အကူအညီဌာနကို ပို့မယ် copies the unit JSON with the reason', (tester) async {
     final (c, shop) = await boot(tester);
     await addRejectedProduct(tester, c, shop, 'bad');
     String? copied;
@@ -126,8 +130,8 @@ void main() {
     c.read(appRouterProvider).push(Routes.rejectedUnit(seq));
     await settle(tester);
 
-    await tester.ensureVisible(find.text('Support ကို ပို့မယ်'));
-    await tester.tap(find.text('Support ကို ပို့မယ်'));
+    await tester.ensureVisible(find.text('အကူအညီဌာနကို ပို့မယ်'));
+    await tester.tap(find.text('အကူအညီဌာနကို ပို့မယ်'));
     await settle(tester);
 
     final j = jsonDecode(copied!) as Map<String, dynamic>;
@@ -144,7 +148,7 @@ void main() {
     // §5.1: the commit schedules a sync 2 s later; it hits the network error.
     await drive(tester, () => Future<void>.delayed(const Duration(seconds: 3)));
     expect(api.pushes, hasLength(1));
-    expect(find.text('Offline · sync ၁ ခုစောင့်'), findsOneWidget);
+    expect(find.text('လိုင်းမရှိ · Sync ၁ ခုစောင့်'), findsOneWidget);
 
     c.read(appRouterProvider).push(Routes.settingsFeatures);
     await settle(tester);

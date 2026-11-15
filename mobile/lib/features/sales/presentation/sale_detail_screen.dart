@@ -15,6 +15,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../application/void_sale_service.dart';
 import '../data/sales_providers.dart';
 import '../domain/sale.dart';
+import 'receipt_image.dart';
 import 'sale_ui.dart';
 import '../../../core/widgets/async_view.dart';
 
@@ -126,14 +127,16 @@ class SaleDetailScreen extends ConsumerWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: PrimaryButton(
-                    label: 'ပြေစာ ပို့မယ်',
-                    variant: ButtonVariant.outline,
-                    height: 54,
-                    radius: 14,
-                    fontSize: 14,
-                    icon: AppIcons.send,
-                    onPressed: () {},
+                  child: Builder(
+                    builder: (context) => PrimaryButton(
+                      label: receiptShareText,
+                      variant: ButtonVariant.outline,
+                      height: 54,
+                      radius: 14,
+                      fontSize: 14,
+                      icon: AppIcons.send,
+                      onPressed: () => shareReceipt(context, ref, sale),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),

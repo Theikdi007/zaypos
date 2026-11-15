@@ -84,7 +84,7 @@ class DashboardScreen extends ConsumerWidget {
                   const SyncChip(),
                   AppIconButton(
                     icon: AppIcons.settings,
-                    semanticLabel: 'Settings',
+                    semanticLabel: 'ဆက်တင်',
                     onPressed: () => context.push(Routes.settingsFeatures),
                   ),
                 ],

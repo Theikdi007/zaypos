@@ -105,6 +105,8 @@ public class SyncTests(SqlServerFixture sql)
 
         first.Outcome.Should().Be(UnitOutcome.Rejected);
         first.Reason.Should().Contain("stockMovements.productId");
+        first.Code.Should().Be(RejectCodes.NotFound);
+        first.Data.Should().BeEquivalentTo(new Dictionary<string, string> { ["field"] = "stockMovements.productId" });
         retry.Outcome.Should().Be(UnitOutcome.Rejected);
         await using var db = sql.CreateContext(shop.TenantId);
         (await db.Sales.AnyAsync()).Should().BeFalse("nothing of a rejected unit is kept");
@@ -399,6 +401,142 @@ public class SyncTests(SqlServerFixture sql)
         await PushOne(shop, ProductUnit(Guid.CreateVersion7(), "Coke A", Now(), barcode: "8850999320014"));
         var second = await PushOne(shop, ProductUnit(Guid.CreateVersion7(), "Coke B", Now(), barcode: "8850999320014"));
         second.Issues.Should().Equal(SyncIssueKind.DuplicateBarcode);
+
+        // BUG-26: structured fields for the app's own (Burmese) message, also on pull; English detail kept.
+        var issue = (await PullAll(shop)).Changes.SyncIssues.Single();
+        issue.Detail.Should().Be("Barcode 8850999320014 is also used by: Coke A.");
+        using var data = JsonDocument.Parse(issue.Data!);
+        data.RootElement.GetProperty("barcode").GetString().Should().Be("8850999320014");
+        data.RootElement.GetProperty("productName").GetString().Should().Be("Coke B");
+        data.RootElement.GetProperty("others").EnumerateArray().Select(e => e.GetString()).Should().Equal("Coke A");
+        data.RootElement.GetProperty("othersCount").GetInt32().Should().Be(1);
+    }
+
+    [Fact]
+    public async Task A_cleared_field_is_stored_as_null_and_pulled_as_an_explicit_null()
+    {
+        // BUG-31, both directions: phone B pushes the row with the fields cleared (null); the server stores null and
+        // the pull JSON carries "barcode": null etc. (not omitted), so phone A can clear its copy.
+        var shop = await NewShop();
+        var id = Guid.CreateVersion7();
+        var created = Now();
+        object Row(DateTime at, string? barcode, long? wholesalePrice, int? expiryAlertDays) => new
+        {
+            id, name = "ဆပ်ပြာ", category = "General", unit = "ခု", barcode, cost = 1000, price = 1500, wholesalePrice,
+            expiryAlertDays, lowAlertMilli = 0, tint = 0, initial = "က", createdAt = created, updatedAt = at,
+        };
+        (await PushOne(shop, Unit("upsertProduct", new { products = new[] { Row(created, "8850000099101", 1400, 30) } })))
+            .Outcome.Should().Be(UnitOutcome.Applied);
+        var customer = await AddCustomer(shop, creditLimit: 50_000);
+        (await PushOne(shop, Unit("upsertProduct", new { products = new[] { Row(created.AddMinutes(1), null, null, null) } })))
+            .Outcome.Should().Be(UnitOutcome.Applied);
+        (await PushOne(shop, Unit("upsertCustomer", new
+        {
+            customers = new[] { new { id = customer, name = "ဒေါ်ခင်မာ", phone = "09777123456", creditLimit = (long?)null,
+                createdAt = created, updatedAt = Now().AddMinutes(1) } },
+        }))).Outcome.Should().Be(UnitOutcome.Applied);
+
+        await using (var db = sql.CreateContext(shop.TenantId))
+        {
+            var p = await db.Products.SingleAsync(x => x.Id == id);
+            (p.Barcode, p.WholesalePrice, p.ExpiryAlertDays).Should().Be((null, null, null));
+            (await db.Customers.SingleAsync(x => x.Id == customer)).CreditLimit.Should().BeNull();
+        }
+
+        var raw = await (await shop.Http.GetAsync("/api/v1/sync/pull?cursor=0&limit=1000")).Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(raw);
+        var changes = doc.RootElement.GetProperty("changes");
+        var product = changes.GetProperty("products").EnumerateArray().Single(r => r.GetProperty("id").GetGuid() == id);
+        foreach (var k in new[] { "barcode", "wholesalePrice", "expiryAlertDays" })
+        {
+            product.TryGetProperty(k, out var v).Should().BeTrue($"{k} must be in the pull JSON");
+            v.ValueKind.Should().Be(JsonValueKind.Null, k);
+        }
+        var c = changes.GetProperty("customers").EnumerateArray().Single(r => r.GetProperty("id").GetGuid() == customer);
+        c.TryGetProperty("creditLimit", out var limit).Should().BeTrue();
+        limit.ValueKind.Should().Be(JsonValueKind.Null);
+    }
+
+    [Fact]
+    public void Issue_data_caps_the_other_names_and_always_fits_the_column()
+    {
+        var names = Enumerable.Range(1, 40).Select(i => new string('က', 150) + i).ToList();
+        var json = SyncIssueData.Serialize(new()
+        {
+            ["barcode"] = "1", ["productName"] = new string('ခ', 150), ["others"] = names.Take(SyncLimits.IssueDataMaxNames).ToList(),
+            ["othersCount"] = names.Count,
+        });
+        json.Length.Should().BeLessThanOrEqualTo(SyncLimits.IssueDataMaxLength);
+        JsonDocument.Parse(json).RootElement.GetProperty("othersCount").GetInt32().Should().Be(40);
+    }
+
+    [Fact]
+    public async Task Negative_stock_and_unknown_kind_carry_structured_fields()
+    {
+        var shop = await NewShop();
+        var product = await AddProduct(shop, stock: 1000);
+        await PushOne(shop, Checkout(shop, "A-0001", (product, 3000, 500)));
+        var unknown = await PushOne(shop, Unit("teleport", new { }));
+
+        using var data = JsonDocument.Parse((await PullAll(shop)).Changes.SyncIssues.Single().Data!);
+        data.RootElement.GetProperty("stockMilli").GetInt64().Should().Be(-2000);
+        data.RootElement.GetProperty("productName").GetString().Should().NotBeNullOrEmpty();
+        unknown.Code.Should().Be(RejectCodes.UnknownKind);
+        unknown.Data.Should().BeEquivalentTo(new Dictionary<string, string> { ["kind"] = "teleport" });
+    }
+
+    [Fact]
+    public async Task A_duplicateBarcode_issue_closes_itself_once_one_product_keeps_the_barcode()
+    {
+        // Owner 2026-11-14: resolved by the server with resolution "fixed", kept in history, pulled by every phone.
+        var shop = await NewShop();
+        var a = Guid.CreateVersion7();
+        var b = Guid.CreateVersion7();
+        var c = Guid.CreateVersion7();
+        await PushOne(shop, ProductUnit(a, "Coke A", Now(), barcode: "8850999320099"));
+        await PushOne(shop, ProductUnit(b, "Coke B", Now(), barcode: "8850999320099"));
+        await PushOne(shop, ProductUnit(c, "Coke C", Now(), barcode: "8850999320099"));
+        async Task<List<SyncIssue>> Issues()
+        {
+            await using var db = sql.CreateContext(shop.TenantId);
+            return await db.SyncIssues.Where(i => i.Kind == SyncIssueKind.DuplicateBarcode).OrderBy(i => i.CreatedAt).ToListAsync();
+        }
+        (await Issues()).Should().HaveCount(2).And.OnlyContain(i => i.ResolvedAt == null);
+
+        await PushOne(shop, ProductUnit(c, "Coke C", Now().AddMinutes(1), barcode: null)); // 2 still share it
+        (await Issues()).Should().OnlyContain(i => i.ResolvedAt == null, "Coke A and Coke B still share the barcode");
+
+        await PushOne(shop, ProductUnit(b, "Coke B", Now().AddMinutes(1), deletedAt: Now().AddMinutes(1))); // deleted
+        var closed = await Issues();
+        closed.Should().HaveCount(2, "kept in history").And.OnlyContain(i => i.ResolvedAt != null && i.DeletedAt == null);
+        foreach (var i in closed)
+        {
+            using var data = JsonDocument.Parse(i.Data!);
+            data.RootElement.GetProperty("resolution").GetString().Should().Be("fixed");
+            data.RootElement.GetProperty("barcode").GetString().Should().Be("8850999320099", "the other fields are kept");
+        }
+        (await PullAll(shop)).Changes.SyncIssues.Should().OnlyContain(i => i.ResolvedAt != null && i.Data!.Contains("\"resolution\":\"fixed\""));
+    }
+
+    [Fact]
+    public async Task An_old_duplicateBarcode_issue_without_data_is_found_by_its_detail_and_closed()
+    {
+        var shop = await NewShop();
+        var a = Guid.CreateVersion7();
+        var b = Guid.CreateVersion7();
+        await PushOne(shop, ProductUnit(a, "Coke A", Now(), barcode: "8850999320098"));
+        await PushOne(shop, ProductUnit(b, "Coke B", Now(), barcode: "8850999320098"));
+        await using (var db = sql.CreateContext(shop.TenantId))
+        {
+            var issue = await db.SyncIssues.SingleAsync();
+            issue.Data = null; // raised before SyncIssues.Data existed
+            await db.SaveChangesAsync();
+        }
+        await PushOne(shop, ProductUnit(b, "Coke B", Now().AddMinutes(1), barcode: "8850999320097"));
+        await using var check = sql.CreateContext(shop.TenantId);
+        var closed = await check.SyncIssues.SingleAsync();
+        closed.ResolvedAt.Should().NotBeNull();
+        closed.Data.Should().Be("{\"resolution\":\"fixed\"}");
     }
 
     [Fact]

@@ -96,7 +96,7 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
     final existing = ref.read(productSerialsProvider(widget.productId)).value ?? const [];
     // Refused if this phone knows it already, on any product (BUG-18).
     final known = ref.read(knownSerialsProvider).value ?? const <String>{};
-    final error = limits.checkText('productSerials.serial', v, label: 'IMEI / Serial') ??
+    final error = limits.checkText('productSerials.serial', v, label: 'IMEI / စီးရီးနံပါတ်') ??
         (_p.imeis.contains(v) || known.contains(v) || existing.any((s) => s.serial == v && s.status == SerialStatus.inStock)
             ? 'ဒီ IMEI ရှိပြီးသားပါ။'
             : null);
@@ -129,10 +129,10 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
     final size = _size.text.trim(), color = _color.text.trim();
     final existing = ref.read(productVariantsProvider(widget.productId)).value ?? const [];
     final error = size.isEmpty || color.isEmpty
-        ? 'Size နဲ့ အရောင် ထည့်ပါ။'
+        ? 'ဆိုဒ် နဲ့ အရောင် ထည့်ပါ။'
         : existing.any((v) => v.size == size && v.color == color) ||
                 _p.variants.any((v) => v.size == size && v.color == color)
-            ? 'ဒီ Size / အရောင် ရှိပြီးသားပါ။'
+            ? 'ဒီ ဆိုဒ် / အရောင် ရှိပြီးသားပါ။'
             : null;
     setState(() => _variantError = error);
     if (error != null) return false;
@@ -172,7 +172,7 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
       children: [
         if (f.serialWarranty)
           FormSection(
-            title: 'IMEI / Serial',
+            title: 'IMEI / စီးရီးနံပါတ်',
             borderColor: AppColors.phoneBorder,
             children: [
               if (serials.isEmpty && _p.imeis.isEmpty)
@@ -276,7 +276,7 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
         if (f.variants) ...[
           if (f.serialWarranty || f.expiryBatch) const SizedBox(height: 14),
           FormSection(
-            title: 'Size / အရောင်',
+            title: 'ဆိုဒ် / အရောင်',
             children: [
               for (final v in variants)
                 Row(
@@ -290,9 +290,9 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
                 Text('${v.size} · ${v.color} · အသစ်', style: AppText.s(14, weight: AppText.w600, color: AppColors.primary)),
               TwoCol(
                 LabeledField(
-                  label: 'Size',
+                  label: 'ဆိုဒ်',
                   small: true,
-                  child: AppInput(key: const ValueKey('newVariantSize'), controller: _size, semanticLabel: 'Size အသစ်'),
+                  child: AppInput(key: const ValueKey('newVariantSize'), controller: _size, semanticLabel: 'ဆိုဒ် အသစ်'),
                 ),
                 LabeledField(
                   label: 'အရောင်',
@@ -302,7 +302,7 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
               ),
               PrimaryButton(
                 key: const ValueKey('addVariant'),
-                label: '+ Size / အရောင် ထည့်မယ်',
+                label: '+ ဆိုဒ် / အရောင် ထည့်မယ်',
                 variant: ButtonVariant.soft,
                 height: 44,
                 radius: 12,

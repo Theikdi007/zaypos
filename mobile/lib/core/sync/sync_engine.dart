@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import '../api/api_error.dart';
 import 'sync_api.dart';
 import 'sync_store.dart';
 
+/// What the sync card / chip says when a cycle fails (Burmese only — the raw error is logged, BUG-30).
 abstract final class SyncMessages {
-  static const unreadable = 'Server က ပို့တဲ့ data ကို ဖတ်မရပါ။ App ကို update လုပ်ပါ (သို့) Support ကို ဆက်သွယ်ပါ။';
+  static const unreadable = 'ဆာဗာက ပို့တဲ့ ဒေတာကို ဖတ်မရပါ။ အက်ပ်ကို အပ်ဒိတ်လုပ်ပါ (သို့) အကူအညီဌာနကို ဆက်သွယ်ပါ။';
+  static const failed = 'Sync လုပ်လို့ မရသေးပါ။ ခဏနေမှ ပြန်ကြိုးစားပါ (သို့) အကူအညီဌာနကို ဆက်သွယ်ပါ။';
 }
 
 /// What the sync UI shows (chip, Settings, first-download screen).
@@ -183,10 +186,12 @@ class SyncEngine {
       error = e.message;
       online = !e.isNetwork;
       if (e.status == 403 && e.code == 'device_revoked') await onSessionEnded?.call(e.code);
-    } on Object catch (e) {
+    } on Object catch (e, st) {
       // e.g. a pulled row this app cannot store (FormatException): that page
       // was rolled back, the cursor stays; report it, never crash the trigger.
-      error = '${SyncMessages.unreadable} ($e)';
+      // BUG-30: the user sees Burmese only; the raw error goes to the log.
+      error = e is FormatException ? SyncMessages.unreadable : SyncMessages.failed;
+      developer.log('sync cycle failed', name: 'zaypos.sync', error: e, stackTrace: st);
     }
     _emit(_snapshot.copyWith(
       running: false,

@@ -7,6 +7,9 @@ abstract interface class CustomerRepository {
   Stream<List<Customer>> watchAll();
   Stream<Customer?> watchById(String id);
   Future<void> add(Customer customer);
+
+  /// Saves an edited customer (name, phone, address, credit limit, note); identity / history columns kept.
+  Future<void> update(Customer customer);
 }
 
 /// Bound at the composition root (lib/app/fake_overrides.dart).

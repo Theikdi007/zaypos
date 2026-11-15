@@ -276,7 +276,7 @@ void main() {
       await tester.enterText(field('newVariantColor'), 'အနက်');
       await tester.tap(find.byKey(const ValueKey('addVariant')));
       await tester.pumpAndSettle();
-      expect(find.text('ဒီ Size / အရောင် ရှိပြီးသားပါ။'), findsOneWidget);
+      expect(find.text('ဒီ ဆိုဒ် / အရောင် ရှိပြီးသားပါ။'), findsOneWidget);
       // BUG-17: the refused size/colour is still typed → save is blocked, nothing written.
       await tester.tap(find.text('သိမ်းမယ်').last);
       await tester.pumpAndSettle();

@@ -1,0 +1,24 @@
+00:00 +0: loading /Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_02_register_test.dart
+Running Xcode build...                                          
+Xcode build done.                                           21.1s
+00:00 +0: register shop A on the live API; empty 7-day chart (debug build)
+QA_SHOT:reg_A_step1_otp
+[runner] screenshot reg_A_step1_otp.png
+QA_SHOT:reg_A_step2_shop
+[runner] screenshot reg_A_step2_shop.png
+QA_SHOT:reg_A_step3_catalog
+[runner] screenshot reg_A_step3_catalog.png
+QA_SHOT:reg_A_step4_pin
+[runner] screenshot reg_A_step4_pin.png
+QA_SHOT:reg_A_dashboard
+[runner] screenshot reg_A_dashboard.png
+QA_SHOT:rpt_new1_empty_week_debug
+[runner] screenshot rpt_new1_empty_week_debug.png
+09:29 +0: register shop A on the live API; empty 7-day chart (debug build) - did not complete [E]
+09:29 +0: (tearDownAll) - did not complete [E]
+09:29 +0: Some tests failed.
+
+Failing tests:
+  /Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_02_register_test.dart: (tearDownAll) (did not complete)
+  /Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_02_register_test.dart: register shop A on the live API; empty 7-day chart (debug build) (did not complete)
+[runner] flutter exit code 1

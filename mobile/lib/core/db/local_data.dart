@@ -8,6 +8,7 @@ import '../../features/inventory/data/fake_stock_repository.dart';
 import '../../features/products/data/fake_product_repository.dart';
 import '../../features/sales/data/fake_sales_repository.dart';
 import '../utils/ids.dart';
+import '../utils/phone.dart';
 import 'app_database.dart';
 import 'database_provider.dart';
 import 'mappers.dart';
@@ -83,7 +84,7 @@ class LocalData {
   /// (register) or the demo shop.
   Future<SignInCheck> check(String? phone) async {
     final o = await owner();
-    if (o != null && !o.isDemo && phone != null && o.phone == phone) return SignInCheck.sameShop;
+    if (o != null && !o.isDemo && phone != null && samePhone(o.phone, phone)) return SignInCheck.sameShop;
     return await pendingUnits() > 0 ? SignInCheck.refuse : SignInCheck.replace;
   }
 
@@ -173,7 +174,7 @@ class LocalData {
     return tenantId;
   }
 
-  static const demoShopName = 'ရွှေဝါ ကုန်စုံဆိုင် (Demo)';
+  static const demoShopName = 'ရွှေဝါ ကုန်စုံဆိုင် (စမ်းသပ်)';
 }
 
 /// The design's sample shop (products, opening stock, customers, debt, ~700

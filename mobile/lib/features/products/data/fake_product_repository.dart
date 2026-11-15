@@ -65,6 +65,12 @@ class FakeProductRepository implements ProductRepository {
       );
 
   @override
+  Stream<List<ProductSerial>> watchSerialRows(String serial) => db.watch(
+        {FakeTable.serials},
+        () => List.unmodifiable(db.serials.where((s) => s.serial == serial && s.deletedAt == null)),
+      );
+
+  @override
   Stream<Set<String>> watchInStockSerialValues() => db.watch(
         {FakeTable.serials},
         () => {

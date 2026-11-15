@@ -27,7 +27,7 @@ class AppBottomNav extends StatelessWidget {
     AppNavItem(AppIcons.cart, 'ရောင်းမယ်'),
     AppNavItem(AppIcons.box, 'ပစ္စည်း'),
     AppNavItem(AppIcons.ledger, 'အကြွေး'),
-    AppNavItem(AppIcons.chart, 'Report'),
+    AppNavItem(AppIcons.chart, 'အစီရင်ခံစာ'),
   ];
 
   @override

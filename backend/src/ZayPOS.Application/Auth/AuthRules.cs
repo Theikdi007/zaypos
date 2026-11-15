@@ -19,18 +19,27 @@ public static partial class PhoneNumbers
 {
     /// <summary>
     /// Myanmar mobile number → E.164 ("09 7xx xxx 102" → "+9597xxxxxx102").
-    /// Accepts 09…, 959… and +959… with spaces/dashes. Returns null when invalid.
+    /// Accepts 09…, 959… and +959… with spaces/dashes/dots and Myanmar digits (၀-၉), the same rules as the
+    /// app's phoneKey/normalizeMmPhone (BUG-34). Returns null when invalid.
     /// </summary>
     public static string? Normalize(string? input)
     {
         if (string.IsNullOrWhiteSpace(input)) return null;
-        var s = Separators().Replace(input.Trim(), "");
+        var s = Separators().Replace(ToAsciiDigits(input.Trim()), "");
         if (s.StartsWith("+959")) s = s[4..];
         else if (s.StartsWith("959")) s = s[3..];
         else if (s.StartsWith("09")) s = s[2..];
         else return null;
         return Subscriber().IsMatch(s) ? "+959" + s : null;
     }
+
+    /// <summary>Myanmar digits ၀-၉ (U+1040–U+1049) → 0-9.</summary>
+    public static string ToAsciiDigits(string s) =>
+        string.Create(s.Length, s, (span, src) =>
+        {
+            for (var i = 0; i < src.Length; i++)
+                span[i] = src[i] is >= '\u1040' and <= '\u1049' ? (char)('0' + (src[i] - '\u1040')) : src[i];
+        });
 
     [GeneratedRegex(@"[\s\-().]")]
     private static partial Regex Separators();

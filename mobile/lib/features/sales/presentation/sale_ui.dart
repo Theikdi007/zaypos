@@ -19,10 +19,10 @@ extension SaleLabels on Sale {
   /// "#A-1030 · အကြွေး (ဦးအောင်ကျော်)"
   String get title => '#$no · ${method.label}${customerName != null ? ' ($customerName)' : ''}';
 
-  /// "3:42 PM"
+  /// "နေ့လယ် 3:42"
   String get time => timeLabel(createdAt);
 
-  /// "ပစ္စည်း 4 မျိုး · 3:42 PM"
+  /// "ပစ္စည်း 4 မျိုး · နေ့လယ် 3:42"
   String get subtitle => 'ပစ္စည်း $itemCount မျိုး · $time';
 
   /// "ယနေ့" / "နို ၇"

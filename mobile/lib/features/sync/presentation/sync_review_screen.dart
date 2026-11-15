@@ -25,6 +25,7 @@ class SyncReviewScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final rejected = ref.watch(rejectedUnitsProvider).value ?? const <OutboxRow>[];
     final issues = ref.watch(openIssuesProvider).value ?? const <SyncIssueRow>[];
+    final resolved = ref.watch(resolvedIssuesProvider).value ?? const <SyncIssueRow>[];
     final isOwner = ref.watch(sessionProvider.select((s) => s.isOwner));
     final now = DateTime.now();
 
@@ -47,10 +48,10 @@ class SyncReviewScreen extends ConsumerWidget {
                         textAlign: TextAlign.center, style: AppText.s(14, color: AppColors.muted)),
                   ),
                 if (rejected.isNotEmpty) ...[
-                  section('Server က လက်မခံသေးတဲ့ စာရင်း'),
+                  section('ဆာဗာက လက်မခံသေးတဲ့ စာရင်း'),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                    child: Text('ဒီစာရင်း မပြင်မချင်း နောက်ပိုင်း စာရင်းတွေ server ကို မပို့နိုင်ပါ။',
+                    child: Text('ဒီစာရင်း မပြင်မချင်း နောက်ပိုင်း စာရင်းတွေ ဆာဗာကို မပို့နိုင်ပါ။',
                         style: AppText.s(12, color: AppColors.dangerInk)),
                   ),
                   AppCard(
@@ -58,7 +59,7 @@ class SyncReviewScreen extends ConsumerWidget {
                       for (final o in rejected)
                         CardListTile(
                           title: Text(unitSummary(o.kind, SyncStore.rowsOf(o)), style: AppText.s(14, weight: AppText.w600)),
-                          subtitle: Text(o.rejectReason ?? '', style: AppText.s(12, color: AppColors.muted)),
+                          subtitle: Text(rejectMessage(o.rejectCode, o.rejectData), style: AppText.s(12, color: AppColors.muted)),
                           trailing: const AppIcon(AppIcons.chevronRight, size: 18, color: AppColors.subtle),
                           onTap: () => context.push(Routes.rejectedUnit(o.seq)),
                         ),
@@ -72,7 +73,7 @@ class SyncReviewScreen extends ConsumerWidget {
                       for (final i in issues)
                         CardListTile(
                           title: Text(issueKindLabel(i.kind), style: AppText.s(14, weight: AppText.w600)),
-                          subtitle: Text('${i.detail}\n${entryDateLabel(i.createdAt, now)}',
+                          subtitle: Text('${issueMessage(i.kind, i.data)}\n${entryDateLabel(i.createdAt, now)}',
                               style: AppText.s(12, color: AppColors.muted)),
                           isThreeLine: true,
                           trailing: isOwner
@@ -82,6 +83,23 @@ class SyncReviewScreen extends ConsumerWidget {
                                       style: AppText.s(13, weight: AppText.w600, color: AppColors.primary)),
                                 )
                               : null,
+                        ),
+                    ]),
+                  ),
+                ],
+                if (resolved.isNotEmpty) ...[
+                  section('ပြီးသွားတဲ့ ကိစ္စများ'),
+                  AppCard(
+                    child: DividedColumn(children: [
+                      for (final i in resolved)
+                        CardListTile(
+                          key: ValueKey('resolvedIssue-${i.id}'),
+                          title: Text(issueKindLabel(i.kind), style: AppText.s(14, weight: AppText.w600, color: AppColors.textSecondary)),
+                          subtitle: Text('${issueMessage(i.kind, i.data)}\n${entryDateLabel(i.resolvedAt!, now)}',
+                              style: AppText.s(12, color: AppColors.muted)),
+                          isThreeLine: true,
+                          trailing: Text(issueResolutionLabel(i.data),
+                              style: AppText.s(12, weight: AppText.w600, color: AppColors.success)),
                         ),
                     ]),
                   ),

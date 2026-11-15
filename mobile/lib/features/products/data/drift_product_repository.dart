@@ -57,6 +57,13 @@ class DriftProductRepository implements ProductRepository {
       .watch();
 
   @override
+  Stream<List<ProductSerial>> watchSerialRows(String serial) => (db.select(db.productSerials)
+        ..where((s) => s.serial.equals(serial) & s.deletedAt.isNull())
+        ..orderBy([(s) => OrderingTerm.asc(s.createdAt)]))
+      .map(serialFromRow)
+      .watch();
+
+  @override
   Stream<Set<String>> watchInStockSerialValues() {
     final s = db.productSerials;
     return (db.selectOnly(s)

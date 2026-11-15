@@ -23,9 +23,12 @@ import '../../../core/features/tenant_features.dart';
 import '../../inventory/data/stock_repository.dart';
 import '../../inventory/domain/stock_movement.dart';
 import '../application/product_service.dart';
+import '../data/product_photos.dart';
 import '../data/product_providers.dart';
 import '../domain/product.dart';
 import '../domain/product_modules.dart';
+import '../domain/product_view.dart';
+import '../../scan/barcode_scanner.dart';
 import 'sections/edit_module_sections.dart';
 import 'sections/feature_sections.dart';
 
@@ -34,7 +37,10 @@ import 'sections/feature_sections.dart';
 /// its own fields only — stock, IMEIs, variants and batches are received
 /// through "Stock ဖြည့်မယ်", not edited here.
 class AddProductScreen extends ConsumerStatefulWidget {
-  const AddProductScreen({super.key, this.editing});
+  const AddProductScreen({super.key, this.editing, this.initialBarcode});
+
+  /// New product from POS: an unknown barcode that was scanned.
+  final String? initialBarcode;
 
   /// The product being edited; null = a new product.
   final Product? editing;
@@ -66,7 +72,14 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   late final Product? _p = widget.editing;
   bool get _isEdit => _p != null;
   late final _name = TextEditingController(text: _p?.name ?? '');
-  late final _barcode = TextEditingController(text: _p?.barcode ?? '');
+  late final _barcode = TextEditingController(text: _p?.barcode ?? widget.initialBarcode ?? '');
+
+  /// Camera scan into the barcode field.
+  Future<void> _scanBarcode() async {
+    final code = await ref.read(barcodeScannerProvider).scan(context, title: 'Barcode ဖတ်မယ်');
+    if (code == null || !mounted) return;
+    _barcode.text = ref.read(syncLimitsProvider).normalize('products.barcode', code);
+  }
   late final _cost = TextEditingController(text: '${_p?.cost ?? _t.sampleCost}');
   late final _price = TextEditingController(text: _p == null ? '${_t.samplePrice}' : (_p.price > 0 ? '${_p.price}' : ''));
   late final _wholesale = TextEditingController(text: _p?.wholesalePrice?.toString() ?? '');
@@ -138,7 +151,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   String? _addImei(String raw) {
     final limits = ref.read(syncLimitsProvider);
     final v = limits.normalize('productSerials.serial', raw);
-    final error = limits.checkText('productSerials.serial', v, label: 'IMEI / Serial');
+    final error = limits.checkText('productSerials.serial', v, label: 'IMEI / စီးရီးနံပါတ်');
     if (error != null) return error;
     if (_imeis.contains(v)) return 'ဒီ IMEI ထည့်ပြီးသားပါ။';
     // Already on this phone (any product): refused (BUG-18).
@@ -146,6 +159,33 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     setState(() => _imeis.add(v));
     return null;
   }
+
+  /// "This barcode is already on another product — save anyway?" Cancel keeps the form open.
+  Future<bool> _confirmDuplicateBarcode(String barcode, List<ProductView> others) async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('ဒီ Barcode ရှိပြီးသားပါ', style: AppText.s(16, weight: AppText.w700)),
+          content: Text(
+            '$barcode ကို ${others.map((o) => '“${o.name}”').join('၊ ')} မှာ သုံးထားပြီးပါပြီ။ '
+            'ဒီအတိုင်း သိမ်းရင် ရောင်းတဲ့အခါ ဘယ်ပစ္စည်းလဲ ရွေးခိုင်းပါမယ်။',
+            style: AppText.s(14),
+          ),
+          actions: [
+            TextButton(
+              key: const ValueKey('duplicateBarcodeCancel'),
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('ပြန်ပြင်မယ်'),
+            ),
+            TextButton(
+              key: const ValueKey('duplicateBarcodeSave'),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text('ဒီအတိုင်း သိမ်းမယ်', style: AppText.s(14, weight: AppText.w700)),
+            ),
+          ],
+        ),
+      ) ??
+      false;
 
   Future<void> _save() async {
     final features = ref.read(tenantFeaturesProvider);
@@ -208,6 +248,14 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         _errors = errors;
       });
       return;
+    }
+    // Duplicate barcode: warn, never block (owner, 2026-11-14). Only when the barcode is new or changed.
+    if (barcode.isNotEmpty && barcode != _p?.barcode) {
+      final others = productsByBarcode(ref.read(productsProvider).value ?? const [], barcode, limits)
+          .where((v) => v.id != _p?.id)
+          .toList();
+      if (others.isNotEmpty && !await _confirmDuplicateBarcode(barcode, others)) return;
+      if (!mounted) return;
     }
     final editing = _p;
     if (editing != null) {
@@ -293,6 +341,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                   ),
             ],
           );
+      await _savePhoto(editing.id);
       if (mounted) context.pop();
       return;
     }
@@ -389,12 +438,98 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
           serials: serials,
           initialStock: movements,
         );
+    await _savePhoto(productId);
     if (mounted) context.pop();
+  }
+
+  // ---------------------------------------------------------------- photo (this phone only, not synced yet)
+
+  /// A new photo taken / picked in this form (raw; compressed on save).
+  Uint8List? _newPhoto;
+
+  /// The saved photo is to be removed on save.
+  bool _removePhoto = false;
+
+  Future<void> _pickPhoto({required bool hasPhoto}) async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: Text('ဓာတ်ပုံ ရိုက်မယ်', style: AppText.s(15)),
+              onTap: () => Navigator.pop(ctx, 'camera'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text('ပုံ ရွေးမယ်', style: AppText.s(15)),
+              onTap: () => Navigator.pop(ctx, 'gallery'),
+            ),
+            if (hasPhoto)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: AppColors.danger),
+                title: Text('ဓာတ်ပုံ ဖယ်မယ်', style: AppText.s(15, color: AppColors.danger)),
+                onTap: () => Navigator.pop(ctx, 'remove'),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (choice == null || !mounted) return;
+    if (choice == 'remove') {
+      setState(() {
+        _newPhoto = null;
+        _removePhoto = true;
+      });
+      return;
+    }
+    final bytes =
+        await ref.read(photoPickerProvider).pick(choice == 'camera' ? PhotoSource.camera : PhotoSource.gallery);
+    if (bytes == null || !mounted) return;
+    setState(() {
+      _newPhoto = bytes;
+      _removePhoto = false;
+    });
+  }
+
+  /// After the product is saved: compress (≤ 200 KB) and keep the photo, or remove it.
+  Future<void> _savePhoto(String productId) async {
+    final photos = ref.read(productPhotosProvider.notifier);
+    try {
+      if (_newPhoto != null) {
+        await photos.save(productId, _newPhoto!);
+      } else if (_removePhoto) {
+        await photos.remove(productId);
+      }
+    } catch (_) {
+      // The product is saved; only the photo failed (e.g. not an image).
+      if (mounted) {
+        ScaffoldMessenger.maybeOf(context)
+            ?.showSnackBar(const SnackBar(content: Text('ဓာတ်ပုံ သိမ်းလို့ မရပါ')));
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final f = ref.watch(tenantFeaturesProvider);
+    final saved = _isEdit ? ref.watch(productPhotoProvider(_p!.id)) : null;
+    final ImageProvider? photo = _newPhoto != null ? MemoryImage(_newPhoto!) : (_removePhoto ? null : saved);
+    const cameraBox = DashedBox(
+      radius: 16,
+      background: AppColors.surface,
+      child: SizedBox(
+        width: 88,
+        height: 88,
+        child: Center(
+          child: AppIcon(AppIcons.camera, size: 28, strokeWidth: 1.8, color: AppColors.textSecondary),
+        ),
+      ),
+    );
     if (_isEdit && f.expiryBatch) {
       // keep the opening-batch check (BUG-22) loaded
       ref.watch(unbatchedStockProvider(_p!.id));
@@ -411,7 +546,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     final serialMode = f.serialWarranty && _serial;
     final showStockInputs = _track && !serialMode && !f.variants;
     final stockHint = f.variants
-        ? 'Variant တစ်ခုချင်း stock ကို အပေါ်မှာ ထည့်ပါ'
+        ? 'ဆိုဒ် / အရောင် တစ်ခုချင်း stock ကို အပေါ်မှာ ထည့်ပါ'
         : serialMode
             ? 'IMEI အရေအတွက်နဲ့ အလိုအလျောက် တွက်မယ်'
             : 'ရောင်းတိုင်း အလိုအလျောက် နုတ်ပေးမယ်';
@@ -431,7 +566,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             trailing: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
               decoration: BoxDecoration(color: _t.tint, borderRadius: AppRadius.chipR),
-              child: Text('${_t.productBadge ?? _t.label} template',
+              child: Text('${_t.productBadge ?? _t.label} ဆိုင်ပုံစံ',
                   style: AppText.s(12, weight: AppText.w700, color: AppColors.textStrong)),
             ),
           ),
@@ -446,23 +581,27 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                   children: [
                     Semantics(
                       button: true,
-                      label: 'ဓာတ်ပုံ ထည့်ရန်',
+                      label: photo == null ? 'ဓာတ်ပုံ ထည့်ရန်' : 'ဓာတ်ပုံ ပြောင်းရန်',
                       excludeSemantics: true,
                       child: InkWell(
-                        onTap: () {},
+                        key: const ValueKey('productPhotoButton'),
+                        onTap: () => _pickPhoto(hasPhoto: photo != null),
                         borderRadius: BorderRadius.circular(16),
-                        child: const DashedBox(
-                          radius: 16,
-                          background: AppColors.surface,
-                          child: SizedBox(
-                            width: 88,
-                            height: 88,
-                            child: Center(
-                              child: AppIcon(AppIcons.camera,
-                                  size: 28, strokeWidth: 1.8, color: AppColors.textSecondary),
-                            ),
-                          ),
-                        ),
+                        child: photo == null
+                            ? cameraBox
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image(
+                                  key: const ValueKey('productPhotoPreview'),
+                                  image: photo,
+                                  width: 88,
+                                  height: 88,
+                                  fit: BoxFit.cover,
+                                  gaplessPlayback: true,
+                                  // BUG-25: a broken saved photo or an undecodable pick shows the camera box, like the POS tile.
+                                  errorBuilder: (_, _, _) => cameraBox,
+                                ),
+                              ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -494,12 +633,12 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                             child: AppInput(
                               key: const ValueKey('barcode'),
                               controller: _barcode,
-                              hint: 'Scan ဖတ် သို့မဟုတ် ရိုက်ထည့်',
+                              hint: 'စကင်ဖတ် သို့မဟုတ် ရိုက်ထည့်',
                               semanticLabel: 'Barcode',
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const ScanSquare(label: 'Barcode scan'),
+                          ScanSquare(key: const ValueKey('barcodeScan'), label: 'Barcode ဖတ်မယ်', onTap: _scanBarcode),
                         ],
                       ),
                     ),
@@ -594,6 +733,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                     onWarrantyChanged: (m) => setState(() => _warrantyMonths = m),
                     showSerials: !_isEdit,
                     registerCommit: (f) => _commitTypedImei = f,
+                    onScanImei: () => ref.read(barcodeScannerProvider).scan(context, title: 'IMEI ဖတ်မယ်'),
                   ),
                 if (f.variants && !_isEdit)
                   VariantsSection(

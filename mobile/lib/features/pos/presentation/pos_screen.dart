@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,9 +16,15 @@ import '../../../core/widgets/numeric_keypad.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/product_tile.dart';
 import '../../../core/widgets/segmented_tabs.dart';
+import '../../../core/utils/myanmar.dart';
 import '../../products/application/product_service.dart';
+import '../../products/data/product_repository.dart';
+import '../../products/domain/product_modules.dart';
+import '../../products/data/product_photos.dart';
 import '../../products/data/product_providers.dart';
 import '../../products/domain/product_view.dart';
+import '../../../core/sync/sync_limits.dart';
+import '../../scan/barcode_scanner.dart';
 import 'module_pick_sheet.dart';
 import 'set_price_sheet.dart';
 import '../../devices/data/device_providers.dart';
@@ -38,12 +45,76 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   String? _cat; // null = all
   String _query = '';
   String _amount = '';
+  /// Measured height of the floating cart bar (it grows with the text size, BUG-44).
+  double _cartBarHeight = 72;
   final _quickName = TextEditingController();
+  final _search = TextEditingController();
 
   @override
   void dispose() {
     _quickName.dispose();
+    _search.dispose();
     super.dispose();
+  }
+
+  Future<void> _scanWithCamera() async {
+    final code = await ref.read(barcodeScannerProvider).scan(context, title: 'Barcode ဖတ်မယ်');
+    if (code != null && mounted) await _onScan(code);
+  }
+
+  /// A scanned code (camera or a HID scanner), in this order (owner, 2026-11-14):
+  /// 1. an in-stock IMEI / serial (phone shops) → that phone with that IMEI (already in the cart /
+  ///    sold → a message);
+  /// 2. a product barcode → like a tap; several products with it → the cashier picks one;
+  /// 3. otherwise "ပစ္စည်းအသစ် ထည့်မယ်" with the code.
+  Future<void> _onScan(String raw) async {
+    // Only when POS is on top (not under Checkout / a sheet).
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+    // A HID scanner also types into a focused search box: undo that.
+    if (_search.text.isNotEmpty && _search.text.contains(raw.trim())) {
+      _search.clear();
+      setState(() => _query = '');
+    }
+    final limits = ref.read(syncLimitsProvider);
+    final code = limits.normalize('products.barcode', raw);
+    final all = ref.read(productsProvider).value ?? const <ProductView>[];
+    final matches = productsByBarcode(all, code, limits);
+    final serial = limits.normalize('productSerials.serial', raw);
+    if (await _addScannedSerial(all, serial, barcodeMatches: matches.isNotEmpty) || !mounted) return;
+    if (matches.isNotEmpty) {
+      final p = matches.length == 1 ? matches.single : await _pickBarcodeMatch(code, matches);
+      if (p != null && mounted) await _addProduct(p);
+      return;
+    }
+    final add = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('ဒီ Barcode နဲ့ ပစ္စည်း မရှိသေးပါ', style: AppText.s(17, weight: AppText.w700)),
+              const SizedBox(height: 4),
+              Text(code, key: const ValueKey('unknownBarcode'), style: AppText.s(15, color: AppColors.muted)),
+              const SizedBox(height: 16),
+              PrimaryButton(label: 'ပစ္စည်းအသစ် ထည့်မယ်', onPressed: () => Navigator.pop(ctx, true)),
+              const SizedBox(height: 8),
+              PrimaryButton(
+                label: 'မလုပ်တော့ပါ',
+                variant: ButtonVariant.outline,
+                borderColor: AppColors.inputBorder,
+                onPressed: () => Navigator.pop(ctx, false),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (add == true && mounted) await context.push(Routes.addProductWithBarcode(code));
   }
 
   void _onKey(String v) {
@@ -57,9 +128,86 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     });
   }
 
+  static const imeiInCartMessage = 'ဒီ IMEI ခြင်းထဲမှာ ရှိပြီးသားပါ';
+  static const imeiSoldMessage = "ဒီ IMEI က ရောင်းပြီးသားပါ — ပြန်ဝယ်ရင် 'Stock ဖြည့်မယ်' ကနေ လက်ခံပါ";
+
+  void _message(String text) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(text), duration: const Duration(seconds: 3)));
+
+  /// Phone shops: [serial] is an in-stock IMEI of a live product → that phone
+  /// goes into the cart with this IMEI (no IMEI question). Returns true when the scan was handled.
+  /// - BUG-27: the IMEI VALUE is compared with every cart line (any product's row with this
+  ///   IMEI already in the cart → a message, nothing added), not just one row id.
+  /// - Owner 2026-11-14: no in-stock row and the IMEI's latest row is sold → "sold" message
+  ///   (receive it back with "Stock ဖြည့်မယ်"), not "ပစ္စည်းအသစ်" — unless a product barcode matches.
+  Future<bool> _addScannedSerial(List<ProductView> all, String serial, {required bool barcodeMatches}) async {
+    if (serial.isEmpty || !ref.read(tenantFeaturesProvider).serialWarranty) return false;
+    final rows = await ref.read(productRepositoryProvider).watchSerialRows(serial).first;
+    if (rows.isEmpty || !mounted) return false;
+    final inCart = ref.read(cartProvider).serialIds;
+    if (rows.any((s) => inCart.contains(s.id))) {
+      _message(imeiInCartMessage);
+      return true;
+    }
+    final byId = {for (final v in all) v.id: v};
+    final inStock = rows.where((s) => s.status == SerialStatus.inStock && byId.containsKey(s.productId)).firstOrNull;
+    if (inStock != null) {
+      await _addProduct(byId[inStock.productId]!,
+          pick: (serialId: inStock.id, variantId: null, batchId: null, label: 'IMEI ${inStock.serial}'));
+      return true;
+    }
+    final latest = rows.reduce((a, b) => b.createdAt.isAfter(a.createdAt) ? b : a);
+    if (latest.status == SerialStatus.sold && !barcodeMatches) {
+      _message(imeiSoldMessage);
+      return true;
+    }
+    return false;
+  }
+
+  /// Several products share [code] (duplicate barcode): the cashier picks one; null = dismissed.
+  Future<ProductView?> _pickBarcodeMatch(String code, List<ProductView> matches) => showModalBottomSheet<ProductView>(
+        context: context,
+        backgroundColor: AppColors.surface,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        builder: (ctx) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('ဘယ်ပစ္စည်းလဲ?', style: AppText.s(17, weight: AppText.w700)),
+                const SizedBox(height: 4),
+                Text('Barcode $code နဲ့ ပစ္စည်း ${mmDigits(matches.length)} မျိုး ရှိပါတယ်',
+                    style: AppText.s(14, color: AppColors.muted)),
+                const SizedBox(height: 8),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (final m in matches)
+                        ListTile(
+                          key: ValueKey('barcodeMatch-${m.id}'),
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(m.name, style: AppText.s(15, weight: AppText.w600)),
+                          trailing: Text(formatKs(m.product.price), style: AppText.s(14)),
+                          onTap: () => Navigator.pop(ctx, m),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
   /// A product without a price is never sold at 0 Ks: ask for the price, save
   /// it to the product (upsertProduct unit) and use it for this sale.
-  Future<void> _addProduct(ProductView p) async {
+  /// [pick] = the unit is already known (a scanned IMEI): no module question.
+  Future<void> _addProduct(ProductView p, {ModulePick? pick}) async {
     var product = p.product;
     if (p.needsPrice) {
       final price = await showSetPriceSheet(context, productName: p.name);
@@ -68,6 +216,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       product = product.copyWith(price: price);
     }
     if (!mounted) return;
+    if (pick != null) {
+      ref.read(cartProvider.notifier).addProduct(product, pick: pick);
+      return;
+    }
     // Which IMEI / size-colour / batch (BUG-2).
     final result = await pickModuleUnit(context, ref, product, ref.read(cartProvider));
     switch (result) {
@@ -96,7 +248,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final mode = features.quickSale ? (_mode ?? PosMode.quick) : PosMode.products;
 
     return Scaffold(
-      body: Stack(
+      body: HidScannerListener(
+        onScan: _onScan,
+        child: Stack(
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -108,7 +262,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 bottom: [
                   if (features.quickSale)
                     SegmentedTabs<PosMode>(
-                      options: const [(PosMode.products, 'ပစ္စည်းများ'), (PosMode.quick, 'Quick Sale')],
+                      options: const [(PosMode.products, 'ပစ္စည်းများ'), (PosMode.quick, 'အမြန်ရောင်း')],
                       selected: mode,
                       onChanged: (m) => setState(() => _mode = m),
                     ),
@@ -118,8 +272,19 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               Expanded(child: mode == PosMode.products ? _productGrid(cart) : _quickSale(cart)),
             ],
           ),
-          Positioned(left: 12, right: 12, bottom: 16 + MediaQuery.paddingOf(context).bottom, child: _CartBar(cart: cart)),
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 16 + MediaQuery.paddingOf(context).bottom,
+            child: _HeightListener(
+              onHeight: (h) {
+                if (mounted && (h - _cartBarHeight).abs() > 0.5) setState(() => _cartBarHeight = h);
+              },
+              child: _CartBar(cart: cart),
+            ),
+          ),
         ],
+        ),
       ),
     );
   }
@@ -135,13 +300,14 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         children: [
           Expanded(
             child: SearchField(
+              controller: _search,
               hint: 'ပစ္စည်းအမည် ရှာရန်',
               semanticLabel: 'ပစ္စည်းရှာရန်',
               onChanged: (q) => setState(() => _query = q.trim()),
             ),
           ),
           const SizedBox(width: 10),
-          const _ScanButton(),
+          _ScanButton(onTap: _scanWithCamera),
         ],
       ),
       FilterChips<String?>(
@@ -153,21 +319,28 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     ];
   }
 
+  /// Bottom padding of the lists, so their last row scrolls fully above the
+  /// floating cart bar at any text size (BUG-44): bar + its 16 margin + the
+  /// home-indicator inset + 16 air.
+  double _listBottomPadding(BuildContext context) =>
+      _cartBarHeight + 16 + MediaQuery.paddingOf(context).bottom + 16;
+
   Widget _productGrid(Cart cart) {
     final features = ref.watch(tenantFeaturesProvider);
     final async = ref.watch(productsProvider);
+    final photos = ref.watch(productPhotosProvider).value ?? const {};
     if (!async.hasValue) return AsyncView(value: async, data: (_) => const SizedBox());
     final items = async.requireValue
         .where((p) => _cat == null || p.category == _cat)
         .where((p) => _query.isEmpty || p.name.contains(_query))
         .toList();
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 120),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      padding: EdgeInsets.fromLTRB(20, 14, 20, _listBottomPadding(context)),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        mainAxisExtent: 160,
+        mainAxisExtent: ProductTile.extent(MediaQuery.textScalerOf(context)),
       ),
       itemCount: items.length,
       itemBuilder: (_, i) {
@@ -190,6 +363,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           stockLow: low,
           qtyMilli: cart.qtyOfProduct(p.id),
           needsPrice: p.needsPrice,
+          image: photos[p.id],
           onTap: () => _addProduct(p),
         );
       },
@@ -199,7 +373,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   Widget _quickSale(Cart cart) {
     final quick = cart.quickLines;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, _listBottomPadding(context)),
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -255,21 +429,51 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   }
 }
 
+/// Reports its child's height after layout.
+class _HeightListener extends SingleChildRenderObjectWidget {
+  const _HeightListener({required this.onHeight, required super.child});
+  final ValueChanged<double> onHeight;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderHeightListener(onHeight);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderHeightListener renderObject) => renderObject.onHeight = onHeight;
+}
+
+class _RenderHeightListener extends RenderProxyBox {
+  _RenderHeightListener(this.onHeight);
+  ValueChanged<double> onHeight;
+  double? _last;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final h = size.height;
+    if (h != _last) {
+      _last = h;
+      WidgetsBinding.instance.addPostFrameCallback((_) => onHeight(h));
+    }
+  }
+}
+
 class _ScanButton extends StatelessWidget {
-  const _ScanButton();
+  const _ScanButton({required this.onTap});
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Barcode scan',
+      label: 'Barcode ဖတ်မယ်',
       excludeSemantics: true,
       child: Material(
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
+          key: const ValueKey('posScan'),
           borderRadius: BorderRadius.circular(14),
-          onTap: () {},
+          onTap: onTap,
           child: const SizedBox(
             width: 48,
             height: 48,

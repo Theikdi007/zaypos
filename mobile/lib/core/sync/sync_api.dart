@@ -17,10 +17,23 @@ class PushUnit {
 enum UnitOutcome { applied, skipped, rejected }
 
 class UnitResult {
-  const UnitResult({required this.unitId, required this.outcome, this.reason, this.issues = const []});
+  const UnitResult({
+    required this.unitId,
+    required this.outcome,
+    this.reason,
+    this.issues = const [],
+    this.code,
+    this.data = const {},
+  });
   final String unitId;
   final UnitOutcome outcome;
+
+  /// English, for Support only (never shown — BUG-26).
   final String? reason;
+
+  /// Reject code (fieldTooLong, notFound, …) + its fields: the shown message is built from these.
+  final String? code;
+  final Map<String, String> data;
 
   /// Server SyncIssueKind names raised by this unit.
   final List<String> issues;
@@ -30,6 +43,8 @@ class UnitResult {
         outcome: UnitOutcome.values.byName(j['outcome'] as String),
         reason: j['reason'] as String?,
         issues: [for (final i in (j['issues'] as List? ?? const [])) i as String],
+        code: j['code'] as String?,
+        data: {for (final e in ((j['data'] as Map?) ?? const {}).entries) '${e.key}': '${e.value}'},
       );
 }
 

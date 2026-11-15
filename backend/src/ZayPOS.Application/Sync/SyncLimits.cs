@@ -25,19 +25,22 @@ public sealed record TextLimit(
     bool MyanmarDigitsToAscii = false,
     NonAsciiRule NonAscii = NonAsciiRule.Allow)
 {
+    private Dictionary<string, string> F(params (string Key, string Value)[] more) =>
+        new[] { ("field", Field) }.Concat(more).ToDictionary(p => p.Item1, p => p.Item2);
+
     /// <summary>Validates and normalizes <paramref name="value"/>; null stays null for optional fields.</summary>
     public string? Apply(string? value)
     {
         if (value is null)
-            return Required ? throw new SyncRejectException($"{Field} is required.") : null;
-        if (value.Length == 0 && Required && !AllowEmpty) throw new SyncRejectException($"{Field} must not be empty.");
-        if (value.Length > MaxLength) throw new SyncRejectException($"{Field} is longer than {MaxLength} characters.");
+            return Required ? throw new SyncRejectException($"{Field} is required.", RejectCodes.FieldRequired, F()) : null;
+        if (value.Length == 0 && Required && !AllowEmpty) throw new SyncRejectException($"{Field} must not be empty.", RejectCodes.FieldEmpty, F());
+        if (value.Length > MaxLength) throw new SyncRejectException($"{Field} is longer than {MaxLength} characters.", RejectCodes.FieldTooLong, F(("max", MaxLength.ToString())));
 
         if (MyanmarDigitsToAscii) value = SyncText.AsciiDigits(value);
         return NonAscii switch
         {
             NonAsciiRule.Reject when !value.All(char.IsAscii) =>
-                throw new SyncRejectException($"{Field} must be ASCII (digits/latin letters)."),
+                throw new SyncRejectException($"{Field} must be ASCII (digits/latin letters).", RejectCodes.FieldNotAscii, F()),
             NonAsciiRule.Drop => new string(value.Where(char.IsAscii).ToArray()),
             _ => value,
         };
@@ -47,10 +50,13 @@ public sealed record TextLimit(
 /// <summary>One integer field of a pushed row: <see cref="Min"/> ≤ value ≤ <see cref="Max"/> (null = no bound).</summary>
 public sealed record NumberLimit(string Field, long? Min = null, long? Max = null, string? Note = null)
 {
+    private Dictionary<string, string> F(params (string Key, string Value)[] more) =>
+        new[] { ("field", Field) }.Concat(more).ToDictionary(p => p.Item1, p => p.Item2);
+
     public long Apply(long value)
     {
-        if (Min is { } min && value < min) throw new SyncRejectException($"{Field} must be >= {min}.");
-        if (Max is { } max && value > max) throw new SyncRejectException($"{Field} must be <= {max}.");
+        if (Min is { } min && value < min) throw new SyncRejectException($"{Field} must be >= {min}.", RejectCodes.FieldTooSmall, F(("min", min.ToString())));
+        if (Max is { } max && value > max) throw new SyncRejectException($"{Field} must be <= {max}.", RejectCodes.FieldTooLarge, F(("max", max.ToString())));
         return value;
     }
 }
@@ -70,6 +76,10 @@ public static class SyncLimits
     public static readonly TimeSpan MaxClockAhead = TimeSpan.FromMinutes(5);
     /// <summary>SyncIssues.Detail (server-written, truncated).</summary>
     public const int IssueDetailMaxLength = 400;
+    /// <summary>SyncIssues.Data (JSON object). Name lists are capped so it always fits.</summary>
+    public const int IssueDataMaxLength = 2000;
+    /// <summary>At most this many "other product" names in an issue's data (+ othersCount).</summary>
+    public const int IssueDataMaxNames = 5;
 
     // ------------------------------------------------------------ text
     public static readonly TextLimit TenantName = new("tenants.name", 120);

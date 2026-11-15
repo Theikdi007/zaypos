@@ -309,7 +309,7 @@ void main() {
         restockMovement(tenantId: tid, productId: p.id, variantId: l.id, qtyMilli: Qty.units(2), note: 'initial'),
       ]);
       await tapInPos(tester, c, p.name);
-      expect(find.text('ဘယ် Size / အရောင် လဲ?'), findsOneWidget);
+      expect(find.text('ဘယ် ဆိုဒ် / အရောင် လဲ?'), findsOneWidget);
       expect(inSheet(find.text('ကျန် 3')), findsOneWidget);
       expect(inSheet(find.text('ကျန် 2')), findsOneWidget);
       await tester.tap(inSheet(find.textContaining('L')).first);

@@ -77,6 +77,10 @@ final rejectedUnitsProvider = StreamProvider<List<OutboxRow>>(
 final openIssuesProvider = StreamProvider<List<SyncIssueRow>>(
     (ref) => ref.watch(syncEngineProvider).store?.watchOpenIssues() ?? Stream.value(const []));
 
+/// Resolved issues (history on "စစ်ရန်"): by the owner ("စစ်ပြီးပြီ") or by the server ("ပြင်ပြီးသွားပါပြီ").
+final resolvedIssuesProvider = StreamProvider<List<SyncIssueRow>>(
+    (ref) => ref.watch(syncEngineProvider).store?.watchResolvedIssues() ?? Stream.value(const []));
+
 /// Dashboard chip (§7): synced / n waiting / offline / sync problem.
 enum SyncChipKind { hidden, synced, waiting, offline, problem }
 

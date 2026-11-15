@@ -79,10 +79,12 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
         await CheckNegativeStockAsync(stockBefore);
         await CheckCreditLimitsAsync();
         await CheckBarcodesAsync();
+        if (rows.Products is { Count: > 0 }) await ResolveFixedDuplicateBarcodesAsync();
         await CheckDuplicateSerialsAsync();
         if (_maxAhead > SyncLimits.MaxClockAhead)
             Issue(SyncIssueKind.ClockSkew, "Devices", caller.DeviceId,
-                $"Device clock is {_maxAhead.TotalMinutes:0} min ahead of the server; edit times were clamped to server time + {SyncLimits.MaxClockAhead.TotalMinutes:0} min.");
+                $"Device clock is {_maxAhead.TotalMinutes:0} min ahead of the server; edit times were clamped to server time + {SyncLimits.MaxClockAhead.TotalMinutes:0} min.",
+                new() { ["minutesAhead"] = (int)Math.Round(_maxAhead.TotalMinutes), ["clampMinutes"] = (int)SyncLimits.MaxClockAhead.TotalMinutes });
 
         await db.SaveChangesAsync(ct);
     }
@@ -280,8 +282,11 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
     private void FlagDoubleSold(ProductSerial serial, Guid firstLine, Guid? secondLine)
     {
         if (!_flaggedSerials.Add(serial.Id)) return;
+        var productName = db.Set<Product>().Local.FirstOrDefault(p => p.Id == serial.ProductId)?.Name
+                          ?? db.Set<Product>().Where(p => p.Id == serial.ProductId).Select(p => p.Name).FirstOrDefault();
         Issue(SyncIssueKind.SerialDoubleSold, "ProductSerials", serial.Id,
-            $"Serial {serial.Serial} sold twice: sale line {firstLine} and {secondLine?.ToString() ?? "(unknown)"}. Both sales were kept.");
+            $"Serial {serial.Serial} sold twice: sale line {firstLine} and {secondLine?.ToString() ?? "(unknown)"}. Both sales were kept.",
+            new() { ["serial"] = serial.Serial, ["productName"] = productName });
     }
 
     // ================================================================ sales (insert-only + void transition)
@@ -340,7 +345,8 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
             if (r.Total is { } clientTotal && clientTotal != total)
                 mismatches.Insert(0, $"total: client {clientTotal}, server {total}");
             if (mismatches.Count > 0)
-                Issue(SyncIssueKind.TotalMismatch, "Sales", sale.Id, $"Sale {sale.No}: " + string.Join("; ", mismatches));
+                Issue(SyncIssueKind.TotalMismatch, "Sales", sale.Id, $"Sale {sale.No}: " + string.Join("; ", mismatches),
+                    new() { ["receiptNo"] = sale.No, ["clientTotal"] = r.Total, ["serverTotal"] = total });
 
             sale.No = await UniqueReceiptNoAsync(sale);
             db.Set<Sale>().Add(sale);
@@ -406,7 +412,8 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
             var candidate = (sale.No.Length + suffix.Length <= 12 ? sale.No : sale.No[..(12 - suffix.Length)]) + suffix;
             if (await NoTakenAsync(candidate, sale.Id)) continue;
             Issue(SyncIssueKind.DuplicateReceiptNo, "Sales", sale.Id,
-                $"Receipt {sale.No} already exists (reinstalled app reusing a device code?). Stored as {candidate}.");
+                $"Receipt {sale.No} already exists (reinstalled app reusing a device code?). Stored as {candidate}.",
+                new() { ["receiptNo"] = sale.No, ["storedAs"] = candidate });
             return candidate;
         }
         throw Reject($"receipt number {sale.No} collides too often.");
@@ -528,7 +535,8 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
             if (after >= 0 || before.GetValueOrDefault(productId) < 0) continue;
             var name = await db.Set<Product>().Where(p => p.Id == productId).Select(p => p.Name).FirstOrDefaultAsync(_ct);
             Issue(SyncIssueKind.NegativeStock, "Products", productId,
-                $"{name}: stock is {Ledger.FormatQty(after)} after this sync. The sale was kept.");
+                $"{name}: stock is {Ledger.FormatQty(after)} after this sync. The sale was kept.",
+                new() { ["productName"] = name, ["stockMilli"] = after });
         }
     }
 
@@ -543,7 +551,8 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
                 .SumAsync(e => e.Type == DebtEntryType.Payment ? -e.Amount : e.Amount, _ct);
             if (balance > limit)
                 Issue(SyncIssueKind.CreditLimitExceeded, "Customers", customerId,
-                    $"{customer.Name} owes {balance:N0} Ks, over the {limit:N0} Ks limit.");
+                    $"{customer.Name} owes {balance:N0} Ks, over the {limit:N0} Ks limit.",
+                    new() { ["customerName"] = customer.Name, ["balance"] = balance, ["limit"] = limit });
         }
     }
 
@@ -557,8 +566,33 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
                 .Where(o => o.Id != productId && o.Barcode == barcode && o.DeletedAt == null)
                 .Select(o => o.Name).ToListAsync(_ct);
             if (others.Count > 0)
+            {
+                var (names, count) = Others(others);
                 Issue(SyncIssueKind.DuplicateBarcode, "Products", productId,
-                    $"Barcode {barcode} is also used by: {string.Join(", ", others)}.");
+                    $"Barcode {barcode} is also used by: {string.Join(", ", others)}.",
+                    new() { ["barcode"] = barcode, ["productName"] = p.Name, ["others"] = names, ["othersCount"] = count });
+            }
+        }
+    }
+
+    /// <summary>
+    /// Owner 2026-11-14: an open duplicateBarcode issue closes itself once at most one live product of the shop
+    /// has that barcode (cleared, changed or deleted on any phone). It stays in history: ResolvedAt + UpdatedAt
+    /// are set (every phone pulls it) and Data gets "resolution": "fixed" (apps: "ပြင်ပြီးသွားပါပြီ").
+    /// </summary>
+    private async Task ResolveFixedDuplicateBarcodesAsync()
+    {
+        var open = await db.Set<SyncIssue>()
+            .Where(i => i.Kind == SyncIssueKind.DuplicateBarcode && i.ResolvedAt == null && i.DeletedAt == null)
+            .ToListAsync(_ct);
+        foreach (var issue in open)
+        {
+            if (SyncIssueData.Barcode(issue.Data, issue.Detail) is not { } barcode) continue;
+            var live = await db.Set<Product>().CountAsync(p => p.Barcode == barcode && p.DeletedAt == null, _ct);
+            if (live > 1) continue;
+            issue.ResolvedAt = now;
+            issue.UpdatedAt = now;
+            issue.Data = SyncIssueData.With(issue.Data, "resolution", SyncIssueData.ResolutionFixed);
         }
     }
 
@@ -577,12 +611,21 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
                 .Join(db.Set<Product>(), o => o.ProductId, p => p.Id, (o, p) => p.Name)
                 .ToListAsync(_ct);
             if (others.Count > 0)
+            {
+                var (names, count) = Others(others);
+                var productName = (await FindAsync<Product>(s.ProductId))?.Name;
                 Issue(SyncIssueKind.DuplicateSerial, "ProductSerials", id,
-                    $"Serial {s.Serial} is already in stock ({string.Join(", ", others)}). Both rows were kept.");
+                    $"Serial {s.Serial} is already in stock ({string.Join(", ", others)}). Both rows were kept.",
+                    new() { ["serial"] = s.Serial, ["productName"] = productName, ["others"] = names, ["othersCount"] = count });
+            }
         }
     }
 
-    private void Issue(SyncIssueKind kind, string table, Guid entityId, string detail)
+    /// <summary>
+    /// Raises an issue. <paramref name="data"/> = its structured fields (camelCase JSON object) — apps build their
+    /// own message from Kind + Data; <paramref name="detail"/> stays English for logs and old apps.
+    /// </summary>
+    private void Issue(SyncIssueKind kind, string table, Guid entityId, string detail, Dictionary<string, object?> data)
     {
         _issueKinds.Add(kind);
         db.Set<SyncIssue>().Add(new SyncIssue
@@ -590,9 +633,14 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
             Id = Guid.CreateVersion7(), TenantId = caller.TenantId, Kind = kind,
             EntityTable = table, EntityId = entityId,
             Detail = detail.Length <= SyncLimits.IssueDetailMaxLength ? detail : detail[..SyncLimits.IssueDetailMaxLength],
+            Data = SyncIssueData.Serialize(data),
             DeviceId = caller.DeviceId, CreatedAt = now, UpdatedAt = now,
         });
     }
+
+    /// <summary>Other products' names for issue data: at most IssueDataMaxNames, plus the full count.</summary>
+    private static (List<string> Names, int Count) Others(List<string> names) =>
+        (names.Take(SyncLimits.IssueDataMaxNames).ToList(), names.Count);
 
     // ================================================================ helpers
 
@@ -605,7 +653,8 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
     {
         var value = Require(id, field);
         if (value == Guid.Empty || await FindAsync<T>(value) is null)
-            throw Reject($"{field} {value} does not exist in this shop.");
+            throw new SyncRejectException($"{field} {value} does not exist in this shop.", RejectCodes.NotFound,
+                new Dictionary<string, string> { ["field"] = field });
         return value;
     }
 
@@ -634,7 +683,8 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
     }
 
     private static T Require<T>(T? value, string field) where T : struct =>
-        value ?? throw Reject($"{field} is required.");
+        value ?? throw new SyncRejectException($"{field} is required.", RejectCodes.FieldRequired,
+            new Dictionary<string, string> { ["field"] = field });
 
     private static SyncRejectException Reject(string reason) => new(reason);
 }

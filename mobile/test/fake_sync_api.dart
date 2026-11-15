@@ -12,6 +12,10 @@ class FakeSyncApi implements SyncApi {
   UnitOutcome Function(PushUnit unit) outcome = (_) => UnitOutcome.applied;
   String rejectReason = 'products.name is longer than 120 characters.';
 
+  /// Reject code + fields (BUG-26). Null / empty = an old server that only sends [rejectReason].
+  String? rejectCode;
+  Map<String, String> rejectData = const {};
+
   /// Thrown by the next pushes, one per call (null entries = succeed).
   final pushErrors = <ApiError?>[];
 
@@ -48,7 +52,8 @@ class FakeSyncApi implements SyncApi {
     return [
       for (final u in units)
         switch (outcome(u)) {
-          UnitOutcome.rejected => UnitResult(unitId: u.unitId, outcome: UnitOutcome.rejected, reason: rejectReason),
+          UnitOutcome.rejected => UnitResult(
+              unitId: u.unitId, outcome: UnitOutcome.rejected, reason: rejectReason, code: rejectCode, data: rejectData),
           final o => UnitResult(unitId: u.unitId, outcome: o),
         },
     ];

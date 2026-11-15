@@ -34,6 +34,10 @@ public class AuthRulesTests
     [InlineData("959797123456", "+959797123456")]
     [InlineData("+66812345678", null)]
     [InlineData("091234", null)]
+    [InlineData("၀၉၇၉၇၁၂၃၄၅၆", "+959797123456")] // BUG-34: Myanmar digits, as the app accepts them
+    [InlineData("+၉၅ ၉၇၉၇ ၁၂၃ ၄၅၆", "+959797123456")]
+    [InlineData("09.797.123.456", "+959797123456")]
+    [InlineData("95 9 797 123 456", "+959797123456")]
     [InlineData("", null)]
     public void Phones_normalize_to_E164(string input, string? expected) =>
         PhoneNumbers.Normalize(input).Should().Be(expected);

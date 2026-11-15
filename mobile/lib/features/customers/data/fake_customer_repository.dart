@@ -1,5 +1,6 @@
 import '../../../app/fake_database.dart';
 import '../../../app/fake_seed.dart';
+import '../../../core/utils/ids.dart';
 import '../domain/customer.dart';
 import 'customer_repository.dart';
 
@@ -54,6 +55,19 @@ class FakeCustomerRepository implements CustomerRepository {
   @override
   Future<void> add(Customer customer) async {
     db.customers.add(customer);
+    db.touch({FakeTable.customers});
+  }
+
+  @override
+  Future<void> update(Customer customer) async {
+    final i = db.customers.indexWhere((c) => c.id == customer.id);
+    if (i < 0) throw StateError('Unknown customer ${customer.id}');
+    final old = db.customers[i];
+    db.customers[i] = Customer(
+      id: old.id, tenantId: old.tenantId, name: customer.name, phone: customer.phone, address: customer.address,
+      creditLimit: customer.creditLimit, note: customer.note, createdAt: old.createdAt, updatedAt: nowUtc(),
+      deletedAt: old.deletedAt,
+    );
     db.touch({FakeTable.customers});
   }
 }

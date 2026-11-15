@@ -16,6 +16,7 @@ import 'package:zaypos_app/features/inventory/application/stock_service.dart';
 import 'package:zaypos_app/features/inventory/domain/stock_movement.dart';
 import 'package:zaypos_app/features/sales/application/checkout_service.dart';
 import 'package:zaypos_app/features/sales/application/void_sale_service.dart';
+import 'package:zaypos_app/features/sales/data/sales_providers.dart' show SaleLineDraft;
 import 'package:zaypos_app/features/sales/domain/sale.dart';
 import 'package:zaypos_app/features/pos/domain/cart.dart';
 import 'package:zaypos_app/features/products/application/product_service.dart';
@@ -424,6 +425,32 @@ void main() {
       await c.read(voidSaleServiceProvider).setVoided(sale.id, false);
       expect(inStock(), 1);
       expect(stockWhere(c, (m) => m.productId == p.id), Qty.units(1), reason: 'un-void mirrors it');
+    });
+
+    test('BUG-24: traded-in phone sold again, then the ORIGINAL sale is voided → not in stock (with customer 2); '
+        'un-void changes nothing either', () async {
+      final c = makeContainer();
+      addTearDown(c.dispose);
+      c.read(shopTemplateProvider.notifier).select('phone');
+      final p = product(c, 'QA resold');
+      final t = nowUtc();
+      final old = ProductSerial(id: newId(), tenantId: p.tenantId, productId: p.id, serial: '370000000000009',
+          status: SerialStatus.inStock, createdAt: t, updatedAt: t);
+      await c.read(productServiceProvider).create(p, serials: [old],
+          initialStock: [restockMovement(tenantId: p.tenantId, productId: p.id, qtyMilli: Qty.units(1))]);
+      SaleLineDraft line(String serialId) =>
+          (productId: p.id, variantId: null, batchId: null, serialId: serialId, name: p.name, qtyMilli: 1000, price: 600, cost: 400);
+      final sale1 = await c.read(checkoutServiceProvider).checkout(CheckoutRequest(lines: [line(old.id)], method: PaymentMethod.cash));
+      await Future<void>.delayed(const Duration(milliseconds: 2)); // the trade-in row is newer
+      await c.read(stockServiceProvider).receive(productId: p.id, qtyMilli: Qty.units(1), serials: ['370000000000009']);
+      final fresh = db(c).serials.singleWhere((s) => s.serial == '370000000000009' && s.id != old.id);
+      await c.read(checkoutServiceProvider).checkout(CheckoutRequest(lines: [line(fresh.id)], method: PaymentMethod.cash));
+
+      int inStock() => db(c).serials.where((s) => s.serial == '370000000000009' && s.status == SerialStatus.inStock).length;
+      await c.read(voidSaleServiceProvider).setVoided(sale1.id, true);
+      expect((inStock(), stockWhere(c, (m) => m.productId == p.id)), (0, 0));
+      await c.read(voidSaleServiceProvider).setVoided(sale1.id, false);
+      expect((inStock(), stockWhere(c, (m) => m.productId == p.id)), (0, 0));
     });
 
     test('a normal void still returns the phone (row in stock, stock +1)', () async {

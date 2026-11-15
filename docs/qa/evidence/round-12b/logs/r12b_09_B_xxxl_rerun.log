@@ -1,0 +1,171 @@
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           33.2s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:58459/0ogYnedoYco=/
+VMServiceFlutterDriver: Isolate found with number: 3747067373015675
+VMServiceFlutterDriver: Isolate 3747067373015675 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: QA_CMD:font_xxxl:0_font_xxxl
+[runner] 15:15:57 cmd font_xxxl
+flutter: QA_NOTE:screen 390.0x844.0 pt, textScaler(14)=18.941176470588236 (×1.3529411764705883)
+flutter: QA_SHOT:xxxl_ux03_unlock
+[runner] screenshot xxxl_ux03_unlock.png
+flutter: QA_NOTE:[xxxl] unlock screen at open: keypad "0" key at y=547..583, screen height 844 → visible
+flutter: QA_NOTE:[xxxl] wrong PIN #1: message for this attempt after 394 ms: "PIN မှားနေပါတယ်။ နောက်ထပ် ၄ ကြိမ် ကြိုးစားလို့ရပါတယ်။"
+flutter: QA_NOTE:[xxxl] keypad "0" key at y=621..657 (screen height 844) after scrolling it into view
+-[WFIsolatedShortcutRunner init] Taking sandbox extensions for execution
+-[WFIsolatedShortcutRunner init]_block_invoke Sandbox extensions acquired
+Indexing for request: <WFToolKitIndexingRequest: 0x1018500c0>, changeset: .partial(updatedCount: 1 removedCount: 1 updated: ["com.zaypos.zayposApp"], removed: ["com.apple.siri.SiriCrisisAppIntentsExtension"], provenance: [VoiceShortcutClient.ToolKitIndexingReason.Changeset.Provenance.appIntentsChange(<LinkSnapshot> ["com.apple.ClassKit.ClassKitAppIntents", "com.apple.shortcuts", "com.apple.ShortcutsActions", "com.apple.usernotificationsd", "com.apple.mobileslideshow", "com.apple.mobilecal", "com.apple.musicrecognition", "com.apple.siri.AudioAppIntentsExtension", "com.apple.PeopleViewService", "com.apple.SafetyMonitorApp", "com.apple.Maps.MapsSettingsAppIntents", "com.apple.Passbook", "com.apple.-Photos-AppIntents", "com.apple.intelligenceflow.IntelligenceFlowAppIntentsExtension", "com.apple.mobilesafari", "com.apple.VisualIntelligence", "com.apple.-GeoToolbox-AppIntents", "com.apple.siri.SiriGeo.SiriGeoAppIntentExtension", "com.apple.calls.PhoneAppIntentsExtension", "com.apple.PassbookStub", "com.apple.AppIntents", "com.apple.g<…>, priority: <decode: missing data>
+Type indexing (params + content items) took 0.000151s
+Action indexing took 0.000068s
+Indexed: 0
+Errored: 0
+Skipped: [:]
+Bundle cache: 0 hits, 0 misses
+flutter: QA_NOTE:[xxxl] wrong PIN #2: message for this attempt after 358 ms: "PIN မှားနေပါတယ်။ နောက်ထပ် ၃ ကြိမ် ကြိုးစားလို့ရပါတယ်။"
+Finished in 0.602390s
+-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
+flutter: QA_NOTE:[xxxl] wrong PIN #3: message for this attempt after 355 ms: "PIN မှားနေပါတယ်။ နောက်ထပ် ၂ ကြိမ် ကြိုးစားလို့ရပါတယ်။"
+flutter: QA_SHOT:xxxl_pin05_wrong_pin_3x
+[runner] screenshot xxxl_pin05_wrong_pin_3x.png
+flutter: QA_SHOT:xxxl_ux03_dashboard
+[runner] screenshot xxxl_ux03_dashboard.png
+flutter: QA_SHOT:xxxl_ux03_dashboard_scrolled
+[runner] screenshot xxxl_ux03_dashboard_scrolled.png
+flutter: QA_SHOT:xxxl_ux03_pos
+[runner] screenshot xxxl_ux03_pos.png
+flutter: QA_SHOT:xxxl_ux03_pos_scrolled
+[runner] screenshot xxxl_ux03_pos_scrolled.png
+flutter: QA_SHOT:xxxl_ux03_checkout
+[runner] screenshot xxxl_ux03_checkout.png
+flutter: QA_SHOT:xxxl_ux03_checkout_scrolled
+[runner] screenshot xxxl_ux03_checkout_scrolled.png
+flutter: QA_SHOT:xxxl_ux03_products
+[runner] screenshot xxxl_ux03_products.png
+flutter: QA_SHOT:xxxl_ux03_products_scrolled
+[runner] screenshot xxxl_ux03_products_scrolled.png
+flutter: QA_SHOT:xxxl_ux03_reports
+[runner] screenshot xxxl_ux03_reports.png
+flutter: QA_SHOT:xxxl_ux03_reports_scrolled
+[runner] screenshot xxxl_ux03_reports_scrolled.png
+flutter: QA_SHOT:xxxl_ux03_sales
+[runner] screenshot xxxl_ux03_sales.png
+flutter: QA_SHOT:xxxl_ux03_sales_scrolled
+[runner] screenshot xxxl_ux03_sales_scrolled.png
+flutter: QA_SHOT:xxxl_ux03_add_customer
+[runner] screenshot xxxl_ux03_add_customer.png
+flutter: QA_SHOT:xxxl_ux03_customer_debt
+[runner] screenshot xxxl_ux03_customer_debt.png
+flutter: QA_SHOT:xxxl_ux03_customer_debt_scrolled
+[runner] screenshot xxxl_ux03_customer_debt_scrolled.png
+flutter: QA_SHOT:xxxl_ux03_edit_customer_current_balance
+[runner] screenshot xxxl_ux03_edit_customer_current_balance.png
+flutter: QA_SHOT:xxxl_ux03_edit_customer_current_balance_scrolled
+[runner] screenshot xxxl_ux03_edit_customer_current_balance_scrolled.png
+flutter: QA_NOTE:edit form shows "လက်ရှိ အကြွေး": true
+flutter: QA_SHOT:xxxl_ux03_duplicate_phone_dialog_long_name
+[runner] screenshot xxxl_ux03_duplicate_phone_dialog_long_name.png
+flutter: QA_SHOT:xxxl_ux03_settings
+[runner] screenshot xxxl_ux03_settings.png
+flutter: QA_SHOT:xxxl_ux03_settings_scrolled
+[runner] screenshot xxxl_ux03_settings_scrolled.png
+flutter: QA_SHOT:xxxl_ux03_sync_review
+[runner] screenshot xxxl_ux03_sync_review.png
+flutter: QA_SHOT:xxxl_ux03_sync_review_scrolled
+[runner] screenshot xxxl_ux03_sync_review_scrolled.png
+flutter: QA_SHOT:xxxl_ux03_devices
+[runner] screenshot xxxl_ux03_devices.png
+flutter: QA_SHOT:xxxl_ux03_devices_scrolled
+[runner] screenshot xxxl_ux03_devices_scrolled.png
+flutter: QA_CMD:font_default:1_font_default
+[runner] 15:17:12 cmd font_default
+flutter: QA_NOTE:[xxxl] layout problems: {A RenderFlex overflowed by 78 pixels on the bottom. @ /pos}
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following TestFailure was thrown running a test:
+flutter: Expected: empty
+flutter:   Actual: [
+flutter:             'A RenderFlex overflowed by 78 pixels on the bottom. @ /pos',
+flutter:             'A RenderFlex overflowed by 78 pixels on the bottom. @ /pos'
+flutter:           ]
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:159:5)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: This was caught by the test expectation on the following line:
+flutter:   file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart line 159
+flutter: The test description was:
+flutter:   TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 01:16 +0: TC-PIN-05 + TC-UX-03 on the small phone with the largest font [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+flutter:
+flutter: 01:16 +0 -1: (tearDownAll)
+flutter: 01:16 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Expected: empty
+  Actual: [
+            'A RenderFlex overflowed by 78 pixels on the bottom.
+@ /pos',
+            'A RenderFlex overflowed by 78 pixels on the bottom.
+@ /pos'
+          ]
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:159:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart line 159
+The test description was:
+  TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+Leaving the application running.
+[runner] flutter exit code 1

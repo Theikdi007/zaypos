@@ -21,7 +21,7 @@ class DriftFeatureRepository implements FeatureRepository {
     final t = nowUtc();
     for (final e in values.entries) {
       final row = TenantFeatureRow(tenantId: tenantId, featureKey: e.key, enabled: e.value, updatedAt: t);
-      await db.into(db.tenantFeatureFlags).insertOnConflictUpdate(row);
+      await db.into(db.tenantFeatureFlags).insertOnConflictUpdate(row.toCompanion(false));
       rec.record(WireTable.tenantFeatures, tenantFeatureWire(row));
     }
   }

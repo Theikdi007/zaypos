@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -21,6 +20,7 @@ import '../data/auth_api.dart';
 import '../data/session.dart';
 import 'widgets/auth_message.dart';
 import 'widgets/phone_field.dart';
+import '../../../core/utils/digit_input.dart';
 
 enum CatalogStart { preset, quick, import }
 
@@ -135,7 +135,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (_signedIn) return _saveTemplate();
     if (_step == 1) {
       if (!_codeSent) return _sendCode();
-      if (_otp.text.length != 6) return _fail('SMS ကုဒ် ၆ လုံး ထည့်ပါ။');
+      if (_otp.text.length != 6) return _fail('OTP ကုဒ် ၆ လုံး ထည့်ပါ။');
     }
     if (_step == 2) {
       final error = ref.read(syncLimitsProvider).checkText('tenants.name', _shopName.text, label: 'ဆိုင်အမည်') ??
@@ -349,7 +349,7 @@ class _StepPhoneState extends State<_StepPhone> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const _StepTitle('ဖုန်းနံပါတ် အတည်ပြုမယ်', 'SMS နဲ့ ကုဒ် ၆ လုံး ပို့ပေးပါမယ်'),
+          const _StepTitle('ဖုန်းနံပါတ် အတည်ပြုမယ်', 'မက်ဆေ့ချ်နဲ့ OTP ကုဒ် ၆ လုံး ပို့ပေးပါမယ်'),
           const SizedBox(height: 18),
           LabeledField(label: 'ဖုန်းနံပါတ်', child: PhoneField(controller: widget.phone)),
           if (widget.codeSent) ..._codeBoxes(code, time),
@@ -400,10 +400,7 @@ class _StepPhoneState extends State<_StepPhone> {
                       focusNode: _otpFocus,
                       keyboardType: TextInputType.number,
                       showCursor: false,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(6),
-                      ],
+                      inputFormatters: digitInput(maxLength: 6),
                       decoration: const InputDecoration.collapsed(hintText: null).copyWith(filled: false),
                     ),
                   ),
@@ -444,7 +441,7 @@ class _StepShopType extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const _StepTitle('ဘယ်လိုဆိုင်လဲ?', 'ရွေးလိုက်တာနဲ့ ဆိုင်နဲ့ကိုက်တဲ့ feature တွေ အလိုအလျောက် ဖွင့်ပေးမယ်',
+          const _StepTitle('ဘယ်လိုဆိုင်လဲ?', 'ရွေးလိုက်တာနဲ့ ဆိုင်နဲ့ကိုက်တဲ့ လုပ်ဆောင်ချက်တွေ အလိုအလျောက် ဖွင့်ပေးမယ်',
               size: 22, subSize: 13, gap: 2),
           const SizedBox(height: 14),
           if (name != null) ...[
@@ -473,10 +470,14 @@ class _StepShopType extends StatelessWidget {
 
   Widget _typeCard(ShopTemplate t) {
     final on = t.id == selected;
+    // BUG-10: "v2" (soon) templates cannot be chosen, like in Settings.
     return Semantics(
       button: true,
       selected: on,
-      child: Material(
+      enabled: !t.soon,
+      child: Opacity(
+        opacity: t.soon ? 0.5 : 1,
+        child: Material(
         color: on ? AppColors.primarySoft : AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
@@ -484,7 +485,7 @@ class _StepShopType extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () => onPick(t),
+          onTap: t.soon ? null : () => onPick(t),
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 92),
             child: Stack(
@@ -525,6 +526,7 @@ class _StepShopType extends StatelessWidget {
           ),
         ),
       ),
+      ),
     );
   }
 }
@@ -546,7 +548,7 @@ class _StepCatalog extends StatelessWidget {
           'ကြိုတင်စာရင်း သုံးမယ် (အကြံပြု)',
           'အများဆုံးရောင်းတဲ့ ပစ္စည်း ${template.presetCount} မျိုး ထည့်ပြီးသား · ဈေးနှုန်းပဲ ထည့်ရုံ',
         ),
-      (CatalogStart.quick, 'Quick Sale နဲ့ ချက်ချင်း စရောင်းမယ်', 'ဈေးနှုန်းရိုက်ပြီး ရောင်းရုံပဲ · ပစ္စည်းစာရင်း နောက်မှ ထည့်'),
+      (CatalogStart.quick, 'အမြန်ရောင်း နဲ့ ချက်ချင်း စရောင်းမယ်', 'ဈေးနှုန်းရိုက်ပြီး ရောင်းရုံပဲ · ပစ္စည်းစာရင်း နောက်မှ ထည့်'),
       (CatalogStart.import, 'Excel ကနေ တင်မယ်', 'ရှိပြီးသား ပစ္စည်းစာရင်း ဖိုင်ကို တင်ပါ'),
     ];
     return Padding(
@@ -635,7 +637,7 @@ class _StepPin extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const _StepTitle('PIN နံပါတ် သတ်မှတ်မယ်', 'App ဖွင့်တိုင်း ဒီ PIN နဲ့ ဝင်ရပါမယ်'),
+          const _StepTitle('PIN နံပါတ် သတ်မှတ်မယ်', 'အက်ပ် ဖွင့်တိုင်း ဒီ PIN နဲ့ ဝင်ရပါမယ်'),
           const SizedBox(height: 18),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),

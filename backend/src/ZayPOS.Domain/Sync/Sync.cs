@@ -20,7 +20,10 @@ public class SyncIssue : ISyncedRow
     public SyncIssueKind Kind { get; set; }
     public string EntityTable { get; set; } = "";
     public Guid EntityId { get; set; }
+    /// <summary>English text for logs / old apps. Apps build their own (Burmese) message from <see cref="Kind"/> + <see cref="Data"/>.</summary>
     public string Detail { get; set; } = "";
+    /// <summary>Structured fields of the issue as a JSON object (barcode, productName, others, serial, amounts…); null on old rows.</summary>
+    public string? Data { get; set; }
     public Guid? DeviceId { get; set; }
     public DateTime? ResolvedAt { get; set; }
     public DateTime CreatedAt { get; set; }

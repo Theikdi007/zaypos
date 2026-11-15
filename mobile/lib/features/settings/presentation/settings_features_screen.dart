@@ -39,7 +39,7 @@ class _SyncSection extends ConsumerWidget {
       return AppCard(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Text('Demo ဆိုင်ကို server နဲ့ sync မလုပ်ပါ။', style: AppText.s(13, color: AppColors.muted)),
+          child: Text('စမ်းသပ်ဆိုင်ကို ဆာဗာနဲ့ Sync မလုပ်ပါ။', style: AppText.s(13, color: AppColors.muted)),
         ),
       );
     }
@@ -88,7 +88,7 @@ class _SyncSection extends ConsumerWidget {
 class SettingsFeaturesScreen extends ConsumerWidget {
   const SettingsFeaturesScreen({super.key});
 
-  static const _core = ['ရောင်းခြင်း (POS)', 'အကြွေးစာအုပ်', 'ငွေသား / KBZPay / WavePay', 'နေ့စဉ် Report', 'Offline + Sync'];
+  static const _core = ['ရောင်းခြင်း', 'အကြွေးစာအုပ်', 'ငွေသား / KBZPay / WavePay', 'နေ့စဉ် အစီရင်ခံစာ', 'လိုင်းမရှိလည်း ရောင်း + Sync'];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -96,19 +96,19 @@ class SettingsFeaturesScreen extends ConsumerWidget {
     final features = ref.watch(tenantFeaturesProvider);
     final simple = ref.watch(simpleModeProvider);
     final modules = [
-      const _Module(FeatureFlag.quickSale, 'Quick Sale', 'ပစ္စည်းမထည့်ဘဲ ဈေးနှုန်းရိုက်ပြီး ရောင်း'),
+      const _Module(FeatureFlag.quickSale, 'အမြန်ရောင်း', 'ပစ္စည်းမထည့်ဘဲ ဈေးနှုန်းရိုက်ပြီး ရောင်း'),
       const _Module(FeatureFlag.stock, 'Stock မှတ်ခြင်း', 'ရောင်းတိုင်း နုတ် · နည်းရင် သတိပေး'),
       _Module(FeatureFlag.presetCatalog, 'ကြိုတင်ပစ္စည်းစာရင်း',
           template.presetCount > 0
               ? '${template.productBadge ?? template.label} ပစ္စည်း ${mmDigits(template.presetCount)} မျိုး'
               : 'ဒီဆိုင်အမျိုးအစားအတွက် မရှိသေးပါ'),
       const _Module(FeatureFlag.expiryBatch, 'သက်တမ်းကုန်ရက် / Batch', 'ဆေးဆိုင်၊ အစားအသောက်'),
-      const _Module(FeatureFlag.serialWarranty, 'IMEI / Serial + အာမခံ', 'ဖုန်း၊ Electronics'),
-      const _Module(FeatureFlag.variants, 'Size / အရောင်', 'အဝတ်အထည်၊ ဖိနပ်၊ အလှကုန်'),
+      const _Module(FeatureFlag.serialWarranty, 'IMEI / စီးရီးနံပါတ် + အာမခံ', 'ဖုန်း၊ လျှပ်စစ်ပစ္စည်း'),
+      const _Module(FeatureFlag.variants, 'အရွယ်အစား / အရောင်', 'အဝတ်အထည်၊ ဖိနပ်၊ အလှကုန်'),
       const _Module(FeatureFlag.decimalQty, 'ဒသမ အရေအတွက်', '2.5 ပေ · 0.75 ကီလို'),
-      const _Module(FeatureFlag.quotation, 'ဈေးနှုန်းတင်ပြချက် (Quotation)', 'ကန်ထရိုက်တာ / လက်ကား'),
-      const _Module(FeatureFlag.serviceItems, 'ဝန်ဆောင်မှု item', 'Stock မလို · ဆံပင်ညှပ်၊ ပြင်ဆင်ခ'),
-      const _Module(null, 'စားပွဲ / Order mode', 'စားသောက်ဆိုင်၊ ကော်ဖီဆိုင်', soon: true),
+      const _Module(FeatureFlag.quotation, 'ဈေးနှုန်းတင်ပြချက်', 'ကန်ထရိုက်တာ / လက်ကား'),
+      const _Module(FeatureFlag.serviceItems, 'ဝန်ဆောင်မှုများ','Stock မလို · ဆံပင်ညှပ်၊ ပြင်ဆင်ခ'),
+      const _Module(null, 'စားပွဲ / အော်ဒါ ပုံစံ', 'စားသောက်ဆိုင်၊ ကော်ဖီဆိုင်', soon: true),
     ];
 
     Widget section(String t) => SectionTitle(t,
@@ -118,7 +118,7 @@ class SettingsFeaturesScreen extends ConsumerWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ScreenHeader(title: 'ဆိုင် Features', onBack: () => context.pop()),
+          ScreenHeader(title: 'ဆိုင် လုပ်ဆောင်ချက်များ', onBack: () => context.pop()),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.only(bottom: 24),
@@ -142,7 +142,7 @@ class SettingsFeaturesScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('လက်ရှိ template',
+                            Text('လက်ရှိ ဆိုင်ပုံစံ',
                                 style: AppText.s(12, color: AppColors.surface.withValues(alpha: 0.9))),
                             Text(template.label,
                                 style: AppText.s(16, weight: AppText.w700, color: AppColors.surface)),
@@ -185,7 +185,7 @@ class SettingsFeaturesScreen extends ConsumerWidget {
                       ),
                   ]),
                 ),
-                section('ထပ်ဖွင့်လို့ရတဲ့ Features'),
+                section('ထပ်ဖွင့်လို့ရတဲ့ လုပ်ဆောင်ချက်များ'),
                 AppCard(
                   child: DividedColumn(children: [
                     for (final m in modules)
@@ -199,7 +199,7 @@ class SettingsFeaturesScreen extends ConsumerWidget {
                             : (v) => ref.read(tenantFeaturesProvider.notifier).set(m.flag!, v),
                         badges: [
                           if (m.flag != null && m.flag!.read(template.features))
-                            const TinyBadge('template', bg: AppColors.successBg, fg: AppColors.success),
+                            const TinyBadge('ဆိုင်ပုံစံ', bg: AppColors.successBg, fg: AppColors.success),
                           if (m.soon) const TinyBadge('v2', bg: AppColors.fill, fg: AppColors.textSecondary),
                         ],
                       ),
@@ -208,8 +208,8 @@ class SettingsFeaturesScreen extends ConsumerWidget {
                 section('အသုံးပြုပုံ'),
                 AppCard(
                   child: AppSwitchTile(
-                    title: 'ရိုးရှင်း mode',
-                    description: 'စာလုံးကြီး၊ ခလုတ်ကြီး၊ menu နည်းနည်း',
+                    title: 'ရိုးရှင်းသော ပုံစံ',
+                    description: 'စာလုံးကြီး၊ ခလုတ်ကြီး၊ မီနူး နည်းနည်း',
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     value: simple,
                     onChanged: (v) => ref.read(simpleModeProvider.notifier).set(v),
@@ -218,7 +218,7 @@ class SettingsFeaturesScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                   child: Text(
-                    'Feature ပိတ်လိုက်ရင်လည်း မှတ်ထားပြီးသား data တွေ မပျက်ပါ။ ပြန်ဖွင့်ရင် ပြန်ပေါ်ပါမယ်။',
+                    'လုပ်ဆောင်ချက် ပိတ်လိုက်ရင်လည်း မှတ်ထားပြီးသား ဒေတာတွေ မပျက်ပါ။ ပြန်ဖွင့်ရင် ပြန်ပေါ်ပါမယ်။',
                     style: AppText.s(12, color: AppColors.muted),
                   ),
                 ),
