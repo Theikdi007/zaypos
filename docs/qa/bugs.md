@@ -798,7 +798,20 @@ Format:
 - Blocks beta: owner's decision. It is rated Medium because a button on every receipt looks ready but does nothing, and nothing in
   the app replaces it (a screenshot is the only workaround). Under the owner's exit rule ("no Medium open"), the beta needs either
   the feature or the buttons hidden (and shops told that receipts are shown on screen only).
-- Status: open
+- Status: **fixed in 71dfd5b, verified in QA round 13** (receipt buttons; iPhone 17 simulator, real share_plus + gal plugins,
+  `mobile/integration_test/qa/r13_bug40_receipt_test.dart`, logs `docs/qa/evidence/round-13/logs/r13_bug40_A_*.log`):
+  - Receipt screen: the label is "ပြေစာ ပို့မယ်" (no "Viber" left); "ပုံ သိမ်းမယ်" with Photos allowed → snackbar "သိမ်းပြီးပါပြီ" and
+    the simulator's Photos library goes `photos count 6` → `7`, `IMG_0007.PNG pixelWidth:=1080 pixelHeight:=765`
+    (copy: `evidence/round-13/r13_pos11_photos_IMG_0007.png`; Myanmar text renders, white background, no overflow).
+  - "ပြေစာ ပို့မယ်" on the receipt screen and on the sale screen → the iOS share sheet with "PNG · 72 KB" and the receipt preview
+    (`r13_pos11_share_sheet_receipt_screen.png`, `r13_pos11_share_sheet_sale_detail.png`); the shared file
+    `Library/Caches/ZayPOS-receipt-E-0116.png` is 1080 × 765. Viber is not installed on the simulator (owner checks it on a phone).
+  - Photos permission revoked (`simctl privacy revoke photos-add`) → "ဓာတ်ပုံထဲ သိမ်းခွင့် မရပါ။ ဖုန်းရဲ့ ဆက်တင်ထဲက ZayPOS → ဓာတ်ပုံများ
+    မှာ ခွင့်ပြုပေးပါ။", Photos still 7. Never asked (`reset`) → the iOS alert shows NSPhotoLibraryAddUsageDescription
+    "ပြေစာပုံကို ဓာတ်ပုံများထဲ သိမ်းဖို့ ခွင့်ပြုပေးပါ။" (`r13_pos11_permission_prompt.png`). The "failed" message is covered only by the
+    developer's widget test (`m/receipt_image_test.dart`, fake outlet); it cannot be forced on the simulator.
+  - Not covered by this fix (filed separately, Low): the customer form's contact-picker button, named in "Actual" above, still does
+    nothing → BUG-46. A voided sale's shared receipt does not say it is voided → BUG-45.
 
 ## BUG-41 · TC-AUTH-NEW-3 · Low · Login / Register / PIN-reset fields silently drop Myanmar digits (typed or pasted)
 - Found in: round 12b · iPhone 17e simulator, `mobile/integration_test/qa/r12b_04_b_signin_reset_test.dart` (step "reset");
@@ -815,7 +828,13 @@ Format:
   (`[0-9 ]`), `pin_reset_screen.dart:115`, `login_screen.dart:153`, `register_screen.dart:404` (`digitsOnly`).
 - Blocks beta: no (ASCII digits work; the iOS phone/number pads type ASCII). The owner's real-iPhone check (MANUAL item 4) decides
   whether the Myanmar keyboard can reach these fields at all.
-- Status: open
+- Status: **fixed in 71dfd5b, verified in QA round 13** (iPhone 17e simulator, live API on the scratch DB,
+  `mobile/integration_test/qa/r13_bug41_auth_test.dart`, logs `r13_bug41_B_login.log`, `r13_bug41_B_reset.log`): Register phone
+  "၀၉ ၇၉၀ ၉၁၇ ၀၆၁" → "09 790 917 061" and the API sends the OTP to +959790917061; register OTP "၀၆၁၂၂၆" → "061226" (step 2 opens;
+  the server checks the register code only at the last step, so that part rests on the developer's fake-API widget test);
+  Login phone "၀၉ ၇၉၀ ၉၁၇ ၀၅၁" + PIN "၂၂၂၂၂၂" → signed in to "QA r12b ကုန်စုံ"; PIN reset phone, SMS code, new PIN and repeat all in
+  Myanmar digits → `[655354, 222222, 222222]`, the server accepts the code and the new PIN, signed in. The real Myanmar keyboard
+  stays MANUAL.
 
 ## BUG-42 · TC-UX-03 · Low · With "Larger Accessibility Sizes" the POS screen is unusable and the PIN keypad starts below the screen
 - Found in: round 12b · iPhone 17e simulator (390×844 pt), `simctl ui content_size accessibility-extra-extra-extra-large` (text ×3.12),
@@ -852,7 +871,15 @@ Format:
   the text is Burmese and the owner can still find both products by the barcode.
 - Note: QA's on-device test had been relaxed to `textContaining('Barcode')` for its passing rerun. The barcode assertion is
   restored in `r12b_07_upgrade_check_test.dart` (it fails until this bug is fixed).
-- Status: open
+- Status: **fixed in 71dfd5b, verified in QA round 13** (real device upgrade on the iPhone 17e simulator: e7cd138 exported with
+  `git archive`, seeded by `mobile/integration_test/qa/r13_bug43_upgrade_seed_r8_test.dart` (`PRAGMA user_version=1`), then this
+  build installed over it by `r13_bug43_upgrade_check_test.dart`; logs `r13_bug43_B_seed_r8.log`, `r13_bug43_B_upgrade_head.log`).
+  Before the upgrade: `cursor=0000000000005615 products=34 customers=6 sales=117 issues=6 outbox=1 moves=124 stockSum=104000 debts=1`
+  (one product added with the API stopped = an unsent unit). After the upgrade, before unlock: `user_version=2 pullCursor=0`.
+  After two syncs: identical counts (`products=34 … debts=1`, nothing duplicated or lost by the full re-pull), `outbox rows left=0`
+  (the unsent product was sent), `issues with data NULL=0`, cursor `…5617`; "စစ်ရန်" shows "Barcode 8850000099013 ကို “QA r13 r8 Sprite
+  can” နဲ့ “QA r13 r8 Coke can” …", and round 12b's 8850000099003 issue (pulled under v1) now has its data. The two earlier tries are
+  kept as `*_SIDE_*` logs (see the round-13 summary). Developer tests in `m/db_migration_test.dart` pass (full suite).
 
 ## BUG-44 · TC-UX-03 · Low · Largest standard text size (no accessibility sizes): POS "အမြန်ရောင်း" overflows by 78 px on a 390×844 phone
 - Found in: round 12b · iPhone 17e simulator (390×844 pt), `simctl ui content_size extra-extra-extra-large` (text ×1.35),
@@ -867,7 +894,46 @@ Format:
 - Suspected area: `mobile/lib/features/pos/presentation/pos_screen.dart` `_quickSale` (fixed-height column above `_CartBar`, not
   scrollable); no text-scale clamp in the app (see BUG-42).
 - Blocks beta: no (most of the button is visible; the shop owner can lower the text size one step).
-- Status: open
+- Status: **fixed in 71dfd5b, verified in QA round 13** (iPhone 17e simulator 390×844, `content_size extra-extra-extra-large` ×1.353,
+  bottom inset 34, `mobile/integration_test/qa/r13_bug44_large_text_test.dart`, log `r13_bug44_B_xxxl.log`): no layout error on
+  "အမြန်ရောင်း" or "ပစ္စည်းများ"; both tabs on screen; the cart bar ends 50 pt above the screen edge (above the home indicator);
+  quick sale scrolled to the end: add button `639..687`, cart bar top `703`; a tap on it adds 500 (`quick lines [500]`); product
+  grid scrolled to the end: lowest tile bottom `687` < cart bar top `703`. The round-12b sweep `r12b_09_large_font_test.dart`
+  (QA_FONT=xxxl) re-run: `[xxxl] layout problems: none` (`logs/r13_r12b09_B_xxxl.log`). BUG-42 (accessibility sizes) unchanged.
+
+## Found in round 13 (2026-11-15, fix/beta-receipt @ 71dfd5b)
+
+## BUG-45 · TC-SALE-NEW-1 · Low · The shared receipt of a VOIDED sale looks like a valid receipt (no "ပယ်ဖျက်" mark)
+- Found in: round 13 · `mobile/test/qa/qa_round13_receipt_test.dart::TC-SALE-NEW-1 …`; iPhone 17 simulator
+  `r13_bug40_receipt_test.dart` (QA_STEP=voided), screenshots `r13_sale_new1_voided_detail.png`, `r13_sale_new1_voided_share_sheet.png`,
+  the shared PNG `r13_sale_new1_voided_shared_receipt.png`
+- Steps to reproduce: Sales → a sale → "ပယ်ဖျက်မယ်" (badge "ပယ်ဖျက်ပြီး", total struck through) → "ပြေစာ ပို့မယ်" → send it.
+- Expected: a voided sale is "Marked ပယ်ဖျက်ပြီး" (TC-SALE-01) everywhere it is shown; the receipt image a customer receives says it
+  is voided (or the share button is not offered for a voided sale).
+- Actual: the image is the normal receipt: `TC-SALE-NEW-1 PNG bytes valid=101355 voided=101355 identical=true`;
+  `Found 0 widgets with text containing ပယ်ဖျက်`. On the simulator the voided sale E-0116 shared the same 1080 × 765 receipt with
+  "စုစုပေါင်း 1,000 Ks" and "ကျေးဇူးတင်ပါတယ်".
+- Suspected area: `mobile/lib/features/sales/presentation/receipt_image.dart` `ReceiptCard` / `_ReceiptBody` (no `sale.voided`
+  branch); `sale_detail_screen.dart` offers "ပြေစာ ပို့မယ်" for voided sales. New with 71dfd5b (before, the button did nothing).
+- Blocks beta: no. Only the shop sends receipts, and only by choice; but a clean receipt for a cancelled sale can cause a dispute.
+- Status: open (beta backlog)
+
+## BUG-46 · TC-UX-NEW-10 · Low · Other buttons that look ready still do nothing (contact picker, debt "ဖုန်းခေါ်ရန်" / "Viber သတိပေး", Reports "Excel", checkout transfer photo)
+- Found in: round 13 · `mobile/test/qa/qa_round13_dead_buttons_test.dart::TC-UX-NEW-10 …` (the fixed "ပုံ သိမ်းမယ်" is the positive
+  control and reacts). BUG-40's "Actual" already named the contact picker; 71dfd5b fixed only the receipt buttons.
+- Steps to reproduce: Customers → a debtor → tap the green phone icon, then "Viber သတိပေး"; Customers → + → the contact icon next to
+  the phone field; Reports → "Excel"; POS → a product → ငွေရှင်းမယ် → KBZPay → the "ငွေလွှဲပြေစာ ပုံ (မဖြစ်မနေ မဟုတ်ပါ)" box.
+- Expected: each opens what it promises (dialer, Viber / share sheet, contacts, export, photo picker), or is hidden.
+- Actual: `debt screen "ဖုန်းခေါ်ရန်": … → NOTHING`, `debt screen "Viber သတိပေး": … → NOTHING`,
+  `add customer "ဖုန်းစာအုပ်ထဲက ရွေးရန်": … → NOTHING`, `reports "Excel": … → NOTHING`, `checkout KBZPay "ငွေလွှဲပြေစာ ပုံ": … → NOTHING`
+  (no route change, dialog, sheet or snackbar). The sales-history "ယနေ့" button (TC-SALE-04 note) is the same kind.
+- Suspected area: empty handlers `onPressed: () {}` / `onTap: () {}`: `customers/presentation/debt_screen.dart:73` and `:113`,
+  `customers/presentation/add_customer_screen.dart:226`, `reports/presentation/report_screen.dart:53`,
+  `pos/presentation/checkout_screen.dart:280`, `sales/presentation/sales_history_screen.dart:51`.
+- Blocks beta: no under the current ratings (each is a secondary action with a manual workaround: call or message from the phone,
+  pay screenshots stay in the customer's chat). But it is the same pattern BUG-40 was rated Medium for. Recommended before the beta:
+  hide them, or tell shops which buttons are "coming later". Owner's call; if the owner rates "Viber သတိပေး" like BUG-40, it is Medium.
+- Status: open (beta backlog)
 
 ---
 

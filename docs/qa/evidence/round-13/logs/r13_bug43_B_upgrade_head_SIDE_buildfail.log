@@ -1,0 +1,144 @@
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           17.1s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+    ** BUILD FAILED **
+
+
+Xcode's output:
+↳
+    Writing result bundle at path:
+    	/var/folders/43/jf3tmlgx2rd1q8jjxx4kb4gw0000gn/T/flutter_tools.veOvKA/flutter_ios_build_temp_diry8Zc95/temporary_xcresult_bundle
+
+    integration_test/qa/r13_bug43_upgrade_check_test.dart:62:31: Error: Undefined name 'Text'.
+        final shown = find.byType(Text).evaluate().map((e) => (e.widget as Text).data).whereType<String>().toList();
+                                  ^^^^
+    integration_test/qa/r13_bug43_upgrade_check_test.dart:62:72: Error: 'Text' isn't a type.
+        final shown = find.byType(Text).evaluate().map((e) => (e.widget as Text).data).whereType<String>().toList();
+                                                                           ^^^^
+    Target kernel_snapshot_program failed: Exception
+    Failed to package /Users/theikdinyunt/Developer/ZayPOS/mobile.
+    Command PhaseScriptExecution failed with a nonzero exit code
+    note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+    note: Run script build phase 'Debug Local Network' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+    note: Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+
+Could not build the application for the simulator.
+Application failed to start on attempt: 1
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:62284/8e7xru_Cm7A=/
+VMServiceFlutterDriver: Isolate found with number: 206586124220571
+VMServiceFlutterDriver: Isolate 206586124220571 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: QA_CMD:font_xxxl:0_font_xxxl
+[runner] 20:54:05 cmd font_xxxl
+flutter: QA_NOTE:screen 390.0x844.0 pt, textScaler(14)=18.941176470588236 (×1.3529411764705883)
+flutter: QA_SHOT:xxxl_ux03_unlock
+[runner] screenshot xxxl_ux03_unlock.png
+flutter: QA_NOTE:[xxxl] unlock screen at open: keypad "0" key at y=547..583, screen height 844 → visible
+flutter: QA_NOTE:[xxxl] wrong PIN #1: message for this attempt after 393 ms: "PIN မှားနေပါတယ်။ နောက်ထပ် ၄ ကြိမ် ကြိုးစားလို့ရပါတယ်။"
+flutter: QA_NOTE:[xxxl] keypad "0" key at y=621..657 (screen height 844) after scrolling it into view
+flutter: QA_NOTE:[xxxl] wrong PIN #2: message for this attempt after 357 ms: "PIN မှားနေပါတယ်။ နောက်ထပ် ၃ ကြိမ် ကြိုးစားလို့ရပါတယ်။"
+flutter: QA_NOTE:[xxxl] wrong PIN #3: message for this attempt after 355 ms: "PIN မှားနေပါတယ်။ နောက်ထပ် ၂ ကြိမ် ကြိုးစားလို့ရပါတယ်။"
+flutter: QA_SHOT:xxxl_pin05_wrong_pin_3x
+[runner] screenshot xxxl_pin05_wrong_pin_3x.png
+flutter: QA_SHOT:xxxl_ux03_dashboard
+[runner] screenshot xxxl_ux03_dashboard.png
+flutter: QA_SHOT:xxxl_ux03_dashboard_scrolled
+[runner] screenshot xxxl_ux03_dashboard_scrolled.png
+flutter: QA_SHOT:xxxl_ux03_pos
+[runner] screenshot xxxl_ux03_pos.png
+flutter: QA_SHOT:xxxl_ux03_pos_scrolled
+[runner] screenshot xxxl_ux03_pos_scrolled.png
+flutter: QA_CMD:font_default:1_font_default
+[runner] 20:54:23 cmd font_default
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following StateError was thrown running a test:
+flutter: Bad state: No element
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #0      Iterable.first (dart:core/iterable.dart:663:7)
+flutter: #1      _FirstFinderMixin.filter (package:flutter_test/src/finders.dart:1383:28)
+flutter: #3      Iterable.single (dart:core/iterable.dart:694:13)
+flutter: #4      WidgetController.element (package:flutter_test/src/controller.dart:888:30)
+flutter: #5      WidgetController.ensureVisible (package:flutter_test/src/controller.dart:2389:32)
+flutter: #6      tapText (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/qa_harness.dart:155:16)
+flutter: #7      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:98:13)
+flutter: <asynchronous suspension>
+flutter: #8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #10     TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: (elided one frame from dart:async-patch)
+flutter:
+flutter: The test description was:
+flutter:   TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 00:18 +0: TC-PIN-05 + TC-UX-03 on the small phone with the largest font [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+flutter:
+flutter: 00:18 +0 -1: (tearDownAll)
+flutter: 00:18 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.first (dart:core/iterable.dart:663:7)
+#1      _FirstFinderMixin.filter (package:flutter_test/src/finders.dart:1383:28)
+#3      Iterable.single (dart:core/iterable.dart:694:13)
+#4      WidgetController.element (package:flutter_test/src/controller.dart:888:30)
+#5      WidgetController.ensureVisible (package:flutter_test/src/controller.dart:2389:32)
+#6      tapText (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/qa_harness.dart:155:16)
+#7      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r12b_09_large_font_test.dart:98:13)
+<asynchronous suspension>
+#8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#10     TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+(elided one frame from dart:async-patch)
+
+The test description was:
+  TC-PIN-05 + TC-UX-03 on the small phone with the largest font
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+Leaving the application running.
+[runner] flutter exit code 1
