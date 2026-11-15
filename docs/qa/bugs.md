@@ -692,7 +692,11 @@ Format:
   `limits.normalize('customers.phone', …)`, which only trims, maps Myanmar digits and drops non-ASCII. Spaces, dashes and a "+95"
   prefix stay.
 - Blocks beta: no (a warning only; nothing is lost).
-- Status: open
+- Status: fixed (developer, 2026-11-15) — one normalizer `phoneKey` (`mobile/lib/core/utils/phone.dart`): Myanmar digits → 0-9,
+  spaces/dashes/dots/brackets dropped, +959 / 959 → 09. Used by the duplicate-phone warning (Add and Edit, incl. "own number
+  re-written with spaces is not a change"), customer search, the sign-in same-shop check, and `normalizeMmPhone` (OTP) is built on it.
+  The server's `PhoneNumbers.Normalize` now maps Myanmar digits too (before, .NET's `\d` let them through unconverted). Stored phones
+  are unchanged (kept as typed). Tests: `m/phone_key_test.dart` (7), `b/…/AuthRulesTests.cs` (+4 cases); QA's TC-DEBT-NEW-8 passes.
 
 ## BUG-35 · TC-RPT-NEW-1 · Low · Report screen: the 7-day chart breaks when the last 7 days have no sales (NaN bar heights)
 - Found in: round 11 (while checking day totals for BUG-32) · `mobile/test/qa/qa_round11_sync_history_test.dart` › "TC-RPT-NEW-1 …"
@@ -706,7 +710,9 @@ Format:
   with an empty week.
 - Blocks beta: no (data and totals are correct; only the chart). New shops see this screen on day 1, so it is worth fixing before
   the beta.
-- Status: open
+- Status: fixed (developer, 2026-11-15) — `_WeekChart` never divides by a zero week: bars are flat (height 0) and
+  "ရောင်းအား မရှိသေးပါ" shows over the chart; the semantics label says the same. Tests: `m/report_empty_week_test.dart` (2; the
+  empty-week test fails without the fix); QA's TC-RPT-NEW-1 passes.
 
 ---
 
@@ -724,6 +730,9 @@ Format:
   ပြန်ဝယ်ရင် 'Stock ဖြည့်မယ်' ကနေ လက်ခံပါ" (no "ပစ္စည်းအသစ်" offer; a product barcode with the same code still wins); a trade-in is
   received only with "Stock ဖြည့်မယ်". Unknown IMEIs and IMEIs of deleted products still go to "ပစ္စည်းအသစ် ထည့်မယ်". Only in shops
   with IMEI tracking on.
+- **Two phones voiding the same sale while one is offline** (owner, 2026-11-15): the offline phone shows the stock returned twice
+  (e.g. 1 sold, voided on both → +2 instead of +1) until its next sync. The server applies the void once, and after the sync the phone
+  takes the server's copy and shows the right stock (TC-SYNC-NEW-23). Nothing is lost; tell shops that only one phone should void a sale.
 - **Sync issue texts** (BUG-26, 7df5f1f): the app builds them in Burmese from the server's structured fields. Issues raised before
   this server version have no fields and show a shorter Burmese sentence (e.g. "ဒီ Barcode ကို ပစ္စည်းတွေမှာ သုံးထားပါတယ်…" without
   the names).
