@@ -34,7 +34,7 @@ database; every write is one unit of work recorded in the outbox
 
 ## Run on a phone over Wi-Fi (debug)
 
-Debug builds may use plain HTTP to the Mac; release builds are HTTPS only.
+Debug builds may use plain HTTP to the Mac; release builds are meant to be HTTPS only (not enforced yet on Android, BUG-55).
 
 - iOS: the "Debug Local Network" build phase (`ios/scripts/debug_local_network.sh`)
   adds `NSAllowsLocalNetworking` and `NSLocalNetworkUsageDescription` to the
