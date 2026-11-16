@@ -1,0 +1,15 @@
+# QA round 15: API console (scratch DB ZayPOS_QA_20261116_R15, 127.0.0.1:5076), filtered to startup, warn/fail and DEV SMS lines. Full log (2 MB, mostly EF SQL) not kept.
+      Now listening on: http://127.0.0.1:5076
+info: Microsoft.Hosting.Lifetime[0]
+--
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+--
+warn: ZayPOS.Infrastructure.Auth.LoggingSmsSender[0]
+      DEV SMS to +959790917151: ZayPOS code: 995503
+--
+warn: ZayPOS.Infrastructure.Auth.LoggingSmsSender[0]
+      DEV SMS to +959790917151: ZayPOS code: 621339
+--
+warn: ZayPOS.Infrastructure.Auth.LoggingSmsSender[0]
+      DEV SMS to +959790917151: ZayPOS code: 597889

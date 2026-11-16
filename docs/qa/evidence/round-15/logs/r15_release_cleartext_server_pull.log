@@ -1,0 +1,5 @@
+Server pull (all pages) after a sale made in the RELEASE build (app-release.apk, API_BASE_URL=http://10.0.2.2:5076) at 11:58:
+sales on server: 156
+{'no': 'A-0154', 'total': 3500, 'method': 'kbz', 'createdAt': '2026-11-16T05:07:01.032Z'}
+{'no': 'C-0001', 'total': 1500, 'method': 'cash', 'createdAt': '2026-11-16T05:23:26.285Z'}
+{'no': 'A-0155', 'total': 7777, 'method': 'cash', 'createdAt': '2026-11-16T05:28:03.053Z'}
