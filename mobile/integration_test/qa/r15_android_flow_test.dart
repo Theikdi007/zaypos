@@ -19,6 +19,8 @@ import 'package:zaypos_app/features/sales/application/checkout_service.dart';
 import 'package:zaypos_app/features/sales/domain/sale.dart';
 
 import 'qa_harness.dart';
+import 'package:zaypos_app/core/utils/myanmar.dart';
+import 'package:zaypos_app/core/widgets/date_picker.dart';
 
 const step = String.fromEnvironment('QA_STEP');
 const zawgyi = 'ေမာင္ေမာင္'; // U+1031 before the consonant, U+1039 as asat (Zawgyi order)
@@ -128,9 +130,9 @@ void main() {
         await tester.tap(exp.last);
         await settle(tester);
         await shot(tester, 'r15_prod_batch_date_picker');
-        await tester.tap(find.descendant(of: find.byType(Dialog), matching: find.text('28')));
+        await tester.tap(find.descendant(of: find.byType(Dialog), matching: find.text(mmDigits(28))));
         await settle(tester);
-        await tester.tap(find.text('OK'));
+        await tester.tap(find.text(datePickerConfirmText)); // BUG-54: Burmese picker
         await settle(tester);
         await shot(tester, 'r15_prod_batch_form');
         await save();

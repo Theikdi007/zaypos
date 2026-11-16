@@ -148,13 +148,16 @@ class DioAuthApi implements AuthApi {
   }
 }
 
-/// Dio for anonymous calls (auth, limits).
-Dio plainDio(String baseUrl) => Dio(BaseOptions(
+/// Dio for anonymous calls (auth, limits). Every dio in the app is built here
+/// (or by [authedDio] on top of it), so the release HTTPS guard (BUG-55) is on
+/// every request.
+Dio plainDio(String baseUrl, {bool? release}) => Dio(BaseOptions(
       baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       contentType: Headers.jsonContentType,
       responseType: ResponseType.json,
-    ));
+    ))
+      ..interceptors.add(release == null ? HttpsOnlyInterceptor() : HttpsOnlyInterceptor(release: release));
 
 final authApiProvider = Provider<AuthApi>((ref) => DioAuthApi(plainDio(ref.watch(apiBaseUrlProvider))));

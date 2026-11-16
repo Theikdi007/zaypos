@@ -9,6 +9,7 @@ import '../../../../core/widgets/app_switch_tile.dart';
 import '../../../../core/widgets/common.dart';
 import '../../../../core/widgets/form_section.dart';
 import '../../../../core/utils/qty.dart';
+import '../../../../core/widgets/date_picker.dart';
 
 /// Accent square scan button.
 class ScanSquare extends StatelessWidget {
@@ -89,8 +90,8 @@ class ExpiryBatchSection extends StatelessWidget {
 
   Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();
-    final d = await showDatePicker(
-      context: context,
+    final d = await showExpiryDatePicker(
+      context,
       initialDate: expiry ?? now,
       firstDate: DateTime(now.year - 1),
       lastDate: DateTime(now.year + 10),

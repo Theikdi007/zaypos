@@ -3,6 +3,14 @@
 Debug builds may talk plain HTTP to the Mac; release builds are HTTPS only
 (docs/mobile/phase3-sync.md §8).
 
+The app enforces it itself (BUG-55): `dart:io` sockets ignore Android's cleartext policy
+and iOS App Transport Security, so the manifest / ATS alone would not stop an `http://` URL.
+A **release** build whose `API_BASE_URL` is not `https://` refuses to start: it shows
+"ZayPOS ကို ဖွင့်လို့ မရပါ" and logs `ZayPOS: InsecureApiUrl …` (logcat / Xcode console), and opens
+no database or network connection. Every dio client also refuses a non-https request in release
+(`HttpsOnlyInterceptor`, `lib/core/api/api_config.dart`). Debug and profile builds may use `http://`.
+Check a real release APK with `mobile/tool/release_https_check.sh` (emulator / phone over adb).
+
 - **iOS:** the Xcode build phase *Debug Local Network*
   (`mobile/ios/scripts/debug_local_network.sh`) adds `NSAllowsLocalNetworking`
   and `NSLocalNetworkUsageDescription` to the **built** Info.plist of Debug builds
@@ -100,13 +108,15 @@ flutter devices                                   # e.g. emulator-5554
 flutter run -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:5076
 ```
 
-Release APK (signed with the debug key until a release keystore exists). Always pass an
-`https://` URL: the release manifest has no cleartext config, but the app's HTTP client
-(dio on `dart:io`) does not apply Android's cleartext policy, so an `http://` URL still
-works in release (BUG-55, open):
+Release APK (signed with the debug key until a release keystore exists). It needs an
+`https://` URL: a release build with an `http://` URL (or none: the default is
+`http://localhost:5076`) shows the refusal screen and sends nothing (see the top of this file):
 
 ```sh
 flutter build apk --release --dart-define=API_BASE_URL=https://<api-host>
+
+# proof on the emulator: the http build is refused with 0 connections; the https one starts
+HTTPS_URL=https://<api-host> tool/release_https_check.sh
 ```
 
 ## Live tests against the running API

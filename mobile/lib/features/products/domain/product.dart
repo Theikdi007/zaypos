@@ -1,3 +1,5 @@
+import '../../../core/text/myanmar_text.dart';
+
 /// Catalog item. Money = int kyats; quantities = int milli-units (see Qty).
 class Product {
   const Product({
@@ -55,6 +57,19 @@ class Product {
   final DateTime? deletedAt;
 
   bool get isDeleted => deletedAt != null;
+
+  /// BUG-52: name, category and unit with Zawgyi converted to Unicode; the
+  /// avatar initial follows the converted name.
+  Product normalizedText() {
+    final n = normalizeMyanmar(name), c = normalizeMyanmar(category), u = normalizeMyanmar(unit);
+    if (identical(n, name) && identical(c, category) && identical(u, unit)) return this;
+    return copyWith(
+      name: n,
+      category: c,
+      unit: u,
+      initial: identical(n, name) || n.isEmpty ? initial : String.fromCharCode(n.runes.first),
+    );
+  }
 
   Product copyWith({
     String? name,
@@ -118,6 +133,22 @@ class ProductVariant {
 
   /// "M · အနက်"
   String get label => '$size · $color';
+
+  /// BUG-52: size and colour with Zawgyi converted to Unicode.
+  ProductVariant normalizedText() {
+    final s = normalizeMyanmar(size), c = normalizeMyanmar(color);
+    if (identical(s, size) && identical(c, color)) return this;
+    return ProductVariant(
+      id: id,
+      tenantId: tenantId,
+      productId: productId,
+      size: s,
+      color: c,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      deletedAt: deletedAt,
+    );
+  }
 
   ProductVariant copyWith({DateTime? updatedAt, DateTime? Function()? deletedAt}) => ProductVariant(
         id: id,

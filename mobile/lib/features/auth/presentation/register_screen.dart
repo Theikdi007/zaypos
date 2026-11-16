@@ -182,6 +182,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
     final bottom = MediaQuery.paddingOf(context).bottom;
+    // BUG-51: Android back / the back gesture steps back like the "နောက်သို့"
+    // arrow (step 2 → 1, entries kept) instead of dropping the wizard.
+    final stepsBack = _step > 1 && !_signedIn;
+    return PopScope(
+      canPop: !stepsBack,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _back();
+      },
+      child: _body(context, top, bottom),
+    );
+  }
+
+  Widget _body(BuildContext context, double top, double bottom) {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: Column(

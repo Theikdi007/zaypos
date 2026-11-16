@@ -30,6 +30,9 @@ String mmLongDate(DateTime t) {
   return '${mmDigits(d.day)} ${mmMonths[d.month - 1]} ${mmDigits(d.year)}';
 }
 
+/// BUG-47: "Viber သတိပေး" is shown only to a customer who owes something.
+bool showDebtReminder(int balance) => balance > 0;
+
 /// The reminder that "Viber သတိပေး" puts into the share sheet.
 String debtReminderText({
   required String shop,

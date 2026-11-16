@@ -147,6 +147,14 @@ count twice; the next pull brings the server's version. A `rejected` unit
 stays visible in a "sync problems" list (should only happen from bugs).
 Batch size: max 50 units per request; the phone loops until the outbox is empty.
 
+**Burmese text encoding (BUG-52).** Every string of an incoming row (sync push) and the free text
+of register (shop name, township, device name) is stored as Unicode: Zawgyi-typed text is detected
+and converted (`ZayPOS.Application/Text/Zawgyi/MyanmarText.NormalizeToUnicode`, vendored from
+Google myanmar-tools, Apache-2.0). It converts only when the detector says ≥ 0.5 Zawgyi **and** the
+text has a sequence impossible in well-formed Unicode Burmese, so correct Unicode is never changed.
+The app applies the same rule before saving (`mobile/lib/core/text/myanmar_text.dart`); the server
+is the safety net for old app versions. Retries stay exactly-once (keyed by `unitId`).
+
 ### 3.2 Pull — `GET /api/v1/sync/pull?cursor=<hex>&limit=500`
 
 The cursor is the SQL Server `rowversion` (database-wide, always increasing).

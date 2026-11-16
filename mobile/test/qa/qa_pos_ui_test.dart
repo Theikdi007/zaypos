@@ -236,8 +236,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('productName')), 'QA ဖျော်ရည်');
     await tester.enterText(find.byKey(const ValueKey('price')), '600');
-    final sampleCost = '${c.read(shopTemplateProvider).sampleCost}';
-    await tester.enterText(find.byWidgetPredicate((w) => w is EditableText && w.controller.text == sampleCost), '450');
+    // BUG-53: the cost field is empty now (the sample is only a hint), so it is found by its key.
+    await tester.enterText(find.byKey(const ValueKey('cost')), '450');
     await tester.pumpAndSettle();
     expect(find.text('+150 Ks (33%)'), findsOneWidget);
 

@@ -82,7 +82,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
               Expanded(
                 child: StatCard(
                   label: 'အမြတ်',
-                  value: formatKs(s.profit),
+                  value: formatProfit(s.profit, unknown: s.profitUnknown),
+                  caption: s.profitUnknown ? null : unknownCostNote(s.unknownCostLines),
                   valueColor: AppColors.success,
                   valueSize: 19,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

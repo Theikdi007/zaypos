@@ -15,6 +15,7 @@ import '../../../inventory/presentation/restock_sheet.dart' show ExpiredBadge;
 import '../../data/product_providers.dart';
 import '../../domain/product.dart' show ProductVariant;
 import '../../domain/product_modules.dart';
+import '../../../../core/widgets/date_picker.dart';
 
 /// New rows typed in the edit form, saved with the product (one unit).
 class PendingModules {
@@ -145,8 +146,8 @@ class _EditModuleSectionsState extends ConsumerState<EditModuleSections> {
 
   Future<void> _pickExpiry() async {
     final now = DateTime.now();
-    final d = await showDatePicker(
-      context: context,
+    final d = await showExpiryDatePicker(
+      context,
       initialDate: _expiry ?? now,
       firstDate: DateTime(now.year - 1),
       lastDate: DateTime(now.year + 10),

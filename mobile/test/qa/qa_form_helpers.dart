@@ -2,6 +2,8 @@
 // expiryAlertDays starts empty in Add Product; batch no. + expiry are required for tracked opening stock).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaypos_app/core/utils/myanmar.dart';
+import 'package:zaypos_app/core/widgets/date_picker.dart';
 
 const expiryWarnKey = ValueKey('expiryWarn');
 const noExpiryLabel = 'သက်တမ်း မမှတ်ပါ';
@@ -33,7 +35,7 @@ Future<void> pickAddProductExpiry(WidgetTester tester, int day) async {
   await _reveal(tester, f);
   await tester.tap(f.last);
   await tester.pumpAndSettle();
-  await tester.tap(find.descendant(of: find.byType(Dialog), matching: find.text('$day')));
-  await tester.tap(find.text('OK'));
+  await tester.tap(find.descendant(of: find.byType(Dialog), matching: find.text(mmDigits(day))));
+  await tester.tap(find.text(datePickerConfirmText)); // BUG-54: Burmese picker
   await tester.pumpAndSettle();
 }

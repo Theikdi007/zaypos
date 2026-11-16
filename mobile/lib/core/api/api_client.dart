@@ -104,8 +104,8 @@ class AuthInterceptor extends Interceptor {
 }
 
 /// Dio for authenticated `/api/v1` calls (sync, me, devices, …).
-Dio authedDio(String baseUrl, TokenRefresher refresher, {HttpClientAdapter? adapter}) {
-  final dio = plainDio(baseUrl);
+Dio authedDio(String baseUrl, TokenRefresher refresher, {HttpClientAdapter? adapter, bool? release}) {
+  final dio = plainDio(baseUrl, release: release);
   if (adapter != null) dio.httpClientAdapter = adapter;
   dio.interceptors.add(AuthInterceptor(refresher, dio));
   return dio;

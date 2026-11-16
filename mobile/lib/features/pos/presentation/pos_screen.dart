@@ -30,6 +30,7 @@ import 'set_price_sheet.dart';
 import '../../devices/data/device_providers.dart';
 import '../domain/cart.dart';
 import '../../../core/widgets/async_view.dart';
+import '../../../core/text/myanmar_text.dart';
 
 enum PosMode { products, quick }
 
@@ -303,7 +304,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               controller: _search,
               hint: 'ပစ္စည်းအမည် ရှာရန်',
               semanticLabel: 'ပစ္စည်းရှာရန်',
-              onChanged: (q) => setState(() => _query = q.trim()),
+              onChanged: (q) => setState(() => _query = normalizeMyanmar(q.trim())), // BUG-52
             ),
           ),
           const SizedBox(width: 10),

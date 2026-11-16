@@ -33,6 +33,8 @@ abstract final class ReportBuilder {
       sales: _sum(inPeriod, (s) => s.total),
       profit: _sum(inPeriod, (s) => s.profit),
       count: inPeriod.length,
+      knownCostLines: _sum(inPeriod, (s) => s.lines.length - s.unknownCostLines),
+      unknownCostLines: _sum(inPeriod, (s) => s.unknownCostLines),
     );
 
     final days = [

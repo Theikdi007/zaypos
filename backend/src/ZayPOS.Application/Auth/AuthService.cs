@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using ZayPOS.Application.Abstractions;
+using ZayPOS.Application.Text.Zawgyi;
 using ZayPOS.Domain.Common;
 using ZayPOS.Domain.Tenancy;
 
@@ -347,7 +348,8 @@ public sealed class AuthService(
 
     private static string RequireText(string? value, string field, int max)
     {
-        var s = value?.Trim();
+        // Zawgyi-typed shop / township / device names are stored as Unicode (BUG-52).
+        var s = MyanmarText.NormalizeToUnicode(value?.Trim());
         if (string.IsNullOrEmpty(s)) throw AuthException.Validation($"{field} is required.");
         if (s.Length > max) throw AuthException.Validation($"{field} must be at most {max} characters.");
         return s;

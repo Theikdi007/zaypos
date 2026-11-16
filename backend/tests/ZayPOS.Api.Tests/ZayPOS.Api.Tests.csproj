@@ -22,6 +22,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Google myanmar-tools test corpora (Apache-2.0), see Zawgyi/ZawgyiTests.cs -->
+    <None Include="Zawgyi\*.txt;Zawgyi\*.tsv" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\ZayPOS.Api\ZayPOS.Api.csproj" />
   </ItemGroup>
 

@@ -8,10 +8,24 @@ import '../../sales/domain/sale.dart';
 
 /// Today's totals (kyats), computed from sales (profit from cost snapshots).
 class TodaySummary {
-  const TodaySummary({required this.sales, required this.count, required this.profit, required this.changePct, required this.pendingSync});
+  const TodaySummary({
+    required this.sales,
+    required this.count,
+    required this.profit,
+    required this.changePct,
+    required this.pendingSync,
+    this.unknownCostLines = 0,
+    this.profitUnknown = false,
+  });
   final int sales;
   final int count;
   final int profit;
+
+  /// Today's lines left out of [profit] (cost unknown, BUG-53).
+  final int unknownCostLines;
+
+  /// Every line sold today has an unknown cost.
+  final bool profitUnknown;
   final int changePct;
   final int pendingSync;
 }
@@ -23,6 +37,8 @@ final todaySummaryProvider = Provider<AsyncValue<TodaySummary>>((ref) => combine
         sales: r.summary.sales,
         count: r.summary.count,
         profit: r.summary.profit,
+        unknownCostLines: r.summary.unknownCostLines,
+        profitUnknown: r.summary.profitUnknown,
         changePct: r.changeVsYesterdayPct,
         pendingSync: sales.where((s) => s.pending).length,
       ),

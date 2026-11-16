@@ -19,6 +19,7 @@ class CustomerService {
   /// Adds a customer; a non-zero [openingBalance] (kyats, from the paper
   /// book) is recorded as a ledger adjustment.
   Future<void> create(Customer customer, {int openingBalance = 0}) => uow.run(UnitKind.upsertCustomer, () async {
+        customer = customer.normalizedText(); // BUG-52
         await customers.add(customer);
         if (openingBalance != 0) {
           await debt.add(_entry(customer.tenantId, customer.id, DebtEntryType.adjustment, openingBalance,
@@ -29,7 +30,7 @@ class CustomerService {
   /// Edit form ("ပြင်ဆင်ရန်"): saves name / phone / address / credit limit / note as ONE upsertCustomer
   /// unit (synced like other edits, last-writer-wins). The debt ledger is not touched; a limit below the
   /// current balance is allowed.
-  Future<void> update(Customer customer) => uow.run(UnitKind.upsertCustomer, () => customers.update(customer));
+  Future<void> update(Customer customer) => uow.run(UnitKind.upsertCustomer, () => customers.update(customer.normalizedText()));
 
   /// PayDebt sheet: records a repayment.
   Future<DebtEntry> recordPayment({

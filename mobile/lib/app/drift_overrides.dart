@@ -16,6 +16,7 @@ import '../features/customers/data/drift_debt_repository.dart';
 import '../features/devices/data/device_repository.dart';
 import '../features/devices/data/drift_device_repository.dart';
 import '../features/inventory/data/drift_stock_repository.dart';
+import '../features/pos/data/cart_store.dart';
 import '../features/inventory/data/stock_repository.dart';
 import '../features/products/data/drift_product_repository.dart';
 import '../features/products/data/product_repository.dart';
@@ -42,4 +43,5 @@ List<Override> driftOverrides(AppDatabase db, BootState boot, SecureStore store)
       reportRepositoryProvider.overrideWith(
           (ref) => DriftReportRepository(db, DriftSalesRepository(db, deviceId: ref.watch(deviceIdProvider)))),
       featureRepositoryProvider.overrideWith((ref) => DriftFeatureRepository(db, tenantId: ref.watch(tenantIdProvider))),
+      cartStoreProvider.overrideWithValue(DriftCartStore(db)),
     ];

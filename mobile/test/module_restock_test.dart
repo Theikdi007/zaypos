@@ -24,6 +24,7 @@ import 'package:zaypos_app/main.dart';
 
 import 'drift_helpers.dart';
 import 'helpers.dart';
+import 'package:zaypos_app/core/widgets/date_picker.dart';
 
 /// BUG-12 (restock / edit follow the product's modules), expired batches at
 /// POS, and clearing the low-stock alert.
@@ -144,7 +145,7 @@ void main() {
       await tester.enterText(field('restockBatchNo'), 'B2');
       await tester.tap(find.byKey(const ValueKey('restockExpiry')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('OK'));
+      await tester.tap(find.text(datePickerConfirmText)); // BUG-54: Burmese picker
       await tester.pumpAndSettle();
       await keys(tester, ['2', '0']);
       await tester.tap(inSheet(find.text('သိမ်းမယ်')));
