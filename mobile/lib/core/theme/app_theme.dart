@@ -20,6 +20,12 @@ abstract final class AppTheme {
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: AppColors.ground,
+      // Every text style in the app — including Material slots AppText does not
+      // set (date picker, AppBar, chips, tooltips, dropdowns) — uses the bundled
+      // fonts with Noto Sans Myanmar (Unicode) as the Burmese fallback, so a
+      // phone's system Myanmar font (often Zawgyi) never renders our text.
+      fontFamily: AppText.inter,
+      fontFamilyFallback: AppText.fallback,
       textTheme: text,
       splashFactory: InkRipple.splashFactory,
       dividerColor: AppColors.divider,

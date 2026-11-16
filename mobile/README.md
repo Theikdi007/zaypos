@@ -50,4 +50,11 @@ cd backend && dotnet run --project src/ZayPOS.Api --urls http://0.0.0.0:5076
 cd mobile && flutter run -d <device-id> --dart-define=API_BASE_URL=http://$(ipconfig getifaddr en0):5076
 ```
 
-Emulators: iOS simulator `http://localhost:5076`, Android emulator `http://10.0.2.2:5076`.
+Emulators: iOS simulator `http://localhost:5076`, Android emulator `http://10.0.2.2:5076`:
+
+```sh
+flutter run -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:5076
+```
+
+Release APK (debug-signed until a keystore exists; HTTPS only): `flutter build apk --release`.
+See `docs/mobile/dev-setup.md` § Android emulator.

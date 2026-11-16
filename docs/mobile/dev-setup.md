@@ -84,6 +84,29 @@ Local Network permission on?
 | Android emulator | `http://10.0.2.2:5076` |
 | Android phone on the same Wi-Fi | `http://$(ipconfig getifaddr en0):5076` |
 
+## Android emulator
+
+The emulator reaches the Mac's loopback at `10.0.2.2`, so the API may listen on
+localhost only. Only debug builds allow the plain-HTTP URL (see the top of this file).
+
+```sh
+# terminal 1
+cd ~/Developer/ZayPOS/backend
+dotnet run --project src/ZayPOS.Api --urls http://127.0.0.1:5076
+
+# terminal 2
+cd ~/Developer/ZayPOS/mobile
+flutter devices                                   # e.g. emulator-5554
+flutter run -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:5076
+```
+
+Release APK (signed with the debug key until a release keystore exists; HTTPS only,
+so it cannot reach `http://10.0.2.2`):
+
+```sh
+flutter build apk --release --dart-define=API_BASE_URL=https://<api-host>
+```
+
 ## Live tests against the running API
 
 ```sh
