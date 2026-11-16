@@ -1,0 +1,7 @@
+## release APK (http build)
+package: name='com.zaypos.zaypos_app' versionCode='1' versionName='1.0.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+application-label:'ZayPOS'
+launchable-activity: name='com.zaypos.zaypos_app.MainActivity'  label='' icon=''
+## debug APK
+application-label:'ZayPOS'
+launchable-activity: name='com.zaypos.zaypos_app.MainActivity'  label='' icon=''

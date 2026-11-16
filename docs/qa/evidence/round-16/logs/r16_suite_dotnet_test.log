@@ -1,0 +1,7 @@
+Passed!  - Failed:     0, Passed:    20, Skipped:     0, Total:    20, Duration: 246 ms - ZayPOS.Domain.Tests.dll (net10.0)
+Passed!  - Failed:     0, Passed:   276, Skipped:     0, Total:   276, Duration: 53 s - ZayPOS.Api.Tests.dll (net10.0)
+  Failed ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(input: "09７９００１１００２") [15 ms]
+  Failed ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(input: "09႗႙႐႐႑႑႐႐႒") [< 1 ms]
+  Failed ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(input: "+959٧٩٠٠١١٠٠٢") [5 ms]
+  Failed ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_api_an_otp_for_a_Shan_digit_number_sends_no_SMS_to_a_non_ASCII_number [5 ms]
+Failed!  - Failed:     4, Passed:    39, Skipped:     0, Total:    43, Duration: 8 s - ZayPOS.QA.Tests.dll (net10.0)

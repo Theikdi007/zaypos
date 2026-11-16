@@ -1,0 +1,58 @@
+Analyzing r16_android_verify_test.dart...                       
+No issues found! (ran in 3.4s)
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDebug'...                             10.9s
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk...           5.4s
+D/nativeloader(27341): Load /data/app/~~_VaeAxaqvmuhMTKA6D70Dw==/com.zaypos.zaypos_app-zKxmfqCaTNS0102CRZmJ9Q==/base.apk!/lib/arm64-v8a/libdartjni.so using class loader ns clns-9 (caller=/data/app/~~_VaeAxaqvmuhMTKA6D70Dw==/com.zaypos.zaypos_app-zKxmfqCaTNS0102CRZmJ9Q==/base.apk!classes7.dex): ok
+I/ypos.zaypos_app(27341): hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported,test-api) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/ypos.zaypos_app(27341): hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/ypos.zaypos_app(27341): hiddenapi: Accessing hidden field Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray; (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/ypos.zaypos_app(27341): hiddenapi: Accessing hidden method Landroid/util/LongArray;->get(I)J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+D/AccessibilityBridge(27341): Setting not found: accessibility_display_inversion_enabled, using default: 0
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:64831/JEJQQhi9HCA=/
+D/FlutterRenderer(27341): Width is zero. 0,0
+D/CompatChangeReporter(27341): Compat change id reported: 377864165; UID 10229; state: ENABLED
+VMServiceFlutterDriver: Isolate found with number: 1130287305398747
+W/HWUI    (27341): Unknown dataspace 0
+VMServiceFlutterDriver: Isolate 1130287305398747 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+D/WindowOnBackDispatcher(27341): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@3925648
+D/ProfileInstaller(27341): Installing profile for com.zaypos.zaypos_app
+I/WindowExtensionsImpl(27341): Initializing Window Extensions, vendor API level=9, activity embedding enabled=true
+D/VRI[MainActivity](27341): WindowInsets changed: 1080x2424 statusBars:[0,142,0,0] navigationBars:[0,0,0,63] mandatorySystemGestures:[0,174,0,84] 
+D/FlutterRenderer(27341): Width is zero. 0,0
+D/FlutterRenderer(27341): Width is zero. 0,0
+D/FlutterJNI(27341): Sending viewport metrics to the engine.
+I/ypos.zaypos_app(27341): Compiler allocated 5390KB to compile void android.view.ViewRootImpl.performTraversals()
+I/Choreographer(27341): Skipped 121 frames!  The application may be doing too much work on its main thread.
+D/WindowLayoutComponentImpl(27341): Register WindowLayoutInfoListener on Context=com.zaypos.zaypos_app.MainActivity@f6c18cb, of which baseContext=android.app.ContextImpl@e0245f9
+D/FlutterJNI(27341): Sending viewport metrics to the engine.
+I/HWUI    (27341): Using FreeType backend (prop=Auto)
+VMServiceFlutterDriver: Flutter Driver extension is taking a long time to become available. Ensure your test app (often "lib/main.dart") imports "package:flutter_driver/driver_extension.dart" and calls enableFlutterDriverExtension() as the first call in main().
+I/ypos.zaypos_app(27341): Background concurrent mark compact GC freed 2640KB AllocSpace bytes, 3(60KB) LOS objects, 49% free, 3452KB/6904KB, paused 342us,6.727ms total 113.832ms
+I/ypos.zaypos_app(27341): Background young concurrent mark compact GC freed 3468KB AllocSpace bytes, 0(0B) LOS objects, 50% free, 3440KB/6904KB, paused 194us,6.665ms total 78.204ms

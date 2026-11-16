@@ -1,0 +1,3 @@
+--------- beginning of main
+11-16 14:09:54.949 24713 24760 I flutter : [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+11-16 14:09:56.218 24713 24713 I flutter : ZayPOS: InsecureApiUrl: release builds only talk to an https:// API, but API_BASE_URL is "http://10.0.2.2:5076". Rebuild with --dart-define=API_BASE_URL=https://<your API host>.

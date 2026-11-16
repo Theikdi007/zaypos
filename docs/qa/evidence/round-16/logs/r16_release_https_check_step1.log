@@ -1,0 +1,24 @@
+== release build with API_BASE_URL=http://10.0.2.2:5076
+Running Gradle task 'assembleRelease'...                           88.3s
+✓ Built build/app/outputs/flutter-apk/app-release.apk (90.1MB)
+Success
+Status: ok
+TotalTime: 7592
+PASS step 1: http release build refused to start; 0 connections to :5076
+tool/release_https_check.sh: line 86: 89541 Terminated: 15          python3 - "$HOST_PORT" "$OUT/connections.txt"  <<'PY'
+import socket, sys
+port, out = int(sys.argv[1]), sys.argv[2]
+s = socket.socket(); s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.bind(('127.0.0.1', port)); s.listen(5); s.settimeout(1)
+open(out, 'w').close()
+while True:
+    try:
+        c, a = s.accept()
+        with open(out, 'a') as f: f.write(f'connection from {a}\n')
+        c.close()
+    except socket.timeout:
+        pass
+PY
+
+Evidence in /private/tmp/claude-501/-Users-theikdinyunt-Developer-ZayPOS/35dc5dcf-13b4-4b38-b9c9-f3b0d1ce0400/scratchpad/r16/rhc/
+exit=0

@@ -1,0 +1,229 @@
+Analyzing r16_android_verify_test.dart...                       
+No issues found! (ran in 3.5s)
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDebug'...                             10.0s
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk...           4.9s
+D/AccessibilityBridge(29339): Setting not found: accessibility_display_inversion_enabled, using default: 0
+D/FlutterRenderer(29339): Width is zero. 0,0
+D/CompatChangeReporter(29339): Compat change id reported: 377864165; UID 10229; state: ENABLED
+W/HWUI    (29339): Unknown dataspace 0
+D/ProfileInstaller(29339): Installing profile for com.zaypos.zaypos_app
+D/WindowOnBackDispatcher(29339): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@3925648
+I/WindowExtensionsImpl(29339): Initializing Window Extensions, vendor API level=9, activity embedding enabled=true
+D/VRI[MainActivity](29339): WindowInsets changed: 1080x2424 statusBars:[0,142,0,0] navigationBars:[0,0,0,63] mandatorySystemGestures:[0,174,0,84] 
+D/FlutterRenderer(29339): Width is zero. 0,0
+D/FlutterRenderer(29339): Width is zero. 0,0
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+I/ypos.zaypos_app(29339): Compiler allocated 5393KB to compile void android.view.ViewRootImpl.performTraversals()
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:52042/3O3_xVmU_X0=/
+VMServiceFlutterDriver: Isolate found with number: 508205682918019
+I/Choreographer(29339): Skipped 66 frames!  The application may be doing too much work on its main thread.
+VMServiceFlutterDriver: Isolate 508205682918019 is runnable.
+D/WindowLayoutComponentImpl(29339): Register WindowLayoutInfoListener on Context=com.zaypos.zaypos_app.MainActivity@f6c18cb, of which baseContext=android.app.ContextImpl@889d4c0
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+I/HWUI    (29339): Using FreeType backend (prop=Auto)
+I/flutter (29339): 00:00 +0: r16 Android: pickers
+VMServiceFlutterDriver: Connected to Flutter application.
+I/Choreographer(29339): Skipped 50 frames!  The application may be doing too much work on its main thread.
+I/Choreographer(29339): Skipped 95 frames!  The application may be doing too much work on its main thread.
+I/HWUI    (29339): Davey! duration=1706ms; Flags=1, FrameTimelineVsyncId=772236, IntendedVsync=14868927547049, Vsync=14870510880319, InputEventId=0, HandleInputStart=14870516971173, AnimationStart=14870516974132, PerformTraversalsStart=14870516976173, DrawStart=14870529142132, FrameDeadline=14868944213715, FrameStartTime=14870514819007, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=14870537414090, SyncStart=14870539865923, IssueDrawCommandsStart=14870543027215, SwapBuffers=14870572937923, FrameCompleted=14870636153465, DequeueBufferDuration=16768333, QueueBufferDuration=2219375, GpuCompleted=14870618981173, SwapBuffersCompleted=14870636153465, DisplayPresentTime=0, CommandSubmissionCompleted=14870572937923, 
+D/InsetsController(29339): hide(ime())
+I/ImeTracker(29339): com.zaypos.zaypos_app:ab96e86d: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+D/WindowOnBackDispatcher(29339): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+I/flutter (29339): QA_NOTE:batch product {id: 01a1e37c-4a12-7627-8c68-4bedcba25152, name: QA r16 Batch, price: 2000, cost: 1500}; batches=[{batchNo: B16, expiryDate: 1795824000000}]
+I/flutter (29339): QA_SHOT:r16_bug54_restock_sheet
+[runner] screenshot r16_bug54_restock_sheet.png
+I/flutter (29339): QA_SHOT:r16_bug54_restock_calendar
+[runner] screenshot r16_bug54_restock_calendar.png
+I/flutter (29339): QA_NOTE:OK   restock calendar: English=[]; texts=[သက်တမ်းကုန်ရက် ရွေးပါ, နို ၁၆ တနင်္လာ, တ, တ, အ, ဗ, က, သ, စ, ၁, ၂, ၃, ၄, ၅, ၆, ၇, ၈, ၉, ၁၀, ၁၁, ၁၂, ၁၃, ၁၄, ၁၅, ၁၆, ၁၇, ၁၈, ၁၉, ၂၀, ၂၁, ၂၂, ၂၃, ၂၄, ၂၅, ၂၆, ၂၇, ၂၈, ၂၉, ၃၀, ၂၀၂၆ နိုဝင်ဘာ, မလုပ်တော့, ရွေးမယ်]
+I/ImeTracker(29339): com.zaypos.zaypos_app:2bc9eda3: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(29339): show(ime())
+D/InsetsController(29339): Setting requestedVisibleTypes to 511 (was 503)
+D/InputConnectionAdaptor(29339): The input method toggled cursor monitoring on
+D/WindowOnBackDispatcher(29339): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@4cf9f8a
+W/InteractionJankMonitor(29339): Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.zaypos.zaypos_app
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+I/ImeTracker(29339): com.zaypos.zaypos_app:2bc9eda3: onShown
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+I/flutter (29339): QA_SHOT:r16_bug54_restock_input_mode
+[runner] screenshot r16_bug54_restock_input_mode.png
+I/flutter (29339): QA_NOTE:FAIL restock keyboard-entry mode: English=[dd-mm-yyyy, dd-mm-yyyy]; texts=[သက်တမ်းကုန်ရက် ရွေးပါ, နို ၁၆ တနင်္လာ, ရက်စွဲ ထည့်ရန်, dd-mm-yyyy, မလုပ်တော့, ရွေးမယ်, dd-mm-yyyy, ရက်စွဲ ထည့်ရန်, ]
+I/ImeTracker(29339): com.zaypos.zaypos_app:4bc76e9b: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+D/InsetsController(29339): hide(ime())
+D/WindowOnBackDispatcher(29339): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+D/InsetsController(29339): Setting requestedVisibleTypes to 503 (was 511)
+D/CompatChangeReporter(29339): Compat change id reported: 395521150; UID 10229; state: ENABLED
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+I/ImeTracker(29339): system_server:71999f32: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+I/flutter (29339): QA_SHOT:r16_bug54_edit_form
+[runner] screenshot r16_bug54_edit_form.png
+I/flutter (29339): QA_SHOT:r16_bug54_edit_form_calendar
+[runner] screenshot r16_bug54_edit_form_calendar.png
+I/flutter (29339): QA_NOTE:OK   edit_form calendar: English=[]; texts=[သက်တမ်းကုန်ရက် ရွေးပါ, နို ၁၆ တနင်္လာ, တ, တ, အ, ဗ, က, သ, စ, ၁, ၂, ၃, ၄, ၅, ၆, ၇, ၈, ၉, ၁၀, ၁၁, ၁၂, ၁၃, ၁၄, ၁၅, ၁၆, ၁၇, ၁၈, ၁၉, ၂၀, ၂၁, ၂၂, ၂၃, ၂၄, ၂၅, ၂၆, ၂၇, ၂၈, ၂၉, ၃၀, ၂၀၂၆ နိုဝင်ဘာ, မလုပ်တော့, ရွေးမယ်]
+I/ImeTracker(29339): com.zaypos.zaypos_app:8e7e7e70: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(29339): show(ime())
+D/InsetsController(29339): Setting requestedVisibleTypes to 511 (was 503)
+D/InputConnectionAdaptor(29339): The input method toggled cursor monitoring on
+D/WindowOnBackDispatcher(29339): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@4cf9f8a
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+I/ImeTracker(29339): com.zaypos.zaypos_app:8e7e7e70: onShown
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+I/flutter (29339): QA_SHOT:r16_bug54_edit_form_input_mode
+[runner] screenshot r16_bug54_edit_form_input_mode.png
+I/flutter (29339): QA_NOTE:FAIL edit_form keyboard-entry mode: English=[dd-mm-yyyy, dd-mm-yyyy]; texts=[သက်တမ်းကုန်ရက် ရွေးပါ, နို ၁၆ တနင်္လာ, ရက်စွဲ ထည့်ရန်, dd-mm-yyyy, မလုပ်တော့, ရွေးမယ်, dd-mm-yyyy, ရက်စွဲ ထည့်ရန်, ]
+I/ImeTracker(29339): com.zaypos.zaypos_app:f6183aac: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+D/InsetsController(29339): hide(ime())
+D/WindowOnBackDispatcher(29339): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+D/InsetsController(29339): Setting requestedVisibleTypes to 503 (was 511)
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+D/FlutterJNI(29339): Sending viewport metrics to the engine.
+I/ImeTracker(29339): system_server:d19c7ef6: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+I/flutter (29339): QA_NOTE:FAILURES: 2 restock keyboard-entry mode: English=[dd-mm-yyyy, dd-mm-yyyy]; texts=[သက်တမ်းကုန်ရက် ရွေးပါ, နို ၁၆ တနင်္လာ, ရက်စွဲ ထည့်ရန်, dd-mm-yyyy, မလုပ်တော့, ရွေးမယ်, dd-mm-yyyy, ရက်စွဲ ထည့်ရန်, ] | edit_form keyboard-entry mode: English=[dd-mm-yyyy, dd-mm-yyyy]; texts=[သက်တမ်းကုန်ရက် ရွေးပါ, နို ၁၆ တနင်္လာ, ရက်စွဲ ထည့်ရန်, dd-mm-yyyy, မလုပ်တော့, ရွေးမယ်, dd-mm-yyyy, ရက်စွဲ ထည့်ရန်, ]
+I/flutter (29339): ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+I/flutter (29339): The following TestFailure was thrown running a test:
+I/flutter (29339): Expected: empty
+I/flutter (29339):   Actual: [
+I/flutter (29339):             'restock keyboard-entry mode: English=[dd-mm-yyyy, dd-mm-yyyy]; texts=[သက်တမ်းကုန်ရက်
+I/flutter (29339): ရွေးပါ, နို ၁၆ တနင်္လာ, ရက်စွဲ ထည့်ရန်, dd-mm-yyyy, မလုပ်တော့, ရွေးမယ်, dd-mm-yyyy, ရက်စွဲ ထည့်ရန်,
+I/flutter (29339): ]',
+I/flutter (29339):             'edit_form keyboard-entry mode: English=[dd-mm-yyyy, dd-mm-yyyy]; texts=[သက်တမ်းကုန်ရက်
+I/flutter (29339): ရွေးပါ, နို ၁၆ တနင်္လာ, ရက်စွဲ ထည့်ရန်, dd-mm-yyyy, မလုပ်တော့, ရွေးမယ်, dd-mm-yyyy, ရက်စွဲ ထည့်ရန်,
+I/flutter (29339): ]'
+I/flutter (29339):           ]
+I/flutter (29339): 
+I/flutter (29339): When the exception was thrown, this was the stack:
+I/flutter (29339): #4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r16_android_verify_test.dart:414:5)
+I/flutter (29339): <asynchronous suspension>
+I/flutter (29339): #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+I/flutter (29339): <asynchronous suspension>
+I/flutter (29339): #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+I/flutter (29339): <asynchronous suspension>
+I/flutter (29339): #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+I/flutter (29339): <asynchronous suspension>
+I/flutter (29339): 
+I/flutter (29339): This was caught by the test expectation on the following line:
+I/flutter (29339):   file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r16_android_verify_test.dart line 414
+I/flutter (29339): The test description was:
+I/flutter (29339):   r16 Android: pickers
+I/flutter (29339): ════════════════════════════════════════════════════════════════════════════════════════════════════
+I/flutter (29339): 00:23 +0: r16 Android: pickers [E]
+I/flutter (29339):   Test failed. See exception logs above.
+I/flutter (29339):   The test description was: r16 Android: pickers
+I/flutter (29339):   
+I/flutter (29339): 00:23 +0 -1: (tearDownAll)
+I/flutter (29339): 00:23 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: r16 Android: pickers
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Expected: empty
+  Actual: [
+            'restock keyboard-entry mode: English=[dd-mm-yyyy,
+dd-mm-yyyy]; texts=[သက်တမ်းကုန်ရက် ရွေးပါ, နို ၁၆ တနင်္လာ, ရက်စွဲ
+ထည့်ရန်, dd-mm-yyyy, မလုပ်တော့, ရွေးမယ်, dd-mm-yyyy, ရက်စွဲ
+ထည့်ရန်, ]',
+            'edit_form keyboard-entry mode: English=[dd-mm-yyyy,
+dd-mm-yyyy]; texts=[သက်တမ်းကုန်ရက် ရွေးပါ, နို ၁၆ တနင်္လာ, ရက်စွဲ
+ထည့်ရန်, dd-mm-yyyy, မလုပ်တော့, ရွေးမယ်, dd-mm-yyyy, ရက်စွဲ
+ထည့်ရန်, ]'
+          ]
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r16_android_verify_test.dart:414:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r16_android_verify_test.dart line 414
+The test description was:
+  r16 Android: pickers
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+Leaving the application running.
+[runner] flutter exit code 1

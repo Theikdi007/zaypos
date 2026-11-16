@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaypos_app/app/fake_overrides.dart';
-import 'package:zaypos_app/core/db/app_database.dart';
+import 'package:zaypos_app/core/db/app_database.dart' hide CustomerRow;
 import 'package:zaypos_app/core/db/database_provider.dart';
 import 'package:zaypos_app/core/features/features_providers.dart';
 import 'package:zaypos_app/core/router/app_router.dart';
@@ -18,10 +18,9 @@ import 'package:zaypos_app/core/sync/sync_limits.dart';
 import 'package:zaypos_app/core/utils/ids.dart';
 import 'package:zaypos_app/features/auth/data/auth_api.dart';
 import 'package:zaypos_app/features/auth/data/boot_state.dart';
-import 'package:zaypos_app/features/auth/data/session.dart';
 import 'package:zaypos_app/features/auth/domain/pin_hasher.dart';
-import 'package:zaypos_app/features/customers/application/customer_service.dart';
-import 'package:zaypos_app/features/customers/domain/customer.dart';
+import 'package:zaypos_app/core/widgets/common.dart' show AppInput;
+import 'package:zaypos_app/features/customers/presentation/widgets/customer_row.dart';
 import 'package:zaypos_app/main.dart';
 
 import '../drift_helpers.dart';
@@ -107,39 +106,45 @@ void main() {
   });
 
   // ------------------------------------------------------------------------------------------------ TC-DEBT-NEW-14
-  testWidgets('TC-DEBT-NEW-14 a customer saved with a Zawgyi-typed name ("ေမာင္ေမာင္") is found when the Unicode spelling '
-      '"မောင်မောင်" is searched (or the name is stored in Unicode)', (tester) async {
+  // Round 16: strengthened. The round-15 version created the customer through the service, tapped "အားလုံး" while it
+  // was off-screen in the scrolling chip row (the tap missed: "would not hit test") and counted texts minus 1 for the
+  // search box. Now: the name is typed into the real Add Customer form, the stored code points are checked, the chip
+  // is scrolled into view, and only real CustomerRow widgets are counted, for a Unicode AND a Zawgyi search.
+  testWidgets('TC-DEBT-NEW-14 a customer saved with a Zawgyi-typed name ("ေမာင္ေမာင္") is stored as Unicode '
+      '"မောင်မောင်" and found by the Unicode and by the Zawgyi spelling', (tester) async {
     final c = await bootShop(tester);
-    final t = DateTime.utc(2026, 11, 1);
-    const zawgyi = 'ေမာင္ေမာင္';
-    const unicode = 'မောင်မောင်';
-    await c
-        .read(customerServiceProvider)
-        .create(
-          Customer(
-            id: newId(),
-            tenantId: c.read(tenantIdProvider),
-            name: zawgyi,
-            phone: '09 790 011 152',
-            createdAt: t,
-            updatedAt: t,
-          ),
-        );
+    const zawgyi = 'ေမာင္ေမာင္'; // U+1031 U+1019 U+102C U+1004 U+1039 x2
+    const unicode = 'မောင်မောင်'; // U+1019 U+1031 U+102C U+1004 U+103A x2
+    c.read(appRouterProvider).push(Routes.addCustomer);
+    await tester.pumpAndSettle();
+    Finder input(String label) => find.descendant(
+        of: find.byWidgetPredicate((w) => w is AppInput && w.semanticLabel == label), matching: find.byType(EditableText));
+    await tester.enterText(input('အမည်'), zawgyi);
+    await tester.enterText(input('ဖုန်းနံပါတ်'), '09 790 011 152');
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('သိမ်းမယ်').last);
+    await tester.tap(find.text('သိမ်းမယ်').last);
+    await tester.pumpAndSettle();
+    final saved = c.read(fakeDatabaseProvider).customers.where((x) => x.phone.replaceAll(' ', '').endsWith('790011152'));
+    expect(saved, hasLength(1), reason: 'saved through the Add Customer form');
+    expect(saved.single.name.runes.toList(), unicode.runes.toList(), reason: 'stored in Unicode (code points)');
+
     c.read(appRouterProvider).go(Routes.customers);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('အားလုံး').first); // the chip row scrolls sideways
     await tester.pumpAndSettle();
     await tester.tap(find.text('အားလုံး').first);
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(EditableText).first, unicode);
-    await tester.pumpAndSettle();
-    final rows =
-        find.textContaining(zawgyi).evaluate().length +
-        find.textContaining(unicode).evaluate().length -
-        1; // minus the search box
-    expect(
-      rows,
-      greaterThanOrEqualTo(1),
-      reason: 'shops type names on Zawgyi and Unicode keyboards; the debtor must be found by the Unicode spelling',
-    );
+    final allRows = find.byType(CustomerRow).evaluate().length;
+    expect(find.descendant(of: find.byType(CustomerRow), matching: find.text(unicode)), findsOneWidget,
+        reason: 'the "အားလုံး" tab lists the customer under its Unicode name ($allRows rows)');
+    for (final query in [unicode, zawgyi, 'မောင်', 'ေမာင္']) {
+      await tester.enterText(find.byType(EditableText).first, query);
+      await tester.pumpAndSettle();
+      expect(find.byType(CustomerRow), findsOneWidget, reason: 'search "$query" finds exactly the one customer');
+      expect(find.descendant(of: find.byType(CustomerRow), matching: find.text(unicode)), findsOneWidget,
+          reason: 'search "$query": the row shows the Unicode name');
+    }
   });
 
   // ------------------------------------------------------------------------------------------------ TC-PROD-NEW-36
