@@ -100,8 +100,10 @@ flutter devices                                   # e.g. emulator-5554
 flutter run -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:5076
 ```
 
-Release APK (signed with the debug key until a release keystore exists; HTTPS only,
-so it cannot reach `http://10.0.2.2`):
+Release APK (signed with the debug key until a release keystore exists). Always pass an
+`https://` URL: the release manifest has no cleartext config, but the app's HTTP client
+(dio on `dart:io`) does not apply Android's cleartext policy, so an `http://` URL still
+works in release (BUG-55, open):
 
 ```sh
 flutter build apk --release --dart-define=API_BASE_URL=https://<api-host>
