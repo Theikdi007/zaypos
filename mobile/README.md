@@ -56,5 +56,5 @@ Emulators: iOS simulator `http://localhost:5076`, Android emulator `http://10.0.
 flutter run -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:5076
 ```
 
-Release APK (debug-signed until a keystore exists; HTTPS only): `flutter build apk --release`.
+Release APK (debug-signed until a keystore exists): `flutter build apk --release`. Pass an https `API_BASE_URL`: release does not yet refuse http (BUG-55).
 See `docs/mobile/dev-setup.md` § Android emulator.
