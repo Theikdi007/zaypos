@@ -1,3 +1,5 @@
+import '../../../core/text/myanmar_text.dart';
+
 // Module entities enabled by TenantFeatures (expiryBatch, serialWarranty).
 
 /// A received lot with an expiry date (pharmacy / food). Stock per batch is
@@ -35,6 +37,23 @@ class ProductBatch {
     if (e == null) return false;
     final local = now.toLocal();
     return DateTime.utc(e.year, e.month, e.day).isBefore(DateTime.utc(local.year, local.month, local.day));
+  }
+
+  /// BUG-52: the batch number with Zawgyi converted to Unicode.
+  ProductBatch normalizedText() {
+    final b = normalizeMyanmar(batchNo);
+    if (identical(b, batchNo)) return this;
+    return ProductBatch(
+      id: id,
+      tenantId: tenantId,
+      productId: productId,
+      batchNo: b,
+      expiryDate: expiryDate,
+      qtyMilli: qtyMilli,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      deletedAt: deletedAt,
+    );
   }
 
   ProductBatch copyWith({int? qtyMilli, DateTime? updatedAt, DateTime? Function()? deletedAt}) => ProductBatch(

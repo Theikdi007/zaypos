@@ -1,3 +1,5 @@
+import '../../../core/text/myanmar_text.dart';
+
 /// Customer master data. The debt balance is NOT stored here — it is the
 /// sum of the customer's [DebtEntry] ledger (see debt_entry.dart).
 class Customer {
@@ -29,6 +31,13 @@ class Customer {
 
   /// First code point — the leading consonant shown in the avatar.
   String get initial => name.isEmpty ? '' : String.fromCharCode(name.runes.first);
+
+  /// BUG-52: name, address and note with Zawgyi converted to Unicode.
+  Customer normalizedText() {
+    final n = normalizeMyanmar(name), a = normalizeMyanmarOrNull(address), o = normalizeMyanmarOrNull(note);
+    if (identical(n, name) && identical(a, address) && identical(o, note)) return this;
+    return copyWith(name: n, address: () => a, note: () => o);
+  }
 
   Customer copyWith({
     String? name,

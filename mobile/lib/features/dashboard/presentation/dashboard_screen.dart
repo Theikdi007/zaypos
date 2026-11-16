@@ -222,11 +222,15 @@ class _Hero extends StatelessWidget {
             children: [
               _metric('အရောင်း', '${today.count} ကြိမ်'),
               const SizedBox(width: 20),
-              _metric('အမြတ်', formatKs(today.profit)),
+              _metric('အမြတ်', formatProfit(today.profit, unknown: today.profitUnknown)),
               const SizedBox(width: 20),
               _metric('မနေ့က', '$sign${today.changePct}%'),
             ],
           ),
+          if (today.profitUnknown ? null : unknownCostNote(today.unknownCostLines) case final note?) ...[
+            const SizedBox(height: 6),
+            Text(note, style: AppText.s(12, color: AppColors.surface.withValues(alpha: 0.85))),
+          ],
         ],
       ),
     );

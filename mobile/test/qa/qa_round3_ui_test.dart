@@ -23,6 +23,8 @@ import 'package:zaypos_app/features/products/domain/product_modules.dart';
 import 'package:zaypos_app/main.dart';
 
 import '../helpers.dart';
+import 'package:zaypos_app/core/utils/myanmar.dart';
+import 'package:zaypos_app/core/widgets/date_picker.dart';
 
 void main() {
   setUpAll(loadAppFonts);
@@ -272,8 +274,8 @@ void main() {
       await tester.enterText(field('restockBatchNo'), 'R3NEW');
       await tester.tap(find.byKey(const ValueKey('restockExpiry')));
       await tester.pumpAndSettle();
-      await tester.tap(find.descendant(of: find.byType(Dialog), matching: find.text('28')));
-      await tester.tap(find.text('OK'));
+      await tester.tap(find.descendant(of: find.byType(Dialog), matching: find.text(mmDigits(28))));
+      await tester.tap(find.text(datePickerConfirmText)); // BUG-54: Burmese picker
       await tester.pumpAndSettle();
       final expectExpiry = DateTime.utc(now.year, now.month, 28);
       final shown = '${expectExpiry.year}-${expectExpiry.month.toString().padLeft(2, '0')}-28';
@@ -451,8 +453,8 @@ void main() {
       await tester.ensureVisible(find.byKey(const ValueKey('newBatchExpiry')));
       await tester.tap(find.byKey(const ValueKey('newBatchExpiry')));
       await tester.pumpAndSettle();
-      await tester.tap(find.descendant(of: find.byType(Dialog), matching: find.text('27')));
-      await tester.tap(find.text('OK'));
+      await tester.tap(find.descendant(of: find.byType(Dialog), matching: find.text(mmDigits(27))));
+      await tester.tap(find.text(datePickerConfirmText)); // BUG-54: Burmese picker
       await tester.pumpAndSettle();
       await tester.ensureVisible(find.byKey(const ValueKey('addBatch')));
       await tester.tap(find.byKey(const ValueKey('addBatch')));

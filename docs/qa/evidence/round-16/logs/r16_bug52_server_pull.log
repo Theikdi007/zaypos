@@ -1,0 +1,8 @@
+POST /auth/login -> 200
+GET /sync/pull (all pages)
+customers 01a1e379 name='မောင်မောင်' [U+1019 U+1031 U+102C U+1004 U+103A U+1019 U+1031 U+102C U+1004 U+103A]
+customers 01a1e379 address='ရန်ကုန်' [U+101B U+1014 U+103A U+1000 U+102F U+1014 U+103A]
+customers 01a1e379 note='ကြွေးကျန်' [U+1000 U+103C U+103D U+1031 U+1038 U+1000 U+103B U+1014 U+103A]
+customers 01a1e379 name='ယခု မိုးရွာနေပါသလား' [U+101A U+1001 U+102F U+0020 U+1019 U+102D U+102F U+1038 U+101B U+103D U+102C U+1014 U+1031 U+1015 U+102B U+101E U+101C U+102C U+1038]
+customers 01a1e379 name='ကျွန်ုပ်' [U+1000 U+103B U+103D U+1014 U+103A U+102F U+1015 U+103A]
+products 01a1e379 name='ဆေးလုံး' [U+1006 U+1031 U+1038 U+101C U+102F U+1036 U+1038]

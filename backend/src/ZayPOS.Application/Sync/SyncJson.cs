@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ZayPOS.Application.Text.Zawgyi;
 
 namespace ZayPOS.Application.Sync;
 
@@ -15,6 +16,7 @@ public static class SyncJson
             new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false),
             new UtcMillisecondsConverter(),
             new LenientDateOnlyConverter(),
+            new UnicodeTextConverter(),
         },
     };
 
@@ -53,6 +55,20 @@ public static class SyncJson
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options) =>
             writer.WriteStringValue(ToUtcMs(value));
+    }
+
+    /// <summary>
+    /// Every string of an incoming row is stored as Unicode: Zawgyi-typed names, notes, addresses … are converted
+    /// (BUG-52; <see cref="MyanmarText.NormalizeToUnicode"/>). Ids, phones, barcodes and codes have no Myanmar
+    /// letters and come back unchanged. Retries stay exactly-once: ProcessedUnits is keyed by unitId, not content.
+    /// </summary>
+    private sealed class UnicodeTextConverter : JsonConverter<string>
+    {
+        public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+            MyanmarText.NormalizeToUnicode(reader.GetString());
+
+        public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options) =>
+            writer.WriteStringValue(value);
     }
 
     /// <summary>Accepts "2026-12-31" and Dart's DateTime.toIso8601String() ("2026-12-31T00:00:00.000Z").</summary>

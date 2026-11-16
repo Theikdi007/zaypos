@@ -1,0 +1,102 @@
+Analyzing r16_android_verify_test.dart...                       
+No issues found! (ran in 3.2s)
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDebug'...                             19.3s
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk...           4.9s
+D/nativeloader(28221): Load /data/app/~~Tew5IEcvS7aSXS4xCu6z5A==/com.zaypos.zaypos_app-ikwTQk6hq0pQfyKVUR7asw==/base.apk!/lib/arm64-v8a/libdartjni.so using class loader ns clns-9 (caller=/data/app/~~Tew5IEcvS7aSXS4xCu6z5A==/com.zaypos.zaypos_app-ikwTQk6hq0pQfyKVUR7asw==/base.apk!classes7.dex): ok
+I/ypos.zaypos_app(28221): hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported,test-api) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/ypos.zaypos_app(28221): hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/ypos.zaypos_app(28221): hiddenapi: Accessing hidden field Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray; (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/ypos.zaypos_app(28221): hiddenapi: Accessing hidden method Landroid/util/LongArray;->get(I)J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+D/AccessibilityBridge(28221): Setting not found: accessibility_display_inversion_enabled, using default: 0
+D/FlutterRenderer(28221): Width is zero. 0,0
+D/CompatChangeReporter(28221): Compat change id reported: 377864165; UID 10229; state: ENABLED
+W/HWUI    (28221): Unknown dataspace 0
+D/WindowOnBackDispatcher(28221): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@17e905c
+I/WindowExtensionsImpl(28221): Initializing Window Extensions, vendor API level=9, activity embedding enabled=true
+D/VRI[MainActivity](28221): WindowInsets changed: 1080x2424 statusBars:[0,142,0,0] navigationBars:[0,0,0,63] mandatorySystemGestures:[0,174,0,84] 
+D/FlutterRenderer(28221): Width is zero. 0,0
+D/FlutterRenderer(28221): Width is zero. 0,0
+D/FlutterJNI(28221): Sending viewport metrics to the engine.
+I/ypos.zaypos_app(28221): Compiler allocated 5390KB to compile void android.view.ViewRootImpl.performTraversals()
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:50609/rx7IU9Dw4xU=/
+VMServiceFlutterDriver: Isolate found with number: 7297840319376879
+I/Choreographer(28221): Skipped 81 frames!  The application may be doing too much work on its main thread.
+VMServiceFlutterDriver: Isolate 7297840319376879 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+D/WindowLayoutComponentImpl(28221): Register WindowLayoutInfoListener on Context=com.zaypos.zaypos_app.MainActivity@a7b2889, of which baseContext=android.app.ContextImpl@2daaff2
+D/ProfileInstaller(28221): Installing profile for com.zaypos.zaypos_app
+I/HWUI    (28221): Using FreeType backend (prop=Auto)
+I/flutter (28221): 00:00 +0: r16 Android: sales
+VMServiceFlutterDriver: Connected to Flutter application.
+D/FlutterJNI(28221): Sending viewport metrics to the engine.
+I/Choreographer(28221): Skipped 144 frames!  The application may be doing too much work on its main thread.
+I/HWUI    (28221): Davey! duration=2681ms; Flags=1, FrameTimelineVsyncId=670359, IntendedVsync=14323944224413, Vsync=14326344224317, InputEventId=0, HandleInputStart=14326353431164, AnimationStart=14326353439039, PerformTraversalsStart=14326353444164, DrawStart=14326385932664, FrameDeadline=14323960891079, FrameStartTime=14326352245289, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=14326397407955, SyncStart=14326408429039, IssueDrawCommandsStart=14326411145330, SwapBuffers=14326549318247, FrameCompleted=14326637042581, DequeueBufferDuration=26977291, QueueBufferDuration=1292958, GpuCompleted=14326609832872, SwapBuffersCompleted=14326637042581, DisplayPresentTime=0, CommandSubmissionCompleted=14326549318247, 
+D/InsetsController(28221): hide(ime())
+I/ImeTracker(28221): com.zaypos.zaypos_app:cd3f0fdd: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+I/ypos.zaypos_app(28221): Background concurrent mark compact GC freed 2496KB AllocSpace bytes, 9(180KB) LOS objects, 49% free, 3568KB/7136KB, paused 3.983ms,5.185ms total 79.779ms
+D/WindowOnBackDispatcher(28221): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+D/WindowOnBackDispatcher(28221): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@17e905c
+D/WindowOnBackDispatcher(28221): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+I/flutter (28221): QA_SHOT:r16_bug53_sale1_done
+[runner] screenshot r16_bug53_sale1_done.png
+I/flutter (28221): QA_NOTE:line {name: QA r16 NoCost, price: 1000, costSnapshot: 0, qtyMilli: 1000}
+I/flutter (28221): QA_NOTE:line {name: QA r16 WithCost, price: 1000, costSnapshot: 700, qtyMilli: 1000}
+I/flutter (28221): QA_SHOT:r16_bug53_dashboard_sale1
+[runner] screenshot r16_bug53_dashboard_sale1.png
+I/flutter (28221): QA_NOTE:OK   dashboard (sale1): profit "300 Ks"
+I/flutter (28221): QA_NOTE:OK   dashboard (sale1): note "အရင်းမသိ 1 ခု မပါ"
+I/flutter (28221): QA_SHOT:r16_bug53_reports_sale1
+[runner] screenshot r16_bug53_reports_sale1.png
+I/flutter (28221): QA_NOTE:OK   Reports (sale1): profit "300 Ks"
+I/flutter (28221): QA_NOTE:OK   Reports (sale1): note "အရင်းမသိ 1 ခု မပါ"
+D/WindowOnBackDispatcher(28221): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@17e905c
+D/WindowOnBackDispatcher(28221): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+I/flutter (28221): QA_SHOT:r16_bug53_pos_asks_price
+[runner] screenshot r16_bug53_pos_asks_price.png
+I/flutter (28221): QA_NOTE:OK   POS asks "ဈေးနှုန်း ထည့်ပါ" for the name-only product
+D/WindowOnBackDispatcher(28221): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@17e905c
+D/WindowOnBackDispatcher(28221): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+I/flutter (28221): QA_SHOT:r16_bug53_sale2_done
+[runner] screenshot r16_bug53_sale2_done.png
+I/flutter (28221): QA_NOTE:OK   name-only product price is now 800
+I/flutter (28221): QA_SHOT:r16_bug53_dashboard_sale2
+[runner] screenshot r16_bug53_dashboard_sale2.png
+I/flutter (28221): QA_NOTE:OK   dashboard (sale2): profit "300 Ks"
+I/flutter (28221): QA_NOTE:OK   dashboard (sale2): note "အရင်းမသိ 2 ခု မပါ"
+I/flutter (28221): QA_SHOT:r16_bug53_reports_sale2
+[runner] screenshot r16_bug53_reports_sale2.png
+I/flutter (28221): QA_NOTE:OK   Reports (sale2): profit "300 Ks"
+I/flutter (28221): QA_NOTE:OK   Reports (sale2): note "အရင်းမသိ 2 ခု မပါ"
+I/flutter (28221): QA_NOTE:sync (sales): outbox rows left=0
+I/flutter (28221): QA_NOTE:FAILURES: 0 
+I/flutter (28221): 00:30 +1: (tearDownAll)
+I/flutter (28221): 00:30 +2: All tests passed!
+All tests passed.
+Leaving the application running.
+[runner] flutter exit code 0

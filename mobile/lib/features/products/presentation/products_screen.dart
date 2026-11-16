@@ -22,6 +22,7 @@ import '../domain/product.dart';
 import '../domain/product_modules.dart';
 import '../domain/product_view.dart';
 import '../../../core/widgets/async_view.dart';
+import '../../../core/text/myanmar_text.dart';
 
 /// Products list filters. `noPrice` = products without a selling price
 /// (`/products?filter=noPrice`, from the Dashboard card). `low` uses
@@ -202,7 +203,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   SearchField(
                     hint: 'အမည် သို့မဟုတ် barcode',
                     semanticLabel: 'ပစ္စည်းရှာရန်',
-                    onChanged: (q) => setState(() => _query = q.trim()),
+                    onChanged: (q) => setState(() => _query = normalizeMyanmar(q.trim())), // BUG-52
                   ),
                   if (features.stock || showNoPrice) ...[
                     const SizedBox(height: 12),
@@ -300,7 +301,7 @@ class _ProductRow extends StatelessWidget {
                     const Padding(padding: EdgeInsets.only(top: 2), child: NeedsPriceBadge())
                   else
                     Text(
-                      'ဝယ်ဈေး ${formatMoney(p.cost)} · ရောင်းဈေး ${formatMoney(p.price)}',
+                      '${p.cost > 0 ? 'ဝယ်ဈေး ${formatMoney(p.cost)}' : costUnknownLabel} · ရောင်းဈေး ${formatMoney(p.price)}',
                       style: AppText.s(12, color: AppColors.muted),
                     ),
                 ],

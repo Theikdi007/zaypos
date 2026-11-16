@@ -42,13 +42,23 @@ class _SalesHistoryScreenState extends ConsumerState<SalesHistoryScreen> {
         .where((s) => _filter == null || s.method == _filter)
         .toList();
 
-    return Scaffold(
+    // BUG-56: after a sale the stack is receipt → sale → this list, with
+    // nothing below; back then goes to ပင်မ instead of leaving the app.
+    // This route's own canPop (rebuilds when the screens above it are popped).
+    final canPop = ModalRoute.of(context)?.canPop ?? false;
+    void leave() => canPop ? context.pop() : context.go(Routes.dashboard);
+    return PopScope(
+      canPop: canPop,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) leave();
+      },
+      child: Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ScreenHeader(
             title: 'အရောင်းမှတ်တမ်း',
-            onBack: () => context.pop(),
+            onBack: leave,
             // The list shows today only; the date picker behind "ယနေ့" is in the beta backlog (BUG-46),
             // so it is a label, not a button.
             trailing: const _TodayLabel(),
@@ -89,6 +99,7 @@ class _SalesHistoryScreenState extends ConsumerState<SalesHistoryScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

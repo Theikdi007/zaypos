@@ -1023,6 +1023,7 @@ One remark: "ယနေ့" kept the bordered box and calendar icon of the old bu
 - Suspected area: `customers/presentation/debt_screen.dart` (the "Viber သတိပေး" button has no balance condition), `debt_actions.dart`
   `debtReminderText`.
 - Blocks beta: no. The shop sees the text in the share sheet before sending it.
+- Status: **fixed in 3c9e102, verified in QA round 16** (emulator: 0 Ks → no button, 3,500 Ks → shown, −6,500 Ks → no button; `docs/qa/evidence/round-16/r16_bug47_*.png`; `qa_round14_debt_test.dart::TC-DEBT-NEW-12` passes).
 
 ## BUG-48 · TC-UX-NEW-13 · Low · Screen readers: enabled icon buttons, the bottom navigation, the PIN / amount keypad and other buttons have no "activate" action
 - Found in: round 14 · `mobile/test/qa/qa_round14_debt_test.dart::TC-UX-NEW-13 …`; simulator semantics audit in
@@ -1071,6 +1072,183 @@ One remark: "ယနေ့" kept the bordered box and calendar icon of the old bu
 - Suspected area: `core/widgets/primary_button.dart` (`dimWhenDisabled` defaults to false), `pos/presentation/pos_screen.dart`
   `_addQuick` and the cart bar, `pos/presentation/checkout_screen.dart` `_stepBtn` "−".
 - Blocks beta: no. Each is the boundary state of a working control and the screen shows why (0 Ks, 0 items, quantity 1).
+
+---
+
+## Found in round 15 (2026-11-16, fix/android @ 32c7af1, first Android round)
+
+Device: Android emulator `emulator-5554` (sdk_gphone64_arm64, Android 16 / API 36, MemTotal 2,017,772 kB), debug build with
+`API_BASE_URL=http://10.0.2.2:5076`, scratch DB `ZayPOS_QA_20261116_R15`. Evidence: `docs/qa/evidence/round-15/` ("evd/" below).
+
+## BUG-51 · TC-AUTH-NEW-4 · Low · Android system BACK on register step 2 throws the registration away (Login), the screen's arrow goes back one step
+- Found in: round 15 · emulator (real app, adb) and `mobile/test/qa/qa_round15_test.dart::TC-AUTH-NEW-4 …`
+- Steps to reproduce: Login → "ဆိုင်အသစ် စာရင်းသွင်းမယ်" → phone → "ကုဒ်ပို့မယ်" → type the OTP → "ဆက်သွားမယ်" (step 2) → type a shop name →
+  press the Android back key (or back gesture), with the keyboard closed.
+- Expected: like the screen's "နောက်သို့" arrow: back to step 1, phone and code kept.
+- Actual: the Login screen; the phone, code and shop name are gone and a new OTP is needed (rate limit 3/hour/phone).
+  evd/a04_reg_step2_before_back.png → evd/a05_reg_step2_after_system_back.png. Widget test: the control (arrow) passes; system back:
+  `Expected: no matching candidates  Actual: _TextWidgetFinder:<Found 1 widget with text "ဝင်မယ်"`.
+- Steps 3 and 4 were not pressed separately; they are the same route, so the same is expected.
+- Suspected area: `features/auth/presentation/register_screen.dart` — `_back()` steps back, but nothing routes the system back to it (no
+  `PopScope` anywhere in lib/), so go_router pops the whole `/register` route.
+- Blocks beta: no.
+- Status: **fixed in 3c9e102, verified in QA round 16** (emulator, real debug app: step 2 → BACK → step 1 with phone and code kept → forward: shop name and template kept; step 3 → BACK → step 2; `docs/qa/evidence/round-16/r16_bug51_*.png`, `logs/r16_adb_manual.log`; `qa_round15_test.dart::TC-AUTH-NEW-4` passes).
+
+## BUG-52 · TC-DEBT-NEW-14 · Medium (QA proposal; Low if every beta shop types with a Unicode keyboard) · A name typed with a Zawgyi keyboard is stored and synced as Zawgyi, drawn broken, and not found by its Unicode spelling
+- Found in: round 15 · `r15_android_flow_test.dart` QA_STEP=data / zawgyi on the emulator (evd/logs/r15_A_data.log,
+  r15_A_zawgyi.log), server pull (evd/logs/r15_zawgyi_server_pull.log), iPhone (evd/logs/r15_B_ios_sync.log), and
+  `mobile/test/qa/qa_round15_test.dart::TC-DEBT-NEW-14 …`
+- Steps to reproduce: Customers → "ဖောက်သည်အသစ်" → name "ေမာင္ေမာင္" (Zawgyi order, what a Zawgyi keyboard produces for "မောင်မောင်"),
+  phone "09 790 011 152" → save. Customers → "အားလုံး" → search "မောင်မောင်". Sync; open the customer on the second phone.
+- Expected: Burmese text works whichever keyboard the shop uses: the name is converted to Unicode (or at least detected and the user
+  warned), it is drawn readably, and the Unicode spelling finds it. Myanmar moved to Unicode in 2019, but Zawgyi keyboards are still in
+  use on older Android phones, which is exactly the beta's audience.
+- Actual:
+  - Stored byte for byte: `[U+1031 U+1019 U+102C U+1004 U+1039 U+1031 U+1019 U+102C U+1004 U+1039]` on the phone, on the server
+    (`GET /sync/pull` → same code points) and on the iPhone after the pull.
+  - Drawn with the bundled Unicode font (PR #8 forces it everywhere): dotted circles before "မ", stacked "င္" marks, avatar initial
+    "ေ◌" (evd/r15_zg_customers_all.png on Android, evd/r15_ios_customers_all.png on iOS). On a Zawgyi phone the shop's own typing now
+    looks broken in every field.
+  - Search: Unicode "မောင်မောင်" → 0 rows; Unicode part "မောင်" → 0; the Zawgyi string → 1; phone "011152" → 1
+    (evd/r15_zg_search_*.png). Widget test: `Expected: a value greater than or equal to <1>  Actual: <0>`.
+  - The same applies to product names, shop name, notes and addresses (any free text).
+- Suspected area: no encoding detection / normalisation on text input or before saving (e.g. `features/customers/presentation/add_customer_screen.dart`
+  `_save`, `features/products/presentation/add_product_screen.dart`); customer search in `customers_screen.dart` compares raw strings.
+  The server stores what it receives.
+- Blocks beta: yes under the owner's rule if kept Medium. The owner can decide Low if the beta shops are checked to use Unicode keyboards
+  (Gboard / Frozen-Unicode, not Zawgyi).
+- Status: **fixed in 3c9e102, verified in QA round 16** (emulator: Zawgyi name / address / note / product name stored as Unicode code points and found by Unicode and Zawgyi search, `logs/r16_A_zawgyi.log`; server pull returns Unicode, `logs/r16_bug52_server_pull.log`; a Zawgyi push from an "old app" with curl is stored and pulled as Unicode, `logs/r16_bug52_server_push_zawgyi.log`; valid Unicode unchanged; the iPhone pulls Unicode. QA's TC-DEBT-NEW-14 widget test was strengthened and fails on the pre-fix commit). By-design limit: Zawgyi text with no impossible-in-Unicode sequence (e.g. "ကေလး") is not converted.
+
+## BUG-53 · TC-PROD-NEW-36 · Medium · Add Product saves the template's sample cost (and price) as real values when the owner does not overwrite them; profit is wrong
+- Found in: round 15 · emulator (every QA product shows "ဝယ်ဈေး 3,500") and `mobile/test/qa/qa_round15_test.dart::TC-PROD-NEW-36 …`
+- Steps to reproduce: Products → "အသစ်ထည့်မယ်" → type a name and a price → "သိမ်းမယ်". Look at the product row ("ဝယ်ဈေး"), the dashboard
+  "အမြတ်" and Reports.
+- Expected: a cost the owner did not type is not saved as the real cost (empty / 0, or the form asks); sample values are hints only.
+- Actual: the form opens with cost and price already filled as real text (phone shop 3500 / 6000, grocery 450 / 600, pharmacy 1200 /
+  1500 …, `ShopTemplate.sampleCost / samplePrice`). Saved as typed: grocery widget test `Expected: not <450>  Actual: <450>`; emulator
+  products "QA r15 Phone / Soda / ဆေး / Cola / Coke" all have cost 3,500 (evd/r15_prod_barcode_form.png shows "3500" and the red
+  "-2,000 Ks (-57%)"). Reports then show profit 445,000 Ks for 452,000 Ks of sales (evd/r15_reports.png), i.e. a made-up cost. If
+  the price is not overwritten, the product sells at the sample price.
+- Suspected area: `features/products/presentation/add_product_screen.dart` lines 83–84 (`_cost` / `_price` controllers initialised with
+  `_t.sampleCost` / `_t.samplePrice`); `core/features/shop_template.dart`. Present since d99efb7 (phase 1), on every platform.
+- Blocks beta: yes under the owner's rule (wrong money figures by default). Small fix: show them as hints.
+- Status: **fixed in 3c9e102, verified in QA round 16** (emulator, pharmacy / grocery / phone forms: empty fields with "ဥပမာ …" hints; name only → price 0 and POS asks; price only → "အရင်းမသိ"; dashboard and Reports "300 Ks" + "အရင်းမသိ 1 ခု မပါ"; `logs/r16_A_products.log`, `r16_A_sales.log`). Follow-up: BUG-61 (a typed cost 0 is also "unknown").
+
+## BUG-54 · TC-UX-NEW-16 · Low · The expiry date picker is in English ("Select date", "Cancel", "OK", month and weekday names)
+- Found in: round 15 · emulator evd/r15_prod_batch_date_picker.png and `mobile/test/qa/qa_round15_test.dart::TC-UX-NEW-16 …`
+- Steps to reproduce: Batch on (pharmacy) → Add Product → "ရက် ၃၀ အလို" → tap "သက်တမ်းကုန်ရက်". Same picker in the edit form and in
+  "Stock ဖြည့်မယ်".
+- Expected: TC-UX-02 rule: no English on Burmese screens except brand / payment names.
+- Actual: `['Select date', 'Mon, Nov 16', 'November 2026', 'Cancel', 'OK']`. The glyphs themselves render correctly (PR #8's font change
+  works here); the strings come from Material's English localizations. `m/no_english_test.dart` does not open dialogs, so it cannot see it.
+- Suspected area: `showDatePicker` in `features/products/presentation/sections/feature_sections.dart:92`, `edit_module_sections.dart:148`,
+  `features/inventory/presentation/restock_sheet.dart:215` (no Burmese `helpText` / `cancelText` / `confirmText`, no `my` localizations).
+- Blocks beta: no.
+- Status: **fixed in 3c9e102, verified in QA round 16** for the calendar picker (Add Product, "Stock ဖြည့်မယ်", edit form: no English, Burmese buttons and digits; `logs/r16_A_pickers.log`). The keyboard-entry mode is BUG-62.
+
+## BUG-55 · TC-SEC-06 · Medium · The Android release build sends plain HTTP: cleartext is NOT blocked (docs and TC-SEC-06 say "release builds are HTTPS only")
+- Found in: round 15 · release APK on the emulator (evd/logs/r15_release_cleartext_server_pull.log, evd/r15_release_fresh_signed_in.png)
+- Steps to reproduce: `flutter build apk --release --dart-define=API_BASE_URL=http://10.0.2.2:5076` → install over the debug build (same
+  debug key) → unlock → quick sale 7,777 Ks. Or: fresh install of that APK → sign in with phone + PIN. API on 127.0.0.1:5076.
+- Expected: `docs/mobile/dev-setup.md` ("release builds are HTTPS only … so it cannot reach http://10.0.2.2"), `phase3-sync.md` §8
+  ("Release builds require HTTPS"), TC-SEC-06 ("no cleartext HTTP in release"): the request is refused.
+- Actual: sale A-0155 (7,777 Ks, cash) is on the server: `{'no': 'A-0155', 'total': 7777, 'method': 'cash', 'createdAt':
+  '2026-11-16T05:28:03.053Z'}`; Settings shows "နောက်ဆုံး sync: ယနေ့ နံနက် 11:57". The fresh release install signed in over HTTP (the PIN
+  went in clear) and pulled all 156 sales. The APK itself is as the developer said (`aapt2`: no networkSecurityConfig, targetSdk 36), but
+  that only governs Java/OkHttp traffic: the app uses dio on `dart:io` `HttpClient`, which does not apply Android's cleartext policy.
+  The release default `API_BASE_URL` is `http://localhost:5076`.
+- Suspected area: `core/api/api_config.dart` (`apiBaseUrl`, no check), `core/api/api_client.dart` (dio). Likely the same on iOS (ATS does not
+  cover `dart:io` sockets either); not tested this round.
+- Blocks beta: yes under the owner's rule. Today the only guard is the procedure "release builds use an https API_BASE_URL". A one-line
+  release check (refuse a non-https base URL when `kReleaseMode`) would make the documented rule true. Until then, treat the docs as wrong.
+- Status: **fixed in 3c9e102, verified in QA round 16 for the refusal**: `tool/release_https_check.sh` step 1 → refusal screen, `ZayPOS: InsecureApiUrl` in logcat, 0 connections to :5076 (listener positive-controlled); `docs/qa/evidence/round-16/release/`, `logs/r16_release_https_check_step1.log`. **Not verified: a release build over https** (BLOCKED: dart:io trusts only system CAs, the emulator image cannot be rooted to add a test CA, and a public https tunnel was refused by the permission system). On the owner's MANUAL list (real https API URL).
+
+## BUG-56 · TC-UX-NEW-17 · Low · Android BACK on the Products / Customers / Reports tabs and after a sale leaves the app; the next open asks for the PIN
+- Found in: round 15 · emulator, real debug app driven with adb (table "System back" in `round-15-summary.md`)
+- Steps to reproduce: (a) tap the "ပစ္စည်း", "အကြွေး" or "အစီရင်ခံစာ" tab → back. (b) Sell → receipt → back → sale → back → sales list → back.
+- Expected: Android convention: back on a secondary tab goes to the first tab (ပင်မ); after a sale back returns towards POS / ပင်မ.
+- Actual: (a) the launcher; (b) receipt → sale #A-0154 → "အရောင်းမှတ်တမ်း" → the previous app. Reopening shows the PIN screen each time
+  (the activity is destroyed, the engine restarts). Nothing is lost.
+- Suspected area: `core/router/app_router.dart` (`StatefulShellRoute.indexedStack`, no back handling to branch 0);
+  `pos/presentation/checkout_screen.dart:121` `context.go(Routes.receipt(...))` replaces the stack with /sales/:id/receipt.
+- Blocks beta: no.
+- Status: **fixed in 3c9e102, verified in QA round 16** (tabs → ပင်မ; ပင်မ → "ZayPOS က ထွက်မလား" with မထွက်ပါ / ထွက်မယ်; after a sale: receipt → sale → list → ပင်မ → question; `logs/r16_adb_manual.log`, `docs/qa/evidence/round-16/r16_bug56_*.png`).
+
+## BUG-57 · TC-UX-NEW-18 · Low · An open cart / checkout is silently lost when Android reclaims the app in the background
+- Found in: round 15 · emulator (2 GB RAM). evd/logs/r15_lmk_kill_logcat.log:
+  `lowmemorykiller: Kill 'com.zaypos.zaypos_app' (11305), uid 10226, oom_score_adj 900 … reason: low watermark is breached`
+- Steps to reproduce: POS → 2 items → "ငွေရှင်းမယ်" → home → open Chrome, Photos, YouTube (or `adb shell am kill com.zaypos.zaypos_app`) →
+  reopen ZayPOS. A realistic trigger: the cashier opens KBZPay to check a transfer.
+- Expected: the cart / checkout is still there, or the app says it was lost.
+- Actual: PIN screen → dashboard → POS with "ပစ္စည်း 0 ခု". No half sale (TC-UX-05 holds); the items must be added again. While the process
+  survives (home and back), the checkout is kept and no PIN is asked.
+- Suspected area: `features/pos/domain/cart.dart` `cartProvider` (memory only; no restoration).
+- Blocks beta: no. Raise it if beta shops use ≤ 2 GB phones and switch to KBZPay / Wave during checkout.
+- Status: **fixed in 3c9e102, verified in QA round 16** (3 lines, one ×2, in checkout → `am kill` → reopen → POS cart "ပစ္စည်း 4 ခု" 3,500 Ks; after checkout + force-stop → empty; `docs/qa/evidence/round-16/r16_bug57_*.png`). Reopens on POS, not checkout (the payment method is not kept): acceptable.
+
+## BUG-58 · TC-UX-NEW-19 · Low · Landscape: the POS product grid and quick-sale keypad are hidden behind the cart bar (the app does not stay in portrait)
+- Found in: round 15 · emulator, `settings put system user_rotation 1` (auto-rotate is often on on Android phones). evd/r15_rot_pos.png,
+  r15_rot_pos_quick.png
+- Steps to reproduce: auto-rotate on → POS → turn the phone sideways.
+- Expected: usable in landscape, or the app locks portrait.
+- Actual: the header, tabs and search take the top 640 px of 1080; the floating cart bar covers 790–970; about 80 px of the grid shows, and
+  the rest sits in the system gesture zone (swiping there goes home). Quick sale: the keypad is under the bar. Checkout, dashboard and
+  the PIN keypad (after scrolling) work; rotating during checkout keeps the cart and payment method.
+- Suspected area: `android/app/src/main/AndroidManifest.xml` / `main.dart` (no orientation lock); `pos/presentation/pos_screen.dart` layout.
+- Blocks beta: no.
+- Status: **fixed in 3c9e102, verified in QA round 16** (user_rotation 1 with auto-rotate off and on: ZayPOS stays 1080x2424 while the Settings app turns to 2424x1080; `logs/r16_adb_manual.log`).
+
+## BUG-59 · TC-UX-NEW-20 · Low · Largest Android font (2.0) with the largest display size: bottom navigation overflows; amounts and names break mid-word
+- Found in: round 15 · emulator, Settings → Display size and text → both sliders at max (font_scale 2.0, density 540 → 320 dp wide).
+  evd/r15_max_reports.png, r15_max_checkout.png, r15_max_pos_quick.png
+- Expected: no overflow; numbers and names not split inside a word.
+- Actual: the bottom navigation shows "BOTTOM OVERFLOWED BY 29 PIXELS" (debug) and its labels run into each other
+  ("ရောင်းပစ္စည်းအ…"); checkout line "So / da", "1,50 / 0", "1,50 / 0 / Ks"; Reports tab "ဒီအပတ်" shows "ဒီ"; Add Customer cancel
+  "မ…". Usable: the PIN keypad fits; POS and checkout work after scrolling (the product grid has a ~300 px window above the cart bar).
+- Suspected area: `core/widgets/app_bottom_nav.dart` (fixed height), `pos/presentation/checkout_screen.dart` `_LineRow`.
+- Blocks beta: no (BUG-42 / BUG-44 family).
+- Status: **partly fixed in 3c9e102 (QA round 16)**: the bottom navigation no longer overflows and its labels are readable. Still seen at font 2.0 + density 540: POS cart bar "ပစ္စ/ည်း" "0/Ks", Reports tab "ဒီ", shop name "Andr/oid" (`docs/qa/evidence/round-16/r16_bug59_max_*.png`). Stays open (Low). New dashboard overflow: BUG-63.
+
+## BUG-60 · TC-UX-NEW-21 · Low · The Android launcher shows the app as "zaypos_app"
+- Found in: round 15 · `aapt2 dump badging app-release.apk` → `application-label:'zaypos_app'`
+- Expected: "ZayPOS" under the icon and in the app switcher (the brand on every screen). iOS shows "Zaypos App" (CFBundleDisplayName).
+- Suspected area: `android/app/src/main/AndroidManifest.xml` `android:label="zaypos_app"`; `ios/Runner/Info.plist`.
+- Blocks beta: no.
+- Status: **fixed in 3c9e102, verified in QA round 16** (`aapt2 dump badging` → `application-label:'ZayPOS'`; launcher drawer "ZayPOS"; iOS CFBundleDisplayName "ZayPOS").
+
+## Found in round 16 (2026-11-16, fix/android @ 3c9e102, targeted re-test)
+
+## BUG-61 · TC-PROD-NEW-37 · Low · A cost typed as 0 (a service with no material cost) is treated as "unknown": the service template never shows a profit
+- Found in: round 16 · `mobile/test/qa/qa_round16_test.dart::TC-PROD-NEW-37 …`
+- Steps to reproduce: service template (or any shop) → Add Product "ဆံပင်ညှပ်", price 5,000, type **0** in ဝယ်ဈေး → the margin box already says
+  "အရင်းမသိ" → save → sell it once → dashboard.
+- Expected: a cost the owner typed is known; 0 means "costs me nothing", so the profit grows by 5,000 Ks.
+- Actual: `Expected: empty Actual: WhereIterable<String>:['အရင်းမသိ 1 ခု မပါ']`: the line is left out of the profit and counted as unknown.
+  A shop that sells only services (template "ဝန်ဆောင်မှု") sees "အရင်းမသိ" as its profit forever. Before 3c9e102 such a line counted as
+  full profit. Quick-sale lines are also always "unknown" (documented in `sale.dart`).
+- Suspected area: `features/sales/domain/sale.dart` `SaleLine.costKnown => costSnapshot > 0`; `products/domain/product.dart` (cost is an
+  `int`, "empty" and "0" are stored the same); `add_product_screen.dart` `costUnknown`.
+- Blocks beta: no. Owner decision: keep "0 = unknown" (then say it in the form: "0 = အရင်းမသိ") or store "unknown" separately (nullable cost).
+
+## BUG-62 · TC-UX-NEW-23 · Low · Expiry date picker, keyboard-entry mode: a date typed with the phone keyboard's digits is rejected ("ဖော်မက် မမှန်ကန်ပါ။"); empty hint "dd-mm-yyyy"
+- Found in: round 16 · emulator (real app) and `mobile/test/qa/qa_round16_test.dart::TC-UX-NEW-23 … "28/11/2030"`
+- Steps to reproduce: Products → a batch product → "Stock ဖြည့်မယ်" → "+ Batch အသစ်" → သက်တမ်းကုန်ရက် → pencil icon ("ထည့်သွင်းမှုသို့ ပြောင်းရန်")
+  → clear the field → type 28/11/2030 → ရွေးမယ်. Same in Add Product and the edit form.
+- Expected: the date is accepted (the Android number keyboard types 0–9), and no English text.
+- Actual: the field shows "ဖော်မက် မမှန်ကန်ပါ။" and the picker stays open (`docs/qa/evidence/round-16/r16_bug54_emulator_input_after_confirm.png`). Only Myanmar
+  digits (၂၈/၁၁/၂၀၃၀, as pre-filled) are accepted. The empty field's hint is "dd-mm-yyyy" (`logs/r16_A_pickers.log`), and the pre-filled
+  value uses "/" while the hint uses "-".
+- Suspected area: `core/widgets/date_picker.dart` `showExpiryDatePicker` (Material's "my" date parsing in input mode); could pass
+  `initialEntryMode: DatePickerEntryMode.calendarOnly` or a parser that accepts both digit sets.
+- Blocks beta: no. The calendar mode works and is the default.
+
+## BUG-63 · TC-UX-NEW-20 · Low · Largest font (2.0) + largest display size: the dashboard's "အရောင်း / အမြတ် / မနေ့က" row overflows by 83 px
+- Found in: round 16 · emulator, `settings put system font_scale 2.0` + `wm density 540`. `docs/qa/evidence/round-16/r16_bug59_max_dashboard.png`
+- Expected: no overflow (TC-UX-NEW-20).
+- Actual: debug stripe "RIGHT OVERFLOWED BY 83 PIXELS" in the green hero card; "မနေ့က +0%" is cut off at the right edge. With a profit of
+  "1,100 Ks"; round 15 had "0 Ks" there.
+- Suspected area: `features/dashboard/presentation/dashboard_screen.dart` `_Hero` (fixed `Row` of `_metric`s).
+- Blocks beta: no (BUG-42 / BUG-59 family).
 
 ---
 

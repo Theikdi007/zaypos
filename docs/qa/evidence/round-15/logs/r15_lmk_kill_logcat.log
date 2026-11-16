@@ -1,0 +1,18 @@
+# adb logcat -d (events + main) lines about com.zaypos.zaypos_app being killed; the 11:34:56 line is the background LMK kill after opening Chrome, Photos, YouTube with a checkout open (debug build)
+11-16 11:20:47.353   717  1070 I am_kill : [0,6666,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to from pid 8378,486728]
+11-16 11:22:23.062   717   734 I am_kill : [0,8487,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to from pid 8675,401972]
+11-16 11:23:37.067   717  1044 I am_kill : [0,8724,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to from pid 8898,461500]
+11-16 11:24:58.332   717  2293 I am_kill : [0,8959,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to from pid 9164,480996]
+11-16 11:26:03.512   717  1813 I am_kill : [0,9197,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to from pid 9417,540948]
+11-16 11:26:41.261   717  1776 I am_kill : [0,9457,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to from pid 9604,486384]
+11-16 11:28:15.979   717  1070 I am_kill : [0,9636,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to from pid 9842,446228]
+11-16 11:29:28.312   717   957 I am_kill : [0,9897,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to from pid 10018,521972]
+11-16 11:30:20.703   717  1069 I am_kill : [0,10064,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to from pid 10182,503392]
+11-16 11:30:55.469   717   750 I am_kill : [0,10225,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to installPackageLI,446504]
+11-16 11:31:12.922   717  1808 I am_kill : [0,10396,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to from pid 10449,474244]
+11-16 11:31:23.321   717  1770 I am_kill : [0,10464,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to from pid 10510,495592]
+11-16 11:32:53.574   717   734 I am_kill : [0,10522,com.zaypos.zaypos_app,0,stop com.zaypos.zaypos_app due to from pid 10965,484004]
+11-16 11:33:48.756   717  1775 I am_kill : [0,10979,com.zaypos.zaypos_app,700,kill background,518984]
+11-16 11:34:56.567   223   223 I lowmemorykiller: Kill 'com.zaypos.zaypos_app' (11305), uid 10226, oom_score_adj 900 to free 103080kB rss, 279720kB swap; reason: low watermark is breached
+# meminfo now
+           TOTAL PSS:   305074            TOTAL RSS:   163956       TOTAL SWAP PSS:   204631

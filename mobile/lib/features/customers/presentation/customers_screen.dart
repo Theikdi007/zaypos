@@ -12,6 +12,7 @@ import '../../../core/widgets/money_text.dart';
 import '../data/customer_providers.dart';
 import 'widgets/customer_row.dart';
 import '../../../core/widgets/async_view.dart';
+import '../../../core/text/myanmar_text.dart';
 
 enum _Tab { debt, overdue, all }
 
@@ -97,7 +98,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   SearchField(
                     hint: 'အမည် သို့မဟုတ် ဖုန်းနံပါတ်',
                     semanticLabel: 'ဖောက်သည်ရှာရန်',
-                    onChanged: (q) => setState(() => _query = q.trim()),
+                    onChanged: (q) => setState(() => _query = normalizeMyanmar(q.trim())), // BUG-52
                   ),
                   const SizedBox(height: 12),
                   FilterChips<_Tab>(

@@ -107,6 +107,8 @@ class DebtScreen extends ConsumerWidget {
                       onPressed: () => showPayDebtSheet(context, c),
                     ),
                   ),
+                  // BUG-47: no debt reminder for a balance of 0 or less.
+                  if (showDebtReminder(c.balance)) ...[
                   const SizedBox(width: 10),
                   Expanded(
                     child: Builder(
@@ -121,6 +123,7 @@ class DebtScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  ],
                 ],
               ),
             ],

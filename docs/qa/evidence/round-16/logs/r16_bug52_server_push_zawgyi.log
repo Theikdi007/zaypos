@@ -1,0 +1,17 @@
+POST /auth/login -> 200
+PUSH upsertCustomer name='ေက်ာ္ေက်ာ္' [U+1031 U+1000 U+103A U+102C U+1039 U+1031 U+1000 U+103A U+102C U+1039]
+PUSH upsertCustomer address='ရန္ကုန္' [U+101B U+1014 U+1039 U+1000 U+102F U+1014 U+1039]
+PUSH upsertCustomer note='ေၾကြးက်န္' [U+1031 U+107E U+1000 U+103C U+1038 U+1000 U+103A U+1014 U+1039]
+PUSH upsertCustomer name='ယခု မိုးရွာနေပါသလား' [U+101A U+1001 U+102F U+0020 U+1019 U+102D U+102F U+1038 U+101B U+103D U+102C U+1014 U+1031 U+1015 U+102B U+101E U+101C U+102C U+1038]
+PUSH upsertCustomer address='ကျွန်ုပ်' [U+1000 U+103B U+103D U+1014 U+103A U+102F U+1015 U+103A]
+PUSH upsertProduct name='ၾကက္ဥ' [U+107E U+1000 U+1000 U+1039 U+1025]
+$ curl -s -w "\nHTTP %{http_code}" -X POST http://127.0.0.1:5076/api/v1/sync/push -H "Authorization: Bearer <token>" -H "Content-Type: application/json" --data-binary @push_body.json
+{"results":[{"unitId":"016a15fb-a847-43ed-aac8-0d181ca67481","outcome":"applied","reason":null,"issues":[],"code":null,"data":null},{"unitId":"a5f81bba-be87-473a-8565-2ad00013f844","outcome":"applied","reason":null,"issues":[],"code":null,"data":null}],"serverTime":"2026-11-16T09:15:33.49Z"}
+HTTP 200
+GET /sync/pull (all pages) — the pushed rows:
+customers 27cea690 name='ယခု မိုးရွာနေပါသလား' [U+101A U+1001 U+102F U+0020 U+1019 U+102D U+102F U+1038 U+101B U+103D U+102C U+1014 U+1031 U+1015 U+102B U+101E U+101C U+102C U+1038]
+customers 27cea690 address='ကျွန်ုပ်' [U+1000 U+103B U+103D U+1014 U+103A U+102F U+1015 U+103A]
+customers 8940f4c2 name='ကျော်ကျော်' [U+1000 U+103B U+1031 U+102C U+103A U+1000 U+103B U+1031 U+102C U+103A]
+customers 8940f4c2 address='ရန်ကုန်' [U+101B U+1014 U+103A U+1000 U+102F U+1014 U+103A]
+customers 8940f4c2 note='ကြွေးကျန်' [U+1000 U+103C U+103D U+1031 U+1038 U+1000 U+103B U+1014 U+103A]
+products cf532d12 name='ကြက်ဥ' [U+1000 U+103C U+1000 U+103A U+1025]

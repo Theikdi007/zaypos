@@ -1,0 +1,213 @@
+Analyzing r15_android_flow_test.dart...                         
+No issues found! (ran in 3.6s)
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDebug'...                             20.9s
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk...          875ms
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:55447/m7MPojzfM1I=/
+VMServiceFlutterDriver: Isolate found with number: 6827299003511343
+VMServiceFlutterDriver: Isolate 6827299003511343 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+I/flutter (18168): 00:00 +0: r15 Android: pullios
+VMServiceFlutterDriver: Connected to Flutter application.
+D/InsetsController(18168): hide(ime())
+I/ImeTracker(18168): com.zaypos.zaypos_app:7e872236: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+D/ProfileInstaller(18168): Installing profile for com.zaypos.zaypos_app
+I/flutter (18168): QA_NOTE:sync (pull from iPhone) took 163 ms; outbox rows left=0
+I/flutter (18168): QA_NOTE:sale {no: A-0001, method: cash, total: 3000, voidedAt: 1794804924108, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0002, method: debt, total: 2000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0003, method: kbz, total: 450000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0004, method: cash, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0005, method: kbz, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0006, method: cash, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0007, method: kbz, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0008, method: cash, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0009, method: kbz, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0010, method: cash, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0011, method: kbz, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0012, method: cash, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0013, method: kbz, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0014, method: cash, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0015, method: kbz, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0016, method: cash, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0017, method: kbz, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0018, method: cash, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0019, method: kbz, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0020, method: cash, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0021, method: kbz, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0022, method: cash, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0023, method: kbz, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0024, method: cash, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0025, method: kbz, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0026, method: cash, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0027, method: kbz, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0028, method: cash, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0029, method: kbz, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0030, method: cash, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0031, method: kbz, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0032, method: cash, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0033, method: kbz, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0034, method: cash, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0035, method: kbz, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0036, method: cash, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0037, method: kbz, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0038, method: cash, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0039, method: kbz, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0040, method: cash, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0041, method: kbz, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0042, method: cash, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0043, method: kbz, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0044, method: cash, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0045, method: kbz, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0046, method: cash, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0047, method: kbz, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0048, method: cash, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0049, method: kbz, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0050, method: cash, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0051, method: kbz, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0052, method: cash, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0053, method: kbz, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0054, method: cash, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0055, method: kbz, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0056, method: cash, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0057, method: kbz, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0058, method: cash, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0059, method: kbz, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0060, method: cash, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0061, method: kbz, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0062, method: cash, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0063, method: kbz, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0064, method: cash, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0065, method: kbz, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0066, method: cash, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0067, method: kbz, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0068, method: cash, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0069, method: kbz, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0070, method: cash, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0071, method: kbz, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0072, method: cash, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0073, method: kbz, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0074, method: cash, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0075, method: kbz, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0076, method: cash, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0077, method: kbz, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0078, method: cash, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0079, method: kbz, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0080, method: cash, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0081, method: kbz, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0082, method: cash, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0083, method: kbz, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0084, method: cash, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0085, method: kbz, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0086, method: cash, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0087, method: kbz, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0088, method: cash, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0089, method: kbz, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0090, method: cash, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0091, method: kbz, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0092, method: cash, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0093, method: kbz, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0094, method: cash, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0095, method: kbz, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0096, method: cash, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0097, method: kbz, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0098, method: cash, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0099, method: kbz, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0100, method: cash, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0101, method: kbz, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0102, method: cash, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0103, method: kbz, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0104, method: cash, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0105, method: kbz, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0106, method: cash, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0107, method: kbz, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0108, method: cash, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0109, method: kbz, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0110, method: cash, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0111, method: kbz, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0112, method: cash, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0113, method: kbz, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0114, method: cash, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0115, method: kbz, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0116, method: cash, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0117, method: kbz, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0118, method: cash, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0119, method: kbz, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0120, method: cash, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0121, method: kbz, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0122, method: cash, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0123, method: kbz, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0124, method: cash, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0125, method: kbz, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0126, method: cash, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0127, method: kbz, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0128, method: cash, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0129, method: kbz, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0130, method: cash, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0131, method: kbz, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0132, method: cash, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0133, method: kbz, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0134, method: cash, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0135, method: kbz, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0136, method: cash, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0137, method: kbz, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0138, method: cash, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0139, method: kbz, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0140, method: cash, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0141, method: kbz, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0142, method: cash, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0143, method: kbz, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0144, method: cash, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0145, method: kbz, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0146, method: cash, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0147, method: kbz, total: 5000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0148, method: cash, total: 5500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0149, method: kbz, total: 6000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0150, method: cash, total: 6500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0151, method: kbz, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0152, method: cash, total: 4000, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0153, method: kbz, total: 4500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: A-0154, method: kbz, total: 3500, voidedAt: null, deviceId: 01a1e2a9-5717-7c8a-9575-97e8c1bad927}
+I/flutter (18168): QA_NOTE:sale {no: C-0001, method: cash, total: 1500, voidedAt: null, deviceId: 01a1e2cf-2497-7705-891e-537b9b4240ec}
+I/flutter (18168): QA_NOTE:customer name=QA r15 ဒေါ်လှ [U+0051 U+0041 U+0020 U+0072 U+0031 U+0035 U+0020 U+1012 U+1031 U+102B U+103A U+101C U+103E]
+I/flutter (18168): QA_NOTE:customer name=ေမာင္ေမာင္ [U+1031 U+1019 U+102C U+1004 U+1039 U+1031 U+1019 U+102C U+1004 U+1039]
+I/flutter (18168): QA_NOTE:customer name=QA r15 iOS ဦးဘ [U+0051 U+0041 U+0020 U+0072 U+0031 U+0035 U+0020 U+0069 U+004F U+0053 U+0020 U+1026 U+1038 U+1018]
+I/flutter (18168): QA_NOTE:stock {name: QA r15 Coke, stock: 0}
+I/flutter (18168): QA_NOTE:stock {name: QA r15 Cola, stock: 0}
+I/flutter (18168): QA_NOTE:stock {name: QA r15 Phone, stock: 0}
+I/flutter (18168): QA_NOTE:stock {name: QA r15 Soda, stock: 18000}
+I/flutter (18168): QA_NOTE:stock {name: QA r15 ဆေး, stock: 8000}
+I/flutter (18168): QA_SHOT:r15_android_sales_after_ios
+[runner] screenshot r15_android_sales_after_ios.png
+I/flutter (18168): QA_SHOT:r15_android_customers_after_ios
+[runner] screenshot r15_android_customers_after_ios.png
+I/flutter (18168): QA_NOTE:done pullios
+I/flutter (18168): 00:08 +1: (tearDownAll)
+I/flutter (18168): 00:08 +2: All tests passed!
+All tests passed.
+Leaving the application running.
+[runner] flutter exit code 0

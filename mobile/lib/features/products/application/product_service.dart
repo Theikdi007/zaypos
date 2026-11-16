@@ -31,7 +31,11 @@ class ProductService {
       if (m.productId != product.id) throw ArgumentError('Movement for another product');
     }
     return uow.run(UnitKind.upsertProduct, () async {
-      await products.add(product, variants: variants, batches: batches, serials: serials);
+      // BUG-52: free text is saved as Unicode.
+      await products.add(product.normalizedText(),
+          variants: [for (final v in variants) v.normalizedText()],
+          batches: [for (final b in batches) b.normalizedText()],
+          serials: serials);
       await stock.addAll(initialStock);
     });
   }
@@ -65,9 +69,12 @@ class ProductService {
       if (r != product.id) throw ArgumentError('Module row for another product');
     }
     await uow.run(UnitKind.upsertProduct, () async {
-      await products.update(product);
+      await products.update(product.normalizedText());
       if (variants.isNotEmpty || batches.isNotEmpty || serials.isNotEmpty) {
-        await products.addModules(variants: variants, batches: batches, serials: serials);
+        await products.addModules(
+            variants: [for (final v in variants) v.normalizedText()],
+            batches: [for (final b in batches) b.normalizedText()],
+            serials: serials);
       }
       if (movements.isNotEmpty) await stock.addAll(movements);
       if (serials.isNotEmpty) {
@@ -86,7 +93,7 @@ class ProductService {
   /// Many products (e.g. the preset catalog) as ONE upsertProduct unit.
   Future<void> importAll(List<Product> items) => uow.run(UnitKind.upsertProduct, () async {
         for (final p in items) {
-          await products.add(p);
+          await products.add(p.normalizedText());
         }
       });
 }

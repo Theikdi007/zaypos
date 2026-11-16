@@ -32,9 +32,25 @@ database; every write is one unit of work recorded in the outbox
   shop (never synced). Seeding throws in release builds and is never called there.
 - Live auth test against a running backend: see `test/live_api_test.dart`.
 
+## Burmese text and money rules
+
+- **Zawgyi (BUG-52):** free text typed on a Zawgyi keyboard (customer / product names, notes,
+  addresses, categories, units, sizes, colours, batch numbers, quick-sale names, the shop name) is
+  converted to Unicode before it is saved (`lib/core/text/myanmar_text.dart`, Google myanmar-tools'
+  detector and converter, vendored under `lib/core/text/zawgyi/`). Search boxes accept either
+  encoding. Valid Unicode is never altered. The server applies the same rule on sync push.
+- **Unknown cost (BUG-53):** the template's sample cost / price are placeholder hints only. An empty
+  cost is saved as 0 = unknown: profit shows "အရင်းမသိ" for it, and those lines are left out of the
+  profit totals with a note "အရင်းမသိ N ခု မပါ". An empty price on a new product saves 0 and POS asks
+  for the price at the first sale.
+- **Open cart (BUG-57):** the cart is kept in the local database (`pos.openCart` in `sync_state`), so
+  it survives Android killing the app in the background. Checkout clears it.
+
 ## Run on a phone over Wi-Fi (debug)
 
-Debug builds may use plain HTTP to the Mac; release builds are HTTPS only.
+Debug builds may use plain HTTP to the Mac; release builds are HTTPS only. The app enforces it (BUG-55):
+a release build with a non-https `API_BASE_URL` refuses to start and every request to a non-https URL is
+refused, on Android and iOS (dart:io ignores the cleartext policy and ATS, so the platform settings alone are not enough).
 
 - iOS: the "Debug Local Network" build phase (`ios/scripts/debug_local_network.sh`)
   adds `NSAllowsLocalNetworking` and `NSLocalNetworkUsageDescription` to the
@@ -50,4 +66,12 @@ cd backend && dotnet run --project src/ZayPOS.Api --urls http://0.0.0.0:5076
 cd mobile && flutter run -d <device-id> --dart-define=API_BASE_URL=http://$(ipconfig getifaddr en0):5076
 ```
 
-Emulators: iOS simulator `http://localhost:5076`, Android emulator `http://10.0.2.2:5076`.
+Emulators: iOS simulator `http://localhost:5076`, Android emulator `http://10.0.2.2:5076`:
+
+```sh
+flutter run -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:5076
+```
+
+Release APK (debug-signed until a keystore exists): `flutter build apk --release --dart-define=API_BASE_URL=https://<api-host>`.
+Without an https URL the release app shows "ZayPOS ကို ဖွင့်လို့ မရပါ" and sends nothing (BUG-55; check with `tool/release_https_check.sh`).
+See `docs/mobile/dev-setup.md` § Android emulator.

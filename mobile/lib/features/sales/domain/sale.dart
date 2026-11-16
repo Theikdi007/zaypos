@@ -53,8 +53,12 @@ class SaleLine {
   /// Kyats.
   int get total => Qty.lineTotal(price, qtyMilli);
 
-  /// Kyats: (price − costSnapshot) × qty.
-  int get profit => Qty.lineTotal(price - costSnapshot, qtyMilli);
+  /// False when the cost was never entered (0: a product saved without a
+  /// cost, or a Quick Sale item). Such lines are left out of profit (BUG-53).
+  bool get costKnown => costSnapshot > 0;
+
+  /// Kyats: (price − costSnapshot) × qty; 0 when the cost is unknown.
+  int get profit => costKnown ? Qty.lineTotal(price - costSnapshot, qtyMilli) : 0;
 
   SaleLine copyWith({int? qtyMilli, int? price, DateTime? updatedAt, DateTime? Function()? deletedAt}) => SaleLine(
         id: id,
@@ -163,8 +167,11 @@ class Sale {
   /// Kyats.
   int get total => lines.fold(0, (a, l) => a + l.total);
 
-  /// Kyats (0 for a voided sale).
+  /// Kyats (0 for a voided sale); lines with an unknown cost are left out.
   int get profit => voided ? 0 : lines.fold(0, (a, l) => a + l.profit);
+
+  /// Lines whose cost is unknown (left out of [profit]); 0 for a voided sale.
+  int get unknownCostLines => voided ? 0 : lines.where((l) => !l.costKnown).length;
 
   /// Cash received (if any) for the receipt.
   int? get received {

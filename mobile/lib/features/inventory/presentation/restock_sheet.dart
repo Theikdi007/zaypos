@@ -14,6 +14,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/qty_sheet.dart';
 import '../../products/domain/product.dart' show ProductVariant;
 import '../../products/domain/product_modules.dart';
+import '../../../core/widgets/date_picker.dart';
 
 /// "Stock ဖြည့်မယ်": goods received for one product. Whole units, or decimals
 /// when [decimal] (TenantFeatures.decimalQty: 2.5 ပေ, 0.75 ကီလို).
@@ -212,8 +213,8 @@ class _ModuleRestockSheetState extends ConsumerState<ModuleRestockSheet> {
   }
 
   Future<void> _pickExpiry() async {
-    final d = await showDatePicker(
-      context: context,
+    final d = await showExpiryDatePicker(
+      context,
       initialDate: _expiry ?? _now,
       firstDate: DateTime(_now.year - 1),
       lastDate: DateTime(_now.year + 10),

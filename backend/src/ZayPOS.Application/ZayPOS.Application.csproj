@@ -8,6 +8,11 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.15" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Google myanmar-tools Zawgyi detector model (BUG-52); loaded by MyanmarText. -->
+    <EmbeddedResource Include="Text\Zawgyi\zawgyiUnicodeModel.dat" LogicalName="ZayPOS.Application.Text.Zawgyi.zawgyiUnicodeModel.dat" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

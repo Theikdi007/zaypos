@@ -80,8 +80,11 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     if (code == null || !mounted) return;
     _barcode.text = ref.read(syncLimitsProvider).normalize('products.barcode', code);
   }
-  late final _cost = TextEditingController(text: '${_p?.cost ?? _t.sampleCost}');
-  late final _price = TextEditingController(text: _p == null ? '${_t.samplePrice}' : (_p.price > 0 ? '${_p.price}' : ''));
+  // BUG-53: the template's sample cost / price are hints (placeholder text),
+  // never values. Empty cost = unknown (left out of profit); an empty price on
+  // a new product saves 0 and POS asks for it at the first sale.
+  late final _cost = TextEditingController(text: (_p?.cost ?? 0) > 0 ? '${_p!.cost}' : '');
+  late final _price = TextEditingController(text: (_p?.price ?? 0) > 0 ? '${_p!.price}' : '');
   late final _wholesale = TextEditingController(text: _p?.wholesalePrice?.toString() ?? '');
   final _stock = TextEditingController();
   /// Low-stock alert 0 = "no alert" (the field is left empty).
@@ -227,7 +230,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         key: ?error,
     };
     if (name.isEmpty) errors['name'] ??= 'ပစ္စည်းအမည် ထည့်ပါ။';
-    if (price <= 0) errors['price'] = 'ရောင်းဈေး ထည့်ပါ။';
+    if (_isEdit && price <= 0) errors['price'] = 'ရောင်းဈေး ထည့်ပါ။';
     if (needsBatch) {
       // Owner decision: batch number AND expiry date for tracked opening stock.
       errors['batchNo'] = _batchNo.text.trim().isEmpty
@@ -539,6 +542,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     if (f.serialWarranty) ref.watch(knownSerialsProvider); // duplicate-IMEI check stays loaded
     final cost = int.tryParse(_cost.text) ?? 0;
     final price = int.tryParse(_price.text) ?? 0;
+    final costUnknown = cost <= 0;
     final margin = price - cost;
     // Integer percent, rounded half away from zero.
     final pct = cost > 0 ? (margin * 200 + (margin >= 0 ? cost : -cost)) ~/ (2 * cost) : 0;
@@ -673,14 +677,19 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                   title: 'ဈေးနှုန်း',
                   children: [
                     TwoCol(
-                      LabeledField(label: 'ဝယ်ဈေး (Ks)', small: true, child: _moneyInput(_cost, 'ဝယ်ဈေး')),
+                      LabeledField(
+                          label: 'ဝယ်ဈေး (Ks)',
+                          small: true,
+                          child: _moneyInput(_cost, 'ဝယ်ဈေး', hint: _sampleHint(_t.sampleCost), key: const ValueKey('cost'))),
                       LabeledField(
                         label: 'ရောင်းဈေး (Ks)',
                         small: true,
-                        required: true,
+                        required: _isEdit,
                         error: _errors['price'],
                         child: _moneyInput(_price, 'ရောင်းဈေး',
-                            error: _showErrors && price <= 0, key: const ValueKey('price')),
+                            hint: _sampleHint(_t.samplePrice),
+                            error: _showErrors && _isEdit && price <= 0,
+                            key: const ValueKey('price')),
                       ),
                     ),
                     if (f.quotation)
@@ -689,6 +698,26 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                         small: true,
                         child: _moneyInput(_wholesale, 'လက်ကား ဈေး'),
                       ),
+                    if (price <= 0 && !_isEdit)
+                      Text('ရောင်းဈေး မထည့်ရင် ပထမဆုံး ရောင်းတဲ့အခါ မေးပါမယ်',
+                          key: const ValueKey('priceLaterNote'), style: AppText.s(12, color: AppColors.muted))
+                    else if (costUnknown)
+                      Container(
+                        key: const ValueKey('costUnknown'),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(color: AppColors.fill, borderRadius: AppRadius.inputR),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Text('တစ်ခုချင်း အမြတ်', style: AppText.s(14, weight: AppText.w600, color: AppColors.muted)),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(costUnknownLabel, style: AppText.s(14, weight: AppText.w600, color: AppColors.muted)),
+                          ],
+                        ),
+                      )
+                    else
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       decoration: BoxDecoration(
@@ -846,8 +875,12 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     );
   }
 
-  Widget _moneyInput(TextEditingController c, String label, {bool error = false, Key? key}) => AppInput(
+  /// "ဥပမာ 450" (the template's sample, shown only as placeholder text).
+  static String? _sampleHint(int sample) => sample > 0 ? 'ဥပမာ $sample' : null;
+
+  Widget _moneyInput(TextEditingController c, String label, {bool error = false, String? hint, Key? key}) => AppInput(
         key: key,
+        hint: hint,
         controller: c,
         fontSize: 16,
         fontWeight: AppText.w600,

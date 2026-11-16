@@ -4,13 +4,16 @@ import '../../../core/utils/ids.dart';
 import '../../../core/utils/qty.dart';
 import '../../products/domain/product.dart';
 import '../../sales/data/sales_providers.dart';
+import '../../../core/text/myanmar_text.dart';
+import '../../auth/data/session.dart';
+import '../data/cart_store.dart';
 
 /// Which unit of a module product the cashier picked (BUG-2): the IMEI
 /// (serialWarranty), the size/colour (variants) or the batch (expiryBatch).
 /// [label] is shown after the product name, e.g. "M · အနက်".
 typedef ModulePick = ({String? variantId, String? batchId, String? serialId, String label});
 
-/// In-progress sale line. Not persisted. Money = kyats, qty = milli-units.
+/// In-progress sale line (saved with the open cart, see cart_store.dart). Money = kyats, qty = milli-units.
 class CartLine {
   const CartLine({
     required this.key,
@@ -104,8 +107,18 @@ const quickSaleName = 'အမြန်ရောင်း';
 class CartNotifier extends Notifier<Cart> {
   static const step = Qty.scale; // one unit
 
+  /// BUG-57: starts with the cart saved before the app was killed (same shop
+  /// only) and saves every change, so an open sale survives a background kill.
   @override
-  Cart build() => const Cart([]);
+  Cart build() {
+    final tenant = ref.watch(tenantIdProvider);
+    final store = ref.watch(cartStoreProvider);
+    final saved = ref.read(initialCartProvider).take();
+    if (store != null && tenant.isNotEmpty) {
+      listenSelf((_, next) => store.save(tenant, next));
+    }
+    return saved != null && saved.tenantId == tenant && tenant.isNotEmpty ? saved.cart : const Cart([]);
+  }
 
   /// Adds one unit of [p]. With a [pick] the line names that IMEI / variant /
   /// batch; the same variant or batch again adds to its line, an IMEI is
@@ -140,9 +153,10 @@ class CartNotifier extends Notifier<Cart> {
   }
 
   void addQuick(int price, String name) {
+    final n = normalizeMyanmar(name.trim()); // BUG-52
     state = Cart([
       ...state.lines,
-      CartLine(key: newId(), name: name.trim().isEmpty ? quickSaleName : name.trim(), price: price, qtyMilli: step),
+      CartLine(key: newId(), name: n.isEmpty ? quickSaleName : n, price: price, qtyMilli: step),
     ]);
   }
 

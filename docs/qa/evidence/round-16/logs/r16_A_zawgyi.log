@@ -1,0 +1,404 @@
+Analyzing r16_android_verify_test.dart...                       
+No issues found! (ran in 2.5s)
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDebug'...                             16.7s
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk...           4.8s
+I/ypos.zaypos_app(28600): hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported,test-api) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/ypos.zaypos_app(28600): hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/ypos.zaypos_app(28600): hiddenapi: Accessing hidden field Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray; (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/ypos.zaypos_app(28600): hiddenapi: Accessing hidden method Landroid/util/LongArray;->get(I)J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+D/AccessibilityBridge(28600): Setting not found: accessibility_display_inversion_enabled, using default: 0
+D/FlutterRenderer(28600): Width is zero. 0,0
+D/CompatChangeReporter(28600): Compat change id reported: 377864165; UID 10229; state: ENABLED
+W/HWUI    (28600): Unknown dataspace 0
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@17e905c
+I/WindowExtensionsImpl(28600): Initializing Window Extensions, vendor API level=9, activity embedding enabled=true
+D/VRI[MainActivity](28600): WindowInsets changed: 1080x2424 statusBars:[0,142,0,0] navigationBars:[0,0,0,63] mandatorySystemGestures:[0,174,0,84] 
+D/FlutterRenderer(28600): Width is zero. 0,0
+D/FlutterRenderer(28600): Width is zero. 0,0
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ypos.zaypos_app(28600): Compiler allocated 5390KB to compile void android.view.ViewRootImpl.performTraversals()
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:51142/EKweNCr58UQ=/
+VMServiceFlutterDriver: Isolate found with number: 3934614417124407
+I/Choreographer(28600): Skipped 69 frames!  The application may be doing too much work on its main thread.
+D/WindowLayoutComponentImpl(28600): Register WindowLayoutInfoListener on Context=com.zaypos.zaypos_app.MainActivity@a7b2889, of which baseContext=android.app.ContextImpl@2daaff2
+D/ProfileInstaller(28600): Installing profile for com.zaypos.zaypos_app
+VMServiceFlutterDriver: Isolate 3934614417124407 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/HWUI    (28600): Using FreeType backend (prop=Auto)
+I/flutter (28600): 00:00 +0: r16 Android: zawgyi
+VMServiceFlutterDriver: Connected to Flutter application.
+I/Choreographer(28600): Skipped 93 frames!  The application may be doing too much work on its main thread.
+I/HWUI    (28600): Davey! duration=1710ms; Flags=1, FrameTimelineVsyncId=717130, IntendedVsync=14603810885430, Vsync=14605360885275, InputEventId=0, HandleInputStart=14605368795255, AnimationStart=14605368801214, PerformTraversalsStart=14605368802547, DrawStart=14605377146422, FrameDeadline=14603827552096, FrameStartTime=14605362367797, FrameInterval=16666665, WorkloadTarget=16666666, SyncQueued=14605381385172, SyncStart=14605382458255, IssueDrawCommandsStart=14605383268422, SwapBuffers=14605495176005, FrameCompleted=14605522923214, DequeueBufferDuration=1629542, QueueBufferDuration=2398333, GpuCompleted=14605521203422, SwapBuffersCompleted=14605522923214, DisplayPresentTime=0, CommandSubmissionCompleted=14605495176005, 
+D/InsetsController(28600): hide(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:11a43da9: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+I/ImeTracker(28600): com.zaypos.zaypos_app:39a0a573: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+D/InsetsController(28600): Setting requestedVisibleTypes to 511 (was 503)
+I/ImeTracker(28600): com.zaypos.zaypos_app:23210c55: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:23210c55: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@a09495e
+W/InteractionJankMonitor(28600): Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.zaypos.zaypos_app
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): com.zaypos.zaypos_app:5ea1fb41: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:5ea1fb41: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker(28600): com.zaypos.zaypos_app:f20a77c9: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:f20a77c9: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker(28600): com.zaypos.zaypos_app:39a0a573: onShown
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+I/ImeTracker(28600): com.zaypos.zaypos_app:e948a758: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:e948a758: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker(28600): com.zaypos.zaypos_app:cfbf4972: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:cfbf4972: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+I/ImeTracker(28600): com.zaypos.zaypos_app:8cda624c: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:8cda624c: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker(28600): com.zaypos.zaypos_app:63c1a251: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:63c1a251: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+I/flutter (28600): QA_SHOT:r16_bug52_customer_form_09790917101
+[runner] screenshot r16_bug52_customer_form_09790917101.png
+I/ImeTracker(28600): com.zaypos.zaypos_app:7e3f6edd: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+D/InsetsController(28600): hide(ime())
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+D/InsetsController(28600): Setting requestedVisibleTypes to 503 (was 511)
+D/CompatChangeReporter(28600): Compat change id reported: 395521150; UID 10229; state: ENABLED
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): system_server:f2f3ce92: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+I/ImeTracker(28600): com.zaypos.zaypos_app:11a783a: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+D/InsetsController(28600): Setting requestedVisibleTypes to 511 (was 503)
+I/ImeTracker(28600): com.zaypos.zaypos_app:e8f522d2: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:e8f522d2: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@a09495e
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): com.zaypos.zaypos_app:11a783a: onShown
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): com.zaypos.zaypos_app:6a9bad2d: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:6a9bad2d: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker(28600): com.zaypos.zaypos_app:12164eaf: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:12164eaf: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+I/flutter (28600): QA_SHOT:r16_bug52_customer_form_09790917102
+[runner] screenshot r16_bug52_customer_form_09790917102.png
+I/ImeTracker(28600): com.zaypos.zaypos_app:c8588c8a: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+D/InsetsController(28600): hide(ime())
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+D/InsetsController(28600): Setting requestedVisibleTypes to 503 (was 511)
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): system_server:b84fe58a: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+I/ImeTracker(28600): com.zaypos.zaypos_app:745cdcf5: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+D/InsetsController(28600): Setting requestedVisibleTypes to 511 (was 503)
+I/ImeTracker(28600): com.zaypos.zaypos_app:200891ba: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:200891ba: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@a09495e
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): com.zaypos.zaypos_app:745cdcf5: onShown
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): com.zaypos.zaypos_app:267ec7a6: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:267ec7a6: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker(28600): com.zaypos.zaypos_app:15049eec: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:15049eec: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+I/flutter (28600): QA_SHOT:r16_bug52_customer_form_09790917103
+[runner] screenshot r16_bug52_customer_form_09790917103.png
+I/ImeTracker(28600): com.zaypos.zaypos_app:5f1a8958: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+D/InsetsController(28600): hide(ime())
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+D/InsetsController(28600): Setting requestedVisibleTypes to 503 (was 511)
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): system_server:cd2c2f91: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+I/ImeTracker(28600): com.zaypos.zaypos_app:19e90dc7: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+D/InsetsController(28600): Setting requestedVisibleTypes to 511 (was 503)
+I/ImeTracker(28600): com.zaypos.zaypos_app:c0d1d272: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:c0d1d272: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@a09495e
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): com.zaypos.zaypos_app:19e90dc7: onShown
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): com.zaypos.zaypos_app:efa190f0: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:efa190f0: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker(28600): com.zaypos.zaypos_app:619de91c: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:619de91c: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+I/ImeTracker(28600): com.zaypos.zaypos_app:9b7af09f: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:9b7af09f: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker(28600): com.zaypos.zaypos_app:a95fc002: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:a95fc002: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+I/flutter (28600): QA_SHOT:r16_bug52_product_form
+[runner] screenshot r16_bug52_product_form.png
+I/ImeTracker(28600): com.zaypos.zaypos_app:bcc5d34e: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+D/InsetsController(28600): hide(ime())
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+D/InsetsController(28600): Setting requestedVisibleTypes to 503 (was 511)
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): system_server:3f7f7921: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+I/flutter (28600): QA_NOTE:customer 09790917101: name=မောင်မောင် [U+1019 U+1031 U+102C U+1004 U+103A U+1019 U+1031 U+102C U+1004 U+103A] address=ရန်ကုန် [U+101B U+1014 U+103A U+1000 U+102F U+1014 U+103A] note=ကြွေးကျန် [U+1000 U+103C U+103D U+1031 U+1038 U+1000 U+103B U+1014 U+103A]
+I/flutter (28600): QA_NOTE:customer 09790917102: name=ယခု မိုးရွာနေပါသလား [U+101A U+1001 U+102F U+0020 U+1019 U+102D U+102F U+1038 U+101B U+103D U+102C U+1014 U+1031 U+1015 U+102B U+101E U+101C U+102C U+1038] address=null [] note=null []
+I/flutter (28600): QA_NOTE:customer 09790917103: name=ကျွန်ုပ် [U+1000 U+103B U+103D U+1014 U+103A U+102F U+1015 U+103A] address=null [] note=null []
+I/flutter (28600): QA_NOTE:OK   Zawgyi name stored as Unicode U+1019 U+1031 U+102C U+1004 U+103A U+1019 U+1031 U+102C U+1004 U+103A
+I/flutter (28600): QA_NOTE:OK   Zawgyi address stored as Unicode U+101B U+1014 U+103A U+1000 U+102F U+1014 U+103A
+I/flutter (28600): QA_NOTE:OK   Zawgyi note stored as Unicode U+1000 U+103C U+103D U+1031 U+1038 U+1000 U+103B U+1014 U+103A
+I/flutter (28600): QA_NOTE:OK   valid Unicode "ယခု မိုးရွာနေပါသလား" unchanged
+I/flutter (28600): QA_NOTE:OK   valid Unicode "ကျွန်ုပ်" unchanged
+I/flutter (28600): QA_NOTE:product name=ဆေးလုံး [U+1006 U+1031 U+1038 U+101C U+102F U+1036 U+1038]
+I/flutter (28600): QA_NOTE:OK   Zawgyi product stored as Unicode U+1006 U+1031 U+1038 U+101C U+102F U+1036 U+1038
+I/flutter (28600): QA_NOTE:OK   customers "အားလုံး": 3 rows, got 3
+I/flutter (28600): QA_SHOT:r16_bug52_customers_all
+[runner] screenshot r16_bug52_customers_all.png
+I/ImeTracker(28600): com.zaypos.zaypos_app:13827da9: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+D/InsetsController(28600): Setting requestedVisibleTypes to 511 (was 503)
+I/ImeTracker(28600): com.zaypos.zaypos_app:3b2ddae5: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:3b2ddae5: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+I/AssistStructure(28600): Flattened final assist data: 524 bytes, containing 1 windows, 3 views
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@a09495e
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): com.zaypos.zaypos_app:13827da9: onShown
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/flutter (28600): QA_NOTE:OK   customer search unicode "မောင်မောင်": rows=1, row shows Unicode name=1
+I/flutter (28600): QA_SHOT:r16_bug52_cust_search_unicode
+[runner] screenshot r16_bug52_cust_search_unicode.png
+I/flutter (28600): QA_NOTE:OK   customer search zawgyi "ေမာင္ေမာင္": rows=1, row shows Unicode name=1
+I/flutter (28600): QA_SHOT:r16_bug52_cust_search_zawgyi
+[runner] screenshot r16_bug52_cust_search_zawgyi.png
+I/flutter (28600): QA_NOTE:OK   customer search unicode_part "မောင်": rows=1, row shows Unicode name=1
+I/flutter (28600): QA_SHOT:r16_bug52_cust_search_unicode_part
+[runner] screenshot r16_bug52_cust_search_unicode_part.png
+I/flutter (28600): QA_NOTE:OK   customer search zawgyi_part "ေမာင္": rows=1, row shows Unicode name=1
+I/flutter (28600): QA_SHOT:r16_bug52_cust_search_zawgyi_part
+[runner] screenshot r16_bug52_cust_search_zawgyi_part.png
+I/ImeTracker(28600): com.zaypos.zaypos_app:183b0f28: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+D/InsetsController(28600): hide(ime())
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+D/InsetsController(28600): Setting requestedVisibleTypes to 503 (was 511)
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): com.zaypos.zaypos_app:896ed80e: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@a09495e
+D/InsetsController(28600): Setting requestedVisibleTypes to 511 (was 503)
+I/ImeTracker(28600): com.zaypos.zaypos_app:183b0f28: onCancelled at PHASE_CLIENT_ANIMATION_CANCEL
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): com.zaypos.zaypos_app:5368a0dc: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController(28600): show(ime())
+I/ImeTracker(28600): com.zaypos.zaypos_app:5368a0dc: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+W/RemoteInputConnectionImpl(28600): requestCursorUpdates on inactive InputConnection
+I/AssistStructure(28600): Flattened final assist data: 516 bytes, containing 1 windows, 3 views
+W/RemoteInputConnectionImpl(28600): getSurroundingText on inactive InputConnection
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/InputConnectionAdaptor(28600): The input method toggled cursor monitoring on
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/ImeTracker(28600): com.zaypos.zaypos_app:896ed80e: onShown
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+I/flutter (28600): QA_NOTE:OK   product search unicode "ဆေးလုံး": rows titled "ဆေးလုံး"=1, others=0
+I/flutter (28600): QA_SHOT:r16_bug52_prod_search_unicode
+[runner] screenshot r16_bug52_prod_search_unicode.png
+I/flutter (28600): QA_NOTE:OK   product search zawgyi "ေဆးလံုး": rows titled "ဆေးလုံး"=1, others=0
+I/flutter (28600): QA_SHOT:r16_bug52_prod_search_zawgyi
+[runner] screenshot r16_bug52_prod_search_zawgyi.png
+I/flutter (28600): QA_NOTE:sync (zawgyi): outbox rows left=0
+I/flutter (28600): QA_NOTE:FAILURES: 0 
+I/flutter (28600): 00:43 +1: (tearDownAll)
+I/ImeTracker(28600): com.zaypos.zaypos_app:6c1dd220: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+D/InsetsController(28600): hide(ime())
+All tests passed.
+D/WindowOnBackDispatcher(28600): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@6692d68
+D/InsetsController(28600): Setting requestedVisibleTypes to 503 (was 511)
+I/flutter (28600): 00:43 +2: All tests passed!
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+Leaving the application running.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+D/FlutterJNI(28600): Sending viewport metrics to the engine.
+[runner] flutter exit code 0

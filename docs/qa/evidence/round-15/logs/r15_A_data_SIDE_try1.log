@@ -1,0 +1,223 @@
+Analyzing r15_android_flow_test.dart...                         
+No issues found! (ran in 2.0s)
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDebug'...                             17.7s
+✓ Built build/app/outputs/flutter-apk/app-debug.apk
+Installing build/app/outputs/flutter-apk/app-debug.apk...           5.6s
+D/nativeloader( 8487): Load /data/app/~~lsZJ4Hi66WjovFnPIRQ-gA==/com.zaypos.zaypos_app-inNcywwSbgNPeBG-g0wAzQ==/base.apk!/lib/arm64-v8a/libdartjni.so using class loader ns clns-9 (caller=/data/app/~~lsZJ4Hi66WjovFnPIRQ-gA==/com.zaypos.zaypos_app-inNcywwSbgNPeBG-g0wAzQ==/base.apk!classes7.dex): ok
+I/ypos.zaypos_app( 8487): hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported,test-api) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/ypos.zaypos_app( 8487): hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/ypos.zaypos_app( 8487): hiddenapi: Accessing hidden field Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray; (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/ypos.zaypos_app( 8487): hiddenapi: Accessing hidden method Landroid/util/LongArray;->get(I)J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app, TargetSdkVersion=36) using reflection: allowed
+D/AccessibilityBridge( 8487): Setting not found: accessibility_display_inversion_enabled, using default: 0
+D/FlutterRenderer( 8487): Width is zero. 0,0
+D/CompatChangeReporter( 8487): Compat change id reported: 377864165; UID 10226; state: ENABLED
+W/HWUI    ( 8487): Unknown dataspace 0
+D/WindowOnBackDispatcher( 8487): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@17e905c
+I/WindowExtensionsImpl( 8487): Initializing Window Extensions, vendor API level=9, activity embedding enabled=true
+D/VRI[MainActivity]( 8487): WindowInsets changed: 1080x2424 statusBars:[0,142,0,0] navigationBars:[0,0,0,63] mandatorySystemGestures:[0,174,0,84] 
+D/FlutterRenderer( 8487): Width is zero. 0,0
+D/FlutterRenderer( 8487): Width is zero. 0,0
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+I/ypos.zaypos_app( 8487): Compiler allocated 5390KB to compile void android.view.ViewRootImpl.performTraversals()
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:64474/4mv1n_yvZX0=/
+VMServiceFlutterDriver: Isolate found with number: 8045330399062571
+I/Choreographer( 8487): Skipped 73 frames!  The application may be doing too much work on its main thread.
+D/WindowLayoutComponentImpl( 8487): Register WindowLayoutInfoListener on Context=com.zaypos.zaypos_app.MainActivity@a7b2889, of which baseContext=android.app.ContextImpl@e2436fd
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/ProfileInstaller( 8487): Installing profile for com.zaypos.zaypos_app
+VMServiceFlutterDriver: Isolate 8045330399062571 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+I/HWUI    ( 8487): Using FreeType backend (prop=Auto)
+I/flutter ( 8487): 00:00 +0: r15 Android: data
+VMServiceFlutterDriver: Connected to Flutter application.
+I/Choreographer( 8487): Skipped 44 frames!  The application may be doing too much work on its main thread.
+I/HWUI    ( 8487): Davey! duration=766ms; Flags=1, FrameTimelineVsyncId=48310, IntendedVsync=1513811408021, Vsync=1514544741281, InputEventId=0, HandleInputStart=1514546110346, AnimationStart=1514546111138, PerformTraversalsStart=1514546111513, DrawStart=1514547395471, FrameDeadline=1513828074687, FrameStartTime=1514545990763, FrameInterval=16666665, WorkloadTarget=16666666, SyncQueued=1514548653305, SyncStart=1514548885471, IssueDrawCommandsStart=1514549287180, SwapBuffers=1514561542555, FrameCompleted=1514578422430, DequeueBufferDuration=372416, QueueBufferDuration=322917, GpuCompleted=1514578422430, SwapBuffersCompleted=1514565795055, DisplayPresentTime=0, CommandSubmissionCompleted=1514561542555, 
+D/InsetsController( 8487): hide(ime())
+I/ImeTracker( 8487): com.zaypos.zaypos_app:b3e76bd5: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+I/flutter ( 8487): QA_NOTE:features: serial=true batch=true
+D/WindowOnBackDispatcher( 8487): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@168e299
+I/ImeTracker( 8487): com.zaypos.zaypos_app:74ba7de7: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 8487): show(ime())
+D/InsetsController( 8487): Setting requestedVisibleTypes to 511 (was 503)
+I/ImeTracker( 8487): com.zaypos.zaypos_app:a09c521a: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 8487): show(ime())
+I/ImeTracker( 8487): com.zaypos.zaypos_app:a09c521a: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+D/InputConnectionAdaptor( 8487): The input method toggled cursor monitoring on
+D/WindowOnBackDispatcher( 8487): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@10b3ea4
+W/InteractionJankMonitor( 8487): Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.zaypos.zaypos_app
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+I/ImeTracker( 8487): com.zaypos.zaypos_app:74ba7de7: onShown
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+I/ImeTracker( 8487): com.zaypos.zaypos_app:9ba2133c: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 8487): show(ime())
+I/ImeTracker( 8487): com.zaypos.zaypos_app:9ba2133c: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker( 8487): com.zaypos.zaypos_app:1d935012: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 8487): show(ime())
+I/ImeTracker( 8487): com.zaypos.zaypos_app:1d935012: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+D/InputConnectionAdaptor( 8487): The input method toggled cursor monitoring on
+I/ImeTracker( 8487): com.zaypos.zaypos_app:16736142: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 8487): show(ime())
+I/ImeTracker( 8487): com.zaypos.zaypos_app:16736142: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker( 8487): com.zaypos.zaypos_app:2412e104: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 8487): show(ime())
+I/ImeTracker( 8487): com.zaypos.zaypos_app:2412e104: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+D/InputConnectionAdaptor( 8487): The input method toggled cursor monitoring on
+I/flutter ( 8487): QA_SHOT:r15_prod_barcode_form
+[runner] screenshot r15_prod_barcode_form.png
+I/ImeTracker( 8487): com.zaypos.zaypos_app:10f08b71: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+D/InsetsController( 8487): hide(ime())
+D/WindowOnBackDispatcher( 8487): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@168e299
+D/InsetsController( 8487): Setting requestedVisibleTypes to 503 (was 511)
+D/CompatChangeReporter( 8487): Compat change id reported: 395521150; UID 10226; state: ENABLED
+D/WindowOnBackDispatcher( 8487): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@17e905c
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+I/ImeTracker( 8487): system_server:8e174df9: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+I/flutter ( 8487): QA_NOTE:after save 1: route=/
+D/WindowOnBackDispatcher( 8487): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@168e299
+I/ImeTracker( 8487): com.zaypos.zaypos_app:95e8d29: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 8487): show(ime())
+D/InsetsController( 8487): Setting requestedVisibleTypes to 511 (was 503)
+I/ImeTracker( 8487): com.zaypos.zaypos_app:986da7e6: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 8487): show(ime())
+I/ImeTracker( 8487): com.zaypos.zaypos_app:986da7e6: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+D/InputConnectionAdaptor( 8487): The input method toggled cursor monitoring on
+D/WindowOnBackDispatcher( 8487): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@10b3ea4
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+I/ImeTracker( 8487): com.zaypos.zaypos_app:95e8d29: onShown
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+D/FlutterJNI( 8487): Sending viewport metrics to the engine.
+I/ImeTracker( 8487): com.zaypos.zaypos_app:b70db9c6: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 8487): show(ime())
+I/ImeTracker( 8487): com.zaypos.zaypos_app:b70db9c6: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker( 8487): com.zaypos.zaypos_app:2a0ec0fc: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 8487): show(ime())
+I/ImeTracker( 8487): com.zaypos.zaypos_app:2a0ec0fc: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+W/RemoteInputConnectionImpl( 8487): getSurroundingText on inactive InputConnection
+W/RemoteInputConnectionImpl( 8487): getTextBeforeCursor on inactive InputConnection
+D/InputConnectionAdaptor( 8487): The input method toggled cursor monitoring on
+I/ImeTracker( 8487): com.zaypos.zaypos_app:470b44cc: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 8487): show(ime())
+I/ImeTracker( 8487): com.zaypos.zaypos_app:470b44cc: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker( 8487): com.zaypos.zaypos_app:c614217e: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 8487): show(ime())
+I/ImeTracker( 8487): com.zaypos.zaypos_app:c614217e: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+D/InputConnectionAdaptor( 8487): The input method toggled cursor monitoring on
+I/flutter ( 8487): ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+I/flutter ( 8487): The following StateError was thrown running a test:
+I/flutter ( 8487): Bad state: No element
+I/flutter ( 8487): 
+I/flutter ( 8487): When the exception was thrown, this was the stack:
+I/flutter ( 8487): #0      Iterable.single (dart:core/iterable.dart:694:25)
+I/flutter ( 8487): #1      WidgetController.element (package:flutter_test/src/controller.dart:888:30)
+I/flutter ( 8487): #2      WidgetController.ensureVisible (package:flutter_test/src/controller.dart:2389:32)
+I/flutter ( 8487): #3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r15_android_flow_test.dart:80:24)
+I/flutter ( 8487): <asynchronous suspension>
+I/flutter ( 8487): #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+I/flutter ( 8487): <asynchronous suspension>
+I/flutter ( 8487): #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+I/flutter ( 8487): <asynchronous suspension>
+I/flutter ( 8487): #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+I/flutter ( 8487): <asynchronous suspension>
+I/flutter ( 8487): 
+I/flutter ( 8487): The test description was:
+I/flutter ( 8487):   r15 Android: data
+I/flutter ( 8487): ════════════════════════════════════════════════════════════════════════════════════════════════════
+I/flutter ( 8487): 00:14 +0: r15 Android: data [E]
+I/flutter ( 8487):   Test failed. See exception logs above.
+I/flutter ( 8487):   The test description was: r15 Android: data
+I/flutter ( 8487):   
+I/flutter ( 8487): 00:14 +0 -1: (tearDownAll)
+I/flutter ( 8487): 00:14 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: r15 Android: data
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:694:25)
+#1      WidgetController.element (package:flutter_test/src/controller.dart:888:30)
+#2      WidgetController.ensureVisible (package:flutter_test/src/controller.dart:2389:32)
+#3      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r15_android_flow_test.dart:80:24)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+The test description was:
+  r15 Android: data
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+Leaving the application running.
+[runner] flutter exit code 1

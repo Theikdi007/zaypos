@@ -19,6 +19,7 @@ import '../data/session.dart';
 import '../data/session_store.dart';
 import '../domain/phone.dart';
 import '../domain/pin_hasher.dart';
+import '../../../core/text/myanmar_text.dart';
 
 enum AuthStatus {
   /// No session: Login / Register only.
@@ -165,7 +166,7 @@ class AuthController extends Notifier<AuthState> {
       (id) => _api.register(
         phone: phone,
         otp: otp.trim(),
-        shopName: shopName.trim(),
+        shopName: normalizeMyanmar(shopName.trim()), // BUG-52
         templateId: templateId,
         pin: pin,
         deviceId: id,

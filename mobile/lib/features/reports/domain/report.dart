@@ -11,13 +11,30 @@ enum ReportPeriod {
 
 /// All money in int kyats.
 class PeriodSummary {
-  const PeriodSummary({required this.range, required this.sales, required this.profit, required this.count});
+  const PeriodSummary({
+    required this.range,
+    required this.sales,
+    required this.profit,
+    required this.count,
+    this.knownCostLines = 0,
+    this.unknownCostLines = 0,
+  });
   final String range;
   final int sales;
 
-  /// Σ (price − costSnapshot) × qty over non-voided sale lines.
+  /// Σ (price − costSnapshot) × qty over non-voided sale lines whose cost is
+  /// known; lines with an unknown cost (0) are left out (BUG-53).
   final int profit;
   final int count;
+
+  /// Sold lines that count in [profit].
+  final int knownCostLines;
+
+  /// Sold lines left out of [profit] because their cost is unknown.
+  final int unknownCostLines;
+
+  /// Lines were sold but not one had a cost: show "အရင်းမသိ", not 0 Ks.
+  bool get profitUnknown => knownCostLines == 0 && unknownCostLines > 0;
 }
 
 class DaySales {

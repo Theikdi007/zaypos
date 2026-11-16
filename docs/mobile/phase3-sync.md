@@ -202,7 +202,10 @@ and **Support ကို ပို့မယ်** (copy unit JSON to share via Vib
   - Android emulator: `http://10.0.2.2:5076`
   - Real phone on the same Wi-Fi: `http://<Mac LAN IP>:5076` (`ipconfig getifaddr en0`)
 - Dev-only cleartext HTTP: Android `network_security_config` for debug builds only;
-  iOS `NSAllowsLocalNetworking` in Info.plist. Release builds require HTTPS.
+  iOS `NSAllowsLocalNetworking` in Info.plist. Release builds require HTTPS, enforced in the app
+  (BUG-55): `dart:io` ignores Android's cleartext policy and iOS ATS, so a release build with a
+  non-https `API_BASE_URL` refuses to start (`checkApiBaseUrl` in `main.dart`), and every dio
+  refuses a non-https request in release (`HttpsOnlyInterceptor`). Debug / profile may use http.
 
 ---
 

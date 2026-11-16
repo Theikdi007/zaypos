@@ -8,6 +8,8 @@ import '../api/api_config.dart';
 import '../api/api_error.dart';
 import '../db/app_database.dart';
 import '../db/database_provider.dart';
+import '../../features/auth/data/auth_api.dart' show plainDio;
+import '../text/myanmar_text.dart';
 
 /// How a text field treats non-ASCII characters (server `NonAsciiRule`).
 enum NonAscii { allow, reject, drop }
@@ -81,7 +83,9 @@ class SyncLimitsData {
   /// non-ASCII where the field says so; surrounding spaces trimmed.
   String normalize(String field, String value) {
     final rule = text[field];
-    var v = value.trim();
+    // BUG-52: Zawgyi-typed text is converted to Unicode first, so the length
+    // check and the saved value both see the Unicode form.
+    var v = normalizeMyanmar(value.trim());
     if (rule == null) return v;
     if (rule.myanmarDigitsToAscii) v = myanmarDigitsToAscii(v);
     if (rule.nonAscii == NonAscii.drop) v = String.fromCharCodes(v.codeUnits.where((c) => c < 128)).trim();
@@ -152,8 +156,8 @@ class SyncLimitsNotifier extends Notifier<SyncLimitsData> {
   /// ignored: the current rules stay.
   Future<void> refresh() async {
     try {
-      final r = await Dio(BaseOptions(baseUrl: ref.read(apiBaseUrlProvider), responseType: ResponseType.plain))
-          .get<String>('/api/v1/sync/limits');
+      final r = await plainDio(ref.read(apiBaseUrlProvider))
+          .get<String>('/api/v1/sync/limits', options: Options(responseType: ResponseType.plain));
       final body = r.data;
       if (body == null) return;
       final limits = SyncLimitsData.parse(body);

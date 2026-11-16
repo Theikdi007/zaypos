@@ -1,0 +1,3 @@
+GET /api/v1/sync/pull?cursor=&limit=500 (logged in as +959790917151, device 'QA r15 curl'); changes tables: {'tenants': 1, 'tenantFeatures': 9, 'devices': 2, 'products': 5, 'productVariants': 0, 'productBatches': 1, 'productSerials': 1, 'customers': 2, 'sales': 3, 'saleLines': 3, 'payments': 2, 'stockMovements': 7, 'debtEntries': 1, 'syncIssues': 0}
+customers: 'QA r15 ဒေါ်လှ' U+0051 U+0041 U+0020 U+0072 U+0031 U+0035 U+0020 U+1012 U+1031 U+102B U+103A U+101C U+103E 09 790 011 151
+customers: 'ေမာင္ေမာင္' U+1031 U+1019 U+102C U+1004 U+1039 U+1031 U+1019 U+102C U+1004 U+1039 09 790 011 152

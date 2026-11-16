@@ -1,0 +1,77 @@
+QA round 16 — real debug app (`flutter build apk --debug --dart-define=API_BASE_URL=http://10.0.2.2:5076`, built from lib/main.dart)
+driven with adb + uiautomator (mobile/integration_test/qa/adb_ui.py, EVD_DIR=docs/qa/evidence/round-16). Emulator emulator-5554,
+Android 16 / API 36. Start settings: font_scale 1.0, Physical density 420, accelerometer_rotation 1, user_rotation 0.
+Output below is copied verbatim from the terminal (dump lines: 'text' | 'content-desc' | bounds | clickable).
+
+== BUG-51 (register, system BACK) ==
+step 1: phone 979091716, OTP from the API console ("DEV SMS to +95979091716: ZayPOS code: 813756") → ဆက်သွားမယ်
+step 2: shop name "QA r16 Android", template ဆေးဆိုင်; keyboard closed with BACK (mInputShown=true → mInputShown=false)
+$ adb_ui.py back   (keyboard already closed)
+'' | 'အဆင့် 1 / 4' | [200, 210, 1028, 273]
+'979091716' | '' | [226, 748, 987, 817] | click
+'' | '8\n1\n3\n7\n5\n6' | [53, 972, 1028, 1108] | click          ← phone and verified code kept
+$ adb_ui.py tap ဆက်သွားမယ်
+'' | 'အဆင့် 2 / 4' | …   'QA r16 Android' | '' | [88, 751, 992, 814]   ← shop name kept, ဆေးဆိုင် still selected (r16_bug51_step2_again.png)
+API log: only 1 "DEV SMS" line → no new OTP was needed.
+step 3 (ချက်ချင်း စရောင်းမယ် selected) → BACK → 'အဆင့် 2 / 4' → ဆက်သွားမယ် → 'အဆင့် 3 / 4' → step 4 PIN 111111 → dashboard "Sync ပြီး".
+
+== BUG-56 (BACK on tabs, exit question, after a sale) ==
+tab ပစ္စည်း  → back → fg com.zaypos.zaypos_app/.MainActivity, 'မင်္ဂလာပါ\nQA r16 Android\nSync ပြီး\nဆက်တင်'
+tab အကြွေး   → back → MainActivity, dashboard
+tab အစီရင်ခံစာ → back → MainActivity, dashboard
+ရောင်းမယ် (POS) → back → MainActivity, dashboard
+dashboard → back →
+'' | 'ZayPOS က ထွက်မလား' | [215, 1049, 865, 1160]
+'' | 'ပြန်ဖွင့်ရင် PIN ထည့်ရပါမယ်။' | [215, 1202, 865, 1265]
+'' | 'မထွက်ပါ' | [404, 1328, 622, 1454] | click
+'' | 'ထွက်မယ်' | [643, 1328, 865, 1454] | click
+tap မထွက်ပါ → MainActivity, dashboard
+back → tap ထွက်မယ် → fg com.google.android.apps.nexuslauncher/.NexusLauncherActivity
+After debt sale A-0003 (receipt 'ရောင်းပြီးပါပြီ'):
+== back 1: fg=com.zaypos.zaypos_app/.MainActivity  'အရောင်း #A-0003'
+== back 2: fg=com.zaypos.zaypos_app/.MainActivity  'အရောင်းမှတ်တမ်း'
+== back 3: fg=com.zaypos.zaypos_app/.MainActivity  dashboard 'ဒီနေ့ ရောင်းရငွေ\n6,300 Ks … အမြတ်\n1,100 Ks … အရင်းမသိ 3 ခု မပါ'
+== back 4: fg=com.zaypos.zaypos_app/.MainActivity  'ZayPOS က ထွက်မလား'   (never left the app)
+
+== BUG-57 (cart survives a kill) ==
+POS: QA r16 WithCost, QA r16 NoCost, ဆေးလုံး → 'ပစ္စည်း 3 ခု' '2,500 Ks' → ငွေရှင်းမယ် → WithCost "+" → '3,500 Ks'
+HOME; pid before: 29656; adb shell am kill com.zaypos.zaypos_app; pid after kill: ''
+reopen → PIN 111111 → ရောင်းမယ်: 'ပစ္စည်း 4 ခု' '3,500 Ks'  (r16_bug57_pos_after_kill.png)
+checkout အကြွေး → မောင်မောင် → A-0003 3,500 Ks → POS 'ပစ္စည်း 0 ခု'
+am force-stop → pid='' → reopen → PIN → ရောင်းမယ်: 'ပစ္စည်း 0 ခု' '0 Ks'  (cleared cart stays cleared)
+
+== BUG-47 ("Viber သတိပေး") ==
+မောင်မောင် balance '0 Ks'     → 'ငွေပြန်ဆပ်မယ်' only; adb_ui has Viber → "no Viber button"   (r16_bug47_balance0_debtor.png)
+after A-0003 '3,500 Ks'       → 'ငွေပြန်ဆပ်မယ်' + 'Viber သတိပေး' → "VIBER SHOWN"           (r16_bug47_debt3500_debtor.png)
+pay 10,000 ('ပိုပေးထား 6,500 Ks') → '-6,500 Ks' → "no Viber"                                (r16_bug47_negative_balance_debtor.png)
+
+== BUG-58 (portrait lock) ==
+On POS: settings put system accelerometer_rotation 0; user_rotation 1 →
+  dumpsys window displays: cur=1080x2424; mDisplayRotation=ROTATION_0   (r16_bug58_pos_user_rotation1.png)
+accelerometer_rotation 1 (user_rotation still 1) → cur=1080x2424         (r16_bug58_pos_autorotate_on_user_rotation1.png)
+Positive control, same settings (accel 0, user_rotation 1):
+  Settings app: cur=2424x1080      ZayPOS: cur=1080x2424
+Restored: user_rotation 0, accelerometer_rotation 1.
+
+== BUG-59 (largest font + display size) ==
+settings put system font_scale 2.0; wm density 540 → "Physical density: 420 / Override density: 540"
+bottom nav: 'ပင်မ' [0,2090,216,2309] 'ရောင်းမယ်' [216,2090,432,2309] 'ပစ္စည်း' [432,2090,648,2309] 'အကြွေး' [648,2090,864,2309]
+            'အစီရင်ခံစာ' [864,2090,1080,2309]  — no overflow stripe on the nav (r16_bug59_max_dashboard.png, _tab_*.png)
+dashboard hero row: "RIGHT OVERFLOWED BY 83 PIXELS" (r16_bug59_max_dashboard.png); shop name "QA / r16 / Andr / oid"
+POS cart bar: "ပစ္စ / ည်း / 0 ခု / 0 / Ks" (r16_bug59_max_pos_quick.png); Reports tab "ဒီအပတ်" shows "ဒီ" (r16_bug59_max_tab_972.png)
+Restored: font_scale 1.0, wm density reset → "Physical density: 420".
+
+== BUG-54 keyboard-entry mode (real app) ==
+Products → QA r16 Batch "Stock ဖြည့်မယ်" → "+ Batch အသစ်" → သက်တမ်းကုန်ရက် → pencil ("ထည့်သွင်းမှုသို့ ပြောင်းရန်")
+field pre-filled '၁၆/၁၁/၂၀၂၆' → cleared → adb shell input text "28/11/2030" → '28/11/2030' → ရွေးမယ် →
+'' | 'ဖော်မက် မမှန်ကန်ပါ။' | [173, 1370, 471, 1425]   — picker stays open (r16_bug54_emulator_input_after_confirm.png)
+
+== BUG-60 ==
+launcher app drawer shows "ZayPOS" (r16_bug60_launcher_drawer.png); uiautomator: 'ZayPOS' | 'ZayPOS' | … nexuslauncher
+
+== Bonus (BUG-52) ==
+the product pushed by curl as Zawgyi "ၾကက္ဥ" shows on Android as 'ကြက်ဥ' (edit form, r16_bug52_curl_pushed_product_on_android_edit.png);
+the customer pushed as "ေက်ာ္ေက်ာ္" shows as 'ကျော်ကျော်' (r16_bug52_android_customers_incl_curl_push.png)
+
+== End ==
+adb uninstall com.zaypos.zaypos_app → Success; font_scale 1.0; Physical density 420; accelerometer_rotation 1; user_rotation 0.
