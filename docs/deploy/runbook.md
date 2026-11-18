@@ -38,8 +38,8 @@ Do these before touching the server. Keep every secret in your password manager.
    Then R2 → Manage API tokens → Create **Account API token**: permission **Object Read & Write**, applied to
    **only** `zaypos-backups`. Note the **Access Key ID**, **Secret Access Key** and your **Account ID**.
 4. **SMSPoh.** smspoh.com dashboard → Accounts & Security → API Credentials → create a v3 credential and whitelist
-   it to the server's IP (the API calls SMSPoh over IPv4 only). Note the key, the secret and the approved **Sender ID**
-   if you have one (empty = SMSPoh's default sender).
+   it to the server's IP (the API calls SMSPoh over IPv4 only). Note the key, the secret and the approved **Sender ID**:
+   it is required (SMSPoh refuses a blank sender), so ask SMSPoh for one if the dashboard shows none.
 5. **Server.** Vultr → Deploy → Cloud Compute, Singapore, Ubuntu 24.04 LTS x64, 4 GB, **SSH key** (add your Mac's
    `~/.ssh/id_ed25519.pub`). Vultr's automatic backups are optional (a weekly image on top of the nightly SQL backup).
    Note the IP and the root password Vultr shows: that password is your way in through Vultr's web console if SSH
@@ -155,12 +155,13 @@ Success ends with `{"status":"healthy","checks":{"database":"healthy"}}` and `De
 3. `curl -k https://<ip>/health` (straight to the server, skipping Cloudflare) → a TLS error (Caddy wants Cloudflare's
    client certificate). That is correct.
 4. **SMS smoke test** (no real SMS, no credit). In `.env`: `SMS_PROVIDER=SmsPoh`, `SMSPOH_API_KEY=`, `SMSPOH_API_SECRET=`
-   (pasted from the SMSPoh dashboard), `SMSPOH_TEST=true`; re-release (`./release.sh <current tag>`). Ask an OTP for
+   (pasted from the SMSPoh dashboard), `SMSPOH_SENDER=` (the approved Sender ID), `SMSPOH_TEST=true`; re-release (`./release.sh <current tag>`). Ask an OTP for
    your own number (counts 1 of the 3 per hour):
    `curl -sS https://api.zaypos.app/api/v1/auth/otp -H 'Content-Type: application/json' -d '{"phone":"+959…","purpose":"register"}'`
    → HTTP 204/200 and, in `docker compose logs api | grep SMSPoh`, `SMS accepted in TEST mode (not delivered) … HTTP 200`.
    A refusal logs `SMSPoh refused SMS to … HTTP <status> <SMSPoh's reply>` (digits masked, never the credential) and the
-   app gets 503 `sms_unavailable`: 401 = key/secret wrong, 403 = IP not whitelisted (must be the server's IPv4).
+   app gets 503 `sms_unavailable`: 400 = a field is wrong (SMSPoh names it, e.g. "From cannot be blank"), 401 = key/secret
+   wrong, 403 = IP not whitelisted (must be the server's IPv4).
 5. Set `SMSPOH_TEST=false` in `.env`, then `./release.sh $(grep ^API_TAG= .env | cut -d= -f2)` (re-deploys the same
    version with the new setting). Register again: the SMS must arrive.
 6. Run a backup now and a restore test (§3): `./backup.sh` then `./restore.sh latest`.

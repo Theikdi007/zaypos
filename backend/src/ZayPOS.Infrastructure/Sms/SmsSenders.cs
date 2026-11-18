@@ -42,7 +42,7 @@ public sealed class SmsPohOptions
     /// <summary>Alternative to ApiKey + ApiSecret: the ready Bearer value, base64("APIKey:APISecret").</summary>
     public string Token { get; set; } = "";
 
-    /// <summary>Sender ID registered with SMSPoh (case-sensitive). Empty = account default.</summary>
+    /// <summary>Sender ID approved on the SMSPoh account (case-sensitive). Required: SMSPoh v3 refuses a blank "from".</summary>
     public string Sender { get; set; } = "";
 
     /// <summary>true = SMSPoh accepts the message but does not deliver or charge it (smoke tests).</summary>
@@ -69,9 +69,10 @@ internal sealed class LoggingSmsSender(ILogger<LoggingSmsSender> logger) : ISmsS
 
 /// <summary>
 /// SMSPoh (Myanmar) v3 REST API: POST {Endpoint}, <c>Authorization: Bearer base64("APIKey:APISecret")</c>,
-/// JSON { to, message, from, test } (<c>test</c> is a JSON boolean per the v3 spec: true = accepted, not
-/// delivered, not charged). Never logs the message text (it holds the OTP) or the token; SMSPoh's reply
-/// is logged with every 4+ digit run masked. A failed send answers 503 sms_unavailable.
+/// JSON { to, message, from, test }. Both checked against the live API (2026-11-18: HTTP 400 "From cannot be
+/// blank., Test must be a number."): <c>from</c> is required (no default sender) and <c>test</c> is a NUMBER,
+/// 1 = accepted, not delivered, not charged. Never logs the message text (it holds the OTP) or the
+/// credential; SMSPoh's reply is logged with every 4+ digit run masked. A failed send answers 503 sms_unavailable.
 /// </summary>
 public sealed partial class SmsPohSmsSender(IOptions<SmsOptions> options, HttpClient http, ILogger<SmsPohSmsSender> logger) : ISmsSender
 {
@@ -85,7 +86,7 @@ public sealed partial class SmsPohSmsSender(IOptions<SmsOptions> options, HttpCl
                 ["to"] = phone,
                 ["message"] = message,
                 ["from"] = o.Sender,
-                ["test"] = o.Test,
+                ["test"] = o.Test ? 1 : 0, // a number: SMSPoh answers 400 "Test must be a number" to true/false
             }.Where(kv => kv.Value is not "").ToDictionary()),
         };
         var bearer = o.BearerToken();

@@ -60,6 +60,7 @@ public class DeploymentTests(SqlServerFixture sql)
         ["ConnectionStrings:ZayPOS"] = connectionString,
         ["Sms:Provider"] = "SmsPoh",
         ["Sms:SmsPoh:Token"] = "test-token",
+        ["Sms:SmsPoh:Sender"] = "ZayPOS",
         ["ForwardedHeaders:TrustedNetworksOverride"] = Caddy + "/32",
     };
 
@@ -223,13 +224,15 @@ public class DeploymentTests(SqlServerFixture sql)
     [Theory]
     [InlineData("SmsPho", "test-token", false, "Sms:Provider must be 'SmsPoh' or 'Console'")] // a typo never falls back to logging codes
     [InlineData("SmsPoh", "", false, "SMSPoh credential missing")]
+    [InlineData("SmsPoh", "test-token", false, "Sms:SmsPoh:Sender is empty", "")]
     [InlineData("SmsPoh", "test-token", true, "not sa")]
-    public async Task Production_refuses_unsafe_configuration(string provider, string token, bool asSa, string expected)
+    public async Task Production_refuses_unsafe_configuration(string provider, string token, bool asSa, string expected, string sender = "ZayPOS")
     {
         var (_, app) = await MigratedDatabase();
         var settings = ProductionSettings(asSa ? sql.ConnectionString : app);
         settings["Sms:Provider"] = provider;
         settings["Sms:SmsPoh:Token"] = token;
+        settings["Sms:SmsPoh:Sender"] = sender;
         await using var api = new ApiFactory(app, settings: settings, environment: "Production");
 
         var start = () => api.CreateClient();
@@ -365,7 +368,7 @@ public class DeploymentTests(SqlServerFixture sql)
         body.GetProperty("to").GetString().Should().Be("+959790011002");
         body.GetProperty("message").GetString().Should().Be("ZayPOS code: 482913");
         body.GetProperty("from").GetString().Should().Be("ZayPOS");
-        body.GetProperty("test").ValueKind.Should().Be(JsonValueKind.False); // a JSON boolean (v3 spec), not 0
+        body.GetProperty("test").GetInt32().Should().Be(0); // a number: SMSPoh answers 400 "Test must be a number" to false
         log.Lines.Should().NotContain(l => l.Contains("482913") || l.Contains("+959790011002"));
     }
 
@@ -405,19 +408,21 @@ public class DeploymentTests(SqlServerFixture sql)
     }
 
     [Fact]
-    public async Task SmsPoh_test_mode_sends_json_true_and_says_so_in_the_log()
+    public async Task SmsPoh_test_mode_sends_test_1_and_says_so_in_the_log()
     {
         var handler = new RecordingHandler(HttpStatusCode.OK, """{"status":true,"data":{"test":true,"to":"+959790011002"}}""");
         var log = new ListLogger();
         var sender = new SmsPohSmsSender(Options.Create(new SmsOptions
         {
-            Provider = "SmsPoh", SmsPoh = new SmsPohOptions { Token = "tok123", Test = true },
+            Provider = "SmsPoh", SmsPoh = new SmsPohOptions { Token = "tok123", Sender = "ZayPOS", Test = true },
         }), new HttpClient(handler), log);
 
         await sender.SendAsync("+959790011002", "ZayPOS code: 482913", CancellationToken.None);
 
-        JsonDocument.Parse(handler.Body!).RootElement.GetProperty("test").ValueKind.Should().Be(JsonValueKind.True);
-        JsonDocument.Parse(handler.Body!).RootElement.TryGetProperty("from", out _).Should().BeFalse(); // default sender
+        var sent = JsonDocument.Parse(handler.Body!).RootElement;
+        sent.GetProperty("test").ValueKind.Should().Be(JsonValueKind.Number);
+        sent.GetProperty("test").GetInt32().Should().Be(1);
+        sent.GetProperty("from").GetString().Should().Be("ZayPOS");
         log.Lines.Should().ContainSingle(l => l.Contains("TEST mode") && l.Contains("HTTP 200"));
         log.Lines.Should().NotContain(l => l.Contains("482913") || l.Contains("790011002") || l.Contains("tok123"));
     }

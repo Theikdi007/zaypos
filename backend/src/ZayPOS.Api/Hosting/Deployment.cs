@@ -78,6 +78,8 @@ public static class DeploymentExtensions
         {
             if (!sms.SmsPoh.HasCredentials)
                 errors.Add("SMSPoh credential missing: set Sms:SmsPoh:ApiKey + Sms:SmsPoh:ApiSecret (or Sms:SmsPoh:Token).");
+            if (string.IsNullOrWhiteSpace(sms.SmsPoh.Sender))
+                errors.Add("Sms:SmsPoh:Sender is empty: SMSPoh refuses every message without a sender (\"From cannot be blank\").");
         }
         else if (!sms.UsesLog)
             errors.Add($"Sms:Provider must be '{SmsOptions.SmsPohProvider}' or '{SmsOptions.ConsoleProvider}' (is '{sms.Provider}').");
