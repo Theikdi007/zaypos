@@ -57,6 +57,7 @@ var useForwarding = builder.Services.AddCloudflareForwarding(builder.Configurati
 
 var app = builder.Build();
 await app.EnsureDatabaseMigratedAsync(); // refuses to start (clear log line) if migrations are pending
+app.WarnAboutConsoleSms();
 
 if (useForwarding) app.UseForwardedHeaders(); // before anything reads RemoteIpAddress or the scheme
 app.UseExceptionHandler();
