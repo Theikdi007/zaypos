@@ -1,0 +1,27 @@
+[runner] 21:31:15 launch step=day run=r17_P_day on 00008120-0002610901F00032 (profile build, API http://192.168.100.198:5076)
+QA_NOTE:21:31:51 start step=day run=r17_P_day platform=ios Version 27.2 (Build 24B119) api=http://192.168.100.198:5076
+QA_NOTE:21:31:55 CHECK OK   PIN 111111 unlocks
+QA_NOTE:21:31:59 typeR: test text input did not reach the field; set "8850999171001" on the controller
+QA_NOTE:21:32:02 typeR: test text input did not reach the field; set "400" on the controller
+QA_NOTE:21:32:04 typeR: test text input did not reach the field; set "500" on the controller
+QA_NOTE:21:32:06 screenshot r17_P_edit_salt.png
+QA_NOTE:21:32:09 edited ဆား: {id: 01a1ea05-5078-7042-9d85-e9aeee2e7c6b, name: ဆား, price: 500, cost: 400, barcode: 8850999171001, stock: 0, moves: 0}
+QA_NOTE:21:32:11 typeR: test text input did not reach the field; set "250" on the controller
+QA_NOTE:21:32:14 typeR: test text input did not reach the field; set "300" on the controller
+QA_NOTE:21:32:15 screenshot r17_P_edit_egg.png
+QA_NOTE:21:32:18 edited ကြက်ဥ: {id: 01a1ea05-5078-7406-8a7f-ff879cc87455, name: ကြက်ဥ, price: 300, cost: 250, barcode: null, stock: 0, moves: 0}
+QA_NOTE:21:32:18 [4] stock before: {ဆား: 0, ကြက်ဥ: 0, သကြား: 0}
+QA_NOTE:21:32:21 screenshot r17_P4_restock_01a1ea_10.png
+QA_NOTE:21:32:24 screenshot r17_P4_restock_01a1ea_30.png
+QA_NOTE:21:32:27 screenshot r17_P4_restock_01a1ea_5.png
+QA_NOTE:21:32:30 screenshot r17_P4_restock_01a1ea_5.png
+QA_NOTE:21:32:31 [4] stock after: {ဆား: 15000, ကြက်ဥ: 30000, သကြား: 5000}
+QA_NOTE:21:32:31 CHECK OK   [4] stock ဆား 15, ကြက်ဥ 30, သကြား 5 (10 + 5 / 30 / 5) (actual: {ဆား: 15000, ကြက်ဥ: 30000, သကြား: 5000})
+QA_NOTE:21:32:32 screenshot r17_P4_products_after_restock.png
+QA_NOTE:21:32:34 EXCEPTION Null check operator used on a null value
+QA_NOTE:21:32:34 STACK #0      KeyEventSimulator._findPhysicalKey (package:flutter_test/src/event_simulation.dart:692) | #1      KeyEventSimulator.simulateKeyDownEvent (package:flutter_test/src/event_simulation.dart:762) | #2      simulateKeyDownEvent (package:flutter_test/src/event_simulation.dart:894) | #3      WidgetController.sendKeyEvent (package:flutter_test/src/controller.dart:2219) | #4      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r17_day_test.dart:362) | <asynchronous suspension> | #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192) | <asynchronous suspension>
+QA_NOTE:21:32:36 screenshot r17_r17_P_day_EXCEPTION.png
+QA_NOTE:21:32:36 layout/framework problems: none
+QA_NOTE:21:32:36 QA_RESULT day: FAIL (1 failed checks)
+QA_NOTE:21:32:36   FAILED: exception: Null check operator used on a null value
+QA_NOTE:21:32:36 QA_DONE day

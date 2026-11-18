@@ -1,0 +1,101 @@
+Analyzing r17_day_test.dart...                                  
+No issues found! (ran in 3.1s)
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  cupertino_ui 1.1.6 (1.1.7 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  material_ui 1.11.0 (1.11.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+22 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Installing build/r17/app-profile.apk...                            889ms
+Error: ADB exited with exit code 1
+Performing Streamed Install
+
+adb: failed to install build/r17/app-profile.apk: Failure [INSTALL_FAILED_INSUFFICIENT_STORAGE: Failed to override installation location]
+Uninstalling old version...
+Installing build/r17/app-profile.apk...                          1,568ms
+I/ypos.zaypos_app( 5370): Compiler allocated 5381KB to compile void android.view.ViewRootImpl.performTraversals()
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:55739/aWTGUoVE9W8=/
+VMServiceFlutterDriver: Isolate found with number: 7522799127348619
+VMServiceFlutterDriver: Isolate 7522799127348619 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+I/flutter ( 5370): 00:00 +0: r17 day: fromhost
+VMServiceFlutterDriver: Connected to Flutter application.
+I/flutter ( 5370): QA_NOTE:start step=signin run=r17_android platform=android BP41.250822.007 api=http://10.0.2.2:5076
+V/Configuration( 5370): Updating configuration, locales updated from [en_US] to [en]
+D/InsetsController( 5370): hide(ime())
+I/ImeTracker( 5370): com.zaypos.zaypos_app:b23cf1ad: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+V/Configuration( 5370): Updating configuration, locales updated from [en] to [en_US]
+I/ImeTracker( 5370): com.zaypos.zaypos_app:c6aca82d: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 5370): show(ime())
+D/InsetsController( 5370): Setting requestedVisibleTypes to 511 (was 503)
+I/ImeTracker( 5370): com.zaypos.zaypos_app:3ec32124: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 5370): show(ime())
+I/ImeTracker( 5370): com.zaypos.zaypos_app:3ec32124: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+D/WindowOnBackDispatcher( 5370): setTopOnBackInvokedCallback (unwrapped): android.view.ImeBackAnimationController@aba7db
+D/VRI[MainActivity]( 5370): WindowInsets changed: ime:[0,0,0,883] 
+W/InteractionJankMonitor( 5370): Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.zaypos.zaypos_app
+I/ImeTracker( 5370): com.zaypos.zaypos_app:c6aca82d: onShown
+D/ProfileInstaller( 5370): Installing profile for com.zaypos.zaypos_app
+I/flutter ( 5370): QA_NOTE:typeR: test text input did not reach the field; set "9790917181" on the controller
+I/ImeTracker( 5370): com.zaypos.zaypos_app:654028e9: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 5370): show(ime())
+I/ImeTracker( 5370): com.zaypos.zaypos_app:654028e9: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/ImeTracker( 5370): com.zaypos.zaypos_app:225c24a7: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InsetsController( 5370): show(ime())
+I/ImeTracker( 5370): com.zaypos.zaypos_app:225c24a7: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+I/flutter ( 5370): QA_NOTE:typeR: test text input did not reach the field; set "111111" on the controller
+I/flutter ( 5370): QA_SHOT:r17_A20_login_filled
+[runner] screenshot r17_A20_login_filled.png
+I/ImeTracker( 5370): com.zaypos.zaypos_app:27ef2516: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+D/InsetsController( 5370): hide(ime())
+D/WindowOnBackDispatcher( 5370): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@da01517
+D/InsetsController( 5370): Setting requestedVisibleTypes to 503 (was 511)
+D/CompatChangeReporter( 5370): Compat change id reported: 395521150; UID 10222; state: ENABLED
+D/VRI[MainActivity]( 5370): WindowInsets changed: ime:null 
+D/WindowOnBackDispatcher( 5370): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@cba0c97
+I/ImeTracker( 5370): system_server:8d2547ab: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+I/ImeTracker( 5370): system_server:7d13635c: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+I/flutter ( 5370): QA_NOTE:CHECK OK   [20] signed in on Android with the iPhone shop phone + PIN
+I/flutter ( 5370): QA_NOTE:CHECK OK   [20] first download finished on Android
+I/flutter ( 5370): QA_NOTE:sync (pull) 128 ms; outbox=0 lastError=null online=true
+I/flutter ( 5370): QA_NOTE:A sale {no: A-0001, method: cash, total: 1000, voided: 1}
+I/flutter ( 5370): QA_NOTE:A sale {no: A-0002, method: cash, total: 6500, voided: 0}
+I/flutter ( 5370): QA_NOTE:A sale {no: A-0003, method: kbz, total: 900, voided: 0}
+I/flutter ( 5370): QA_NOTE:A sale {no: A-0004, method: debt, total: 2000, voided: 0}
+I/flutter ( 5370): QA_NOTE:CHECK OK   [20] all 4 iPhone sales are on Android (actual: 4)
+I/flutter ( 5370): QA_SHOT:r17_A20_sales_list
+[runner] screenshot r17_A20_sales_list.png
+I/flutter ( 5370): QA_NOTE:CHECK OK   [20] the voided sale shows as voided
+I/flutter ( 5370): QA_NOTE:A product {id: 01a1ea0d-93ed-78eb-9570-515d7e767475, name: ဆား, price: 500, cost: 400, barcode: 8850999171001, stock: 11000, moves: 5}
+I/flutter ( 5370): QA_NOTE:A product {id: 01a1ea0d-93ed-781f-9d34-475a5e14dfd8, name: ကြက်ဥ, price: 300, cost: 250, barcode: null, stock: 27000, moves: 2}
+I/flutter ( 5370): QA_NOTE:A product {id: 01a1ea0d-93ed-7e57-aae5-7e34a5e0014d, name: သကြား, price: 6500, cost: 0, barcode: null, stock: 4000, moves: 2}
+I/flutter ( 5370): QA_NOTE:layout/framework problems: none
+I/flutter ( 5370): QA_NOTE:QA_RESULT signin: PASS (0 failed checks)
+I/flutter ( 5370): QA_NOTE:QA_DONE signin
+I/flutter ( 5370): 00:06 +1: (tearDownAll)
+I/flutter ( 5370): 00:06 +2: All tests passed!
+All tests passed.
+Leaving the application running.
+[runner] flutter exit code 0

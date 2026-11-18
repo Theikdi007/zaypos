@@ -1,0 +1,49 @@
+11-17 22:16:15.633  6304  6304 I flutter : QA_NOTE:start step=offline run=r17_android platform=android BP41.250822.007 api=http://10.0.2.2:5076
+11-17 22:16:19.201  6304  6304 I flutter : QA_NOTE:CHECK OK   PIN 111111 unlocks
+11-17 22:16:21.460  6304  6304 I flutter : QA_NOTE:sync (before airplane) 150 ms; outbox=0 lastError=null online=true
+11-17 22:16:21.475  6304  6304 I flutter : QA_NOTE:host cmd airplane_window_90 → HTTP 200
+11-17 22:16:29.524  6304  6304 I flutter : QA_NOTE:[18] API probe in airplane mode: failed: SocketException
+11-17 22:16:29.524  6304  6304 I flutter : QA_NOTE:CHECK OK   [18] airplane mode cuts the API (actual: failed: SocketException)
+11-17 22:16:29.530  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:29.532  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:31.952  6304  6304 I flutter : QA_NOTE:host post /shot?name=r17_A18_offline_1_checkout failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:31.952  6304  6304 I flutter : QA_NOTE:screenshot r17_A18_offline_1_checkout.png
+11-17 22:16:31.955  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:32.306  6304  6304 I flutter : QA_NOTE:CHECK OK   r17_A18_offline_1: receipt screen "ရောင်းပြီးပါပြီ" shows
+11-17 22:16:32.312  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:32.835  6304  6304 I flutter : QA_NOTE:host post /shot?name=r17_A18_offline_1_receipt failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:32.836  6304  6304 I flutter : QA_NOTE:screenshot r17_A18_offline_1_receipt.png
+11-17 22:16:32.837  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:32.837  6304  6304 I flutter : QA_NOTE:r17_A18_offline_1: sale {id: 01a1ea30-3bfa-74c4-ae39-5dce70677279, no: D-0001, method: cash, total: 300, customerId: null, voidedAt: null}
+11-17 22:16:32.837  6304  6304 I flutter : QA_NOTE:CHECK OK   [18] receipt 1 says saved offline
+11-17 22:16:32.838  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:32.839  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:36.934  6304  6304 I flutter : QA_NOTE:host post /shot?name=r17_A18_offline_2_checkout failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:36.934  6304  6304 I flutter : QA_NOTE:screenshot r17_A18_offline_2_checkout.png
+11-17 22:16:36.935  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:37.272  6304  6304 I flutter : QA_NOTE:CHECK OK   r17_A18_offline_2: receipt screen "ရောင်းပြီးပါပြီ" shows
+11-17 22:16:37.278  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:37.782  6304  6304 I flutter : QA_NOTE:host post /shot?name=r17_A18_offline_2_receipt failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:37.782  6304  6304 I flutter : QA_NOTE:screenshot r17_A18_offline_2_receipt.png
+11-17 22:16:37.783  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:37.784  6304  6304 I flutter : QA_NOTE:r17_A18_offline_2: sale {id: 01a1ea30-4f74-70d8-993b-134975166ed8, no: D-0002, method: debt, total: 500, customerId: 01a1ea10-9fa8-741a-90e7-13f392f67c50, voidedAt: null}
+11-17 22:16:37.785  6304  6304 I flutter : QA_NOTE:CHECK OK   [18] receipt 2 says saved offline
+11-17 22:16:37.786  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:37.787  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:37.787  6304  6304 I flutter : QA_NOTE:[18] outbox while offline: 2
+11-17 22:16:37.787  6304  6304 I flutter : QA_NOTE:CHECK OK   [18] the 2 sales wait in the outbox (actual: 2)
+11-17 22:16:37.787  6304  6304 I flutter : QA_NOTE:[19] airplane mode goes off in 73 s; outbox still 2
+11-17 22:16:37.787  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:37.788  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:16:37.788  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:17:48.477  6304  6304 I flutter : QA_NOTE:CHECK OK   [18] still waiting in the outbox right before airplane mode goes off (actual: 2)
+11-17 22:17:48.482  6304  6304 I flutter : QA_NOTE:host post /note?run=r17b_A18_offline failed: SocketException: Connection failed (OS Error: Network is unreachable, errno = 101), address = 10.0.2.2, port = 8765
+11-17 22:17:54.775  6304  6304 I flutter : QA_NOTE:[19] outbox empty without a manual sync: true after 6 s
+11-17 22:17:54.775  6304  6304 I flutter : QA_NOTE:CHECK OK   [19] the 2 offline sales sync by themselves after airplane mode off
+11-17 22:17:54.780  6304  6304 I flutter : QA_NOTE:CHECK OK   [18] 2 new sales on the phone
+11-17 22:17:54.782  6304  6304 I flutter : QA_NOTE:[19] offline sale id=01a1ea30-3bfa-74c4-ae39-5dce70677279 {no: D-0001, total: 300, syncedAt: 1794930485981}
+11-17 22:17:54.786  6304  6304 I flutter : QA_NOTE:[19] offline sale id=01a1ea30-4f74-70d8-993b-134975166ed8 {no: D-0002, total: 500, syncedAt: 1794930486009}
+11-17 22:17:55.524  6304  6304 I flutter : QA_NOTE:screenshot r17_A19_sales_after_reconnect.png
+11-17 22:17:55.524  6304  6304 I flutter : QA_NOTE:layout/framework problems: none
+11-17 22:17:55.524  6304  6304 I flutter : QA_NOTE:QA_RESULT offline: PASS (0 failed checks)
+11-17 22:17:55.524  6304  6304 I flutter : QA_NOTE:QA_DONE offline

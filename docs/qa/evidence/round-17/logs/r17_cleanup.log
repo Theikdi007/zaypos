@@ -1,0 +1,16 @@
+# 2026-11-17 22:27:12 cleanup
+host helper stopped
+api stopped
+port 5076 free
+name
+----
+master
+model
+msdb
+tempdb
+ZayPOS
+ZayPOS_QA_20261115_R12B
+ZayPOS_SchemaRef
+emulator: uninstall Success
+font_scale=1.0 airplane=disabled density=Physical density: 420 
+AVD 'ZayPOS_QA_r17' deleted.

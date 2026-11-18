@@ -1250,6 +1250,41 @@ Device: Android emulator `emulator-5554` (sdk_gphone64_arm64, Android 16 / API 3
 - Suspected area: `features/dashboard/presentation/dashboard_screen.dart` `_Hero` (fixed `Row` of `_metric`s).
 - Blocks beta: no (BUG-42 / BUG-59 family).
 
+## Found in round 17 (2026-11-17, fix/android @ e5ba3da + uncommitted api_error.dart; real iPhone + Android emulator)
+
+## BUG-64 · TC-POS-NEW-18 · Low · The receipt does not say how the sale was paid (KBZPay / WavePay / debt)
+- Found in: round 17 · real iPhone 15 (iOS 27.2), `mobile/integration_test/qa/r17_day_test.dart` QA_STEP=day, checklist 7.
+  `docs/qa/evidence/round-17/r17_P7_kbz_receipt.png`, `r17_P7_kbz_sale_detail.png`, `logs/r17b_P_day.log`
+- Steps to reproduce: POS → ကြက်ဥ × 3 → ငွေရှင်းမယ် → KBZPay → အတည်ပြုပြီး ပြေစာထုတ်မယ် → look at the receipt card (also what
+  "ပြေစာ ပို့မယ်" shares).
+- Expected: the receipt shows the payment method ("KBZPay"), as the sale detail does ("ငွေပေးချေမှု KBZPay"). A customer who paid by
+  KBZPay gets a receipt that proves it.
+- Actual: receipt texts `[QA r17b ကုန်စုံ, ပြေစာ #A-0003 · ၁၇ နိုဝင်ဘာ ၂၀၂၆ · ည 9:41, ကြက်ဥ × 3, 900, စုစုပေါင်း, 900 Ks, ကျေးဇူးတင်ပါတယ်]`: no method.
+  The sale itself is right (`method: kbz`; server `Sales.Method = kbz`). Only a cash sale with "လက်ခံရရှိငွေ" shows payment lines.
+- Suspected area: `features/sales/presentation/receipt_image.dart` `ReceiptCard` (payment lines only for `PaymentMethod.cash && received != null`).
+- Blocks beta: no. Owner decision whether the receipt should name the method.
+
+## BUG-65 · TC-SALE-NEW-2 · Low · An online sale's receipt first says "saved without a connection" ("လိုင်းမရှိဘဲ သိမ်းထားသည်")
+- Found in: round 17 · real iPhone 15, Wi-Fi up, sync working (each push 180–330 ms). `logs/r17b_P_day.log` ([7]), `r17_P7_kbz_receipt.png`
+- Steps to reproduce: phone online → any sale → look at the receipt screen right away.
+- Expected: no offline text while the phone is online (at most "sync လုပ်နေသည်…").
+- Actual: "လိုင်းမရှိဘဲ သိမ်းထားသည် · လိုင်းရရင် Sync လုပ်ပါမယ်" on every receipt until the debounced push has run; QA measured it gone
+  after 1,267 ms (outbox 0). A cashier who reads it believes the phone is offline.
+- Suspected area: `features/sales/presentation/sale_receipt_screen.dart` (`if (sale.pending)`, `Sale.pending => syncedAt == null`);
+  the push runs 2 s after a commit (`sync_engine.dart` `debounce`). The text should depend on the connection, not only on `syncedAt`.
+- Blocks beta: no.
+
+## BUG-66 · TC-UX-NEW-24 · Low · Android font 2.0 at the DEFAULT display size: checkout button cut "အတည်ပြုပြီး ပြေစာ…", cart total "850 / Ks", names break mid-word
+- Found in: round 17 · emulator Medium_Phone_API_36.1 (1080 × 2400, 420 dpi, display size unchanged), `settings put system font_scale 2.0`
+  (Settings → Font size max). `r17_A24_checkout_font_max_screen.png`, `r17_A24_pos_font_max_screen.png`, `logs/r17b_A24_font.log`
+- Steps to reproduce: font size max (display size default) → POS → ကြက်ဥ + ဆား → ငွေရှင်းမယ်.
+- Expected: labels readable (TC-UX-NEW-20 asks this even with the display size at max; here only the font is at max).
+- Actual: every button is visible and tappable (checklist 24 itself passes), but the confirm button reads "အတည်ပြုပြီး ပြေစာ…" (the app's
+  RenderParagraph reports `didExceedMaxLines`), the POS cart bar total wraps to "850 / Ks", and product names break inside a word
+  ("ဖယောင်းတို / င်"). BUG-59 / BUG-63 were found with font AND display size at max; this happens with the font alone.
+- Suspected area: `core/widgets/primary_button.dart` (one line + ellipsis), `pos/presentation/pos_screen.dart` `_CartBar`, POS product tile.
+- Blocks beta: no (BUG-59 family).
+
 ---
 
 ## Known limitations for the beta (owner, 2026-11-14)

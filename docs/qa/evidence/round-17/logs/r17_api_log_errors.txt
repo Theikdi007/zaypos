@@ -1,0 +1,4 @@
+# API log 22:26:59: lines with fail:/5xx/unhandled
+0
+# warn/fail categories:
+   2 warn: ZayPOS.Infrastructure.Auth.LoggingSmsSender[0]

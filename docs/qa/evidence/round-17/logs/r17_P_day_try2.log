@@ -1,0 +1,15 @@
+[runner] 21:33:14 launch step=day run=r17_P_day_try2 on 00008120-0002610901F00032 (profile build, API http://192.168.100.198:5076)
+QA_NOTE:21:33:50 start step=day run=r17_P_day_try2 platform=ios Version 27.2 (Build 24B119) api=http://192.168.100.198:5076
+QA_NOTE:21:33:53 CHECK OK   PIN 111111 unlocks
+QA_NOTE:21:33:55 [4] stock before: {ဆား: 15000, ကြက်ဥ: 30000, သကြား: 5000}
+QA_NOTE:21:33:55 [4] restock already done by an earlier run of this step; not repeated
+QA_NOTE:21:33:55 [4] stock after: {ဆား: 15000, ကြက်ဥ: 30000, သကြား: 5000}
+QA_NOTE:21:33:55 CHECK OK   [4] stock ဆား 15, ကြက်ဥ 30, သကြား 5 (10 + 5 / 30 / 5) (actual: {ဆား: 15000, ကြက်ဥ: 30000, သကြား: 5000})
+QA_NOTE:21:33:57 screenshot r17_P4_products_after_restock.png
+QA_NOTE:21:34:00 EXCEPTION Bad state: No element
+QA_NOTE:21:34:00 STACK #0      Iterable.first (dart:core/iterable.dart:663) | #1      _FirstFinderMixin.filter (package:flutter_test/src/finders.dart:1383) | #2      _SyncStarIterator.moveNext (dart:async-patch/async_patch.dart:594) | #3      Iterable.single (dart:core/iterable.dart:694) | #4      WidgetController.element (package:flutter_test/src/controller.dart:888) | #5      WidgetController.ensureVisible (package:flutter_test/src/controller.dart:2389) | #6      main.<anonymous closure>.tapProductTile (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r17_day_test.dart:188) | #7      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r17_day_test.dart:388)
+QA_NOTE:21:34:02 screenshot r17_r17_P_day_try2_EXCEPTION.png
+QA_NOTE:21:34:02 layout/framework problems: none
+QA_NOTE:21:34:02 QA_RESULT day: FAIL (1 failed checks)
+QA_NOTE:21:34:02   FAILED: exception: Bad state: No element
+QA_NOTE:21:34:02 QA_DONE day

@@ -1,0 +1,18 @@
+[runner] 22:24:55 launch step=pinlock run=r17b_P23_pinlock on 00008120-0002610901F00032 (profile build, API http://192.168.100.198:5076)
+QA_NOTE:22:25:31 start step=pinlock run=r17b_P23_pinlock platform=ios Version 27.2 (Build 24B119) api=http://192.168.100.198:5076
+QA_NOTE:22:25:33 CHECK OK   [23] opened on the PIN screen
+QA_NOTE:22:25:36 [23] wrong PIN 1 → [PIN မှားနေပါတယ်။ နောက်ထပ် ၄ ကြိမ် ကြိုးစားလို့ရပါတယ်။]
+QA_NOTE:22:25:39 [23] wrong PIN 2 → [PIN မှားနေပါတယ်။ နောက်ထပ် ၃ ကြိမ် ကြိုးစားလို့ရပါတယ်။]
+QA_NOTE:22:25:42 [23] wrong PIN 3 → [PIN မှားနေပါတယ်။ နောက်ထပ် ၂ ကြိမ် ကြိုးစားလို့ရပါတယ်။]
+QA_NOTE:22:25:45 [23] wrong PIN 4 → [PIN မှားနေပါတယ်။ နောက်ထပ် ၁ ကြိမ် ကြိုးစားလို့ရပါတယ်။]
+QA_NOTE:22:25:45 CHECK OK   [23] after 4: "1 more try" (actual: [PIN မှားနေပါတယ်။ နောက်ထပ် ၁ ကြိမ် ကြိုးစားလို့ရပါတယ်။])
+QA_NOTE:22:25:48 [23] wrong PIN 5 → [PIN မှားတာ များသွားလို့ ၁၅ မိနစ် ပိတ်ထားပါတယ်။]
+QA_NOTE:22:25:48 screenshot r17_P23_locked.png
+QA_NOTE:22:25:48 CHECK OK   [23] after 5: "… ၁၅ မိနစ် ပိတ်ထားပါတယ်" (actual: [PIN မှားတာ များသွားလို့ ၁၅ မိနစ် ပိတ်ထားပါတယ်။])
+QA_NOTE:22:25:48 [23] lockRemaining=0:14:57.458601
+QA_NOTE:22:25:48 CHECK OK   [23] locked for 15 minutes (actual: 0:14:57.458601)
+QA_NOTE:22:25:52 screenshot r17_P23_correct_pin_while_locked.png
+QA_NOTE:22:25:52 CHECK OK   [23] the correct PIN is refused while locked (actual: AuthStatus.locked)
+QA_NOTE:22:25:52 layout/framework problems: none
+QA_NOTE:22:25:52 QA_RESULT pinlock: PASS (0 failed checks)
+QA_NOTE:22:25:52 QA_DONE pinlock

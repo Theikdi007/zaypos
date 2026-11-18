@@ -58,6 +58,9 @@ flutter drive --keep-app-running --driver=test_driver/integration_test.dart --ta
         font_default) $A shell settings put system font_scale 1.0 </dev/null >> $LOG 2>&1 ;;
         density_max) $A shell wm density 540 </dev/null >> $LOG 2>&1 ;;   # largest "Display size" step on this 1080-px, 420-dpi device (smallest width 320 dp)
         density_reset) $A shell wm density reset </dev/null >> $LOG 2>&1 ;;
+        # QA round 17: airplane mode (checklist 18-19); the adb link to the emulator is not affected.
+        airplane_on) $A shell cmd connectivity airplane-mode enable </dev/null >> $LOG 2>&1; print -r -- "[runner] airplane-mode now $($A shell cmd connectivity airplane-mode </dev/null)" >> $LOG ;;
+        airplane_off) $A shell cmd connectivity airplane-mode disable </dev/null >> $LOG 2>&1; print -r -- "[runner] airplane-mode now $($A shell cmd connectivity airplane-mode </dev/null)" >> $LOG ;;
         mem) $A shell dumpsys meminfo $PKG </dev/null | grep -E "TOTAL PSS|TOTAL RSS" | head -2 | sed 's/^/[runner] /' >> $LOG ;;
         wait_*) sleep ${cmd#wait_} ;;
       esac

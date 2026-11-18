@@ -1,0 +1,21 @@
+# 2026-11-17 21:42:22 server DB after the iPhone day (scratch DB)
+shop|Id|products|sales
+----|--|--------|-----
+QA r17b ကုန်စုံ|01A1EA0D-07F8-7ABA-920D-A860C680D2C0|20|4
+QA r17 ကုန်စုံ|01A1EA04-C417-7D74-B147-FAFCA740B920|20|4
+No|Method|Total|voided|CustomerName
+--|------|-----|------|------------
+A-0001|cash|1000|1|NULL
+A-0002|cash|6500|0|NULL
+A-0003|kbz|900|0|NULL
+A-0004|debt|2000|0|QA r17 ဒေါ်မြ
+Name|Phone|CreditLimit
+----|-----|-----------
+QA r17 ဒေါ်မြ|09790917173|50000
+Type|Amount|Method|SaleNo
+----|------|------|------
+creditSale|2000|NULL|A-0004
+payment|1000|cash|NULL
+payment|1000|cash|NULL
+# API log fail/5xx lines:
+0

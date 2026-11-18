@@ -1,0 +1,29 @@
+[runner] 21:28:36 launch step=register run=r17_P1_register_try3 on 00008120-0002610901F00032 (profile build, API http://192.168.100.198:5076)
+QA_NOTE:21:29:13 start step=register run=r17_P1_register_try3 platform=ios Version 27.2 (Build 24B119) api=http://192.168.100.198:5076
+QA_NOTE:21:29:15 auth at launch: AuthStatus.signedOut
+QA_NOTE:21:29:15 login screen texts: [ZayPOS, ဆိုင်စာရင်းကို ဖုန်းတစ်လုံးနဲ့ လွယ်လွယ်ကူကူ စီမံပါ, ဖုန်းနံပါတ်, +95, 9 xxx xxx xxx, PIN နံပါတ် (၆ လုံး), ••••••, PIN မေ့နေပါသလား?, ဝင်မယ်, သို့မဟုတ်, ဆိုင်အသစ် စာရင်းသွင်းမယ်, စမ်းသပ်ဆိုင် (အင်တာနက်မလို), အင်တာနက်မရှိလည်း ရောင်းလို့ရပါတယ်။ လိုင်းပြန်ရတာနဲ့ အလိုအလျောက် sync လုပ်ပေးပါမယ်။]
+QA_NOTE:21:29:17 screenshot r17_P1_login.png
+QA_NOTE:21:29:19 typeR: test text input did not reach the field; set "9 790 917 171" on the controller
+QA_NOTE:21:29:19 register screen texts: [အဆင့် 1 / 4, ဖုန်းနံပါတ် အတည်ပြုမယ်, မက်ဆေ့ချ်နဲ့ OTP ကုဒ် ၆ လုံး ပို့ပေးပါမယ်, ဖုန်းနံပါတ်, +95, 9 xxx xxx xxx, ကုဒ်ပို့မယ်]
+QA_NOTE:21:29:24 after "ကုဒ်ပို့မယ်": [အဆင့် 1 / 4, ဖုန်းနံပါတ် အတည်ပြုမယ်, မက်ဆေ့ချ်နဲ့ OTP ကုဒ် ၆ လုံး ပို့ပေးပါမယ်, ဖုန်းနံပါတ်, +95, 9 xxx xxx xxx, အတည်ပြုကုဒ်, , , , , , , ကုဒ်မရဘူးလား? , ပြန်ပို့မယ် (0:57), ဆက်သွားမယ်]
+QA_NOTE:21:29:26 screenshot r17_P1_code_sent.png
+QA_NOTE:21:29:26 OTP received from the API log (6 digits)
+QA_NOTE:21:29:26 typeR: test text input did not reach the field; set "<OTP masked>" on the controller
+QA_NOTE:21:29:29 typeR: test text input did not reach the field; set "QA r17 ကုန်စုံ" on the controller
+QA_NOTE:21:29:33 screenshot r17_P1_step2_shop.png
+QA_NOTE:21:29:36 screenshot r17_P1_step3_preset.png
+QA_NOTE:21:29:40 screenshot r17_P1_first_sync.png
+QA_NOTE:21:29:40 after register: status=AuthStatus.unlocked notice=null firstSyncDone=true route=/ sawFirstSyncScreen=true
+QA_NOTE:21:29:40 CHECK OK   signed in after "ဆိုင်ဖွင့်မယ်" (actual: AuthStatus.unlocked)
+QA_NOTE:21:29:40 CHECK OK   first download finished
+QA_NOTE:21:29:40 CHECK OK   Home (dashboard) opens (actual: /)
+QA_NOTE:21:29:40 CHECK OK   no notice (presets downloaded)
+QA_NOTE:21:29:44 screenshot r17_P1_home.png
+QA_NOTE:21:29:44 CHECK OK   no sync error after the first download
+QA_NOTE:21:29:44 CHECK OK   20 preset products on the phone (actual: 20)
+QA_NOTE:21:29:44 sync (push presets) 246 ms; outbox=0 lastError=null online=true
+QA_NOTE:21:29:47 CHECK OK   outbox empty after the first push (actual: 0)
+QA_NOTE:21:29:47 CHECK OK   no sync error after the push
+QA_NOTE:21:29:47 layout/framework problems: none
+QA_NOTE:21:29:47 QA_RESULT register: PASS (0 failed checks)
+QA_NOTE:21:29:47 QA_DONE register

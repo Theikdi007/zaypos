@@ -1,0 +1,85 @@
+[runner] 21:34:42 launch step=day run=r17_P_day_try3 on 00008120-0002610901F00032 (profile build, API http://192.168.100.198:5076)
+QA_NOTE:21:35:18 start step=day run=r17_P_day_try3 platform=ios Version 27.2 (Build 24B119) api=http://192.168.100.198:5076
+QA_NOTE:21:35:22 CHECK OK   PIN 111111 unlocks
+QA_NOTE:21:35:24 [4] stock before: {ဆား: 15000, ကြက်ဥ: 30000, သကြား: 5000}
+QA_NOTE:21:35:24 [4] restock already done by an earlier run of this step; not repeated
+QA_NOTE:21:35:24 [4] stock after: {ဆား: 15000, ကြက်ဥ: 30000, သကြား: 5000}
+QA_NOTE:21:35:24 CHECK OK   [4] stock ဆား 15, ကြက်ဥ 30, သကြား 5 (10 + 5 / 30 / 5) (actual: {ဆား: 15000, ကြက်ဥ: 30000, သကြား: 5000})
+QA_NOTE:21:35:25 screenshot r17_P4_products_after_restock.png
+QA_NOTE:21:35:29 [5] cart after typed barcode + tap: [ဆား×3000]
+QA_NOTE:21:35:29 CHECK FAIL [5] typed barcode adds ဆား (2 with the tap) (actual: [ဆား×3000])
+QA_NOTE:21:35:31 screenshot r17_P5_cash_checkout.png
+QA_NOTE:21:35:31 CHECK OK   r17_P5_cash: receipt screen "ရောင်းပြီးပါပြီ" shows
+QA_NOTE:21:35:32 screenshot r17_P5_cash_receipt.png
+QA_NOTE:21:35:32 r17_P5_cash: sale {id: 01a1ea0a-af36-7682-8279-dc8272f37f33, no: A-0001, method: cash, total: 1500, customerId: null, voidedAt: null}
+QA_NOTE:21:35:32 CHECK FAIL [5] cash sale 1,000 Ks (actual: {id: 01a1ea0a-af36-7682-8279-dc8272f37f33, no: A-0001, method: cash, total: 1500, customerId: null, voidedAt: null})
+QA_NOTE:21:35:32 CHECK FAIL [5] receipt shows 1,000
+QA_NOTE:21:35:32 CHECK FAIL [5] ဆား stock 15 → 13 (actual: 12000)
+QA_NOTE:21:35:35 screenshot r17_P6_asks_price.png
+QA_NOTE:21:35:35 CHECK OK   [6] POS asks "ဈေးနှုန်း ထည့်ပါ" for သကြား (price 0)
+QA_NOTE:21:35:37 screenshot r17_P6_noprice_checkout.png
+QA_NOTE:21:35:37 CHECK OK   r17_P6_noprice: receipt screen "ရောင်းပြီးပါပြီ" shows
+QA_NOTE:21:35:38 screenshot r17_P6_noprice_receipt.png
+QA_NOTE:21:35:38 r17_P6_noprice: sale {id: 01a1ea0a-c7e5-77c1-9f80-91b9adee6446, no: A-0002, method: cash, total: 6500, customerId: null, voidedAt: null}
+QA_NOTE:21:35:38 CHECK OK   [6] sale at the entered price 6,500 (actual: {id: 01a1ea0a-c7e5-77c1-9f80-91b9adee6446, no: A-0002, method: cash, total: 6500, customerId: null, voidedAt: null})
+QA_NOTE:21:35:38 CHECK OK   [6] price saved on the product
+QA_NOTE:21:35:43 screenshot r17_P7_kbz_checkout.png
+QA_NOTE:21:35:43 CHECK OK   r17_P7_kbz: receipt screen "ရောင်းပြီးပါပြီ" shows
+QA_NOTE:21:35:44 screenshot r17_P7_kbz_receipt.png
+QA_NOTE:21:35:44 r17_P7_kbz: sale {id: 01a1ea0a-def9-73a1-8d94-efc10f76fad3, no: A-0003, method: kbz, total: 900, customerId: null, voidedAt: null}
+QA_NOTE:21:35:44 CHECK OK   [7] KBZPay sale 900 Ks, method kbz (actual: {id: 01a1ea0a-def9-73a1-8d94-efc10f76fad3, no: A-0003, method: kbz, total: 900, customerId: null, voidedAt: null})
+QA_NOTE:21:35:44 CHECK FAIL [7] receipt shows "KBZPay"
+QA_NOTE:21:35:47 typeR: test text input did not reach the field; set "QA r17 ဒေါ်မြ" on the controller
+QA_NOTE:21:35:49 typeR: test text input did not reach the field; set "09790917172" on the controller
+QA_NOTE:21:35:51 screenshot r17_P8_new_customer.png
+QA_NOTE:21:36:01 screenshot r17_P8_debt_checkout.png
+QA_NOTE:21:36:01 CHECK OK   r17_P8_debt: receipt screen "ရောင်းပြီးပါပြီ" shows
+QA_NOTE:21:36:02 screenshot r17_P8_debt_receipt.png
+QA_NOTE:21:36:02 r17_P8_debt: sale {id: 01a1ea0b-2449-7aa0-b117-5b857192116e, no: A-0004, method: debt, total: 2000, customerId: 01a1ea0b-010a-7fe6-bf3f-62021ffb5c0a, voidedAt: null}
+QA_NOTE:21:36:02 CHECK OK   [8] debt sale 2,000 Ks for the new customer (actual: {id: 01a1ea0b-2449-7aa0-b117-5b857192116e, no: A-0004, method: debt, total: 2000, customerId: 01a1ea0b-010a-7fe6-bf3f-62021ffb5c0a, voidedAt: null})
+QA_NOTE:21:36:03 screenshot r17_P8_debts_list.png
+QA_NOTE:21:36:03 CHECK OK   [8] the customer is in the debts list
+QA_NOTE:21:36:03 CHECK OK   [8] balance 2,000 (actual: 2000)
+QA_NOTE:21:36:03 CHECK OK   [8] list shows 2,000
+QA_NOTE:21:36:06 typeR: test text input did not reach the field; set "1000" on the controller
+QA_NOTE:21:36:08 screenshot r17_P12_half_sheet.png
+QA_NOTE:21:36:08 r17_P12_half: tapping "1,000 Ks လက်ခံမယ်"
+QA_NOTE:21:36:11 screenshot r17_P12_half_after.png
+QA_NOTE:21:36:11 CHECK OK   [12] remaining 1,000 after paying 1,000 (actual: 1000)
+QA_NOTE:21:36:11 CHECK OK   [12] debt screen shows 1,000 Ks
+QA_NOTE:21:36:11 CHECK OK   [16 pre] "Viber သတိပေး" shown while 1,000 is owed
+QA_NOTE:21:36:14 typeR: test text input did not reach the field; set "09790917173" on the controller
+QA_NOTE:21:36:16 typeR: test text input did not reach the field; set "50000" on the controller
+QA_NOTE:21:36:18 screenshot r17_P15_edit_customer.png
+QA_NOTE:21:36:18 CHECK OK   [15] "လက်ရှိ အကြွေး 1,000 Ks" next to the credit limit (actual: [လက်ရှိ အကြွေး, 1,000 Ks])
+QA_NOTE:21:36:21 CHECK OK   [15] saved: phone 09790917173, limit 50,000 (actual: {phone: 09790917173, creditLimit: 50000})
+QA_NOTE:21:36:22 screenshot r17_P15_debt_screen_after_edit.png
+QA_NOTE:21:36:24 screenshot r17_P16_full_sheet.png
+QA_NOTE:21:36:24 r17_P16_full: tapping "1,000 Ks လက်ခံမယ်"
+QA_NOTE:21:36:28 screenshot r17_P16_full_after.png
+QA_NOTE:21:36:28 CHECK OK   [16] balance 0 (actual: 0)
+QA_NOTE:21:36:28 CHECK OK   [16] "Viber သတိပေး" gone
+QA_NOTE:21:36:30 screenshot r17_P17_sale_voided.png
+QA_NOTE:21:36:30 CHECK OK   [17] sale voided
+QA_NOTE:21:36:30 CHECK FAIL [17] ဆား stock +2 (8000 → 11000) (actual: 11000)
+QA_NOTE:21:36:31 screenshot r17_P17_receipt_voided.png
+QA_NOTE:21:36:31 CHECK OK   [17] receipt shows "ပယ်ဖျက်ပြီး"
+QA_NOTE:21:36:32 sync (end of day part 1) 186 ms; outbox=0 lastError=null online=true
+QA_NOTE:21:36:34 sync (again) 299 ms; outbox=0 lastError=null online=true
+QA_NOTE:21:36:34 CHECK OK   P: everything pushed (outbox 0) (actual: 0)
+QA_NOTE:21:36:34 P sale {no: A-0001, method: cash, total: 1500, voided: 1}
+QA_NOTE:21:36:34 P sale {no: A-0002, method: cash, total: 6500, voided: 0}
+QA_NOTE:21:36:34 P sale {no: A-0003, method: kbz, total: 900, voided: 0}
+QA_NOTE:21:36:34 P sale {no: A-0004, method: debt, total: 2000, voided: 0}
+QA_NOTE:21:36:34 P product {id: 01a1ea05-5078-7042-9d85-e9aeee2e7c6b, name: ဆား, price: 500, cost: 400, barcode: 8850999171001, stock: 11000, moves: 5}
+QA_NOTE:21:36:34 P product {id: 01a1ea05-5078-7406-8a7f-ff879cc87455, name: ကြက်ဥ, price: 300, cost: 250, barcode: null, stock: 27000, moves: 2}
+QA_NOTE:21:36:34 P product {id: 01a1ea05-5078-79ea-b6c9-372b21eb66ae, name: သကြား, price: 6500, cost: 0, barcode: null, stock: 4000, moves: 2}
+QA_NOTE:21:36:34 layout/framework problems: none
+QA_NOTE:21:36:34 QA_RESULT day: FAIL (6 failed checks)
+QA_NOTE:21:36:34   FAILED: [5] typed barcode adds ဆား (2 with the tap) (actual: [ဆား×3000])
+QA_NOTE:21:36:34   FAILED: [5] cash sale 1,000 Ks (actual: {id: 01a1ea0a-af36-7682-8279-dc8272f37f33, no: A-0001, method: cash, total: 1500, customerId: null, voidedAt: null})
+QA_NOTE:21:36:34   FAILED: [5] receipt shows 1,000
+QA_NOTE:21:36:34   FAILED: [5] ဆား stock 15 → 13 (actual: 12000)
+QA_NOTE:21:36:34   FAILED: [7] receipt shows "KBZPay"
+QA_NOTE:21:36:34   FAILED: [17] ဆား stock +2 (8000 → 11000) (actual: 11000)
+QA_NOTE:21:36:34 QA_DONE day

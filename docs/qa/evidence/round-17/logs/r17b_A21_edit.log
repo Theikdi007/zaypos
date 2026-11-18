@@ -1,0 +1,16 @@
+[launch] 22:18:30 step=edit run=r17b_A21_edit serial=emulator-5554 (profile APK, no driver); pid before: '6304'
+QA_NOTE:22:18:18 start step=edit run=r17_android platform=android BP41.250822.007 api=http://10.0.2.2:5076
+QA_NOTE:22:18:22 CHECK OK   PIN 111111 unlocks
+QA_NOTE:22:18:24 sync (before edit) 167 ms; outbox=0 lastError=null online=true
+QA_NOTE:22:18:26 typeR: test text input did not reach the field; set "350" on the controller
+QA_NOTE:22:18:26 screenshot r17_A21_edit_price.png
+QA_NOTE:22:18:30 typeR: test text input did not reach the field; set "" on the controller
+QA_NOTE:22:18:30 screenshot r17_A21_delete_barcode.png
+QA_NOTE:22:18:32 [21] A after edit: {id: 01a1ea0d-93ed-781f-9d34-475a5e14dfd8, name: ကြက်ဥ, price: 350, cost: 250, barcode: null, stock: 26000, moves: 3} / {id: 01a1ea0d-93ed-78eb-9570-515d7e767475, name: ဆား, price: 500, cost: 400, barcode: null, stock: 10000, moves: 6}
+QA_NOTE:22:18:32 CHECK OK   [21] A: ကြက်ဥ price 350
+QA_NOTE:22:18:32 CHECK OK   [21] A: ဆား barcode deleted
+QA_NOTE:22:18:33 sync (push edit) 167 ms; outbox=0 lastError=null online=true
+QA_NOTE:22:18:33 CHECK OK   [21] A: edit pushed
+QA_NOTE:22:18:33 layout/framework problems: none
+QA_NOTE:22:18:33 QA_RESULT edit: PASS (0 failed checks)
+QA_NOTE:22:18:33 QA_DONE edit
