@@ -271,6 +271,7 @@ if the IP changed.
 | OTP never arrives | `docker compose logs api | grep -i sms`: `refused HTTP 401` = token, `unreachable` = network; `SMSPOH_TEST` must be `false` |
 | Backup failed | `journalctl -u zaypos-backup --since today`; run `./backup.sh` by hand to see the error |
 | `ssh` suddenly says "Connection closed" | ufw allows only 6 new SSH connections per 30 s from one IP (and fail2ban bans for 1 h after 5 failed logins). Wait a minute; for scripts, reuse one connection (`ControlMaster auto` in `~/.ssh/config`) |
+| `ssh` hangs: "Connection timed out during banner exchange" | something drops your address in front of the server, and a VPN on your Mac (Outline, WARP, …) hides it: its client accepts every connection itself, so a blocked port looks "connected, then silent". The server sees the VPN's exit address (`curl https://api.ipify.org`). Check the Vultr Firewall group: port 22 must be allowed in the **IPv4** rules (0.0.0.0/0, or that exit address). `/health` through Cloudflare keeps working meanwhile |
 | Disk full | `df -h`, `docker system df`; old images: `docker image prune`; local backups are kept 3 days in `backups/` |
 
 Useful commands:
