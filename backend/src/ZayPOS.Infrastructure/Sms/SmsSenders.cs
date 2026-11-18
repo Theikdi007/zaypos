@@ -7,19 +7,25 @@ using ZayPOS.Application.Abstractions;
 namespace ZayPOS.Infrastructure.Sms;
 
 /// <summary>
-/// "Sms" config section. <c>Provider</c>: <c>Log</c> (dev: the code goes to the log) or <c>SmsPoh</c>.
-/// Production refuses to start with anything but SmsPoh (see the API's ProductionChecks).
+/// "Sms" config section. <c>Provider</c>: <c>Log</c> or its alias <c>Console</c> (the code goes to the
+/// log: dev, and production only until SMSPoh is ready) or <c>SmsPoh</c>. Production refuses any other
+/// value (a typo must not silently fall back to logging codes) and warns loudly at every start when the
+/// code goes to the log (see the API's DeploymentExtensions).
 /// </summary>
 public sealed class SmsOptions
 {
     public const string Section = "Sms";
     public const string LogProvider = "Log";
+    public const string ConsoleProvider = "Console";
     public const string SmsPohProvider = "SmsPoh";
 
     public string Provider { get; set; } = LogProvider;
     public SmsPohOptions SmsPoh { get; set; } = new();
 
     public bool UsesSmsPoh => string.Equals(Provider, SmsPohProvider, StringComparison.OrdinalIgnoreCase);
+
+    public bool UsesLog => string.Equals(Provider, LogProvider, StringComparison.OrdinalIgnoreCase)
+                           || string.Equals(Provider, ConsoleProvider, StringComparison.OrdinalIgnoreCase);
 }
 
 public sealed class SmsPohOptions

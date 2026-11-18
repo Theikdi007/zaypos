@@ -1,6 +1,6 @@
 # ZayPOS production runbook
 
-One DigitalOcean droplet (Ubuntu 24.04, 4 GB, Singapore). The API is at **https://api.zaypos.app** behind Cloudflare
+One Vultr server (Ubuntu 24.04, 4 GB, Singapore; production: `45.32.114.207`). The API is at **https://api.zaypos.app** behind Cloudflare
 (proxied, SSL/TLS mode **Full (strict)**).
 
 ```
@@ -18,7 +18,7 @@ Where things live:
 | Database | Docker volume `zaypos_mssql-data`. Nightly backup (02:00 Myanmar time) to Cloudflare R2, bucket `zaypos-backups`, kept 30 days; the 7 newest are never deleted, even if backups stopped for a while. Plus one before every deploy |
 | Logs | `docker compose logs <service>` (JSON lines; 5 × 10 MB per container, then rotated) |
 
-Commands on the server are run as **deploy** in `~/zaypos` unless it says otherwise. `<ip>` = the droplet's IP.
+Commands on the server are run as **deploy** in `~/zaypos` unless it says otherwise. `<ip>` = the server's IP.
 
 ---
 
@@ -39,8 +39,10 @@ Do these before touching the server. Keep every secret in your password manager.
    **only** `zaypos-backups`. Note the **Access Key ID**, **Secret Access Key** and your **Account ID**.
 4. **SMSPoh.** smspoh.com dashboard → Accounts & Security → API Credentials → create a v3 key. Make the token on
    your Mac: `printf '%s' '<API key>:<API secret>' | base64`. Note the approved **Sender ID** if you have one.
-5. **Droplet.** DigitalOcean → Create Droplet: Ubuntu 24.04 LTS, Singapore, Basic 4 GB, **SSH key** authentication
-   (add your Mac's `~/.ssh/id_ed25519.pub`), enable backups if you want DO's weekly image too. Note the IP.
+5. **Server.** Vultr → Deploy → Cloud Compute, Singapore, Ubuntu 24.04 LTS x64, 4 GB, **SSH key** (add your Mac's
+   `~/.ssh/id_ed25519.pub`). Vultr's automatic backups are optional (a weekly image on top of the nightly SQL backup).
+   Note the IP and the root password Vultr shows: that password is your way in through Vultr's web console if SSH
+   ever locks you out.
 6. **Docker on your Mac** (Docker Desktop) for building the image.
 
 ### 1.2 DNS and Cloudflare settings
@@ -54,36 +56,56 @@ Cloudflare → zaypos.app:
   Caddy refuses every TLS connection that does not present Cloudflare's client certificate. If this switch is off,
   the site answers Cloudflare error **525/526** instead of the API.
 
-### 1.3 Harden the droplet
+Vultr → Network → **Firewall** → Add Firewall Group `zaypos`, then link it to the server (server → Settings →
+Firewall):
 
-First open a **second** terminal with `ssh root@<ip>` and leave it open: if anything locks you out, that session
-still works. Then, in the first terminal on your Mac, from the repo:
+| Protocol | Port | Source |
+|---|---|---|
+| SSH | 22 | your IP (or "Anywhere" if your IP changes; fail2ban and key-only login still protect it) |
+| HTTPS | 443 | **Cloudflare** (Vultr's built-in Cloudflare list, kept up to date by Vultr) |
+
+This is the only place where 443 can be limited to Cloudflare: Docker opens published ports past ufw, so a ufw rule on
+the server would not work. Without this group the server still refuses non-Cloudflare visitors, during the TLS
+handshake (Authenticated Origin Pulls), but they can reach Caddy.
+
+### 1.3 Harden the server
+
+Two steps, so you cannot lock yourself out. On your Mac, from the repo:
 
 ```bash
 scp -r deploy root@<ip>:/root/deploy
 ssh -t root@<ip> "bash /root/deploy/server-setup.sh '$(cat ~/.ssh/id_ed25519.pub)'"
 ```
 
-(`$(cat …)` runs on your Mac and passes your public key; `-t` lets the script ask for a password.)
+(`$(cat …)` runs on your Mac and passes your public key; `-t` lets the script ask for a sudo password for deploy.
+Without a terminal it skips that: daily work needs no sudo.)
 
-The script:
+Step 1 of the script:
 - installs updates, ufw, fail2ban and unattended-upgrades;
-- creates the user **deploy** with your SSH key and asks you for a **sudo password** (store it: you need it for
-  `sudo` and for the DigitalOcean recovery console);
-- turns off root login and password login for SSH;
-- opens the firewall for 22 (rate-limited) and 443 only;
+- creates the user **deploy** with your SSH key (sudo password: store it in your password manager);
+- opens the firewall (ufw) for 22 (rate-limited) and 443 only;
 - adds 2 GB swap, installs Docker, copies the deploy files to `/home/deploy/zaypos/`;
 - installs the nightly backup timer (02:00 Myanmar time).
 
-Now, still keeping the second root window open, in a new terminal on your Mac:
+SSH is **not** locked down yet. Prove the key login as deploy in a **new** connection:
 
 ```bash
-ssh deploy@<ip>        # must work
-ssh root@<ip>          # must say "Permission denied"
+ssh deploy@<ip> 'id'   # must print uid=1000(deploy) … docker
 ```
 
-Only then close the root window. (Locked out anyway? DigitalOcean → droplet → Access → Recovery Console, log in as
-deploy with the sudo password.) Then remove the copy: `ssh deploy@<ip> 'sudo rm -rf /root/deploy'`.
+Then step 2 turns off root login and password login. It refuses to run unless sshd's own log shows that key login
+from the last 2 hours:
+
+```bash
+ssh root@<ip> 'bash /root/deploy/server-setup.sh --lock-ssh'
+ssh deploy@<ip> 'id'    # must still work
+ssh root@<ip>           # must say "Permission denied"
+```
+
+Locked out anyway? Vultr → the server → **View Console** (a screen, not SSH): log in as root with the password from
+the Vultr dashboard, then `rm /etc/ssh/sshd_config.d/00-zaypos.conf && systemctl restart ssh`.
+
+`/root/deploy` holds no secrets (only the files that are in git); it can stay.
 
 ### 1.4 Certificates and secrets
 
@@ -105,7 +127,13 @@ nano .env
 Fill in every `<…>` value (see the comments in the file). Make each password with
 `openssl rand -base64 32 | tr -d '/+=' | cut -c1-32` and the JWT key with `openssl rand -base64 48 | tr -d '\n'`.
 Put all of them in your password manager too. For the very first SMS test leave `SMSPOH_TEST=true`.
-Leave `API_TAG=` empty: the deploy fills it in.
+Set `DEPLOY_UID` / `DEPLOY_GID` to the output of `id -u` / `id -g` (on Vultr usually 1001: the image already has
+`linuxuser` as 1000). Leave `API_TAG=` empty: the deploy fills it in. Every script refuses to run while a `<…>` placeholder is left
+(it names the keys).
+
+**SMSPoh not ready yet?** Set `SMS_PROVIDER=Console` and `SMSPOH_TOKEN=` (empty). No SMS is sent: the code is in the
+API log, `docker compose logs api | grep 'DEV SMS'`, and the API logs a CRITICAL warning at every start. Switch to
+`SmsPoh` (§1.6 step 4) before real shops register: anyone who can read the logs could sign in to any shop.
 
 ### 1.5 First deploy
 
@@ -220,7 +248,7 @@ Only when the production database is lost or corrupt.
    `./release.sh $(grep ^API_TAG= .env | cut -d= -f2)` (it takes a backup first; `SKIP_BACKUP=1` if the DB is broken).
 4. Check `/health`, then one phone: pull works, a test sale syncs.
 
-**Whole droplet lost:** new droplet → §1.3 → §1.4 with the same `.env` (from your password manager) and certs →
+**Whole server lost:** new Vultr server → §1.3 → §1.4 with the same `.env` (from your password manager) and certs →
 first deploy creates an empty database → stop the API (step 1 above) → step 2 → step 3. Update the DNS A record
 if the IP changed.
 
@@ -238,6 +266,7 @@ if the IP changed.
 | `{"status":"unhealthy"…}` | SQL Server down or the API login broken: `docker compose logs mssql`, then `docker compose run --rm migrate` (re-creates the login) |
 | OTP never arrives | `docker compose logs api | grep -i sms`: `refused HTTP 401` = token, `unreachable` = network; `SMSPOH_TEST` must be `false` |
 | Backup failed | `journalctl -u zaypos-backup --since today`; run `./backup.sh` by hand to see the error |
+| `ssh` suddenly says "Connection closed" | ufw allows only 6 new SSH connections per 30 s from one IP (and fail2ban bans for 1 h after 5 failed logins). Wait a minute; for scripts, reuse one connection (`ControlMaster auto` in `~/.ssh/config`) |
 | Disk full | `df -h`, `docker system df`; old images: `docker image prune`; local backups are kept 3 days in `backups/` |
 
 Useful commands:

@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
-# One-time hardening + Docker for a fresh DigitalOcean droplet (Ubuntu 24.04). Run as root:
-#   bash server-setup.sh "ssh-ed25519 AAAA... you@mac"
-# from the copied deploy/ folder (runbook §1.3). Safe to re-run.
-# Keep your current root SSH session OPEN until you have logged in as deploy in a new terminal.
+# One-time hardening + Docker for a fresh Vultr server (Ubuntu 24.04). Run as root, in two steps
+# (runbook §1.3), from the copied deploy/ folder. Both steps are safe to re-run.
+#
+#   1. bash server-setup.sh "ssh-ed25519 AAAA... you@mac"
+#        packages, user deploy (+ your key), firewall, fail2ban, unattended-upgrades, swap, Docker,
+#        app folder, backup timer. SSH is NOT locked down yet: root login still works.
+#   2. (from your Mac, in a NEW connection)  ssh deploy@<server-ip>      ← must work
+#   3. bash server-setup.sh --lock-ssh
+#        refuses unless sshd's log shows a key login as deploy in the last 2 hours; then turns off
+#        root login and password login for SSH.
 set -euo pipefail
 
 DEPLOY_USER=deploy
@@ -15,9 +21,52 @@ die() { echo "ERROR: $*" >&2; exit 1; }
 [[ $EUID -eq 0 ]] || die "run as root"
 . /etc/os-release
 [[ "$ID" == ubuntu && "$VERSION_ID" == 24.04 ]] || die "expected Ubuntu 24.04, found $PRETTY_NAME"
+
+# ---------------------------------------------------------------- step 3: SSH lockdown
+if [[ "${1:-}" == --lock-ssh ]]; then
+  id "$DEPLOY_USER" > /dev/null 2>&1 || die "user $DEPLOY_USER does not exist: run step 1 first"
+  # Proof that the key login works, from sshd itself (not from what someone remembers).
+  proof=$(journalctl --since "-2 hours" -t sshd -t sshd-session --no-pager 2>/dev/null \
+    | grep -E "Accepted publickey for $DEPLOY_USER from" | tail -n 1 || true)
+  [[ -n "$proof" ]] || die "no successful key login as $DEPLOY_USER in the last 2 hours.
+  From your Mac, in a new terminal: ssh $DEPLOY_USER@<server-ip>   then run this again.
+  Nothing was changed: root and password login still work."
+  echo "Key login as $DEPLOY_USER seen: $proof"
+
+  log "SSH: no root login, no passwords, keys only, only $DEPLOY_USER"
+  # 00- sorts before cloud-init's 50-cloud-init.conf, and sshd keeps the FIRST value it reads.
+  cat > /etc/ssh/sshd_config.d/00-zaypos.conf << EOF
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+AuthenticationMethods publickey
+AllowUsers $DEPLOY_USER
+MaxAuthTries 3
+LoginGraceTime 30
+X11Forwarding no
+EOF
+  if ! sshd -t; then
+    rm -f /etc/ssh/sshd_config.d/00-zaypos.conf
+    die "sshd config invalid; removed it, nothing restarted"
+  fi
+  systemctl restart ssh
+  sshd -T | grep -E '^(permitrootlogin|passwordauthentication|kbdinteractiveauthentication|allowusers) '
+  cat << EOF
+
+SSH locked down. Existing sessions stay open. Check from your Mac, in a NEW terminal:
+    ssh $DEPLOY_USER@<server-ip>          (must work)
+    ssh root@<server-ip>                  (must be refused)
+Locked out anyway? Vultr → the server → "View Console": log in as root with the password from the
+Vultr dashboard (the console is not SSH, so it still works), then: rm /etc/ssh/sshd_config.d/00-zaypos.conf && systemctl restart ssh
+EOF
+  exit 0
+fi
+
+# ---------------------------------------------------------------- step 1: everything else
 pubkey="${1:-}"
 [[ "$pubkey" =~ ^(ssh-ed25519|ssh-rsa|ecdsa-sha2-nistp(256|384|521))\ [A-Za-z0-9+/=]+(\ .*)?$ ]] \
-  || die "usage: bash server-setup.sh \"<your SSH public key, e.g. the contents of ~/.ssh/id_ed25519.pub>\""
+  || die "usage: bash server-setup.sh \"<your SSH public key, e.g. the contents of ~/.ssh/id_ed25519.pub>\"  |  bash server-setup.sh --lock-ssh"
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -26,7 +75,7 @@ apt-get update -q
 apt-get -y -q -o Dpkg::Options::=--force-confold upgrade
 apt-get -y -q install ca-certificates curl gnupg ufw fail2ban unattended-upgrades apt-listchanges
 
-log "User $DEPLOY_USER (SSH key only; sudo with a password you choose now)"
+log "User $DEPLOY_USER (SSH key only)"
 if ! id "$DEPLOY_USER" > /dev/null 2>&1; then
   adduser --disabled-password --gecos "ZayPOS deploy" "$DEPLOY_USER"
 fi
@@ -38,26 +87,15 @@ grep -qxF "$pubkey" "$auth" || echo "$pubkey" >> "$auth"
 chown "$DEPLOY_USER:$DEPLOY_USER" "$auth"
 chmod 600 "$auth"
 if passwd -S "$DEPLOY_USER" | awk '{exit !($2 == "L" || $2 == "NP")}'; then
-  echo "Choose a password for '$DEPLOY_USER'. It is only for sudo and the DigitalOcean recovery console,"
-  echo "never for SSH (password SSH login is disabled below). Store it in your password manager."
-  passwd "$DEPLOY_USER"
+  if [[ -t 0 ]]; then
+    echo "Choose a password for '$DEPLOY_USER'. It is only for sudo, never for SSH (password SSH login"
+    echo "gets disabled). Store it in your password manager."
+    passwd "$DEPLOY_USER"
+  else
+    echo "NOTE: no terminal, so no sudo password was set for $DEPLOY_USER. Daily work needs none (docker group)."
+    echo "      To allow sudo later: Vultr console as root → passwd $DEPLOY_USER"
+  fi
 fi
-
-log "SSH: no root login, no passwords, keys only, only $DEPLOY_USER"
-# 00- sorts before cloud-init's 50-cloud-init.conf, and sshd keeps the FIRST value it reads.
-cat > /etc/ssh/sshd_config.d/00-zaypos.conf << EOF
-PermitRootLogin no
-PasswordAuthentication no
-KbdInteractiveAuthentication no
-PubkeyAuthentication yes
-AuthenticationMethods publickey
-AllowUsers $DEPLOY_USER
-MaxAuthTries 3
-LoginGraceTime 30
-X11Forwarding no
-EOF
-sshd -t || die "sshd config invalid; nothing restarted"
-systemctl restart ssh
 
 log "Firewall (ufw): 22 and 443 only"
 ufw --force reset > /dev/null
@@ -67,6 +105,9 @@ ufw limit 22/tcp comment 'SSH (rate-limited)'
 ufw allow 443/tcp comment 'HTTPS from Cloudflare (Caddy)'
 # Port 80 stays closed: Cloudflare connects to the origin on 443 only (Full strict), and the
 # origin certificate needs no ACME challenge.
+# NOTE: Docker-published ports (Caddy's 443) bypass ufw. Limiting 443 to Cloudflare's addresses is
+# done in front of the server (Vultr Firewall group, source "Cloudflare"; runbook §1.2). Caddy also
+# refuses any TLS client without Cloudflare's origin-pull certificate.
 ufw --force enable
 ufw status verbose
 
@@ -150,8 +191,7 @@ systemctl list-timers zaypos-backup.timer --no-pager
 
 cat << EOF
 
-Done. NOW, before closing this root session, open a NEW terminal on your Mac and check:
-    ssh $DEPLOY_USER@<droplet-ip>          (must work)
-    ssh root@<droplet-ip>                  (must be refused)
-Then continue with runbook §1.4 (certificates and .env).
+Step 1 done. SSH is NOT locked down yet. Next:
+  1. From your Mac, in a NEW terminal:  ssh $DEPLOY_USER@<server-ip>     (must work)
+  2. Back here as root:                 bash $HERE/server-setup.sh --lock-ssh
 EOF

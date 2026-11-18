@@ -1,4 +1,4 @@
-# ZayPOS production stack: one droplet, Cloudflare (proxied, Full strict) → Caddy :443 → API → SQL Server.
+# ZayPOS production stack: one Vultr server, Cloudflare (proxied, Full strict) → Caddy :443 → API → SQL Server.
 # Lives on the server as /home/deploy/zaypos/docker-compose.prod.yml next to .env (secrets, not in git).
 # Deploy with ./release.sh <tag>, never by hand-editing image tags. See docs/deploy/runbook.md.
 #
@@ -36,7 +36,7 @@ services:
       ACCEPT_EULA: "Y"
       MSSQL_PID: Express
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?set MSSQL_SA_PASSWORD in .env}
-      # 4 GB droplet: leave room for the API, Caddy and the OS (Express caps its buffer pool anyway).
+      # 4 GB server: leave room for the API, Caddy and the OS (Express caps its buffer pool anyway).
       MSSQL_MEMORY_LIMIT_MB: "2048"
       MSSQL_AGENT_ENABLED: "false"
     volumes:
@@ -84,7 +84,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?set JWT_SIGNING_KEY in .env}
       Sms__Provider: ${SMS_PROVIDER:-SmsPoh}
-      Sms__SmsPoh__Token: ${SMSPOH_TOKEN:?set SMSPOH_TOKEN in .env}
+      Sms__SmsPoh__Token: ${SMSPOH_TOKEN:-}  # required when SMS_PROVIDER=SmsPoh (the API checks it)
       Sms__SmsPoh__Sender: ${SMSPOH_SENDER:-}
       Sms__SmsPoh__Test: ${SMSPOH_TEST:-false}
       AllowedHosts: "${API_DOMAIN:?set API_DOMAIN in .env};localhost"

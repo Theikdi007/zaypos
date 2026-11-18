@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Run on your Mac from the repo: build the API image for the droplet (linux/amd64), upload it
+# Run on your Mac from the repo: build the API image for the server (linux/amd64), upload it
 # over SSH (no registry needed), copy the deploy files, and run release.sh on the server.
-#   deploy/deploy.sh deploy@<droplet-ip>
+#   deploy/deploy.sh deploy@<server-ip>
 # The image tag is the git commit, so the tree must be committed (ALLOW_DIRTY=1 to override).
 set -euo pipefail
 
 target="${1:-}"
-[[ "$target" =~ ^[A-Za-z0-9._-]+@[A-Za-z0-9.:-]+$ ]] || { echo "usage: deploy/deploy.sh deploy@<droplet-ip>" >&2; exit 2; }
+[[ "$target" =~ ^[A-Za-z0-9._-]+@[A-Za-z0-9.:-]+$ ]] || { echo "usage: deploy/deploy.sh deploy@<server-ip>" >&2; exit 2; }
 cd "$(dirname "$0")/.."
 
 if [[ -n "$(git status --porcelain -- backend deploy)" && "${ALLOW_DIRTY:-0}" != 1 ]]; then

@@ -16,6 +16,10 @@ load_env() {
   local mode
   mode=$(stat -c '%a' "$env")
   [[ "$mode" == "600" || "$mode" == "400" ]] || die "$env must be chmod 600 (is $mode)."
+  # A "<…>" placeholder left from .env.example is not just wrong: bash reads "<" as a redirect.
+  local unfilled
+  unfilled=$(grep -E '^[A-Za-z0-9_]+=<' "$env" | cut -d= -f1 | tr '\n' ' ' || true)
+  [[ -z "$unfilled" ]] || die "$env still has placeholders for: $unfilled(nano $env)"
   set -a
   # shellcheck disable=SC1090
   source "$env"

@@ -6,6 +6,8 @@ using System.Text.Json.Serialization;
 using FluentAssertions;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using ZayPOS.Application.Abstractions;
@@ -219,7 +221,7 @@ public class DeploymentTests(SqlServerFixture sql)
     // ------------------------------------------------------------ production guards
 
     [Theory]
-    [InlineData("Log", "test-token", false, "Sms:Provider must be 'SmsPoh'")]
+    [InlineData("SmsPho", "test-token", false, "Sms:Provider must be 'SmsPoh' or 'Console'")] // a typo never falls back to logging codes
     [InlineData("SmsPoh", "", false, "Sms:SmsPoh:Token is empty")]
     [InlineData("SmsPoh", "test-token", true, "not sa")]
     public async Task Production_refuses_unsafe_configuration(string provider, string token, bool asSa, string expected)
@@ -232,6 +234,42 @@ public class DeploymentTests(SqlServerFixture sql)
 
         var start = () => api.CreateClient();
         start.Should().Throw<InvalidOperationException>().WithMessage($"*{expected}*");
+    }
+
+    [Theory]
+    [InlineData("Console")]
+    [InlineData("console")]
+    [InlineData("Log")]
+    public async Task Production_starts_with_console_sms_and_no_smspoh_token(string provider)
+    {
+        var (_, app) = await MigratedDatabase();
+        var settings = ProductionSettings(app);
+        settings["Sms:Provider"] = provider;
+        settings["Sms:SmsPoh:Token"] = "";
+        await using var api = new ApiFactory(app, remoteIp: IPAddress.Loopback, settings: settings, environment: "Production");
+
+        (await api.CreateClient().GetAsync("/health")).StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Theory]
+    [InlineData("Console", "LoggingSmsSender")]
+    [InlineData("SmsPoh", "SmsPohSmsSender")]
+    public void Sms_provider_picks_the_sender(string provider, string expected)
+    {
+        var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ConnectionStrings:ZayPOS"] = sql.ConnectionString,
+                ["Jwt:SigningKey"] = ApiFactory.SigningKey,
+                ["Sms:Provider"] = provider,
+                ["Sms:SmsPoh:Token"] = "t",
+            }).Build();
+        var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection().AddLogging();
+        ZayPOS.Infrastructure.DependencyInjection.AddInfrastructure(services, config);
+        services.AddSingleton<ICurrentTenant>(new NoTenant());
+
+        using var sp = services.BuildServiceProvider();
+        sp.GetRequiredService<ISmsSender>().GetType().Name.Should().Be(expected);
     }
 
     [Fact]

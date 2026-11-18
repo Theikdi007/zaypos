@@ -64,8 +64,8 @@ public static class DeploymentExtensions
     }
 
     /// <summary>
-    /// Production must be configured safely or not start at all: real SMS (the dev sender logs OTPs),
-    /// a JWT key, and an API login that is not sa.
+    /// Production must be configured safely or not start at all: a known SMS provider (SmsPoh with a
+    /// token, or Console on purpose), an API login that is not sa, and HTTPS required.
     /// </summary>
     public static void ValidateProductionConfig(this WebApplicationBuilder builder)
     {
@@ -74,10 +74,13 @@ public static class DeploymentExtensions
         var errors = new List<string>();
 
         var sms = config.GetSection(SmsOptions.Section).Get<SmsOptions>() ?? new SmsOptions();
-        if (!sms.UsesSmsPoh)
-            errors.Add($"Sms:Provider must be '{SmsOptions.SmsPohProvider}' (is '{sms.Provider}'): the dev sender writes OTP codes to the log.");
-        else if (string.IsNullOrWhiteSpace(sms.SmsPoh.Token))
-            errors.Add("Sms:SmsPoh:Token is empty.");
+        if (sms.UsesSmsPoh)
+        {
+            if (string.IsNullOrWhiteSpace(sms.SmsPoh.Token))
+                errors.Add("Sms:SmsPoh:Token is empty.");
+        }
+        else if (!sms.UsesLog)
+            errors.Add($"Sms:Provider must be '{SmsOptions.SmsPohProvider}' or '{SmsOptions.ConsoleProvider}' (is '{sms.Provider}').");
 
         var cs = config.GetConnectionString("ZayPOS");
         if (!string.IsNullOrWhiteSpace(cs))
@@ -92,6 +95,18 @@ public static class DeploymentExtensions
 
         if (errors.Count > 0)
             throw new InvalidOperationException("Unsafe production configuration:\n - " + string.Join("\n - ", errors));
+    }
+
+    /// <summary>Production with Sms:Provider=Console: allowed (before SMSPoh is ready), but never quietly.</summary>
+    public static void WarnAboutConsoleSms(this WebApplication app)
+    {
+        if (!app.Environment.IsProduction()) return;
+        var sms = app.Configuration.GetSection(SmsOptions.Section).Get<SmsOptions>() ?? new SmsOptions();
+        if (!sms.UsesLog) return;
+        app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("ZayPOS.Startup").LogCritical(
+            "Sms:Provider={Provider} in Production: OTP codes are NOT sent by SMS, they are written to this log " +
+            "(anyone who can read the server's logs can sign in to any shop). Switch to SmsPoh before real shops register.",
+            sms.Provider);
     }
 
     public static IServiceCollection AddZayPosHealthChecks(this IServiceCollection services)
