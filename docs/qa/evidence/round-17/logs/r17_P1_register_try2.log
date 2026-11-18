@@ -1,0 +1,15 @@
+[runner] 21:25:48 launch step=register run=r17_P1_register_try2 on 00008120-0002610901F00032 (profile build, API http://192.168.100.198:5076)
+QA_NOTE:21:26:24 start step=register run=r17_P1_register_try2 platform=ios Version 27.2 (Build 24B119) api=http://192.168.100.198:5076
+QA_NOTE:21:26:26 auth at launch: AuthStatus.signedOut
+QA_NOTE:21:26:26 login screen texts: [ZayPOS, ဆိုင်စာရင်းကို ဖုန်းတစ်လုံးနဲ့ လွယ်လွယ်ကူကူ စီမံပါ, ဖုန်းနံပါတ်, +95, 9 xxx xxx xxx, PIN နံပါတ် (၆ လုံး), ••••••, PIN မေ့နေပါသလား?, ဝင်မယ်, သို့မဟုတ်, ဆိုင်အသစ် စာရင်းသွင်းမယ်, စမ်းသပ်ဆိုင် (အင်တာနက်မလို), အင်တာနက်မရှိလည်း ရောင်းလို့ရပါတယ်။ လိုင်းပြန်ရတာနဲ့ အလိုအလျောက် sync လုပ်ပေးပါမယ်။]
+QA_NOTE:21:26:27 screenshot r17_P1_login.png
+QA_NOTE:21:26:29 register screen texts: [အဆင့် 1 / 4, ဖုန်းနံပါတ် အတည်ပြုမယ်, မက်ဆေ့ချ်နဲ့ OTP ကုဒ် ၆ လုံး ပို့ပေးပါမယ်, ဖုန်းနံပါတ်, +95, 9 xxx xxx xxx, ကုဒ်ပို့မယ်]
+QA_NOTE:21:26:34 after "ကုဒ်ပို့မယ်": [အဆင့် 1 / 4, ဖုန်းနံပါတ် အတည်ပြုမယ်, မက်ဆေ့ချ်နဲ့ OTP ကုဒ် ၆ လုံး ပို့ပေးပါမယ်, ဖုန်းနံပါတ်, +95, 9 xxx xxx xxx, ဖုန်းနံပါတ် မှန်အောင် ထည့်ပါ (ဥပမာ 9 7xx xxx xxx)။, ကုဒ်ပို့မယ်]
+QA_NOTE:21:26:35 screenshot r17_P1_code_sent.png
+QA_NOTE:21:26:55 EXCEPTION no new OTP for +959790917171 from the host
+QA_NOTE:21:26:55 STACK #0      fail (package:matcher/src/expect/expect.dart:187) | #1      otpForR (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r17_io.dart:87) | <asynchronous suspension> | #2      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r17_day_test.dart:237) | <asynchronous suspension> | #3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192) | <asynchronous suspension> | #4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953)
+QA_NOTE:21:26:57 screenshot r17_r17_P1_register_try2_EXCEPTION.png
+QA_NOTE:21:26:57 layout/framework problems: none
+QA_NOTE:21:26:57 QA_RESULT register: FAIL (1 failed checks)
+QA_NOTE:21:26:57   FAILED: exception: no new OTP for +959790917171 from the host
+QA_NOTE:21:26:57 QA_DONE register

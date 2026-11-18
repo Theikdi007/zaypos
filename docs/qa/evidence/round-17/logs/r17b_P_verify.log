@@ -1,0 +1,28 @@
+[runner] 22:19:38 launch step=verify run=r17b_P_verify on 00008120-0002610901F00032 (profile build, API http://192.168.100.198:5076)
+QA_NOTE:22:20:15 start step=verify run=r17b_P_verify platform=ios Version 27.2 (Build 24B119) api=http://192.168.100.198:5076
+QA_NOTE:22:20:19 CHECK OK   PIN 111111 unlocks
+QA_NOTE:22:20:21 sync (pull) 200 ms; outbox=0 lastError=null online=true
+QA_NOTE:22:20:21 [21] P after pull: {id: 01a1ea0d-93ed-781f-9d34-475a5e14dfd8, name: ကြက်ဥ, price: 350, cost: 250, barcode: null, stock: 26000, moves: 3} / {id: 01a1ea0d-93ed-78eb-9570-515d7e767475, name: ဆား, price: 500, cost: 400, barcode: null, stock: 10000, moves: 6}
+QA_NOTE:22:20:21 CHECK OK   [21] iPhone: ကြက်ဥ price 350 (changed on Android) (actual: 350)
+QA_NOTE:22:20:21 CHECK OK   [21] iPhone: ဆား barcode deleted
+QA_NOTE:22:20:24 screenshot r17_P21_old_barcode_scanned.png
+QA_NOTE:22:20:24 CHECK OK   [21] iPhone: the old barcode no longer finds ဆား
+QA_NOTE:22:20:30 CHECK OK   [21] iPhone POS sells ကြက်ဥ at 350 (actual: 350)
+QA_NOTE:22:20:30 [22] expected from the server DB: {sales: 10200, count: 5, profit: 700, unknown: 1, debt: 500, debtors: 1}
+QA_NOTE:22:20:33 screenshot r17_P22_dashboard.png
+QA_NOTE:22:20:33 [22] P dashboard texts: [QA r17b ကုန်စုံ, 10,200 Ks, 5 ကြိမ်, 700 Ks, +0%, အရင်းမသိ 1 ခု မပါ, 500, ဖောက်သည် 1 ဦး, 1 မျိုး, #D-0002 · အကြွေး (QA r17 ဒေါ်မြ), ပစ္စည်း 1 မျိုး · ည 10:16, 500, #D-0001 · ငွေသား, ပစ္စည်း 1 မျိုး · ည 10:16, 300, #A-0004 · အကြွေး (QA r17 ဒေါ်မြ), ပစ္စည်း 1 မျိုး · ည 9:42, 2,000]
+QA_NOTE:22:20:33 CHECK FAIL [22] P Dashboard today sales 10,200
+QA_NOTE:22:20:33 CHECK OK   [22] P Dashboard count 5 ကြိမ်
+QA_NOTE:22:20:33 CHECK OK   [22] P Dashboard profit 700 Ks
+QA_NOTE:22:20:33 CHECK OK   [22] P Dashboard note "အရင်းမသိ 1 ခု မပါ"
+QA_NOTE:22:20:33 CHECK OK   [22] P Dashboard debt outstanding 500
+QA_NOTE:22:20:37 screenshot r17_P22_reports.png
+QA_NOTE:22:20:37 [22] P reports texts: [10,200 Ks, 700 Ks, အရင်းမသိ 1 ခု မပါ, 5 ကြိမ်, 0, 0, 0, 0, 0, 0, 10, 67%, 9%, 0%, 24%]
+QA_NOTE:22:20:37 CHECK FAIL [22] P Reports sales 10,200
+QA_NOTE:22:20:37 CHECK OK   [22] P Reports profit 700 Ks
+QA_NOTE:22:20:37 CHECK OK   [22] P Reports count
+QA_NOTE:22:20:37 layout/framework problems: none
+QA_NOTE:22:20:37 QA_RESULT verify: FAIL (2 failed checks)
+QA_NOTE:22:20:37   FAILED: [22] P Dashboard today sales 10,200
+QA_NOTE:22:20:37   FAILED: [22] P Reports sales 10,200
+QA_NOTE:22:20:37 QA_DONE verify

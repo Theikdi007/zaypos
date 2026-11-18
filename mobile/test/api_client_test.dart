@@ -149,9 +149,18 @@ void main() {
       expect(ApiError.fromDio(problem(502, {})).code, 'server');
     });
 
+    test('503 sms_unavailable (the API\'s exact ProblemDetails) keeps its code, message and Retry-After', () {
+      // ApiExceptionHandler sends the code both as title and as "code"; a 5xx must not turn it into 'server'.
+      final e = ApiError.fromDio(problem(503,
+          {'title': 'sms_unavailable', 'status': 503, 'detail': 'Could not send the SMS. Try again shortly.', 'code': 'sms_unavailable'},
+          retryAfter: '30'));
+      expect((e.status, e.code, e.retryAfter), (503, 'sms_unavailable', const Duration(seconds: 30)));
+      expect(e.message, 'SMS ပို့မရပါ။ ခဏနေ ထပ်ကြိုးစားပါ။');
+    });
+
     test('every server auth code has its own Burmese message', () {
       const codes = [
-        'otp_invalid', 'otp_rate_limited', 'phone_registered', 'invalid_credentials', 'pin_locked',
+        'otp_invalid', 'otp_rate_limited', 'sms_unavailable', 'phone_registered', 'invalid_credentials', 'pin_locked',
         'device_revoked', 'device_conflict', 'rate_limited', 'validation', 'invalid_refresh_token', 'network',
       ];
       final fallback = apiErrorMessage('something_new');

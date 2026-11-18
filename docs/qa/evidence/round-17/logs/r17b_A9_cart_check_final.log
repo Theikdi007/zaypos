@@ -1,0 +1,10 @@
+[launch] 22:15:57 step=cart_check run=r17b_A9_cart_check_final serial=emulator-5554 (profile APK, no driver); pid before: '6130'
+QA_NOTE:22:15:46 start step=cart_check run=r17_android platform=android BP41.250822.007 api=http://10.0.2.2:5076
+QA_NOTE:22:15:49 CHECK OK   PIN 111111 unlocks
+QA_NOTE:22:15:53 screenshot r17_A9_cart_after_reopen.png
+QA_NOTE:22:15:53 [9] cart after force-stop + reopen: [ကြက်ဥ×2000, ဆား×1000] total=1100
+QA_NOTE:22:15:53 CHECK OK   [9] cart restored (ကြက်ဥ×2, ဆား×1) (actual: [ကြက်ဥ×2000, ဆား×1000])
+QA_NOTE:22:15:53 CHECK OK   [9] cart bar shows "ပစ္စည်း 3 ခု"
+QA_NOTE:22:15:55 layout/framework problems: none
+QA_NOTE:22:15:55 QA_RESULT cart_check: PASS (0 failed checks)
+QA_NOTE:22:15:55 QA_DONE cart_check

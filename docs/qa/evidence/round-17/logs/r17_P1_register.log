@@ -1,0 +1,12 @@
+[runner] 21:23:44 launch step=register run=r17_P1_register on 00008120-0002610901F00032 (profile build, API http://192.168.100.198:5076)
+QA_NOTE:21:24:20 start step=register run=r17_P1_register platform=ios Version 27.2 (Build 24B119) api=http://192.168.100.198:5076
+QA_NOTE:21:24:23 auth at launch: AuthStatus.locked
+QA_NOTE:21:24:23 the phone opened on the PIN screen of an older install: "တခြားအကောင့်နဲ့ ဝင်မယ်"
+QA_NOTE:21:24:25 screenshot r17_P1_login failed: type 'Null' is not a subtype of type 'OffsetLayer' in type cast
+QA_NOTE:21:24:49 EXCEPTION no new OTP for +959790917171 from the host
+QA_NOTE:21:24:49 STACK #0      fail (package:matcher/src/expect/expect.dart:187) | #1      otpForR (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r17_io.dart:87) | <asynchronous suspension> | #2      main.<anonymous closure> (file:///Users/theikdinyunt/Developer/ZayPOS/mobile/integration_test/qa/r17_day_test.dart:232) | <asynchronous suspension> | #3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192) | <asynchronous suspension> | #4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953)
+QA_NOTE:21:24:50 screenshot r17_r17_P1_register_EXCEPTION failed: type 'Null' is not a subtype of type 'OffsetLayer' in type cast
+QA_NOTE:21:24:50 layout/framework problems: none
+QA_NOTE:21:24:50 QA_RESULT register: FAIL (1 failed checks)
+QA_NOTE:21:24:50   FAILED: exception: no new OTP for +959790917171 from the host
+QA_NOTE:21:24:50 QA_DONE register

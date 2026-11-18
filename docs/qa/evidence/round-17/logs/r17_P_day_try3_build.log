@@ -1,0 +1,15 @@
+Analyzing r17_day_test.dart...                                  
+No issues found! (ran in 2.0s)
+Building com.zaypos.zayposApp for device (ios-profile)...
+Automatically signing iOS for device deployment using specified development team in Xcode project: QRAHT2PGD4
+Running Xcode build...                                          
+Xcode build done.                                           29.1s
+✓ Built build/ios/iphoneos/Runner.app (37.6MB)
+App installed:
+• bundleID: com.zaypos.zayposApp
+• installationURL: file:///private/var/containers/Bundle/Application/1945B478-8387-4597-BB68-4A91587B1FDB/Runner.app/
+• launchServicesIdentifier: unknown
+• databaseUUID: 94EAEA53-9BAE-4115-B184-F9637B1F3935
+• databaseSequenceNumber: 3160
+• options: 
+Launched application with com.zaypos.zayposApp bundle identifier.

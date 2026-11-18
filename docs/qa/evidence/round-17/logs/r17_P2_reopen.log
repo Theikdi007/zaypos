@@ -1,0 +1,12 @@
+[runner] 21:30:12 launch step=reopen run=r17_P2_reopen on 00008120-0002610901F00032 (profile build, API http://192.168.100.198:5076)
+QA_NOTE:21:30:48 start step=reopen run=r17_P2_reopen platform=ios Version 27.2 (Build 24B119) api=http://192.168.100.198:5076
+QA_NOTE:21:30:50 new process: auth=AuthStatus.locked route=/unlock PIN screen=true
+QA_NOTE:21:30:51 screenshot r17_P2_reopen_pin_screen.png
+QA_NOTE:21:30:51 CHECK OK   reopened app shows the PIN screen (actual: /unlock)
+QA_NOTE:21:30:52 CHECK OK   PIN 111111 unlocks
+QA_NOTE:21:30:55 screenshot r17_P2_after_unlock.png
+QA_NOTE:21:30:55 CHECK OK   after the PIN: Home (actual: /)
+QA_NOTE:21:30:55 CHECK OK   Home shows the shop name
+QA_NOTE:21:30:55 layout/framework problems: none
+QA_NOTE:21:30:55 QA_RESULT reopen: PASS (0 failed checks)
+QA_NOTE:21:30:55 QA_DONE reopen

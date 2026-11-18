@@ -1,0 +1,20 @@
+[launch] 22:22:03 step=totals run=r17b_A22_totals serial=emulator-5554 (profile APK, no driver); pid before: ''
+QA_NOTE:22:21:53 start step=totals run=r17_android platform=android BP41.250822.007 api=http://10.0.2.2:5076
+QA_NOTE:22:21:56 CHECK OK   PIN 111111 unlocks
+QA_NOTE:22:21:59 sync (pull) 150 ms; outbox=0 lastError=null online=true
+QA_NOTE:22:21:59 [22] expected from the server DB: {sales: 10200, count: 5, profit: 700, unknown: 1, debt: 500, debtors: 1}
+QA_NOTE:22:22:01 screenshot r17_A22_dashboard.png
+QA_NOTE:22:22:01 [22] A dashboard texts: [QA r17b ကုန်စုံ, 10,200 Ks, 5 ကြိမ်, 700 Ks, +0%, အရင်းမသိ 1 ခု မပါ, 500, ဖောက်သည် 1 ဦး, 1 မျိုး, #D-0002 · အကြွေး (QA r17 ဒေါ်မြ), ပစ္စည်း 1 မျိုး · ည 10:16, 500, #D-0001 · ငွေသား, ပစ္စည်း 1 မျိုး · ည 10:16, 300, #A-0004 · အကြွေး (QA r17 ဒေါ်မြ), ပစ္စည်း 1 မျိုး · ည 9:42, 2,000]
+QA_NOTE:22:22:01 CHECK OK   [22] A Dashboard today sales 10,200 Ks
+QA_NOTE:22:22:01 CHECK OK   [22] A Dashboard count 5 ကြိမ်
+QA_NOTE:22:22:01 CHECK OK   [22] A Dashboard profit 700 Ks
+QA_NOTE:22:22:01 CHECK OK   [22] A Dashboard note "အရင်းမသိ 1 ခု မပါ"
+QA_NOTE:22:22:01 CHECK OK   [22] A Dashboard debt outstanding 500
+QA_NOTE:22:22:04 screenshot r17_A22_reports.png
+QA_NOTE:22:22:04 [22] A reports texts: [10,200 Ks, 700 Ks, အရင်းမသိ 1 ခု မပါ, 5 ကြိမ်, 0, 0, 0, 0, 0, 0, 10, 67%, 9%, 0%, 24%]
+QA_NOTE:22:22:04 CHECK OK   [22] A Reports sales 10,200 Ks
+QA_NOTE:22:22:04 CHECK OK   [22] A Reports profit 700 Ks
+QA_NOTE:22:22:04 CHECK OK   [22] A Reports count
+QA_NOTE:22:22:04 layout/framework problems: none
+QA_NOTE:22:22:04 QA_RESULT totals: PASS (0 failed checks)
+QA_NOTE:22:22:04 QA_DONE totals

@@ -1,0 +1,57 @@
+Analyzing r17_day_test.dart...                                  
+No issues found! (ran in 3.1s)
+Resolving dependencies...
+Downloading packages...
+  built_collection 5.1.2 (6.0.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  cupertino_ui 1.1.6 (1.1.7 available)
+  flutter_svg 2.3.3 (2.4.0 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.13.0 (4.13.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  material_ui 1.11.0 (1.11.1 available)
+  meta 1.18.3 (1.19.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  record_use 0.6.0 (1.1.1 available)
+  sqlite3 3.5.2 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+  vector_graphics 1.2.7 (1.3.1 available)
+  vector_graphics_compiler 1.3.5 (1.3.6 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+22 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Installing build/app/outputs/flutter-apk/app-profile.apk...        638ms
+I/ypos.zaypos_app( 4697): Compiler allocated 5381KB to compile void android.view.ViewRootImpl.performTraversals()
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:55153/FIcrhSnniTs=/
+VMServiceFlutterDriver: Isolate found with number: 4337063832859303
+VMServiceFlutterDriver: Isolate 4337063832859303 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+I/flutter ( 4697): 00:00 +0: r17 day: cart_add
+I/flutter ( 4697): QA_NOTE:start step=cart_add run=r17b_A9_cart_add platform=android BP41.250822.007 api=http://10.0.2.2:5076
+VMServiceFlutterDriver: Connected to Flutter application.
+D/InsetsController( 4697): hide(ime())
+I/ImeTracker( 4697): com.zaypos.zaypos_app:88d65198: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+D/ProfileInstaller( 4697): Installing profile for com.zaypos.zaypos_app
+I/flutter ( 4697): QA_NOTE:CHECK OK   PIN 111111 unlocks
+D/WindowOnBackDispatcher( 4697): setTopOnBackInvokedCallback (unwrapped): io.flutter.embedding.android.FlutterActivity$1@7822e24
+D/WindowOnBackDispatcher( 4697): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@da01517
+I/flutter ( 4697): QA_SHOT:r17_A9_cart_before_kill
+[runner] screenshot r17_A9_cart_before_kill.png
+I/flutter ( 4697): QA_NOTE:[9] cart before kill: [ကြက်ဥ×2000, ဆား×1000] total=1100
+I/flutter ( 4697): QA_NOTE:CHECK OK   [9] 2 lines in the cart
+I/flutter ( 4697): QA_NOTE:layout/framework problems: none
+I/flutter ( 4697): QA_NOTE:QA_RESULT cart_add: PASS (0 failed checks)
+I/flutter ( 4697): QA_NOTE:QA_DONE cart_add
+I/flutter ( 4697): 00:11 +1: (tearDownAll)
+I/flutter ( 4697): 00:11 +2: All tests passed!
+All tests passed.
+Leaving the application running.
+[runner] flutter exit code 0

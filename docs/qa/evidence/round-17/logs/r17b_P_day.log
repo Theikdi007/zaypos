@@ -1,0 +1,95 @@
+[runner] 21:39:52 launch step=day run=r17b_P_day on 00008120-0002610901F00032 (profile build, API http://192.168.100.198:5076)
+QA_NOTE:21:40:28 start step=day run=r17b_P_day platform=ios Version 27.2 (Build 24B119) api=http://192.168.100.198:5076
+QA_NOTE:21:40:31 CHECK OK   PIN 111111 unlocks
+QA_NOTE:21:40:36 typeR: test text input did not reach the field; set "8850999171001" on the controller
+QA_NOTE:21:40:39 typeR: test text input did not reach the field; set "400" on the controller
+QA_NOTE:21:40:41 typeR: test text input did not reach the field; set "500" on the controller
+QA_NOTE:21:40:43 screenshot r17_P_edit_salt.png
+QA_NOTE:21:40:45 edited ဆား: {id: 01a1ea0d-93ed-78eb-9570-515d7e767475, name: ဆား, price: 500, cost: 400, barcode: 8850999171001, stock: 0, moves: 0}
+QA_NOTE:21:40:48 typeR: test text input did not reach the field; set "250" on the controller
+QA_NOTE:21:40:50 typeR: test text input did not reach the field; set "300" on the controller
+QA_NOTE:21:40:53 screenshot r17_P_edit_egg.png
+QA_NOTE:21:40:55 edited ကြက်ဥ: {id: 01a1ea0d-93ed-781f-9d34-475a5e14dfd8, name: ကြက်ဥ, price: 300, cost: 250, barcode: null, stock: 0, moves: 0}
+QA_NOTE:21:40:55 [4] stock before: {ဆား: 0, ကြက်ဥ: 0, သကြား: 0}
+QA_NOTE:21:40:58 screenshot r17_P4_restock_01a1ea_10.png
+QA_NOTE:21:41:02 screenshot r17_P4_restock_01a1ea_30.png
+QA_NOTE:21:41:05 screenshot r17_P4_restock_01a1ea_5.png
+QA_NOTE:21:41:12 screenshot r17_P4_restock_01a1ea_5.png
+QA_NOTE:21:41:14 [4] stock after: {ဆား: 15000, ကြက်ဥ: 30000, သကြား: 5000}
+QA_NOTE:21:41:14 CHECK OK   [4] stock ဆား 15, ကြက်ဥ 30, သကြား 5 (10 + 5 / 30 / 5) (actual: {ဆား: 15000, ကြက်ဥ: 30000, သကြား: 5000})
+QA_NOTE:21:41:16 screenshot r17_P4_products_after_restock.png
+QA_NOTE:21:41:20 [5] cart after typed barcode + tap: [ဆား×2000]
+QA_NOTE:21:41:20 CHECK OK   [5] typed barcode adds ဆား (2 with the tap) (actual: [ဆား×2000])
+QA_NOTE:21:41:22 screenshot r17_P5_cash_checkout.png
+QA_NOTE:21:41:22 CHECK OK   r17_P5_cash: receipt screen "ရောင်းပြီးပါပြီ" shows
+QA_NOTE:21:41:26 screenshot r17_P5_cash_receipt.png
+QA_NOTE:21:41:26 r17_P5_cash: sale {id: 01a1ea10-0ab7-757a-b18e-c51769dc1dbf, no: A-0001, method: cash, total: 1000, customerId: null, voidedAt: null}
+QA_NOTE:21:41:26 CHECK OK   [5] cash sale 1,000 Ks (actual: {id: 01a1ea10-0ab7-757a-b18e-c51769dc1dbf, no: A-0001, method: cash, total: 1000, customerId: null, voidedAt: null})
+QA_NOTE:21:41:26 CHECK OK   [5] receipt shows 1,000
+QA_NOTE:21:41:26 CHECK OK   [5] ဆား stock 15 → 13 (actual: 13000)
+QA_NOTE:21:41:36 screenshot r17_P6_asks_price.png
+QA_NOTE:21:41:36 CHECK OK   [6] POS asks "ဈေးနှုန်း ထည့်ပါ" for သကြား (price 0)
+QA_NOTE:21:41:40 screenshot r17_P6_noprice_checkout.png
+QA_NOTE:21:41:40 CHECK OK   r17_P6_noprice: receipt screen "ရောင်းပြီးပါပြီ" shows
+QA_NOTE:21:41:43 screenshot r17_P6_noprice_receipt.png
+QA_NOTE:21:41:43 r17_P6_noprice: sale {id: 01a1ea10-50c3-7759-a83f-10d6a5c92b4b, no: A-0002, method: cash, total: 6500, customerId: null, voidedAt: null}
+QA_NOTE:21:41:43 CHECK OK   [6] sale at the entered price 6,500 (actual: {id: 01a1ea10-50c3-7759-a83f-10d6a5c92b4b, no: A-0002, method: cash, total: 6500, customerId: null, voidedAt: null})
+QA_NOTE:21:41:43 CHECK OK   [6] price saved on the product
+QA_NOTE:21:41:48 screenshot r17_P7_kbz_checkout.png
+QA_NOTE:21:41:48 CHECK OK   r17_P7_kbz: receipt screen "ရောင်းပြီးပါပြီ" shows
+QA_NOTE:21:41:49 screenshot r17_P7_kbz_receipt.png
+QA_NOTE:21:41:49 r17_P7_kbz: sale {id: 01a1ea10-7086-7705-bbe6-40add171357e, no: A-0003, method: kbz, total: 900, customerId: null, voidedAt: null}
+QA_NOTE:21:41:49 CHECK OK   [7] KBZPay sale 900 Ks, method kbz (actual: {id: 01a1ea10-7086-7705-bbe6-40add171357e, no: A-0003, method: kbz, total: 900, customerId: null, voidedAt: null})
+QA_NOTE:21:41:49 [7] receipt shows the method "KBZPay": false (receipt card texts: [ရောင်းပြီးပါပြီ, လိုင်းမရှိဘဲ သိမ်းထားသည် · လိုင်းရရင် Sync လုပ်ပါမယ်, QA r17b ကုန်စုံ, ပြေစာ #A-0003 · ၁၇ နိုဝင်ဘာ ၂၀၂၆ · ည 9:41, ကြက်ဥ × 3, 900, စုစုပေါင်း, 900 Ks, ကျေးဇူးတင်ပါတယ်, ပြေစာ ပို့မယ်, ပုံ သိမ်းမယ်, နောက်တစ်ခု ရောင်းမယ်, ပင်မသို့])
+QA_NOTE:21:41:50 [7] online receipt said "လိုင်းမရှိဘဲ သိမ်းထားသည်" at first: true; gone after sync: true in 1267 ms; outbox=0
+QA_NOTE:21:41:51 screenshot r17_P7_kbz_receipt_after_sync.png
+QA_NOTE:21:41:52 screenshot r17_P7_kbz_sale_detail.png
+QA_NOTE:21:41:52 CHECK OK   [7] sale detail shows payment method "KBZPay"
+QA_NOTE:21:41:55 typeR: test text input did not reach the field; set "QA r17 ဒေါ်မြ" on the controller
+QA_NOTE:21:41:57 typeR: test text input did not reach the field; set "09790917172" on the controller
+QA_NOTE:21:41:59 screenshot r17_P8_new_customer.png
+QA_NOTE:21:42:09 screenshot r17_P8_debt_checkout.png
+QA_NOTE:21:42:09 CHECK OK   r17_P8_debt: receipt screen "ရောင်းပြီးပါပြီ" shows
+QA_NOTE:21:42:10 screenshot r17_P8_debt_receipt.png
+QA_NOTE:21:42:10 r17_P8_debt: sale {id: 01a1ea10-c1da-7a69-98bf-460f48340948, no: A-0004, method: debt, total: 2000, customerId: 01a1ea10-9fa8-741a-90e7-13f392f67c50, voidedAt: null}
+QA_NOTE:21:42:10 CHECK OK   [8] debt sale 2,000 Ks for the new customer (actual: {id: 01a1ea10-c1da-7a69-98bf-460f48340948, no: A-0004, method: debt, total: 2000, customerId: 01a1ea10-9fa8-741a-90e7-13f392f67c50, voidedAt: null})
+QA_NOTE:21:42:14 screenshot r17_P8_debts_list.png
+QA_NOTE:21:42:14 CHECK OK   [8] the customer is in the debts list
+QA_NOTE:21:42:14 CHECK OK   [8] balance 2,000 (actual: 2000)
+QA_NOTE:21:42:14 CHECK OK   [8] list shows 2,000
+QA_NOTE:21:42:17 typeR: test text input did not reach the field; set "1000" on the controller
+QA_NOTE:21:42:19 screenshot r17_P12_half_sheet.png
+QA_NOTE:21:42:19 r17_P12_half: tapping "1,000 Ks လက်ခံမယ်"
+QA_NOTE:21:42:22 screenshot r17_P12_half_after.png
+QA_NOTE:21:42:22 CHECK OK   [12] remaining 1,000 after paying 1,000 (actual: 1000)
+QA_NOTE:21:42:22 CHECK OK   [12] debt screen shows 1,000 Ks
+QA_NOTE:21:42:22 CHECK OK   [16 pre] "Viber သတိပေး" shown while 1,000 is owed
+QA_NOTE:21:42:25 typeR: test text input did not reach the field; set "09790917173" on the controller
+QA_NOTE:21:42:27 typeR: test text input did not reach the field; set "50000" on the controller
+QA_NOTE:21:42:29 screenshot r17_P15_edit_customer.png
+QA_NOTE:21:42:29 CHECK OK   [15] "လက်ရှိ အကြွေး 1,000 Ks" next to the credit limit (actual: [လက်ရှိ အကြွေး, 1,000 Ks])
+QA_NOTE:21:42:32 CHECK OK   [15] saved: phone 09790917173, limit 50,000 (actual: {phone: 09790917173, creditLimit: 50000})
+QA_NOTE:21:42:33 screenshot r17_P15_debt_screen_after_edit.png
+QA_NOTE:21:42:35 screenshot r17_P16_full_sheet.png
+QA_NOTE:21:42:35 r17_P16_full: tapping "1,000 Ks လက်ခံမယ်"
+QA_NOTE:21:42:39 screenshot r17_P16_full_after.png
+QA_NOTE:21:42:39 CHECK OK   [16] balance 0 (actual: 0)
+QA_NOTE:21:42:39 CHECK OK   [16] "Viber သတိပေး" gone
+QA_NOTE:21:42:42 screenshot r17_P17_sale_voided.png
+QA_NOTE:21:42:42 CHECK OK   [17] sale voided
+QA_NOTE:21:42:42 CHECK OK   [17] ဆား stock +2000 milli back (9000 → 11000) (actual: 11000)
+QA_NOTE:21:42:43 screenshot r17_P17_receipt_voided.png
+QA_NOTE:21:42:43 CHECK OK   [17] receipt shows "ပယ်ဖျက်ပြီး"
+QA_NOTE:21:42:44 sync (end of day part 1) 178 ms; outbox=0 lastError=null online=true
+QA_NOTE:21:42:46 sync (again) 332 ms; outbox=0 lastError=null online=true
+QA_NOTE:21:42:46 CHECK OK   P: everything pushed (outbox 0) (actual: 0)
+QA_NOTE:21:42:46 P sale {no: A-0001, method: cash, total: 1000, voided: 1}
+QA_NOTE:21:42:46 P sale {no: A-0002, method: cash, total: 6500, voided: 0}
+QA_NOTE:21:42:46 P sale {no: A-0003, method: kbz, total: 900, voided: 0}
+QA_NOTE:21:42:46 P sale {no: A-0004, method: debt, total: 2000, voided: 0}
+QA_NOTE:21:42:46 P product {id: 01a1ea0d-93ed-78eb-9570-515d7e767475, name: ဆား, price: 500, cost: 400, barcode: 8850999171001, stock: 11000, moves: 5}
+QA_NOTE:21:42:46 P product {id: 01a1ea0d-93ed-781f-9d34-475a5e14dfd8, name: ကြက်ဥ, price: 300, cost: 250, barcode: null, stock: 27000, moves: 2}
+QA_NOTE:21:42:46 P product {id: 01a1ea0d-93ed-7e57-aae5-7e34a5e0014d, name: သကြား, price: 6500, cost: 0, barcode: null, stock: 4000, moves: 2}
+QA_NOTE:21:42:46 layout/framework problems: none
+QA_NOTE:21:42:46 QA_RESULT day: PASS (0 failed checks)
+QA_NOTE:21:42:46 QA_DONE day

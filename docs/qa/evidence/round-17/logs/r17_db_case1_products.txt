@@ -1,0 +1,28 @@
+# 2026-11-17 21:29:21 server DB after case 1 (scratch DB ZayPOS_QA_20261117_R17)
+shop|TemplateId|products|devices
+----|----------|--------|-------
+QA r17 ကုန်စုံ|grocery|20|1
+Name|Price|Cost|Barcode
+----|-----|----|-------
+ကော်ဖီမစ် 3 in 1|0|0|NULL
+ကြက်ဥ|0|0|NULL
+ကြက်သွန်နီ|0|0|NULL
+ကြက်သွန်ဖြူ|0|0|NULL
+ငံပြာရည်|0|0|NULL
+ဆန် (ပေါ်ဆန်း)|0|0|NULL
+ဆပ်ပြာခဲ|0|0|NULL
+ဆပ်ပြာမှုန့်|0|0|NULL
+ဆား|0|0|NULL
+ပဲဆီ|0|0|NULL
+ဖယောင်းတိုင်|0|0|NULL
+ဘီစကွတ်|0|0|NULL
+မီးခြစ်|0|0|NULL
+ရေသန့် 1L|0|0|NULL
+လက်ဖက်ခြောက်|0|0|NULL
+သကြား|0|0|NULL
+သွားတိုက်ဆေး|0|0|NULL
+အချိုမှုန့်|0|0|NULL
+အချိုရည် ဗူး|0|0|NULL
+အသင့်စား ခေါက်ဆွဲ|0|0|NULL
+# API log: fail/5xx lines
+0

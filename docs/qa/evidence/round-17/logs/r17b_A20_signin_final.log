@@ -1,0 +1,21 @@
+[launch] 22:15:31 step=signin run=r17b_A20_signin_final serial=emulator-5554 (profile APK, no driver); pid before: ''
+QA_NOTE:22:15:21 start step=signin run=r17_android platform=android BP41.250822.007 api=http://10.0.2.2:5076
+QA_NOTE:22:15:25 typeR: test text input did not reach the field; set "9790917181" on the controller
+QA_NOTE:22:15:25 typeR: test text input did not reach the field; set "111111" on the controller
+QA_NOTE:22:15:26 screenshot r17_A20_login_filled.png
+QA_NOTE:22:15:27 CHECK OK   [20] signed in on Android with the iPhone shop phone + PIN
+QA_NOTE:22:15:27 CHECK OK   [20] first download finished on Android
+QA_NOTE:22:15:27 sync (pull) 148 ms; outbox=0 lastError=null online=true
+QA_NOTE:22:15:27 A sale {no: A-0001, method: cash, total: 1000, voided: 1}
+QA_NOTE:22:15:27 A sale {no: A-0002, method: cash, total: 6500, voided: 0}
+QA_NOTE:22:15:27 A sale {no: A-0003, method: kbz, total: 900, voided: 0}
+QA_NOTE:22:15:27 A sale {no: A-0004, method: debt, total: 2000, voided: 0}
+QA_NOTE:22:15:27 CHECK OK   [20] all 4 iPhone sales are on Android (actual: 4)
+QA_NOTE:22:15:28 screenshot r17_A20_sales_list.png
+QA_NOTE:22:15:28 CHECK OK   [20] the voided sale shows as voided
+QA_NOTE:22:15:28 A product {id: 01a1ea0d-93ed-78eb-9570-515d7e767475, name: ဆား, price: 500, cost: 400, barcode: 8850999171001, stock: 11000, moves: 5}
+QA_NOTE:22:15:28 A product {id: 01a1ea0d-93ed-781f-9d34-475a5e14dfd8, name: ကြက်ဥ, price: 300, cost: 250, barcode: null, stock: 27000, moves: 2}
+QA_NOTE:22:15:28 A product {id: 01a1ea0d-93ed-7e57-aae5-7e34a5e0014d, name: သကြား, price: 6500, cost: 0, barcode: null, stock: 4000, moves: 2}
+QA_NOTE:22:15:28 layout/framework problems: none
+QA_NOTE:22:15:28 QA_RESULT signin: PASS (0 failed checks)
+QA_NOTE:22:15:28 QA_DONE signin

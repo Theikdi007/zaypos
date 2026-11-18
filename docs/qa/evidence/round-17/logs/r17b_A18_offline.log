@@ -1,0 +1,14 @@
+[launch] 22:16:27 step=offline run=r17b_A18_offline serial=emulator-5554 (profile APK, no driver); pid before: '6210'
+QA_NOTE:22:16:15 start step=offline run=r17_android platform=android BP41.250822.007 api=http://10.0.2.2:5076
+QA_NOTE:22:16:19 CHECK OK   PIN 111111 unlocks
+QA_NOTE:22:16:21 sync (before airplane) 150 ms; outbox=0 lastError=null online=true
+QA_NOTE:22:16:21 host cmd airplane_window_90 → HTTP 200
+QA_NOTE:22:17:54 [19] outbox empty without a manual sync: true after 6 s
+QA_NOTE:22:17:54 CHECK OK   [19] the 2 offline sales sync by themselves after airplane mode off
+QA_NOTE:22:17:54 CHECK OK   [18] 2 new sales on the phone
+QA_NOTE:22:17:54 [19] offline sale id=01a1ea30-3bfa-74c4-ae39-5dce70677279 {no: D-0001, total: 300, syncedAt: 1794930485981}
+QA_NOTE:22:17:54 [19] offline sale id=01a1ea30-4f74-70d8-993b-134975166ed8 {no: D-0002, total: 500, syncedAt: 1794930486009}
+QA_NOTE:22:17:55 screenshot r17_A19_sales_after_reconnect.png
+QA_NOTE:22:17:55 layout/framework problems: none
+QA_NOTE:22:17:55 QA_RESULT offline: PASS (0 failed checks)
+QA_NOTE:22:17:55 QA_DONE offline

@@ -27,7 +27,9 @@ class ApiError implements Exception {
     final data = r.data;
     final retry = int.tryParse(r.headers.value('retry-after') ?? '');
     final status = r.statusCode ?? 0;
-    final code = data is Map ? (data['code'] ?? data['title'])?.toString() : null;
+    // A 5xx without our own `code` is a server fault: never use its ProblemDetails
+    // title ("An error occurred while processing your request.") as the code.
+    final code = data is Map ? (data['code'] ?? (status >= 500 ? null : data['title']))?.toString() : null;
     return ApiError(
       status,
       code ?? (status >= 500 ? 'server' : status == 403 ? 'forbidden' : 'unknown'),
@@ -53,6 +55,8 @@ int minutesUp(Duration d) {
 String apiErrorMessage(String code, {Duration? retryAfter}) => switch (code) {
       'otp_invalid' => 'ကုဒ် မှားနေပါတယ် (သို့) သက်တမ်းကုန်သွားပါပြီ။',
       'otp_rate_limited' => 'ကုဒ်တောင်းတာ များသွားပါပြီ။ နောက်မှ ပြန်ကြိုးစားပါ။',
+      // 503 from POST /auth/otp when the SMS provider (SMSPoh) is down or refuses the message.
+      'sms_unavailable' => 'SMS ပို့မရပါ။ ခဏနေ ထပ်ကြိုးစားပါ။',
       'phone_registered' => 'ဒီဖုန်းနံပါတ်နဲ့ ဆိုင်ရှိပြီးသားပါ။ "ဝင်မယ်" ကနေ ဝင်ပါ။',
       'invalid_credentials' => 'ဖုန်းနံပါတ် (သို့) PIN မှားနေပါတယ်။',
       'pin_locked' => retryAfter == null
