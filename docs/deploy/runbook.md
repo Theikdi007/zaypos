@@ -169,7 +169,11 @@ Success ends with `{"status":"healthy","checks":{"database":"healthy"}}` and `De
 
 1. On your Mac: merge to `main`, `git pull`, make sure the tree is clean.
 2. Run the suites (`cd backend && dotnet test`).
-3. `deploy/deploy.sh deploy@<ip>`
+3. Optional: `deploy/deploy.sh deploy@<ip> --dry-run` changes nothing. It checks the login and shows which deploy
+   files would change and which release runs now.
+4. `deploy/deploy.sh deploy@<ip>`
+
+All of it goes over **one** SSH connection: the server allows only 6 new SSH connections per 30 s.
 
 What happens on the server, in order (each step stops the deploy on failure):
 
@@ -188,7 +192,7 @@ Log of what ran when: `cat ~/zaypos/releases.log`.
 
 ---
 
-## 3. Restore test (do it once a month)
+## 3. Restore test (monthly, see §8)
 
 On the server:
 
@@ -287,3 +291,17 @@ sudo fail2ban-client status sshd          # banned SSH attackers
 | `JWT_SIGNING_KEY` | change in `.env`, re-release. Every phone must sign in again with its PIN on the next sync |
 | `SMSPOH_TOKEN`, R2 keys | create the new one, put it in `.env`, re-release (R2 backup keys: no re-release needed), then revoke the old one |
 | Origin certificate | new one in Cloudflare (§1.1), copy to `certs/`, `docker compose restart caddy` |
+
+## 8. Monthly checklist (about 15 minutes)
+
+First Monday of the month, as deploy: `ssh deploy@<ip>`, then `cd ~/zaypos`. Write the date and the results down.
+
+- [ ] **Backups exist.** `./restore.sh list`: the newest is from last night (names are UTC: `T19…Z` = 02:00 Myanmar),
+      and there is one per night for about 30 days. A gap means a backup failed: run `./backup.sh` by hand to see why.
+- [ ] **The backup timer is on.** `systemctl list-timers zaypos-backup.timer` shows the next run tonight.
+- [ ] **Restore test** (§3): `./restore.sh latest`, compare the counts with production, then `./restore.sh drop`.
+      If it fails, fixing backups comes before anything else.
+- [ ] **Running cleanly.** `docker compose ps`: all `healthy`. Crash loops: `docker inspect -f '{{.Name}} {{.RestartCount}}' $(docker compose ps -q)` shows 0, or the same as last month.
+- [ ] **Disk.** `df -h /` has more than 10 GB free. `docker system df`; old images: `docker image prune`.
+- [ ] **Reboot pending?** `test -f /var/run/reboot-required && echo yes`. Unattended upgrades reboot at 04:00
+      Myanmar time on their own; "yes" for days means that is not happening.
