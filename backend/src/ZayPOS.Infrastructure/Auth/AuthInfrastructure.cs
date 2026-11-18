@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -86,14 +85,4 @@ public sealed class PinHasher : IPinHasher
         PasswordVerificationResult.SuccessRehashNeeded => PinCheck.SuccessRehashNeeded,
         _ => PinCheck.Failed,
     };
-}
-
-/// <summary>v1 dev SMS: writes the message (with the OTP) to the log/console.</summary>
-internal sealed class LoggingSmsSender(ILogger<LoggingSmsSender> logger) : ISmsSender
-{
-    public Task SendAsync(string phone, string message, CancellationToken ct)
-    {
-        logger.LogWarning("DEV SMS to {Phone}: {Message}", phone, message);
-        return Task.CompletedTask;
-    }
 }

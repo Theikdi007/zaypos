@@ -12,6 +12,7 @@ using ZayPOS.Application.Auth;
 using ZayPOS.Application.Sync;
 using ZayPOS.Infrastructure.Auth;
 using ZayPOS.Infrastructure.Persistence;
+using ZayPOS.Infrastructure.Sms;
 using ZayPOS.Infrastructure.Storage;
 using ZayPOS.Infrastructure.Sync;
 
@@ -44,7 +45,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthRepository, AuthRepository>();
         services.AddSingleton<IPinHasher, PinHasher>();
         services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
-        services.TryAddSingleton<ISmsSender, LoggingSmsSender>();
+        AddSms(services, configuration);
         services.AddScoped<AuthService>();
 
         services.AddScoped<AccountService>();
@@ -53,6 +54,21 @@ public static class DependencyInjection
         services.AddOptions<SubscriptionOptions>().Bind(configuration.GetSection(SubscriptionOptions.Section));
         AddFileStorage(services, configuration);
         return services;
+    }
+
+    /// <summary>Sms:Provider = SmsPoh → real SMS; anything else → the dev logger.</summary>
+    private static void AddSms(IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(SmsOptions.Section);
+        services.AddOptions<SmsOptions>().Bind(section);
+        if (section.Get<SmsOptions>() is { UsesSmsPoh: true })
+            services.TryAddSingleton<ISmsSender>(sp => new SmsPohSmsSender(
+                sp.GetRequiredService<IOptions<SmsOptions>>(),
+                new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(5) })
+                    { Timeout = TimeSpan.FromSeconds(15) },
+                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<SmsPohSmsSender>>()));
+        else
+            services.TryAddSingleton<ISmsSender, LoggingSmsSender>();
     }
 
     /// <summary>R2 only when fully configured (Storage:R2); otherwise screenshot endpoints answer 503.</summary>
