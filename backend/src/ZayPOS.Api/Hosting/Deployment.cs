@@ -76,8 +76,8 @@ public static class DeploymentExtensions
         var sms = config.GetSection(SmsOptions.Section).Get<SmsOptions>() ?? new SmsOptions();
         if (sms.UsesSmsPoh)
         {
-            if (string.IsNullOrWhiteSpace(sms.SmsPoh.Token))
-                errors.Add("Sms:SmsPoh:Token is empty.");
+            if (!sms.SmsPoh.HasCredentials)
+                errors.Add("SMSPoh credential missing: set Sms:SmsPoh:ApiKey + Sms:SmsPoh:ApiSecret (or Sms:SmsPoh:Token).");
         }
         else if (!sms.UsesLog)
             errors.Add($"Sms:Provider must be '{SmsOptions.SmsPohProvider}' or '{SmsOptions.ConsoleProvider}' (is '{sms.Provider}').");

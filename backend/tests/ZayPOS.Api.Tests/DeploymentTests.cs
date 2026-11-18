@@ -222,7 +222,7 @@ public class DeploymentTests(SqlServerFixture sql)
 
     [Theory]
     [InlineData("SmsPho", "test-token", false, "Sms:Provider must be 'SmsPoh' or 'Console'")] // a typo never falls back to logging codes
-    [InlineData("SmsPoh", "", false, "Sms:SmsPoh:Token is empty")]
+    [InlineData("SmsPoh", "", false, "SMSPoh credential missing")]
     [InlineData("SmsPoh", "test-token", true, "not sa")]
     public async Task Production_refuses_unsafe_configuration(string provider, string token, bool asSa, string expected)
     {
@@ -365,8 +365,78 @@ public class DeploymentTests(SqlServerFixture sql)
         body.GetProperty("to").GetString().Should().Be("+959790011002");
         body.GetProperty("message").GetString().Should().Be("ZayPOS code: 482913");
         body.GetProperty("from").GetString().Should().Be("ZayPOS");
-        body.GetProperty("test").GetInt32().Should().Be(0);
+        body.GetProperty("test").ValueKind.Should().Be(JsonValueKind.False); // a JSON boolean (v3 spec), not 0
         log.Lines.Should().NotContain(l => l.Contains("482913") || l.Contains("+959790011002"));
+    }
+
+    [Fact]
+    public async Task SmsPoh_key_and_secret_become_the_v3_bearer_value_and_never_reach_the_log()
+    {
+        // SMSPoh's own v3 example: "SMSPohV3APIKey:SMSPohV3APISecret" → Bearer U01TUG9oVjNBUElLZXk6U01TUG9oVjNBUElTZWNyZXQ=
+        var o = new SmsPohOptions { ApiKey = "SMSPohV3APIKey", ApiSecret = "SMSPohV3APISecret" };
+        o.HasCredentials.Should().BeTrue();
+        o.BearerToken().Should().Be("U01TUG9oVjNBUElLZXk6U01TUG9oVjNBUElTZWNyZXQ=");
+        new SmsPohOptions { ApiKey = "k" }.HasCredentials.Should().BeFalse();
+        new SmsPohOptions { Token = "t", ApiKey = "ignored", ApiSecret = "ignored" }.BearerToken().Should().Be("t");
+
+        var handler = new RecordingHandler(HttpStatusCode.Unauthorized,
+            """{"message":"Invalid credential SMSPohV3APIKey / SMSPohV3APISecret / U01TUG9oVjNBUElLZXk6U01TUG9oVjNBUElTZWNyZXQ="}""");
+        var log = new ListLogger();
+        var sender = new SmsPohSmsSender(Options.Create(new SmsOptions { SmsPoh = o }), new HttpClient(handler), log);
+        await ((Func<Task>)(() => sender.SendAsync("+959790011002", "ZayPOS code: 482913", CancellationToken.None)))
+            .Should().ThrowAsync<ApiException>();
+
+        handler.Request!.Headers.Authorization.Should().Be(new AuthenticationHeaderValue("Bearer", "U01TUG9oVjNBUElLZXk6U01TUG9oVjNBUElTZWNyZXQ="));
+        log.Lines.Should().ContainSingle().Which.Should().Contain("HTTP 401").And.Contain("Invalid credential")
+            .And.NotContainAny("SMSPohV3APIKey", "SMSPohV3APISecret", "U01TUG9oVjNBUElLZXk6U01TUG9oVjNBUElTZWNyZXQ=");
+    }
+
+    [Fact]
+    public async Task Production_starts_with_smspoh_key_and_secret_instead_of_a_token()
+    {
+        var (_, app) = await MigratedDatabase();
+        var settings = ProductionSettings(app);
+        settings["Sms:SmsPoh:Token"] = "";
+        settings["Sms:SmsPoh:ApiKey"] = "key";
+        settings["Sms:SmsPoh:ApiSecret"] = "secret";
+        await using var api = new ApiFactory(app, remoteIp: IPAddress.Loopback, settings: settings, environment: "Production");
+
+        (await api.CreateClient().GetAsync("/health")).StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task SmsPoh_test_mode_sends_json_true_and_says_so_in_the_log()
+    {
+        var handler = new RecordingHandler(HttpStatusCode.OK, """{"status":true,"data":{"test":true,"to":"+959790011002"}}""");
+        var log = new ListLogger();
+        var sender = new SmsPohSmsSender(Options.Create(new SmsOptions
+        {
+            Provider = "SmsPoh", SmsPoh = new SmsPohOptions { Token = "tok123", Test = true },
+        }), new HttpClient(handler), log);
+
+        await sender.SendAsync("+959790011002", "ZayPOS code: 482913", CancellationToken.None);
+
+        JsonDocument.Parse(handler.Body!).RootElement.GetProperty("test").ValueKind.Should().Be(JsonValueKind.True);
+        JsonDocument.Parse(handler.Body!).RootElement.TryGetProperty("from", out _).Should().BeFalse(); // default sender
+        log.Lines.Should().ContainSingle(l => l.Contains("TEST mode") && l.Contains("HTTP 200"));
+        log.Lines.Should().NotContain(l => l.Contains("482913") || l.Contains("790011002") || l.Contains("tok123"));
+    }
+
+    [Fact]
+    public async Task SmsPoh_refusal_logs_status_and_reply_but_no_token_phone_or_code()
+    {
+        var handler = new RecordingHandler(HttpStatusCode.Forbidden,
+            """{"status":false,"message":"IP address 45.32.114.207 is not whitelisted","token":"tok123","to":"+959790011002","text":"ZayPOS code: 482913"}""");
+        var log = new ListLogger();
+        var sender = new SmsPohSmsSender(Options.Create(new SmsOptions { SmsPoh = new SmsPohOptions { Token = "tok123" } }),
+            new HttpClient(handler), log);
+
+        var send = () => sender.SendAsync("+959790011002", "ZayPOS code: 482913", CancellationToken.None);
+
+        await send.Should().ThrowAsync<ApiException>();
+        var line = log.Lines.Should().ContainSingle().Which;
+        line.Should().Contain("HTTP 403").And.Contain("is not whitelisted").And.Contain("[token]");
+        line.Should().NotContainAny("tok123", "482913", "790011002");
     }
 
     [Theory]
@@ -393,7 +463,7 @@ public class DeploymentTests(SqlServerFixture sql)
         public Guid? TenantId => null;
     }
 
-    private sealed class RecordingHandler(HttpStatusCode status) : HttpMessageHandler
+    private sealed class RecordingHandler(HttpStatusCode status, string reply = "{}") : HttpMessageHandler
     {
         public HttpRequestMessage? Request { get; private set; }
         public string? Body { get; private set; }
@@ -402,7 +472,7 @@ public class DeploymentTests(SqlServerFixture sql)
         {
             Request = request;
             Body = request.Content is null ? null : await request.Content.ReadAsStringAsync(ct);
-            return new HttpResponseMessage(status) { Content = new StringContent("{}") };
+            return new HttpResponseMessage(status) { Content = new StringContent(reply) };
         }
     }
 

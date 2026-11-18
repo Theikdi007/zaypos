@@ -37,8 +37,9 @@ Do these before touching the server. Keep every secret in your password manager.
 3. **R2 backup bucket.** Cloudflare → R2 → Create bucket `zaypos-backups` (location hint: Asia-Pacific).
    Then R2 → Manage API tokens → Create **Account API token**: permission **Object Read & Write**, applied to
    **only** `zaypos-backups`. Note the **Access Key ID**, **Secret Access Key** and your **Account ID**.
-4. **SMSPoh.** smspoh.com dashboard → Accounts & Security → API Credentials → create a v3 key. Make the token on
-   your Mac: `printf '%s' '<API key>:<API secret>' | base64`. Note the approved **Sender ID** if you have one.
+4. **SMSPoh.** smspoh.com dashboard → Accounts & Security → API Credentials → create a v3 credential and whitelist
+   it to the server's IP (the API calls SMSPoh over IPv4 only). Note the key, the secret and the approved **Sender ID**
+   if you have one (empty = SMSPoh's default sender).
 5. **Server.** Vultr → Deploy → Cloud Compute, Singapore, Ubuntu 24.04 LTS x64, 4 GB, **SSH key** (add your Mac's
    `~/.ssh/id_ed25519.pub`). Vultr's automatic backups are optional (a weekly image on top of the nightly SQL backup).
    Note the IP and the root password Vultr shows: that password is your way in through Vultr's web console if SSH
@@ -153,11 +154,13 @@ Success ends with `{"status":"healthy","checks":{"database":"healthy"}}` and `De
 2. `curl -I https://api.zaypos.app/swagger/index.html` → **404** (Swagger is off).
 3. `curl -k https://<ip>/health` (straight to the server, skipping Cloudflare) → a TLS error (Caddy wants Cloudflare's
    client certificate). That is correct.
-4. **SMS smoke test** (`SMSPOH_TEST=true`): on a phone, start registering with your own number. The API log must
-   say `SMS sent to +9597…***.. via SMSPoh` (`docker compose logs api | grep SMS`). If it says `SMSPoh refused … HTTP 401`,
-   the token is wrong. The token format (Bearer + base64 of `key:secret`) has **not** been tried against the real
-   SMSPoh yet: if 401 persists, check SMSPoh's v3 REST docs (dashboard → Developers) for the exact Bearer value,
-   put that in `SMSPOH_TOKEN` and re-release; no code change is needed for a different token value.
+4. **SMS smoke test** (no real SMS, no credit). In `.env`: `SMS_PROVIDER=SmsPoh`, `SMSPOH_API_KEY=`, `SMSPOH_API_SECRET=`
+   (pasted from the SMSPoh dashboard), `SMSPOH_TEST=true`; re-release (`./release.sh <current tag>`). Ask an OTP for
+   your own number (counts 1 of the 3 per hour):
+   `curl -sS https://api.zaypos.app/api/v1/auth/otp -H 'Content-Type: application/json' -d '{"phone":"+959…","purpose":"register"}'`
+   → HTTP 204/200 and, in `docker compose logs api | grep SMSPoh`, `SMS accepted in TEST mode (not delivered) … HTTP 200`.
+   A refusal logs `SMSPoh refused SMS to … HTTP <status> <SMSPoh's reply>` (digits masked, never the credential) and the
+   app gets 503 `sms_unavailable`: 401 = key/secret wrong, 403 = IP not whitelisted (must be the server's IPv4).
 5. Set `SMSPOH_TEST=false` in `.env`, then `./release.sh $(grep ^API_TAG= .env | cut -d= -f2)` (re-deploys the same
    version with the new setting). Register again: the SMS must arrive.
 6. Run a backup now and a restore test (§3): `./backup.sh` then `./restore.sh latest`.
