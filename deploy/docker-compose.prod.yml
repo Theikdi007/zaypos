@@ -84,7 +84,10 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?set JWT_SIGNING_KEY in .env}
       Sms__Provider: ${SMS_PROVIDER:-SmsPoh}
-      Sms__SmsPoh__Token: ${SMSPOH_TOKEN:-}  # required when SMS_PROVIDER=SmsPoh (the API checks it)
+      # SmsPoh needs API key + secret (or the ready base64 token); the API refuses to start without them.
+      Sms__SmsPoh__ApiKey: ${SMSPOH_API_KEY:-}
+      Sms__SmsPoh__ApiSecret: ${SMSPOH_API_SECRET:-}
+      Sms__SmsPoh__Token: ${SMSPOH_TOKEN:-}
       Sms__SmsPoh__Sender: ${SMSPOH_SENDER:-}
       Sms__SmsPoh__Test: ${SMSPOH_TEST:-false}
       AllowedHosts: "${API_DOMAIN:?set API_DOMAIN in .env};localhost"
