@@ -1,0 +1,11 @@
+[Unit]
+Description=ZayPOS: nightly backup at 02:00 Myanmar time
+
+[Timer]
+OnCalendar=*-*-* 02:00:00 Asia/Yangon
+RandomizedDelaySec=10min
+# Missed while the server was off? Run at the next boot.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

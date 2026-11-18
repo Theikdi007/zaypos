@@ -1,0 +1,150 @@
+# ZayPOS production stack: one Vultr server, Cloudflare (proxied, Full strict) → Caddy :443 → API → SQL Server.
+# Lives on the server as /home/deploy/zaypos/docker-compose.prod.yml next to .env (secrets, not in git).
+# Deploy with ./release.sh <tag>, never by hand-editing image tags. See docs/deploy/runbook.md.
+#
+#   Internet ──443──▶ caddy (edge net, 172.30.0.10) ──▶ api:8080 (edge + db) ──▶ mssql:1433 (db net only)
+#
+# Only Caddy publishes a port. SQL Server is on an internal network: not on the host, no internet.
+
+name: zaypos
+
+x-logging: &logging
+  # Structured (JSON) logs with rotation: 5 × 10 MB per container.
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+x-hardening: &hardening
+  # tini as PID 1. Without it a .NET crash (unhandled exception → abort()) never ends: PID 1 ignores
+  # SIGABRT, the process spins at 100% CPU, stays "running", and is never restarted.
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+
+x-app-connection: &app-connection
+  # The API's own SQL login (db_datareader + db_datawriter only), created/updated by the migrate step.
+  ConnectionStrings__ZayPOS: "Server=mssql,1433;Database=ZayPOS;User Id=zaypos_app;Password=${DB_APP_PASSWORD:?set DB_APP_PASSWORD in .env};Encrypt=True;TrustServerCertificate=True"
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Express
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?set MSSQL_SA_PASSWORD in .env}
+      # 4 GB server: leave room for the API, Caddy and the OS (Express caps its buffer pool anyway).
+      MSSQL_MEMORY_LIMIT_MB: "2048"
+      MSSQL_AGENT_ENABLED: "false"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    networks:
+      - db
+    # No "ports:": never reachable from outside Docker.
+    healthcheck:
+      # The password comes from the container's own env: it never appears on the host command line.
+      test: ["CMD-SHELL", "SQLCMDPASSWORD=\"$$MSSQL_SA_PASSWORD\" /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -b -l 5 -Q 'SET NOCOUNT ON; SELECT 1' > /dev/null"]
+      interval: 10s
+      timeout: 8s
+      retries: 12
+      start_period: 40s
+    stop_grace_period: 60s
+    logging: *logging
+
+  # One-shot deploy step: create the database if missing, apply pending EF migrations,
+  # create/update the API's SQL login. The only container that gets the sa password.
+  migrate:
+    image: zaypos-api:${API_TAG:?API_TAG is set by release.sh}
+    command: ["migrate"]
+    restart: "no"
+    environment:
+      <<: *app-connection
+      ConnectionStrings__ZayPOSAdmin: "Server=mssql,1433;Database=ZayPOS;User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=True;TrustServerCertificate=True"
+    depends_on:
+      mssql:
+        condition: service_healthy
+    networks:
+      - db
+    healthcheck:
+      disable: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    <<: *hardening
+    logging: *logging
+
+  api:
+    image: zaypos-api:${API_TAG:?API_TAG is set by release.sh}
+    restart: unless-stopped
+    environment:
+      <<: *app-connection
+      ASPNETCORE_ENVIRONMENT: Production
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:?set JWT_SIGNING_KEY in .env}
+      Sms__Provider: ${SMS_PROVIDER:-SmsPoh}
+      Sms__SmsPoh__Token: ${SMSPOH_TOKEN:-}  # required when SMS_PROVIDER=SmsPoh (the API checks it)
+      Sms__SmsPoh__Sender: ${SMSPOH_SENDER:-}
+      Sms__SmsPoh__Test: ${SMSPOH_TEST:-false}
+      AllowedHosts: "${API_DOMAIN:?set API_DOMAIN in .env};localhost"
+      # Only Caddy may set CF-Connecting-IP / X-Forwarded-Proto (Caddy itself trusts only Cloudflare).
+      ForwardedHeaders__TrustedNetworksOverride: "172.30.0.10/32"
+      # Subscription screenshots (optional; without them those endpoints answer 503).
+      Storage__R2__AccountId: ${APP_R2_ACCOUNT_ID:-}
+      Storage__R2__AccessKeyId: ${APP_R2_ACCESS_KEY_ID:-}
+      Storage__R2__SecretAccessKey: ${APP_R2_SECRET_ACCESS_KEY:-}
+      Storage__R2__Bucket: ${APP_R2_BUCKET:-}
+    depends_on:
+      mssql:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - db
+      - edge
+    # Health check (GET /health incl. database) is defined in backend/Dockerfile.
+    read_only: true
+    tmpfs:
+      - /tmp
+    mem_limit: 1g
+    <<: *hardening
+    logging: *logging
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    # Runs as the deploy user (reads the 0600 origin key) and listens on 8443 inside: no root, no capabilities.
+    user: "${DEPLOY_UID:-1000}:${DEPLOY_GID:-1000}"
+    environment:
+      API_DOMAIN: ${API_DOMAIN}
+    ports:
+      - "443:8443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+    # No ACME and no persisted config: nothing in /data or /config needs to survive a restart.
+    # Owned by the deploy user (a plain tmpfs is root 0755: Caddy could not write its lock files).
+    tmpfs:
+      - /data:uid=${DEPLOY_UID:-1000},gid=${DEPLOY_GID:-1000},mode=0700
+      - /config:uid=${DEPLOY_UID:-1000},gid=${DEPLOY_GID:-1000},mode=0700
+    read_only: true
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      edge:
+        ipv4_address: 172.30.0.10
+    <<: *hardening
+    logging: *logging
+
+networks:
+  db:
+    internal: true
+  edge:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  mssql-data:

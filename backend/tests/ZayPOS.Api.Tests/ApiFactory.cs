@@ -18,7 +18,8 @@ public sealed class ApiFactory(
     int authPerPhone = 10_000,
     IPAddress? remoteIp = null,
     Action<IServiceCollection>? services = null,
-    IReadOnlyDictionary<string, string?>? settings = null) : WebApplicationFactory<Program>
+    IReadOnlyDictionary<string, string?>? settings = null,
+    string environment = "Testing") : WebApplicationFactory<Program>
 {
     /// <summary>Test-only key; the real one lives in user-secrets / env.</summary>
     public const string SigningKey = "test-signing-key-0123456789-abcdefghijklmnopqrstuvwxyz";
@@ -27,7 +28,7 @@ public sealed class ApiFactory(
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Testing");
+        builder.UseEnvironment(environment);
         builder.UseSetting("ConnectionStrings:ZayPOS", connectionString);
         builder.UseSetting("Jwt:SigningKey", SigningKey);
         builder.UseSetting("RateLimiting:AuthPerIpPerMinute", authPerIp.ToString());

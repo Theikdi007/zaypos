@@ -1,0 +1,58 @@
+# Caddy: TLS on the origin with the Cloudflare Origin Certificate, only Cloudflare may connect
+# (Authenticated Origin Pulls = Cloudflare presents a client certificate), then → api:8080.
+# Files in ./certs (not in git): origin.pem, origin.key, cloudflare-origin-pull-ca.pem.
+
+{
+	admin off
+	persist_config off
+	# Certificates are provided: no ACME, no HTTP→HTTPS redirect listener (port 80 stays closed).
+	auto_https off
+
+	servers {
+		protocols h1 h2
+		# Cloudflare edge ranges (https://www.cloudflare.com/ips/, checked 2026-11). Only from these
+		# peers is CF-Connecting-IP believed; {client_ip} below is then the real visitor IP.
+		trusted_proxies static 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+		client_ip_headers CF-Connecting-IP
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}
+
+{$API_DOMAIN}:8443 {
+	tls /certs/origin.pem /certs/origin.key {
+		protocols tls1.2 tls1.3
+		# Authenticated Origin Pulls: refuse any TLS client that is not Cloudflare.
+		client_auth {
+			mode require_and_verify
+			trust_pool file /certs/cloudflare-origin-pull-ca.pem
+		}
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+
+	request_body {
+		max_size 32MB
+	}
+
+	reverse_proxy api:8080 {
+		# Overwrite whatever the client sent: the verified visitor IP (or the peer if not Cloudflare).
+		header_up CF-Connecting-IP {client_ip}
+		transport http {
+			dial_timeout 5s
+		}
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

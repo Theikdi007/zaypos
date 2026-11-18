@@ -107,8 +107,11 @@ public static class AuthRateLimiting
 }
 
 /// <summary>
-/// The API sits behind Cloudflare. Trust CF-Connecting-IP only when the TCP peer is a Cloudflare
-/// address (list in config: https://www.cloudflare.com/ips/). Disabled in Development.
+/// The API sits behind Cloudflare. Trust CF-Connecting-IP (client IP) and X-Forwarded-Proto only
+/// when the TCP peer is a trusted proxy. Default list: Cloudflare (https://www.cloudflare.com/ips/),
+/// for Kestrel facing Cloudflare directly. Production puts Caddy in between: Caddy checks the
+/// Cloudflare ranges itself and the API trusts only Caddy (ForwardedHeaders:TrustedNetworksOverride,
+/// comma-separated, replaces the list). Disabled in Development.
 /// </summary>
 public static class CloudflareForwarding
 {
@@ -116,6 +119,13 @@ public static class CloudflareForwarding
     {
         public bool Enabled { get; set; }
         public string[] TrustedNetworks { get; set; } = [];
+
+        /// <summary>When set: comma-separated CIDRs that replace <see cref="TrustedNetworks"/> (config arrays only merge).</summary>
+        public string? TrustedNetworksOverride { get; set; }
+
+        public IEnumerable<string> Networks() => string.IsNullOrWhiteSpace(TrustedNetworksOverride)
+            ? TrustedNetworks
+            : TrustedNetworksOverride.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 
     public static bool AddCloudflareForwarding(this IServiceCollection services, IConfiguration config, IHostEnvironment env)
@@ -125,12 +135,12 @@ public static class CloudflareForwarding
 
         services.Configure<ForwardedHeadersOptions>(o =>
         {
-            o.ForwardedHeaders = ForwardedHeaders.XForwardedFor;
+            o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             o.ForwardedForHeaderName = "CF-Connecting-IP";
             o.ForwardLimit = 1;
             o.KnownProxies.Clear();
             o.KnownIPNetworks.Clear();
-            foreach (var cidr in settings.TrustedNetworks)
+            foreach (var cidr in settings.Networks())
                 o.KnownIPNetworks.Add(IPNetwork.Parse(cidr));
         });
         return true;
