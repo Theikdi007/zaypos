@@ -231,7 +231,9 @@ always registers as a **new** device.
 - PIN: `PasswordHasher<User>`; lock 15 min after 5 wrong PINs.
 - Offline: the phone keeps the last session and checks the PIN against a local
   hash (flutter_secure_storage). Sync waits until a token can be refreshed.
-- SMS provider is behind `ISmsSender`; v1 dev implementation logs the code.
+- SMS provider is behind `ISmsSender`. `Sms:Provider=Log` (default, dev) logs the code;
+  `Sms:Provider=SmsPoh` sends it through SMSPoh (`Sms:SmsPoh:{Token,Sender,Test}`), never logging the
+  code, and a failed send answers 503 `sms_unavailable`. Production refuses to start with anything but SmsPoh.
 
 ---
 
@@ -254,6 +256,16 @@ Config: `Storage:R2:{AccountId,AccessKeyId,SecretAccessKey,Bucket}` (user-secret
 screenshot endpoints answer 503 `storage_not_configured`), `Subscription:Prices[]` (`{months, amount}`) and
 `Subscription:PayTo` (`kbz`/`wave` → account shown to the owner). `DELETE /devices/{id}`, the screenshot URL and
 `POST /subscription/payments` need role `owner`; every endpoint above refuses a revoked device's token.
+
+Health: `GET /api/v1/health` is liveness only (the app uses it). `GET /health` also checks the database:
+200 `{"status":"healthy","checks":{"database":"healthy"}}` or 503, never any detail.
+
+Production (Phase 4, `docs/deploy/runbook.md`): `ZayPOS.Api migrate` applies pending migrations and creates the
+API's own SQL login (`db_datareader` + `db_datawriter`, not sa) as a deploy step. The API refuses to start
+while migrations are pending (`Database:CheckMigrationsOnStartup`, default true) and in Production refuses an
+unsafe config (dev SMS, sa login, `Https:Require` off). Swagger is Development only. Plain HTTP is refused with
+400 `https_required` (loopback exempt for the container health check). `CF-Connecting-IP` / `X-Forwarded-Proto`
+are trusted only from `ForwardedHeaders:TrustedNetworks` (Cloudflare) or `TrustedNetworksOverride` (Caddy).
 
 The mobile app only needs **auth, sync, me, presets, subscription**. CRUD for
 products/customers/sales goes through sync, not REST.

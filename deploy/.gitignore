@@ -1,0 +1,11 @@
+# Secrets and server-only state: never in git.
+.env
+.env.*
+!.env.example
+certs/
+backups/
+releases.log
+*.pem
+*.key
+*.bak
+*.bak.gz

@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+**/TestResults/
+**/.vs/
+**/*.user
+**/.DS_Store
+tests/
+# Local secrets: never in an image.
+**/appsettings.Development.json
+**/secrets.json
+**/.env
