@@ -68,8 +68,65 @@ class AuthResult {
   }
 }
 
+/// One shop of a Google account (`POST /auth/google/shops`).
+class GoogleShop {
+  const GoogleShop({required this.tenantId, required this.name, required this.templateId, this.role = 'owner'});
+  final String tenantId;
+  final String name;
+  final String templateId;
+  final String role;
+
+  factory GoogleShop.fromJson(Map<String, dynamic> j) => GoogleShop(
+        tenantId: j['tenantId'] as String,
+        name: j['name'] as String? ?? '',
+        templateId: j['templateId'] as String? ?? 'grocery',
+        role: j['role'] as String? ?? 'owner',
+      );
+}
+
+/// "Who is this user": the Google account's email and its shops, oldest first.
+class GoogleShops {
+  const GoogleShops({this.email, required this.shops});
+  final String? email;
+  final List<GoogleShop> shops;
+
+  factory GoogleShops.fromJson(Map<String, dynamic> j) => GoogleShops(
+        email: j['email'] as String?,
+        shops: [for (final s in (j['shops'] as List? ?? const [])) GoogleShop.fromJson(s as Map<String, dynamic>)],
+      );
+}
+
 /// `/api/v1/auth/*`. Every method throws [ApiError] on failure.
 abstract interface class AuthApi {
+  /// `POST /auth/google/shops`.
+  Future<GoogleShops> googleShops(String idToken);
+
+  /// `POST /auth/google`: a shop of this Google account ([tenantId]) or, to link a shop registered by
+  /// phone before Google, [phone]; plus the shop's PIN.
+  Future<AuthResult> googleSignIn({
+    required String idToken,
+    String? tenantId,
+    String? phone,
+    required String pin,
+    required String deviceId,
+    String? deviceName,
+  });
+
+  /// `POST /auth/google/register`. [ownerPhone] is a contact number (not verified).
+  Future<AuthResult> googleRegister({
+    required String idToken,
+    required String shopName,
+    required String templateId,
+    String? township,
+    required String ownerPhone,
+    required String pin,
+    required String deviceId,
+    String? deviceName,
+  });
+
+  /// `POST /auth/google/pin/reset`: every session of the user ends.
+  Future<void> googleResetPin({required String idToken, required String tenantId, required String newPin});
+
   /// Sends an SMS code; returns when it expires.
   Future<DateTime> requestOtp(String phone, OtpPurpose purpose);
 
@@ -106,6 +163,53 @@ class DioAuthApi implements AuthApi {
   }
 
   Map<String, Object?> _device(String id, String? name) => {'id': id, 'name': name};
+
+  @override
+  Future<GoogleShops> googleShops(String idToken) async =>
+      GoogleShops.fromJson(await _post('/google/shops', {'idToken': idToken}));
+
+  @override
+  Future<AuthResult> googleSignIn({
+    required String idToken,
+    String? tenantId,
+    String? phone,
+    required String pin,
+    required String deviceId,
+    String? deviceName,
+  }) async =>
+      AuthResult.fromJson(await _post('/google', {
+        'idToken': idToken,
+        'tenantId': ?tenantId,
+        'phone': ?phone,
+        'pin': pin,
+        'device': _device(deviceId, deviceName),
+      }));
+
+  @override
+  Future<AuthResult> googleRegister({
+    required String idToken,
+    required String shopName,
+    required String templateId,
+    String? township,
+    required String ownerPhone,
+    required String pin,
+    required String deviceId,
+    String? deviceName,
+  }) async =>
+      AuthResult.fromJson(await _post('/google/register', {
+        'idToken': idToken,
+        'shopName': shopName,
+        'templateId': templateId,
+        'township': township,
+        'ownerPhone': ownerPhone,
+        'pin': pin,
+        'device': _device(deviceId, deviceName),
+      }));
+
+  @override
+  Future<void> googleResetPin({required String idToken, required String tenantId, required String newPin}) async {
+    await _post('/google/pin/reset', {'idToken': idToken, 'tenantId': tenantId, 'newPin': newPin});
+  }
 
   @override
   Future<DateTime> requestOtp(String phone, OtpPurpose purpose) async {

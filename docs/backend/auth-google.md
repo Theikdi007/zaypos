@@ -109,8 +109,11 @@ Flows (screens):
   locked to a known shop, or the account has one shop) → new PIN → `/google/pin/reset` → `/google`.
 - The local-data guard now compares the **tenant id** (known before the call) instead of the
   phone; the link path still compares the phone.
-- Session storage: `phone` stays (empty for Google users); `googleEmail` is added for the
-  Settings/account display.
+- Session storage is unchanged: `phone` stays (empty for Google users). The ID token is held in
+  memory only for the calls of one flow and dropped after sign-in; signing out also signs out of
+  Google, so the next sign-in shows the account picker.
+- An ID token the server refuses (`google_token_invalid`, e.g. it expired while the user waited)
+  drops the flow and the screen asks for the Google step again.
 
 ## 6. Config
 

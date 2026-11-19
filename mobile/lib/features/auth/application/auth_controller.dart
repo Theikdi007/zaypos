@@ -14,12 +14,16 @@ import '../../../core/sync/sync_providers.dart';
 import '../../../core/sync/sync_store.dart';
 import '../../../core/utils/ids.dart';
 import '../data/auth_api.dart';
+import '../data/google_auth.dart';
 import '../data/boot_state.dart';
 import '../data/session.dart';
 import '../data/session_store.dart';
 import '../domain/phone.dart';
 import '../domain/pin_hasher.dart';
 import '../../../core/text/myanmar_text.dart';
+import 'auth_failure.dart';
+
+export 'auth_failure.dart';
 
 enum AuthStatus {
   /// No session: Login / Register only.
@@ -39,18 +43,6 @@ class AuthState {
   final String? notice;
 }
 
-/// A user-facing failure: [message] is Burmese, [code] is stable.
-class AuthFailure implements Exception {
-  const AuthFailure(this.code, this.message, {this.retryAfter});
-  final String code;
-  final String message;
-  final Duration? retryAfter;
-
-  factory AuthFailure.fromApi(ApiError e) => AuthFailure(e.code, e.message, retryAfter: e.retryAfter);
-
-  @override
-  String toString() => 'AuthFailure($code)';
-}
 
 abstract final class AuthMessages {
   static const badPhone = 'ဖုန်းနံပါတ် မှန်အောင် ထည့်ပါ (ဥပမာ 9 7xx xxx xxx)။';
@@ -73,7 +65,30 @@ abstract final class AuthMessages {
 
   static const presetsFailed =
       'ဆိုင်ဖွင့်ပြီးပါပြီ။ ကြိုတင်ပစ္စည်းစာရင်း ဒေါင်းလို့ မရပါ — ပစ္စည်းတွေကို ကိုယ်တိုင် ထည့်ပါ။';
+
+  static const badOwnerPhone = 'ဆိုင်ပိုင်ရှင် ဖုန်းနံပါတ် မှန်အောင် ထည့်ပါ (ဥပမာ 9 7xx xxx xxx)။';
+
+  /// The Google step is missing or its ID token is gone (app restarted, or it expired).
+  static const googleAgain = 'Google အကောင့်နဲ့ ပြန်ဝင်ပေးပါ။';
 }
+
+/// The Google account picked in this sign-in / register / reset flow and its shops (not persisted:
+/// the ID token is only used for the next few calls).
+class GoogleFlowState {
+  const GoogleFlowState(this.identity, this.shops);
+  final GoogleIdentity identity;
+  final List<GoogleShop> shops;
+  String? get email => identity.email;
+}
+
+class GoogleFlow extends Notifier<GoogleFlowState?> {
+  @override
+  GoogleFlowState? build() => null;
+
+  void set(GoogleFlowState? s) => state = s;
+}
+
+final googleFlowProvider = NotifierProvider<GoogleFlow, GoogleFlowState?>(GoogleFlow.new);
 
 /// Sign-in, registration, offline PIN unlock and sign-out (§6).
 class AuthController extends Notifier<AuthState> {
@@ -103,8 +118,8 @@ class AuthController extends Notifier<AuthState> {
 
   /// Refuses (before any network call) when signing in would replace local
   /// data while the outbox still has units.
-  Future<SignInCheck> _guard(String? phone) async {
-    final check = await _local.check(phone);
+  Future<SignInCheck> _guard(String? phone, {String? tenantId}) async {
+    final check = await _local.check(phone, tenantId: tenantId);
     if (check == SignInCheck.refuse) {
       throw AuthFailure('outbox_not_empty', AuthMessages.outboxBlocks(await _local.pendingUnits()));
     }
@@ -196,6 +211,107 @@ class AuthController extends Notifier<AuthState> {
     await _adopt(r, phone, newPin);
   }
 
+  // ── Google (docs/backend/auth-google.md §5) ─────────────────────────────
+
+  GoogleFlowState get _flow =>
+      ref.read(googleFlowProvider) ?? (throw const AuthFailure('google_again', AuthMessages.googleAgain));
+
+  /// Runs [call]; a Google token the server refuses (expired: the user waited an hour) drops the flow
+  /// so the screen goes back to the Google step.
+  Future<T> _google<T>(Future<T> Function() call) async {
+    try {
+      return await call();
+    } on AuthFailure catch (e) {
+      if (e.code == 'google_token_invalid') ref.read(googleFlowProvider.notifier).set(null);
+      rethrow;
+    } on ApiError catch (e) {
+      if (e.code == 'google_token_invalid') ref.read(googleFlowProvider.notifier).set(null);
+      throw AuthFailure.fromApi(e);
+    }
+  }
+
+  /// "Who is this user": Google's account picker, then the shops of that account.
+  Future<GoogleFlowState> googleSignIn() async {
+    final identity = await ref.read(googleAuthProvider).signIn();
+    final shops = await _google(() => _api.googleShops(identity.idToken));
+    final flow = GoogleFlowState(identity, shops.shops);
+    ref.read(googleFlowProvider.notifier).set(flow);
+    return flow;
+  }
+
+  /// New phone: the chosen shop of the Google account + its PIN.
+  Future<void> signInToShop(String tenantId, String pin) async {
+    _pin(pin);
+    final flow = _flow;
+    final check = await _guard(null, tenantId: tenantId);
+    final r = await _google(() => _withDevice(
+        check,
+        (id) => _api.googleSignIn(
+            idToken: flow.identity.idToken, tenantId: tenantId, pin: pin, deviceId: id, deviceName: _deviceName)));
+    await _adopt(r, '', pin);
+  }
+
+  /// A shop registered by phone before Google: phone + PIN once, then it belongs to this Google account.
+  Future<void> linkPhoneShop(String rawPhone, String pin) async {
+    final phone = _phone(rawPhone);
+    _pin(pin);
+    final flow = _flow;
+    final check = await _guard(phone);
+    final r = await _google(() => _withDevice(
+        check,
+        (id) => _api.googleSignIn(
+            idToken: flow.identity.idToken, phone: phone, pin: pin, deviceId: id, deviceName: _deviceName)));
+    await _adopt(r, phone, pin);
+  }
+
+  /// Register: Google account → shop (name, owner phone as a contact, template) → PIN.
+  Future<void> registerWithGoogle({
+    required String shopName,
+    required String rawOwnerPhone,
+    required String templateId,
+    required String pin,
+    bool importPresets = false,
+  }) async {
+    final ownerPhone = normalizeMmPhone(rawOwnerPhone) ?? (throw const AuthFailure('validation', AuthMessages.badOwnerPhone));
+    _pin(pin);
+    if (shopName.trim().isEmpty) throw const AuthFailure('validation', 'ဆိုင်အမည် ထည့်ပါ။');
+    final flow = _flow;
+    final check = await _guard(null);
+    final r = await _google(() => _withDevice(
+          check,
+          (id) => _api.googleRegister(
+            idToken: flow.identity.idToken,
+            shopName: normalizeMyanmar(shopName.trim()), // BUG-52
+            templateId: templateId,
+            ownerPhone: ownerPhone,
+            pin: pin,
+            deviceId: id,
+            deviceName: _deviceName,
+          ),
+        ));
+    await _adopt(r, '', pin, beforeUnlock: importPresets ? () => _importPresets(templateId) : null);
+  }
+
+  /// Forgotten PIN: the Google account proves who it is → new PIN → signs in with it (every other
+  /// session of the user ends, like the SMS reset). Works signed out and while locked out.
+  Future<void> resetPinWithGoogle({required String tenantId, required String newPin}) async {
+    _pin(newPin);
+    final flow = _flow;
+    final check = await _guard(null, tenantId: tenantId);
+    await _google(() async {
+      try {
+        await _api.googleResetPin(idToken: flow.identity.idToken, tenantId: tenantId, newPin: newPin);
+      } on ApiError catch (e) {
+        throw AuthFailure.fromApi(e);
+      }
+    });
+    final r = await _google(() => _withDevice(
+        check,
+        (id) => _api.googleSignIn(
+            idToken: flow.identity.idToken, tenantId: tenantId, pin: newPin, deviceId: id, deviceName: _deviceName)));
+    await _adopt(r, '', newPin);
+  }
+
   /// "ကြိုတင်စာရင်း" (§7): downloads the template's presets and saves them as
   /// products in ONE upsertProduct unit (pushed after the first download).
   /// Registration has succeeded already, so a failure only leaves a notice.
@@ -248,6 +364,7 @@ class AuthController extends Notifier<AuthState> {
           startedAt: nowUtc(),
         ));
     final notice = await beforeUnlock?.call();
+    ref.read(googleFlowProvider.notifier).set(null); // the ID token is not kept
     state = AuthState(AuthStatus.unlocked, notice: notice);
   }
 
@@ -287,6 +404,8 @@ class AuthController extends Notifier<AuthState> {
   /// Login screen warns when units are still waiting.
   Future<void> signOut({String? reasonCode}) async {
     await _store.clear();
+    ref.read(googleFlowProvider.notifier).set(null);
+    await ref.read(googleAuthProvider).signOut(); // next sign-in shows the account picker again
     final pending = await _local.pendingUnits();
     ref.read(sessionProvider.notifier).set(ShopSession(tenantId: '', shopName: '', startedAt: nowUtc()));
     final notice = [

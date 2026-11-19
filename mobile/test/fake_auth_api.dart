@@ -1,6 +1,8 @@
 import 'package:zaypos_app/core/api/api_error.dart';
 import 'package:zaypos_app/core/utils/ids.dart';
+import 'package:zaypos_app/features/auth/application/auth_failure.dart';
 import 'package:zaypos_app/features/auth/data/auth_api.dart';
+import 'package:zaypos_app/features/auth/data/google_auth.dart';
 
 /// Records every call; answers like the backend for one shop.
 class FakeAuthApi implements AuthApi {
@@ -91,4 +93,89 @@ class FakeAuthApi implements AuthApi {
     calls.add('reset:$phone');
     if (resetError != null) throw resetError!;
   }
+
+  // ── Google ──────────────────────────────────────────────────────────────
+
+  /// What `/google/shops` answers (the Google account's shops).
+  List<GoogleShop> googleShopList = [];
+
+  /// Thrown by the next googleShops call (then cleared).
+  ApiError? shopsError;
+
+  /// The ID tokens the API was given, in order.
+  final idTokens = <String>[];
+
+  @override
+  Future<GoogleShops> googleShops(String idToken) async {
+    calls.add('google:shops');
+    idTokens.add(idToken);
+    final e = shopsError;
+    if (e != null) {
+      shopsError = null;
+      throw e;
+    }
+    return GoogleShops(email: 'owner@gmail.com', shops: googleShopList);
+  }
+
+  @override
+  Future<AuthResult> googleSignIn({
+    required String idToken,
+    String? tenantId,
+    String? phone,
+    required String pin,
+    required String deviceId,
+    String? deviceName,
+  }) async {
+    idTokens.add(idToken);
+    if (tenantId != null) this.tenantId = tenantId;
+    return _answer(phone == null ? 'google:signIn:$tenantId:$pin' : 'google:link:$phone:$pin', deviceId);
+  }
+
+  @override
+  Future<AuthResult> googleRegister({
+    required String idToken,
+    required String shopName,
+    required String templateId,
+    String? township,
+    required String ownerPhone,
+    required String pin,
+    required String deviceId,
+    String? deviceName,
+  }) async {
+    idTokens.add(idToken);
+    return _answer('google:register:$shopName:$templateId:$ownerPhone:$pin', deviceId);
+  }
+
+  @override
+  Future<void> googleResetPin({required String idToken, required String tenantId, required String newPin}) async {
+    calls.add('google:reset:$tenantId:$newPin');
+    idTokens.add(idToken);
+    if (resetError != null) throw resetError!;
+  }
+}
+
+/// Stands in for Google's account picker. [next] = what the next signIn does.
+class FakeGoogleAuth implements GoogleAuth {
+  FakeGoogleAuth({this.email = 'owner@gmail.com'});
+
+  String? email;
+  int signIns = 0;
+  int signOuts = 0;
+
+  /// Thrown by the next signIn (then cleared), e.g. `AuthFailure('google_cancelled', …)`.
+  AuthFailure? nextError;
+
+  @override
+  Future<GoogleIdentity> signIn() async {
+    signIns++;
+    final e = nextError;
+    if (e != null) {
+      nextError = null;
+      throw e;
+    }
+    return GoogleIdentity(idToken: 'google-id-token-$signIns', email: email);
+  }
+
+  @override
+  Future<void> signOut() async => signOuts++;
 }

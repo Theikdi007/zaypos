@@ -18,6 +18,7 @@ import 'package:zaypos_app/core/sync/wire.dart';
 import 'package:zaypos_app/core/utils/ids.dart';
 import 'package:zaypos_app/features/auth/application/auth_controller.dart';
 import 'package:zaypos_app/features/auth/data/auth_api.dart';
+import 'package:zaypos_app/features/auth/data/google_auth.dart';
 import 'package:zaypos_app/features/auth/data/boot_state.dart';
 import 'package:zaypos_app/features/auth/data/session.dart';
 import 'package:zaypos_app/features/auth/domain/pin_hasher.dart';
@@ -69,6 +70,7 @@ void main() {
       final c = ProviderContainer(overrides: [
         ...driftOverrides(db, await bootstrap(db, store), store),
         authApiProvider.overrideWithValue(auth),
+        otpEnabledProvider.overrideWithValue(true), // the SMS OTP screens (AUTH_OTP_ENABLED)
         presetCatalogApiProvider.overrideWithValue(presetApi),
         pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
         initialLimitsProvider.overrideWithValue(limits),
@@ -129,6 +131,7 @@ void main() {
       final c = ProviderContainer(overrides: [
         ...driftOverrides(db, await bootstrap(db, store), store),
         authApiProvider.overrideWithValue(auth),
+        otpEnabledProvider.overrideWithValue(true), // the SMS OTP screens (AUTH_OTP_ENABLED)
         pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
         clockProvider.overrideWithValue(() => now),
       ]);
@@ -186,7 +189,8 @@ void main() {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
-      final c = ProviderContainer(overrides: [...fakeOverrides(boot: state), ...overrides]);
+      final c = ProviderContainer(
+          overrides: [...fakeOverrides(boot: state), otpEnabledProvider.overrideWithValue(true), ...overrides]);
       addTearDown(c.dispose);
       await tester.pumpWidget(UncontrolledProviderScope(container: c, child: const ZayPosApp()));
       await tester.pumpAndSettle();

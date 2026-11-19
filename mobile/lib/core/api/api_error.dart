@@ -58,6 +58,13 @@ String apiErrorMessage(String code, {Duration? retryAfter}) => switch (code) {
       // 503 from POST /auth/otp when the SMS provider (SMSPoh) is down or refuses the message.
       'sms_unavailable' => 'SMS ပို့မရပါ။ ခဏနေ ထပ်ကြိုးစားပါ။',
       'phone_registered' => 'ဒီဖုန်းနံပါတ်နဲ့ ဆိုင်ရှိပြီးသားပါ။ "ဝင်မယ်" ကနေ ဝင်ပါ။',
+      // Google sign-in (docs/backend/auth-google.md §3).
+      'google_token_invalid' => 'Google အကောင့်နဲ့ ပြန်ဝင်ပေးပါ။',
+      'google_unavailable' => 'Google နဲ့ အခု စစ်လို့ မရပါ။ ခဏနေ ပြန်ကြိုးစားပါ။',
+      'shop_not_found' => 'ဒီ Google အကောင့်မှာ ဒီဆိုင် မရှိပါ။ ဆိုင်ဖွင့်တုန်းက Google အကောင့်နဲ့ ဝင်ပါ။',
+      'google_shop_limit' => 'Google အကောင့်တစ်ခုမှာ ဆိုင် ၁၀ ဆိုင်ထက် ပိုဖွင့်လို့ မရပါ။',
+      'google_linked_elsewhere' => 'ဒီဆိုင်ကို တခြား Google အကောင့်နဲ့ ချိတ်ထားပြီးပါပြီ။ အဲဒီအကောင့်နဲ့ ဝင်ပါ။',
+      'otp_disabled' => 'SMS ကုဒ်နဲ့ ဝင်တာ ပိတ်ထားပါတယ်။ Google အကောင့်နဲ့ ဝင်ပါ။',
       'invalid_credentials' => 'ဖုန်းနံပါတ် (သို့) PIN မှားနေပါတယ်။',
       'pin_locked' => retryAfter == null
           ? 'PIN မှားတာ များသွားလို့ ခဏပိတ်ထားပါတယ်။'

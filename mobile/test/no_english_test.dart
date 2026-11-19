@@ -22,6 +22,8 @@ import 'sync_screens_test.dart' show settle;
 const _allowed = {
   'kbzpay', 'wavepay', 'viber', 'excel', 'imei', 'barcode', 'pin', 'otp', 'stock', 'sync', 'batch', // batch: owner 2026-11-14 (printed on medicine boxes)
   'sms', // owner 2026-11-18: the sms_unavailable message ("SMS ပို့မရပါ။ ...")
+  'google', // 2026-11-19: Google Sign-In (a brand, like KBZPay) — confirm with the owner
+
   'zaypos', 'ks', 'ml', 'kg', 'xx', 'xxx',
 };
 const _examples = {'ဥပမာ - Paracetamol 500mg', 'ဥပမာ - Type-C အားသွင်းကြိုး'};

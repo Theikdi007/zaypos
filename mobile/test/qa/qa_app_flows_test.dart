@@ -20,6 +20,7 @@ import 'package:zaypos_app/core/widgets/app_switch_tile.dart';
 import 'package:zaypos_app/core/widgets/product_tile.dart';
 import 'package:zaypos_app/features/auth/application/auth_controller.dart';
 import 'package:zaypos_app/features/auth/data/auth_api.dart';
+import 'package:zaypos_app/features/auth/data/google_auth.dart';
 import 'package:zaypos_app/features/auth/data/boot_state.dart';
 import 'package:zaypos_app/features/auth/domain/pin_hasher.dart';
 import 'package:zaypos_app/features/customers/application/customer_service.dart';
@@ -69,6 +70,7 @@ void main() {
         appDatabaseProvider.overrideWithValue(db),
         secureStoreProvider.overrideWithValue(MemorySecureStore()),
         authApiProvider.overrideWithValue(api),
+        otpEnabledProvider.overrideWithValue(true), // the SMS OTP screens (AUTH_OTP_ENABLED)
         pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
       ]);
       addTearDown(c.dispose);
@@ -160,6 +162,7 @@ void main() {
       final c = ProviderContainer(overrides: [
         ...driftOverrides(db, await bootstrap(db, store), store),
         authApiProvider.overrideWithValue(api),
+        otpEnabledProvider.overrideWithValue(true), // the SMS OTP screens (AUTH_OTP_ENABLED)
         pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
         clockProvider.overrideWithValue(() => now),
       ]);

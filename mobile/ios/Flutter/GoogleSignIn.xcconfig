@@ -1,0 +1,5 @@
+// Google Sign-In (docs/backend/auth-google.md §6). The iOS OAuth client id REVERSED:
+// client id  123-abc.apps.googleusercontent.com  →  com.googleusercontent.apps.123-abc
+// It is the URL scheme Google redirects back to (Info.plist CFBundleURLTypes). Not a secret.
+// Placeholder until the real iOS client exists; the app then shows "not configured" for Google.
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.not-configured

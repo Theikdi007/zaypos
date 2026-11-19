@@ -52,7 +52,28 @@ dotnet run --project src/ZayPOS.Api --urls http://0.0.0.0:5076
 ```
 
 If macOS asks whether `dotnet` may accept incoming network connections, click **Allow**.
-OTP codes are printed here: `DEV SMS to +959…: ZayPOS code: 123456`.
+
+**Google Sign-In** is the default (docs/backend/auth-google.md). The API needs the client ids
+once (user-secrets, never appsettings):
+
+```sh
+dotnet user-secrets set Auth:Google:ClientIds "<web id>,<android debug id>,<ios id>" --project src/ZayPOS.Api
+```
+
+and every app run below adds:
+
+```sh
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=<web client id> \
+  --dart-define=GOOGLE_IOS_CLIENT_ID=<ios client id>       # iOS only; also set ios/Flutter/GoogleSignIn.xcconfig
+```
+
+Without them the app says Google is not configured ("…ပြင်ဆင်ထားခြင်း မရှိသေးပါ"). The Android debug
+client must carry the SHA-1 of `~/.android/debug.keystore`; the emulator needs a Google Play system
+image with a Google account added.
+
+**SMS OTP** (off by default): run the API with `--Auth:OtpEnabled=true` and the app with
+`--dart-define=AUTH_OTP_ENABLED=true`. OTP codes are then printed here:
+`DEV SMS to +959…: ZayPOS code: 123456`.
 
 **Terminal 2 — the app on the iPhone**, pointed at the Mac's Wi-Fi IP:
 

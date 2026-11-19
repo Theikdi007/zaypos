@@ -17,7 +17,9 @@ import '../../../core/widgets/numeric_keypad.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../application/auth_controller.dart';
 import '../data/auth_api.dart';
+import '../data/google_auth.dart';
 import '../data/session.dart';
+import '../domain/phone.dart';
 import 'widgets/auth_message.dart';
 import 'widgets/phone_field.dart';
 import '../../../core/utils/digit_input.dart';
@@ -42,7 +44,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   late final TextEditingController _shopName;
   final _phone = TextEditingController();
   final _otp = TextEditingController();
+
+  /// Google mode: the shop's contact number (not verified).
+  final _ownerPhone = TextEditingController();
   String _pin = '';
+
+  /// SMS OTP flow (AUTH_OTP_ENABLED) instead of Google; step 1 differs.
+  late final bool _otpFlow = ref.read(otpEnabledProvider);
 
   /// Signed in already: opened from Settings to change the shop template.
   late final bool _signedIn;
@@ -71,6 +79,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _shopName.dispose();
     _phone.dispose();
     _otp.dispose();
+    _ownerPhone.dispose();
     super.dispose();
   }
 
@@ -104,6 +113,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             _step = 1;
             _otp.clear();
           }
+          // The Google step is gone (expired token): pick the account again.
+          if (e.code == 'google_again' || e.code == 'google_token_invalid') _step = 1;
         });
       }
       return false;
@@ -133,13 +144,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _next() async {
     if (_signedIn) return _saveTemplate();
-    if (_step == 1) {
+    if (_step == 1 && _otpFlow) {
       if (!_codeSent) return _sendCode();
       if (_otp.text.length != 6) return _fail('OTP ကုဒ် ၆ လုံး ထည့်ပါ။');
     }
+    if (_step == 1 && !_otpFlow && ref.read(googleFlowProvider) == null) {
+      // Pick the Google account; the local-data guard runs again when the shop is created.
+      if (!await _run((c) => c.googleSignIn()) || !mounted) return;
+    }
     if (_step == 2) {
       final error = ref.read(syncLimitsProvider).checkText('tenants.name', _shopName.text, label: 'ဆိုင်အမည်') ??
-          (_shopName.text.trim().isEmpty ? 'ဆိုင်အမည် ထည့်ပါ။' : null);
+          (_shopName.text.trim().isEmpty ? 'ဆိုင်အမည် ထည့်ပါ။' : null) ??
+          (!_otpFlow && normalizeMmPhone(_ownerPhone.text) == null ? AuthMessages.badOwnerPhone : null);
       if (error != null) return _fail(error);
     }
     if (_step < 4) {
@@ -151,14 +167,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
     if (_pin.length != 6) return _fail(AuthMessages.badPin);
     // Success: the auth status becomes unlocked and the router opens the app.
-    await _run((c) => c.register(
-          rawPhone: _phone.text,
-          otp: _otp.text,
-          shopName: _shopName.text,
-          templateId: _type,
-          pin: _pin,
-          importPresets: _start == CatalogStart.preset,
-        ));
+    await _run((c) => _otpFlow
+        ? c.register(
+            rawPhone: _phone.text,
+            otp: _otp.text,
+            shopName: _shopName.text,
+            templateId: _type,
+            pin: _pin,
+            importPresets: _start == CatalogStart.preset,
+          )
+        : c.registerWithGoogle(
+            shopName: _shopName.text,
+            rawOwnerPhone: _ownerPhone.text,
+            templateId: _type,
+            pin: _pin,
+            importPresets: _start == CatalogStart.preset,
+          ));
   }
 
   /// Settings → change shop type: applies the template's feature flags.
@@ -174,7 +198,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   String get _buttonLabel {
     if (_signedIn) return 'သိမ်းမယ်';
     if (_busy) return 'ခဏစောင့်ပါ…';
-    if (_step == 1 && !_codeSent) return 'ကုဒ်ပို့မယ်';
+    if (_step == 1 && _otpFlow && !_codeSent) return 'ကုဒ်ပို့မယ်';
+    if (_step == 1 && !_otpFlow && ref.watch(googleFlowProvider) == null) return 'Google နဲ့ စမယ်';
     return _step < 4 ? 'ဆက်သွားမယ်' : 'ဆိုင်ဖွင့်မယ်';
   }
 
@@ -236,6 +261,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 20),
               child: switch (_step) {
+                1 when !_otpFlow => _StepGoogle(email: ref.watch(googleFlowProvider)?.email,
+                    picked: ref.watch(googleFlowProvider) != null),
                 1 => _StepPhone(
                     phone: _phone,
                     otp: _otp,
@@ -245,6 +272,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 2 => _StepShopType(
                     shopName: _signedIn ? null : _shopName,
+                    ownerPhone: _signedIn || _otpFlow ? null : _ownerPhone,
                     selected: _type,
                     onPick: (t) => setState(() {
                       _type = t.id;
@@ -308,7 +336,38 @@ class _StepTitle extends StatelessWidget {
   }
 }
 
-// ── Step 1: phone + OTP ────────────────────────────────────────────────────
+// ── Step 1 (default): Google account ───────────────────────────────────────
+class _StepGoogle extends StatelessWidget {
+  const _StepGoogle({required this.email, required this.picked});
+
+  final String? email;
+  final bool picked;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const _StepTitle('Google အကောင့်နဲ့ ဆိုင်ဖွင့်မယ်',
+              'ဖုန်းအသစ်နဲ့ ဝင်ရင်၊ PIN မေ့ရင် ဒီ Google အကောင့်နဲ့ ပြန်ဝင်ရပါမယ်'),
+          if (picked) ...[
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(14)),
+              child: Text(email ?? 'Google အကောင့် ရွေးပြီးပါပြီ',
+                  style: AppText.s(15, weight: AppText.w600, color: AppColors.primaryInk)),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Step 1 (AUTH_OTP_ENABLED): phone + OTP ─────────────────────────────────
 class _StepPhone extends StatefulWidget {
   const _StepPhone({
     required this.phone,
@@ -438,10 +497,13 @@ class _StepPhoneState extends State<_StepPhone> {
 
 // ── Step 2: shop type ──────────────────────────────────────────────────────
 class _StepShopType extends StatelessWidget {
-  const _StepShopType({required this.shopName, required this.selected, required this.onPick});
+  const _StepShopType({required this.shopName, this.ownerPhone, required this.selected, required this.onPick});
 
   /// null = no name field (changing the template of an existing shop).
   final TextEditingController? shopName;
+
+  /// Google registration: the owner's contact phone (not verified). null = no field.
+  final TextEditingController? ownerPhone;
   final String selected;
   final ValueChanged<ShopTemplate> onPick;
 
@@ -461,6 +523,14 @@ class _StepShopType extends StatelessWidget {
             FieldLabel('ဆိုင်အမည်', size: 13),
             const SizedBox(height: 6),
             AppInput(controller: name, height: 46, semanticLabel: 'ဆိုင်အမည်'),
+            const SizedBox(height: 14),
+          ],
+          if (ownerPhone != null) ...[
+            FieldLabel('ဆိုင်ပိုင်ရှင် ဖုန်းနံပါတ်', size: 13),
+            const SizedBox(height: 6),
+            PhoneField(controller: ownerPhone!),
+            const SizedBox(height: 4),
+            Text('ဆက်သွယ်ဖို့ပဲ သုံးပါမယ် (SMS မပို့ပါ)', style: AppText.s(12, color: AppColors.muted)),
             const SizedBox(height: 14),
           ],
           for (var r = 0; r < all.length; r += 2) ...[
