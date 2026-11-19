@@ -148,6 +148,28 @@ Firebase files and local ids are **gitignored** (`mobile/.gitignore`): `android/
 Android = `ANDROID_CLIENT_ID` in the plist (or `client_type: 1` in a `google-services.json`
 downloaded after the SHA was added). The app needs none of the Firebase SDKs.
 
+**Running the app with Google sign-in** (from `mobile/`, local API on port 5076; the ids come from
+the gitignored files above, so the command holds no secrets):
+
+```sh
+# iOS simulator (the simulator reaches the Mac as localhost)
+xcrun simctl list devices booted                     # pick the simulator id
+flutter run -d <simulator-id> \
+  --dart-define-from-file=google.json \
+  --dart-define=API_BASE_URL=http://localhost:5076
+
+# Android emulator (Google Play image with a Google account; the Mac is 10.0.2.2)
+flutter run -d emulator-5554 \
+  --dart-define-from-file=google.json \
+  --dart-define=API_BASE_URL=http://10.0.2.2:5076
+```
+
+Without `--dart-define-from-file=google.json` the Login screen says "ဒီဗားရှင်းမှာ Google နဲ့ ဝင်ဖို့
+ပြင်ဆင်ထားခြင်း မရှိသေးပါ". On iOS the URL scheme comes from `GoogleSignIn.local.xcconfig` at build
+time; if it is missing the build still runs, but Google's sheet can't return to the app. After
+changing either file, uninstall the app (`xcrun simctl uninstall <simulator-id> app.zaypos`) and run
+again. `GoogleService-Info.plist` is kept only as the source of the ids; the app does not read it.
+
 ## 7. Tests
 
 - Backend unit: verifier (signature, wrong key, `iss`, `aud`, expired, future `iat`, no `sub`,
