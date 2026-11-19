@@ -72,7 +72,7 @@ def main():
         for n in nodes():
             if n["text"] or n["desc"] or n["clickable"] == "true":
                 print(repr(n["text"]), "|", repr(n["desc"]), "|", n["bounds"], "| click" if n["clickable"] == "true" else "",
-                      "" if n["pkg"].startswith("com.zaypos") else n["pkg"])
+                      "" if n["pkg"] == "app.zaypos" else n["pkg"])
     elif cmd == "has":
         sys.exit(0 if find(sys.argv[2]) else 1)
     elif cmd == "tap":

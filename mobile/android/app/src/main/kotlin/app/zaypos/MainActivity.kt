@@ -1,4 +1,4 @@
-package com.zaypos.zaypos_app
+package app.zaypos
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -117,6 +117,10 @@ Flows (screens):
 
 ## 6. Config
 
+App identity registered with Firebase / Google Cloud: Android package **`app.zaypos`** (with the
+SHA-1/SHA-256 of the debug and release keystores), iOS bundle id **`app.zaypos`**. Changing either
+breaks Google Sign-In until the OAuth clients are updated.
+
 | Where | Key | Value |
 |---|---|---|
 | API | `Auth:Google:ClientIds` (env `Auth__Google__ClientIds`, comma-separated) | web, Android (debug + release), iOS client ids |

@@ -13,7 +13,7 @@
 #  * Screenshots: adb exec-out screencap -p.
 set -u
 SERIAL=$1; TEST=$2; RUN=${3:-$(basename $TEST .dart)}
-PKG=com.zaypos.zaypos_app
+PKG=app.zaypos
 REPO=${0:A:h:h:h:h}
 EVD=${EVD_DIR:-$REPO/docs/qa/evidence/round-15}
 APP_QA=/data/user/0/$PKG/cache/qa

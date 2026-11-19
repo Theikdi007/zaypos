@@ -10,7 +10,7 @@
 set -u
 STEP=$1; RUN=$2; EXPECT=${3:-}
 SERIAL=${SERIAL:-emulator-5554}
-PKG=com.zaypos.zaypos_app
+PKG=app.zaypos
 A=(adb -s $SERIAL)
 cd ${0:A:h:h:h}
 APK=build/r17/app-profile-host.apk

@@ -1177,7 +1177,7 @@ Device: Android emulator `emulator-5554` (sdk_gphone64_arm64, Android 16 / API 3
 ## BUG-57 · TC-UX-NEW-18 · Low · An open cart / checkout is silently lost when Android reclaims the app in the background
 - Found in: round 15 · emulator (2 GB RAM). evd/logs/r15_lmk_kill_logcat.log:
   `lowmemorykiller: Kill 'com.zaypos.zaypos_app' (11305), uid 10226, oom_score_adj 900 … reason: low watermark is breached`
-- Steps to reproduce: POS → 2 items → "ငွေရှင်းမယ်" → home → open Chrome, Photos, YouTube (or `adb shell am kill com.zaypos.zaypos_app`) →
+- Steps to reproduce: POS → 2 items → "ငွေရှင်းမယ်" → home → open Chrome, Photos, YouTube (or `adb shell am kill app.zaypos`; before Nov 2026 the package was `com.zaypos.zaypos_app`) →
   reopen ZayPOS. A realistic trigger: the cashier opens KBZPay to check a transfer.
 - Expected: the cart / checkout is still there, or the app says it was lost.
 - Actual: PIN screen → dashboard → POS with "ပစ္စည်း 0 ခု". No half sale (TC-UX-05 holds); the items must be added again. While the process

@@ -40,7 +40,7 @@ flutter drive --keep-app-running --driver=test_driver/integration_test.dart --ta
         font_xxxl) xcrun simctl ui $UDID content_size extra-extra-extra-large >> $LOG 2>&1 ;;
         font_ax5) xcrun simctl ui $UDID content_size accessibility-extra-extra-extra-large >> $LOG 2>&1 ;;
         font_default) xcrun simctl ui $UDID content_size large >> $LOG 2>&1 ;;
-        kill_app) xcrun simctl terminate $UDID com.zaypos.zayposApp >> $LOG 2>&1 ;;
+        kill_app) xcrun simctl terminate $UDID app.zaypos >> $LOG 2>&1 ;;
         mem) ps -axo rss=,command= | grep "$UDID" | grep 'Runner.app/Runner ' | grep -v grep | awk '{printf "[runner] app RSS %.1f MB\n", $1/1024}' >> $LOG ;;
         wait_*) sleep ${cmd#wait_} ;;
         # QA round 13 (BUG-40): what reached the simulator's Photos library / the app's temp folder.
@@ -53,7 +53,7 @@ flutter drive --keep-app-running --driver=test_driver/integration_test.dart --ta
             cp ${files[1]} "$EVD/photos_${RUN}_${id}.${files[1]:e:l}"
           fi ;;
         apptmp)
-          tmp=$(xcrun simctl get_app_container $UDID com.zaypos.zayposApp data)/Library/Caches  # path_provider temp dir on iOS
+          tmp=$(xcrun simctl get_app_container $UDID app.zaypos data)/Library/Caches  # path_provider temp dir on iOS
           for f in $tmp/**/ZayPOS-receipt-*.png(N.om); do
             print -r -- "[runner] app tmp ${f#$tmp/} $(stat -f '%Sm' $f) $(sips -g pixelWidth -g pixelHeight $f | awk '/pixel/{printf "%s=%s ", $1, $2}')" >> $LOG
           done

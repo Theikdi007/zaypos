@@ -25,7 +25,7 @@ flutter build ios --profile -t integration_test/qa/r17_day_test.dart \
   --dart-define=QA_STEP=$STEP --dart-define=QA_RUN=$RUN "$@" >> $BLOG 2>&1 || { echo "[runner] build failed (see $BLOG)"; exit 4; }
 xcrun devicectl device install app --device $DEVICE build/ios/iphoneos/Runner.app >> $BLOG 2>&1 || { echo "[runner] install failed"; exit 5; }
 print -r -- "[runner] $(date '+%H:%M:%S') launch step=$STEP run=$RUN on $DEVICE (profile build, API http://$MAC_IP:5076)" >> $LOG
-xcrun devicectl device process launch --terminate-existing --device $DEVICE com.zaypos.zayposApp >> $BLOG 2>&1 || { echo "[runner] launch failed"; exit 6; }
+xcrun devicectl device process launch --terminate-existing --device $DEVICE app.zaypos >> $BLOG 2>&1 || { echo "[runner] launch failed"; exit 6; }
 end=$(( $(date +%s) + ${TIMEOUT:-900} ))
 while (( $(date +%s) < end )); do
   grep -q "QA_DONE" $LOG && break
