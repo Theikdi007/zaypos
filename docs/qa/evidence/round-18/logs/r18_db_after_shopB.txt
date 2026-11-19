@@ -1,0 +1,17 @@
+Name|TenantPhone|TemplateId|CreatedAt|GoogleSubject|GoogleEmail|UserPhone|Role|FailedPinCount|LockedUntil
+----|-----------|----------|---------|-------------|-----------|---------|----|--------------|-----------
+QA R18 Shop A|+959790917041|grocery|2026-11-19 10:06:26.961|set(len 21)|<google-account>|NULL|owner|0|NULL
+QA R18 Shop B with a very long name for the 320px check|+959790917041|pharmacy|2026-11-19 11:24:58.366|set(len 21)|<google-account>|NULL|owner|0|NULL
+Name|Code|DeviceName|LastSyncAt|DeletedAt
+----|----|----------|----------|---------
+QA R18 Shop A|A|Android|2026-11-19 10:06:27.903|NULL
+QA R18 Shop A|B|Android|NULL|NULL
+QA R18 Shop A|C|Android|NULL|NULL
+QA R18 Shop B with a very long name for the 320px check|A|Android|NULL|NULL
+Name|products
+----|--------
+QA R18 Shop A|20
+QA R18 Shop B with a very long name for the 320px check|0
+subjects|users
+--------|-----
+1|2

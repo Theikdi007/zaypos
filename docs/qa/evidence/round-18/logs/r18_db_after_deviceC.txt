@@ -1,0 +1,6 @@
+----|----|----------|----------|---------
+QA R18 Shop A|A|Android|2026-11-19 10:06:27.903|NULL
+QA R18 Shop A|B|Android|NULL|NULL
+QA R18 Shop A|C|Android|NULL|NULL
+Name|products
+----|--------

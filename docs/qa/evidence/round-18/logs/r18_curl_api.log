@@ -1,0 +1,48 @@
+### TC-AUTH-09 registered phone, a PIN (right/any) /login
+body: {"phone":"+959698045236","pin":"123456","device":{"installId":"qa-r18-curl-0001","platform":"android","model":"curl"}}
+HTTP/1.1 404 Not Found
+
+
+### TC-AUTH-09 registered phone, wrong PIN /login
+body: {"phone":"+959698045236","pin":"000000","device":{"installId":"qa-r18-curl-0001","platform":"android","model":"curl"}}
+HTTP/1.1 404 Not Found
+
+
+### TC-AUTH-09 unknown phone /login
+body: {"phone":"+959111222333","pin":"123456","device":{"installId":"qa-r18-curl-0001","platform":"android","model":"curl"}}
+HTTP/1.1 404 Not Found
+
+
+### TC-AUTH-09 GET /login /login
+body: 
+HTTP/1.1 404 Not Found
+
+
+### TC-GAUTH-12 /otp /otp
+body: {"phone":"09790917099","purpose":"register"}
+HTTP/1.1 403 Forbidden
+Content-Type: application/problem+json
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"otp_disabled","status":403,"detail":"Phone verification by SMS is turned off. Sign in with Google.","code":"otp_disabled","traceId":"00-6a95b01eb20cf802ef4581219a1871ed-0e0ef20d305149b3-00"}
+### TC-GAUTH-12 /register /register
+body: {"phone":"09790917099","code":"123456","shopName":"x","templateId":"grocery","pin":"123456","device":{"installId":"qa-r18-curl-0001","platform":"android","model":"curl"}}
+HTTP/1.1 403 Forbidden
+Content-Type: application/problem+json
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"otp_disabled","status":403,"detail":"Phone verification by SMS is turned off. Sign in with Google.","code":"otp_disabled","traceId":"00-66da6cf69af30d5512e11e8db90ea349-bcfaaacca2ed4c0c-00"}
+### TC-GAUTH-12 /pin/reset /pin/reset
+body: {"phone":"09790917099","code":"123456","newPin":"123456"}
+HTTP/1.1 403 Forbidden
+Content-Type: application/problem+json
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"otp_disabled","status":403,"detail":"Phone verification by SMS is turned off. Sign in with Google.","code":"otp_disabled","traceId":"00-df513f7593ec62c64bff91b91966ea76-18f334a541bd108c-00"}
+### TC-GAUTH-12 /refresh bogus token (endpoint exists) /refresh
+body: {"refreshToken":"bogus","installId":"qa-r18-curl-0001"}
+HTTP/1.1 401 Unauthorized
+Content-Type: application/problem+json
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"invalid_refresh_token","status":401,"detail":"Sign in again.","code":"invalid_refresh_token","traceId":"00-f7644f7cc151c13638466db6e08684d7-ec71798ad18e1888-00"}
+### TC-SEC-G-04 POST /auth/login owner phone of the Google shops +959790917041 pin 135790
+HTTP/1.1 404 Not Found
+### TC-SEC-G-04 POST /auth/login owner phone of the Google shops +959790917041 pin 246802
+HTTP/1.1 404 Not Found
+### TC-SEC-G-04 POST /auth/login owner phone of the Google shops 09790917041 pin 135790
+HTTP/1.1 404 Not Found
+### TC-SEC-G-04 POST /auth/login owner phone of the Google shops 09790917041 pin 246802
+HTTP/1.1 404 Not Found
