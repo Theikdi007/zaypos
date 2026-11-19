@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using ZayPOS.Application.Auth;
+using ZayPOS.Infrastructure.Auth;
 using ZayPOS.Infrastructure.Persistence;
 using ZayPOS.Infrastructure.Sms;
 
@@ -64,8 +66,9 @@ public static class DeploymentExtensions
     }
 
     /// <summary>
-    /// Production must be configured safely or not start at all: a known SMS provider (SmsPoh with a
-    /// token, or Console on purpose), an API login that is not sa, and HTTPS required.
+    /// Production must be configured safely or not start at all: Google client ids (the sign-in), a known
+    /// SMS provider (SmsPoh with a credential, or Console on purpose) when SMS OTP is on, an API login that
+    /// is not sa, and HTTPS required.
     /// </summary>
     public static void ValidateProductionConfig(this WebApplicationBuilder builder)
     {
@@ -73,8 +76,17 @@ public static class DeploymentExtensions
         var config = builder.Configuration;
         var errors = new List<string>();
 
+        var google = config.GetSection(GoogleAuthOptions.Section).Get<GoogleAuthOptions>() ?? new GoogleAuthOptions();
+        if (!google.IsConfigured)
+            errors.Add("Google sign-in: set Auth:Google:ClientIds (env Auth__Google__ClientIds, comma-separated client ids).");
+
+        var auth = config.GetSection(AuthSettings.Section).Get<AuthSettings>() ?? new AuthSettings();
         var sms = config.GetSection(SmsOptions.Section).Get<SmsOptions>() ?? new SmsOptions();
-        if (sms.UsesSmsPoh)
+        if (!auth.OtpEnabled)
+        {
+            // SMS OTP is off: nothing is ever sent, so the SMS settings don't matter.
+        }
+        else if (sms.UsesSmsPoh)
         {
             if (!sms.SmsPoh.HasCredentials)
                 errors.Add("SMSPoh credential missing: set Sms:SmsPoh:ApiKey + Sms:SmsPoh:ApiSecret (or Sms:SmsPoh:Token).");
@@ -101,6 +113,7 @@ public static class DeploymentExtensions
     public static void WarnAboutConsoleSms(this WebApplication app)
     {
         if (!app.Environment.IsProduction()) return;
+        if (!(app.Configuration.GetSection(AuthSettings.Section).Get<AuthSettings>() ?? new AuthSettings()).OtpEnabled) return;
         var sms = app.Configuration.GetSection(SmsOptions.Section).Get<SmsOptions>() ?? new SmsOptions();
         if (!sms.UsesLog) return;
         app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("ZayPOS.Startup").LogCritical(

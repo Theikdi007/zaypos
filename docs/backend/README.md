@@ -218,6 +218,19 @@ always registers as a **new** device.
 
 ## 4. Auth
 
+**Default: Google Sign-In** — full design in [auth-google.md](auth-google.md).
+
+| Step | Endpoint | Result |
+|---|---|---|
+| Who is this user | `POST /api/v1/auth/google/shops` `{ idToken }` | `{ email, shops: [{ tenantId, name, templateId, role }] }` |
+| Register | `POST /api/v1/auth/google/register` `{ idToken, shopName, templateId, township, ownerPhone, pin, device }` | Tenant (owner phone = unverified contact), owner User (Google subject), features, Device `A`; tokens |
+| Sign in on a phone | `POST /api/v1/auth/google` `{ idToken, tenantId, pin, device }` | next Device code; tokens |
+| Link a phone shop | `POST /api/v1/auth/google` `{ idToken, phone, pin, device }` | phone + PIN as `/login`, then the Google account is linked; tokens |
+| Reset PIN | `POST /api/v1/auth/google/pin/reset` `{ idToken, tenantId, newPin }` | 204; every session of the user ends |
+
+**SMS OTP** — only with `Auth:OtpEnabled=true` (env `AUTH_OTP_ENABLED`, default false; otherwise
+`/otp`, `/register`, `/pin/reset` answer 403 `otp_disabled`). `/login` and `/refresh` are always on.
+
 | Step | Endpoint | Result |
 |---|---|---|
 | Ask OTP | `POST /api/v1/auth/otp` `{ phone, purpose }` | SMS 6-digit code (5 min, 5 attempts, rate-limit 3/hour/phone) |
@@ -233,7 +246,8 @@ always registers as a **new** device.
   hash (flutter_secure_storage). Sync waits until a token can be refreshed.
 - SMS provider is behind `ISmsSender`. `Sms:Provider=Log` (default, dev) logs the code;
   `Sms:Provider=SmsPoh` sends it through SMSPoh (`Sms:SmsPoh:{Token,Sender,Test}`), never logging the
-  code, and a failed send answers 503 `sms_unavailable`. Production refuses to start with anything but SmsPoh.
+  code, and a failed send answers 503 `sms_unavailable`. With OTP on, Production refuses to start with anything
+  but SmsPoh (or Console on purpose). Production always needs `Auth:Google:ClientIds`.
 
 ---
 

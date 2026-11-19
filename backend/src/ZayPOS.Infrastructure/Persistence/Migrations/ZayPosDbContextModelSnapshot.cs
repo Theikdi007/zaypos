@@ -1529,6 +1529,16 @@ namespace ZayPOS.Infrastructure.Persistence.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0, "DF_Users_Failed");
 
+                    b.Property<string>("GoogleEmail")
+                        .HasMaxLength(320)
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(320)");
+
+                    b.Property<string>("GoogleSubject")
+                        .HasMaxLength(255)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(255)");
+
                     b.Property<DateTime?>("LockedUntil")
                         .HasPrecision(3)
                         .HasColumnType("datetime2(3)");
@@ -1540,7 +1550,6 @@ namespace ZayPOS.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(80)");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
                         .HasColumnType("varchar(20)");
@@ -1578,7 +1587,12 @@ namespace ZayPOS.Infrastructure.Persistence.Migrations
                     b.HasIndex("Phone")
                         .IsUnique()
                         .HasDatabaseName("UX_Users_Phone")
-                        .HasFilter("[DeletedAt] IS NULL");
+                        .HasFilter("[Phone] IS NOT NULL AND [DeletedAt] IS NULL");
+
+                    b.HasIndex("GoogleSubject", "TenantId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Users_Google")
+                        .HasFilter("[GoogleSubject] IS NOT NULL AND [DeletedAt] IS NULL");
 
                     b.HasIndex("TenantId", "CreatedAt")
                         .HasDatabaseName("CX_Users");

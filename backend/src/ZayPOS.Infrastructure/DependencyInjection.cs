@@ -46,6 +46,8 @@ public static class DependencyInjection
         services.AddSingleton<IPinHasher, PinHasher>();
         services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
         AddSms(services, configuration);
+        AddGoogle(services, configuration);
+        services.AddSingleton(configuration.GetSection(AuthSettings.Section).Get<AuthSettings>() ?? new AuthSettings());
         services.AddScoped<AuthService>();
 
         services.AddScoped<AccountService>();
@@ -69,6 +71,17 @@ public static class DependencyInjection
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<SmsPohSmsSender>>()));
         else
             services.TryAddSingleton<ISmsSender, LoggingSmsSender>();
+    }
+
+    /// <summary>Google ID token checks (docs/backend/auth-google.md). Keys come from Google's JWKS over HTTPS.</summary>
+    private static void AddGoogle(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<GoogleAuthOptions>().Bind(configuration.GetSection(GoogleAuthOptions.Section));
+        services.TryAddSingleton<IGoogleSigningKeys>(sp => new GoogleOpenIdSigningKeys(
+            sp.GetRequiredService<IOptions<GoogleAuthOptions>>(),
+            new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(5) })
+                { Timeout = TimeSpan.FromSeconds(10) }));
+        services.TryAddSingleton<IGoogleIdTokenVerifier, GoogleIdTokenVerifier>();
     }
 
     /// <summary>R2 only when fully configured (Storage:R2); otherwise screenshot endpoints answer 503.</summary>

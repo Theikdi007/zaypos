@@ -9,7 +9,8 @@ namespace ZayPOS.Application.Account;
 public sealed record MeResponse(MeUser User, MeTenant Tenant, IReadOnlyDictionary<string, bool> Features, PlanInfo Plan,
     IReadOnlyList<DeviceInfoDto> Devices, Guid CurrentDeviceId);
 
-public sealed record MeUser(Guid Id, string Name, string Phone, UserRole Role);
+/// <summary><see cref="Phone"/>: verified login phone (null for Google users); <see cref="GoogleEmail"/>: support only.</summary>
+public sealed record MeUser(Guid Id, string Name, string? Phone, UserRole Role, string? GoogleEmail);
 
 public sealed record MeTenant(Guid Id, string Name, string TemplateId, string? Township, string Phone, DateTime CreatedAt);
 
@@ -38,7 +39,7 @@ public sealed class AccountService(IAppDb db, TimeProvider clock)
         var features = FeatureKeys.All.ToDictionary(k => k, k => stored.GetValueOrDefault(k));
 
         return new MeResponse(
-            new MeUser(user.Id, user.Name, user.Phone, user.Role),
+            new MeUser(user.Id, user.Name, user.Phone, user.Role, user.GoogleEmail),
             new MeTenant(tenant.Id, tenant.Name, tenant.TemplateId, tenant.Township, tenant.Phone, tenant.CreatedAt),
             features,
             PlanInfo.Of(tenant, Now),

@@ -18,6 +18,14 @@ internal sealed class AuthRepository(ZayPosDbContext db) : IAuthRepository
     public Task<User?> FindUserByPhoneAsync(string phone, CancellationToken ct) =>
         db.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Phone == phone && u.DeletedAt == null, ct);
 
+    public async Task<IReadOnlyList<(User User, Tenant Tenant)>> FindGoogleUsersAsync(string googleSubject, CancellationToken ct) =>
+        (await (from u in db.Users.IgnoreQueryFilters()
+                join t in db.Tenants.IgnoreQueryFilters() on u.TenantId equals t.Id
+                where u.GoogleSubject == googleSubject && u.DeletedAt == null && t.DeletedAt == null
+                orderby u.CreatedAt
+                select new { u, t }).ToListAsync(ct))
+        .Select(r => (r.u, r.t)).ToList();
+
     public Task<User?> FindUserAsync(Guid userId, CancellationToken ct) =>
         db.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == userId, ct);
 

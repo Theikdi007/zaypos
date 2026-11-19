@@ -13,6 +13,8 @@ public static class AuthRules
     public static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(90);
     /// <summary>A just-rotated token presented again within this window is a retry, not theft.</summary>
     public static readonly TimeSpan RefreshRetryGrace = TimeSpan.FromMinutes(2);
+    /// <summary>Shops one Google account may own (stops one account from minting shops).</summary>
+    public const int GoogleShopsPerAccount = 10;
 }
 
 public static partial class PhoneNumbers

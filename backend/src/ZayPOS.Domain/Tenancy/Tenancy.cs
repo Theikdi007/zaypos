@@ -10,7 +10,7 @@ public class Tenant : IVersioned
     /// <summary>Dart <c>ShopTemplate.id</c>: grocery|pharmacy|phone|fashion|hardware|service|restaurant|other.</summary>
     public string TemplateId { get; set; } = "";
     public string? Township { get; set; }
-    /// <summary>Owner phone, E.164 (+959...).</summary>
+    /// <summary>Owner phone, E.164 (+959...). A contact number: verified only for shops registered by OTP.</summary>
     public string Phone { get; set; } = "";
     public TenantPlan Plan { get; set; } = TenantPlan.Free;
     public DateTime? PlanExpiresAt { get; set; }
@@ -35,7 +35,12 @@ public class User : ITenantOwned
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
-    public string Phone { get; set; } = "";
+    /// <summary>A verified login phone (E.164), set only by OTP registration. Null for Google users.</summary>
+    public string? Phone { get; set; }
+    /// <summary>Google <c>sub</c>: the identity of a Google sign-in. One user per (subject, tenant).</summary>
+    public string? GoogleSubject { get; set; }
+    /// <summary>Google account email at the last Google sign-in. Support only: never used to find or trust a user.</summary>
+    public string? GoogleEmail { get; set; }
     public string Name { get; set; } = "";
     public UserRole Role { get; set; }
     /// <summary>ASP.NET Core <c>PasswordHasher</c> output.</summary>

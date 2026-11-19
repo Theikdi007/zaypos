@@ -33,6 +33,26 @@ public static class AuthEndpoints
             })
             .Produces(StatusCodes.Status204NoContent);
 
+        // Google sign-in (docs/backend/auth-google.md).
+        auth.MapPost("/google/shops", async (GoogleShopsRequest req, AuthService svc, CancellationToken ct) =>
+                Results.Ok(await svc.GoogleShopsAsync(req, ct)))
+            .Produces<GoogleShopsResponse>();
+
+        auth.MapPost("/google", async (GoogleSignInRequest req, AuthService svc, CancellationToken ct) =>
+                Results.Ok(await svc.GoogleSignInAsync(req, ct)))
+            .Produces<AuthResponse>();
+
+        auth.MapPost("/google/register", async (GoogleRegisterRequest req, AuthService svc, CancellationToken ct) =>
+                Results.Ok(await svc.GoogleRegisterAsync(req, ct)))
+            .Produces<AuthResponse>();
+
+        auth.MapPost("/google/pin/reset", async (GoogleResetPinRequest req, AuthService svc, CancellationToken ct) =>
+            {
+                await svc.GoogleResetPinAsync(req, ct);
+                return Results.NoContent();
+            })
+            .Produces(StatusCodes.Status204NoContent);
+
         return app;
     }
 }

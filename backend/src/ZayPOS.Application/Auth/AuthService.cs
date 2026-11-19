@@ -7,12 +7,18 @@ using ZayPOS.Domain.Tenancy;
 
 namespace ZayPOS.Application.Auth;
 
-/// <summary>README §4: OTP, register, login, refresh with rotation, PIN reset, lockout.</summary>
+/// <summary>
+/// README §4 + docs/backend/auth-google.md: Google sign-in, OTP (behind <see cref="AuthSettings.OtpEnabled"/>),
+/// register, login, refresh with rotation, PIN reset, lockout. Google and OTP only answer "who is this
+/// user"; shop creation, the PIN check, devices and tokens are one shared path.
+/// </summary>
 public sealed class AuthService(
     IAuthRepository repo,
     IPinHasher pins,
     IAccessTokenIssuer accessTokens,
     ISmsSender sms,
+    IGoogleIdTokenVerifier google,
+    AuthSettings settings,
     TimeProvider clock)
 {
     private DateTime Now => TruncateMs(clock.GetUtcNow().UtcDateTime);
@@ -21,6 +27,7 @@ public sealed class AuthService(
 
     public async Task<OtpResponse> RequestOtpAsync(OtpRequest req, CancellationToken ct)
     {
+        RequireOtpEnabled();
         var phone = RequirePhone(req.Phone);
         var now = Now;
         var registered = await repo.FindUserByPhoneAsync(phone, ct) is not null;
@@ -56,6 +63,7 @@ public sealed class AuthService(
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest req, CancellationToken ct)
     {
+        RequireOtpEnabled();
         var phone = RequirePhone(req.Phone);
         RequirePin(req.Pin);
         var shopName = RequireText(req.ShopName, "shopName", 120);
@@ -73,21 +81,44 @@ public sealed class AuthService(
             throw DeviceConflict();
 
         var now = Now;
+        otp.ConsumedAt = now;
+        try
+        {
+            return await CreateShopAsync(shopName, req.TemplateId!, township, ownerPhone: phone, loginPhone: phone,
+                googleIdentity: null, req.Pin, req.Device, deviceName, now, ct);
+        }
+        catch (UniqueViolationException e) when (e.Involves("UX_Users_Phone"))
+        {
+            throw new AuthException(409, "phone_registered", "This phone already has a shop. Sign in instead.");
+        }
+    }
+
+    /// <summary>
+    /// Tenant + owner user + template features + device A + first refresh token, in one save.
+    /// <paramref name="loginPhone"/> is a verified phone (OTP) or null; <paramref name="ownerPhone"/> is the
+    /// shop's contact number (verified only when it came through OTP).
+    /// </summary>
+    private async Task<AuthResponse> CreateShopAsync(
+        string shopName, string templateId, string? township, string ownerPhone, string? loginPhone,
+        GoogleIdentity? googleIdentity, string pin, DeviceInfo deviceInfo, string? deviceName, DateTime now,
+        CancellationToken ct)
+    {
         var tenant = new Tenant
         {
-            Id = Guid.CreateVersion7(), Name = shopName, TemplateId = req.TemplateId!, Township = township,
-            Phone = phone, Plan = TenantPlan.Free, CreatedAt = now, UpdatedAt = now,
+            Id = Guid.CreateVersion7(), Name = shopName, TemplateId = templateId, Township = township,
+            Phone = ownerPhone, Plan = TenantPlan.Free, CreatedAt = now, UpdatedAt = now,
         };
         var user = new User
         {
-            Id = Guid.CreateVersion7(), TenantId = tenant.Id, Phone = phone,
+            Id = Guid.CreateVersion7(), TenantId = tenant.Id, Phone = loginPhone,
+            GoogleSubject = googleIdentity?.Subject, GoogleEmail = Email(googleIdentity),
             Name = shopName.Length > 80 ? shopName[..80] : shopName,
             Role = UserRole.Owner, CreatedAt = now, UpdatedAt = now,
         };
-        user.PinHash = pins.Hash(user, req.Pin);
+        user.PinHash = pins.Hash(user, pin);
         var device = new Device
         {
-            Id = req.Device.Id, TenantId = tenant.Id, Code = DeviceCodes.ForIndex(0), Name = deviceName,
+            Id = deviceInfo.Id, TenantId = tenant.Id, Code = DeviceCodes.ForIndex(0), Name = deviceName,
             CreatedAt = now, UpdatedAt = now,
         };
 
@@ -98,15 +129,14 @@ public sealed class AuthService(
         repo.Add(device);
         var (refresh, token) = NewRefreshToken(user, device, now);
         repo.Add(token);
-        otp.ConsumedAt = now;
 
         try
         {
             await repo.SaveChangesAsync(ct);
         }
-        catch (UniqueViolationException e) when (e.Involves("UX_Users_Phone"))
+        catch (UniqueViolationException e) when (e.Involves("PK_Devices"))
         {
-            throw new AuthException(409, "phone_registered", "This phone already has a shop. Sign in instead.");
+            throw DeviceConflict();
         }
 
         return Respond(user, tenant, device, refresh, token, now);
@@ -119,18 +149,25 @@ public sealed class AuthService(
         var phone = PhoneNumbers.Normalize(req.Phone) ?? throw AuthException.InvalidCredentials();
         var deviceName = RequireDevice(req.Device);
         var user = await repo.FindUserByPhoneAsync(phone, ct);
-        if (user is null)
-        {
-            // Same PBKDF2 cost as a real user, so response time does not reveal which phones exist.
-            if (Pins.IsValid(req.Pin)) pins.VerifyDummy(req.Pin);
-            throw AuthException.InvalidCredentials();
-        }
+        if (user is null) throw UnknownPhone(req.Pin);
+        return await SignInAsync(user, req.Pin, req.Device, deviceName, onPinVerified: null, ct);
+    }
+
+    /// <summary>
+    /// The shared sign-in once "who" is known: lockout, PIN check (5 wrong → 15 min), then this device
+    /// (same device = its old sessions end; new device = next free code) and fresh tokens.
+    /// <paramref name="onPinVerified"/> runs after a right PIN, before anything is saved (Google: remember
+    /// the email, or link the account); it may throw to refuse.
+    /// </summary>
+    private async Task<AuthResponse> SignInAsync(
+        User user, string? pin, DeviceInfo deviceInfo, string? deviceName, Action<User>? onPinVerified, CancellationToken ct)
+    {
         var now = Now;
 
         if (user.LockedUntil is { } until && until > now)
             throw Locked(until - now);
 
-        var check = Pins.IsValid(req.Pin) ? pins.Verify(user, user.PinHash, req.Pin) : PinCheck.Failed;
+        var check = Pins.IsValid(pin) ? pins.Verify(user, user.PinHash, pin!) : PinCheck.Failed;
         if (check == PinCheck.Failed)
         {
             user.FailedPinCount++;
@@ -145,16 +182,17 @@ public sealed class AuthService(
             throw lockedNow ? Locked(AuthRules.PinLockout) : AuthException.InvalidCredentials();
         }
 
-        if (check == PinCheck.SuccessRehashNeeded) user.PinHash = pins.Hash(user, req.Pin);
+        if (check == PinCheck.SuccessRehashNeeded) user.PinHash = pins.Hash(user, pin!);
         if (user.FailedPinCount != 0 || user.LockedUntil is not null || check == PinCheck.SuccessRehashNeeded)
         {
             user.FailedPinCount = 0;
             user.LockedUntil = null;
             user.UpdatedAt = now;
         }
+        onPinVerified?.Invoke(user);
 
         var tenant = await repo.FindTenantAsync(user.TenantId, ct) ?? throw AuthException.InvalidCredentials();
-        var device = await repo.FindDeviceAsync(req.Device.Id, ct);
+        var device = await repo.FindDeviceAsync(deviceInfo.Id, ct);
         if (device is not null)
         {
             if (device.TenantId != user.TenantId) throw DeviceConflict();
@@ -179,7 +217,7 @@ public sealed class AuthService(
             var codes = await repo.DeviceCodesAsync(user.TenantId, ct);
             var newDevice = new Device
             {
-                Id = req.Device.Id, TenantId = user.TenantId, Code = DeviceCodes.NextFree(codes), Name = deviceName,
+                Id = deviceInfo.Id, TenantId = user.TenantId, Code = DeviceCodes.NextFree(codes), Name = deviceName,
                 CreatedAt = now, UpdatedAt = now,
             };
             var (refresh, token) = NewRefreshToken(user, newDevice, now);
@@ -266,23 +304,130 @@ public sealed class AuthService(
 
     public async Task ResetPinAsync(ResetPinRequest req, CancellationToken ct)
     {
+        RequireOtpEnabled();
         var phone = RequirePhone(req.Phone);
         RequirePin(req.NewPin);
         var user = await repo.FindUserByPhoneAsync(phone, ct) ?? throw AuthException.OtpInvalid();
         var otp = await ConsumeOtpAsync(phone, OtpPurpose.Reset, req.Otp, ct);
-        var now = Now;
+        otp.ConsumedAt = Now;
+        await SetPinAsync(user, req.NewPin, ct);
+    }
 
-        user.PinHash = pins.Hash(user, req.NewPin);
+    /// <summary>New PIN, lockout cleared, and every session of the user (all devices) ends.</summary>
+    private async Task SetPinAsync(User user, string newPin, CancellationToken ct)
+    {
+        var now = Now;
+        user.PinHash = pins.Hash(user, newPin);
         user.FailedPinCount = 0;
         user.LockedUntil = null;
         user.UpdatedAt = now;
-        otp.ConsumedAt = now;
 
         await using var tx = await repo.BeginTransactionAsync(ct);
         await repo.RevokeRefreshTokensAsync(user.Id, deviceId: null, now, ct);
         await repo.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
     }
+
+    // ---------------------------------------------------------------- Google (docs/backend/auth-google.md)
+
+    /// <summary>"Who is this user": the shops this Google account can sign in to.</summary>
+    public async Task<GoogleShopsResponse> GoogleShopsAsync(GoogleShopsRequest req, CancellationToken ct)
+    {
+        var id = await google.VerifyAsync(req.IdToken, ct);
+        var mine = await repo.FindGoogleUsersAsync(id.Subject, ct);
+        return new GoogleShopsResponse(
+            Email(id),
+            mine.Select(r => new GoogleShop(r.Tenant.Id, r.Tenant.Name, r.Tenant.TemplateId, r.User.Role)).ToList());
+    }
+
+    /// <summary>
+    /// Sign in on this phone: a shop of this Google account (tenantId) + its PIN, or a shop registered by
+    /// phone before Google (phone + PIN, exactly like /login), which links the Google account to it.
+    /// </summary>
+    public async Task<AuthResponse> GoogleSignInAsync(GoogleSignInRequest req, CancellationToken ct)
+    {
+        var deviceName = RequireDevice(req.Device);
+        var hasPhone = !string.IsNullOrWhiteSpace(req.Phone);
+        if (req.TenantId is not null && hasPhone) throw AuthException.Validation("Send tenantId or phone, not both.");
+        if (req.TenantId is null && !hasPhone) throw AuthException.Validation("tenantId (or phone, to link a shop) is required.");
+
+        var id = await google.VerifyAsync(req.IdToken, ct);
+        var mine = await repo.FindGoogleUsersAsync(id.Subject, ct);
+
+        if (req.TenantId is { } tenantId)
+        {
+            var user = mine.FirstOrDefault(r => r.Tenant.Id == tenantId).User ?? throw AuthException.ShopNotFound();
+            return await SignInAsync(user, req.Pin, req.Device, deviceName, u => RememberEmail(u, id), ct);
+        }
+
+        var phone = PhoneNumbers.Normalize(req.Phone) ?? throw AuthException.InvalidCredentials();
+        var legacy = await repo.FindUserByPhoneAsync(phone, ct);
+        if (legacy is null) throw UnknownPhone(req.Pin);
+        return await SignInAsync(legacy, req.Pin, req.Device, deviceName, u => Link(u, id, mine), ct);
+    }
+
+    /// <summary>Find-or-create's "create": a new shop owned by this Google account.</summary>
+    public async Task<AuthResponse> GoogleRegisterAsync(GoogleRegisterRequest req, CancellationToken ct)
+    {
+        RequirePin(req.Pin);
+        var shopName = RequireText(req.ShopName, "shopName", 120);
+        var township = OptionalText(req.Township, "township", 80);
+        var ownerPhone = PhoneNumbers.Normalize(req.OwnerPhone)
+            ?? throw AuthException.Validation("ownerPhone must be a Myanmar mobile number (09… or +959…).");
+        var deviceName = RequireDevice(req.Device);
+        if (!ShopTemplates.Exists(req.TemplateId ?? ""))
+            throw AuthException.Validation($"Unknown templateId. Use one of: {string.Join(", ", ShopTemplates.Ids)}.");
+
+        var id = await google.VerifyAsync(req.IdToken, ct);
+        var mine = await repo.FindGoogleUsersAsync(id.Subject, ct);
+        if (mine.Count >= AuthRules.GoogleShopsPerAccount) throw ShopLimit();
+        if (await repo.FindDeviceAsync(req.Device.Id, ct) is not null) throw DeviceConflict();
+
+        return await CreateShopAsync(shopName, req.TemplateId!, township, ownerPhone, loginPhone: null,
+            id, req.Pin, req.Device, deviceName, Now, ct);
+    }
+
+    /// <summary>Forgotten PIN: the Google account proves who it is (instead of an SMS code).</summary>
+    public async Task GoogleResetPinAsync(GoogleResetPinRequest req, CancellationToken ct)
+    {
+        RequirePin(req.NewPin);
+        var id = await google.VerifyAsync(req.IdToken, ct);
+        var mine = await repo.FindGoogleUsersAsync(id.Subject, ct);
+        var user = mine.FirstOrDefault(r => r.Tenant.Id == req.TenantId).User ?? throw AuthException.ShopNotFound();
+        RememberEmail(user, id);
+        await SetPinAsync(user, req.NewPin, ct);
+    }
+
+    private void RememberEmail(User user, GoogleIdentity id)
+    {
+        var email = Email(id);
+        if (email is null || user.GoogleEmail == email) return;
+        user.GoogleEmail = email;
+        user.UpdatedAt = Now;
+    }
+
+    /// <summary>Attaches the Google account to a phone-registered user (after its PIN was right).</summary>
+    private void Link(User user, GoogleIdentity id, IReadOnlyList<(User User, Tenant Tenant)> mine)
+    {
+        if (user.GoogleSubject == id.Subject)
+        {
+            RememberEmail(user, id);
+            return;
+        }
+        if (user.GoogleSubject is not null)
+            throw new AuthException(409, "google_linked_elsewhere",
+                "This shop is already linked to another Google account. Sign in with that account.");
+        if (mine.Any(r => r.Tenant.Id == user.TenantId))
+            throw new AuthException(409, "google_linked_elsewhere", "This Google account already has a user in this shop.");
+        if (mine.Count >= AuthRules.GoogleShopsPerAccount) throw ShopLimit();
+        user.GoogleSubject = id.Subject;
+        user.GoogleEmail = Email(id);
+        user.UpdatedAt = Now;
+    }
+
+    /// <summary>nvarchar(320): a longer "email" is not a real address; keep the row valid.</summary>
+    private static string? Email(GoogleIdentity? id) =>
+        id?.Email is { Length: > 0 and <= 320 } e ? e : null;
 
     // ---------------------------------------------------------------- helpers
 
@@ -363,6 +508,21 @@ public sealed class AuthService(
         if (device is null || device.Id == Guid.Empty) throw AuthException.Validation("device.id is required.");
         return OptionalText(device.Name, "device.name", 60);
     }
+
+    private void RequireOtpEnabled()
+    {
+        if (!settings.OtpEnabled) throw AuthException.OtpDisabled();
+    }
+
+    /// <summary>Same PBKDF2 cost as a real user, so response time does not reveal which phones exist.</summary>
+    private AuthException UnknownPhone(string? pin)
+    {
+        if (Pins.IsValid(pin)) pins.VerifyDummy(pin!);
+        return AuthException.InvalidCredentials();
+    }
+
+    private static AuthException ShopLimit() =>
+        new(409, "google_shop_limit", $"One Google account can have at most {AuthRules.GoogleShopsPerAccount} shops.");
 
     private static AuthException Locked(TimeSpan retryAfter) =>
         new(423, "pin_locked", "Too many wrong PINs. Try again later or reset the PIN.", retryAfter);
