@@ -60,10 +60,6 @@ class FakeAuthApi implements AuthApi {
   }
 
   @override
-  Future<AuthResult> login({required String phone, required String pin, required String deviceId, String? deviceName}) async =>
-      _answer('login:$phone', deviceId);
-
-  @override
   Future<AuthResult> register({
     required String phone,
     required String otp,
@@ -83,15 +79,6 @@ class FakeAuthApi implements AuthApi {
     final e = refreshError;
     if (e != null) throw e;
     return result('device');
-  }
-
-  /// Thrown by resetPin if set.
-  ApiError? resetError;
-
-  @override
-  Future<void> resetPin({required String phone, required String otp, required String newPin}) async {
-    calls.add('reset:$phone');
-    if (resetError != null) throw resetError!;
   }
 
   // ── Google ──────────────────────────────────────────────────────────────
@@ -120,15 +107,14 @@ class FakeAuthApi implements AuthApi {
   @override
   Future<AuthResult> googleSignIn({
     required String idToken,
-    String? tenantId,
-    String? phone,
+    required String tenantId,
     required String pin,
     required String deviceId,
     String? deviceName,
   }) async {
     idTokens.add(idToken);
-    if (tenantId != null) this.tenantId = tenantId;
-    return _answer(phone == null ? 'google:signIn:$tenantId:$pin' : 'google:link:$phone:$pin', deviceId);
+    this.tenantId = tenantId;
+    return _answer('google:signIn:$tenantId:$pin', deviceId);
   }
 
   @override
@@ -145,6 +131,9 @@ class FakeAuthApi implements AuthApi {
     idTokens.add(idToken);
     return _answer('google:register:$shopName:$templateId:$ownerPhone:$pin', deviceId);
   }
+
+  /// Thrown by googleResetPin if set.
+  ApiError? resetError;
 
   @override
   Future<void> googleResetPin({required String idToken, required String tenantId, required String newPin}) async {

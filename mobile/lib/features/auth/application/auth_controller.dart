@@ -155,15 +155,6 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
-  Future<void> login(String rawPhone, String pin) async {
-    final phone = _phone(rawPhone);
-    _pin(pin);
-    final check = await _guard(phone);
-    final r = await _withDevice(
-        check, (id) => _api.login(phone: phone, pin: pin, deviceId: id, deviceName: _deviceName));
-    await _adopt(r, phone, pin);
-  }
-
   Future<void> register({
     required String rawPhone,
     required String otp,
@@ -189,26 +180,6 @@ class AuthController extends Notifier<AuthState> {
       ),
     );
     await _adopt(r, phone, pin, beforeUnlock: importPresets ? () => _importPresets(templateId) : null);
-  }
-
-  /// Forgotten PIN: SMS code → new PIN (`POST /auth/pin/reset`), then signs in
-  /// with it. The server ends every session of this user, so this phone signs
-  /// in again; that replaces the local PIN hash and clears the local lockout.
-  /// Works signed out and while locked out (no unlock needed). The local-data
-  /// guard runs first, exactly as for a sign-in.
-  Future<void> resetPin({required String rawPhone, required String otp, required String newPin}) async {
-    final phone = _phone(rawPhone);
-    _pin(newPin);
-    if (!RegExp(r'^\d{6}$').hasMatch(otp.trim())) throw const AuthFailure('validation', 'OTP ကုဒ် ၆ လုံး ထည့်ပါ။');
-    final check = await _guard(phone);
-    try {
-      await _api.resetPin(phone: phone, otp: otp.trim(), newPin: newPin);
-    } on ApiError catch (e) {
-      throw AuthFailure.fromApi(e);
-    }
-    final r = await _withDevice(
-        check, (id) => _api.login(phone: phone, pin: newPin, deviceId: id, deviceName: _deviceName));
-    await _adopt(r, phone, newPin);
   }
 
   // ── Google (docs/backend/auth-google.md §5) ─────────────────────────────
@@ -249,19 +220,6 @@ class AuthController extends Notifier<AuthState> {
         (id) => _api.googleSignIn(
             idToken: flow.identity.idToken, tenantId: tenantId, pin: pin, deviceId: id, deviceName: _deviceName)));
     await _adopt(r, '', pin);
-  }
-
-  /// A shop registered by phone before Google: phone + PIN once, then it belongs to this Google account.
-  Future<void> linkPhoneShop(String rawPhone, String pin) async {
-    final phone = _phone(rawPhone);
-    _pin(pin);
-    final flow = _flow;
-    final check = await _guard(phone);
-    final r = await _google(() => _withDevice(
-        check,
-        (id) => _api.googleSignIn(
-            idToken: flow.identity.idToken, phone: phone, pin: pin, deviceId: id, deviceName: _deviceName)));
-    await _adopt(r, phone, pin);
   }
 
   /// Register: Google account → shop (name, owner phone as a contact, template) → PIN.

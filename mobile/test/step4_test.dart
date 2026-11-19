@@ -4,26 +4,19 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaypos_app/app/drift_overrides.dart';
 import 'package:zaypos_app/app/fake_overrides.dart';
-import 'package:zaypos_app/core/api/api_config.dart';
 import 'package:zaypos_app/core/api/api_error.dart';
 import 'package:zaypos_app/core/db/app_database.dart';
-import 'package:zaypos_app/core/db/database_provider.dart';
-import 'package:zaypos_app/core/db/local_data.dart';
 import 'package:zaypos_app/core/router/app_router.dart';
 import 'package:zaypos_app/core/router/routes.dart';
 import 'package:zaypos_app/core/storage/secure_store.dart';
 import 'package:zaypos_app/core/sync/sync_limits.dart';
 import 'package:zaypos_app/core/sync/sync_store.dart';
 import 'package:zaypos_app/core/sync/wire.dart';
-import 'package:zaypos_app/core/utils/ids.dart';
 import 'package:zaypos_app/features/auth/application/auth_controller.dart';
 import 'package:zaypos_app/features/auth/data/auth_api.dart';
 import 'package:zaypos_app/features/auth/data/google_auth.dart';
 import 'package:zaypos_app/features/auth/data/boot_state.dart';
-import 'package:zaypos_app/features/auth/data/session.dart';
 import 'package:zaypos_app/features/auth/domain/pin_hasher.dart';
-import 'package:zaypos_app/features/auth/presentation/pin_reset_screen.dart';
-import 'package:zaypos_app/features/auth/presentation/unlock_screen.dart';
 import 'package:zaypos_app/features/devices/data/devices_api.dart';
 import 'package:zaypos_app/features/devices/presentation/devices_screen.dart';
 import 'package:zaypos_app/features/products/application/product_service.dart';
@@ -114,67 +107,9 @@ void main() {
     });
   });
 
+  // PIN reset is Google → new PIN (the SMS reset was removed with phone + PIN sign-in):
+  // test/google_auth_test.dart and test/google_auth_screens_test.dart.
   group('PIN reset', () {
-    late AppDatabase db;
-    late MemorySecureStore store;
-    late FakeAuthApi auth;
-    var now = DateTime.utc(2026, 11, 12, 9);
-    setUp(() {
-      db = memoryDb();
-      store = MemorySecureStore();
-      auth = FakeAuthApi();
-      now = DateTime.utc(2026, 11, 12, 9);
-    });
-    tearDown(() => db.close());
-
-    Future<ProviderContainer> launch() async {
-      final c = ProviderContainer(overrides: [
-        ...driftOverrides(db, await bootstrap(db, store), store),
-        authApiProvider.overrideWithValue(auth),
-        otpEnabledProvider.overrideWithValue(true), // the SMS OTP screens (AUTH_OTP_ENABLED)
-        pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
-        clockProvider.overrideWithValue(() => now),
-      ]);
-      addTearDown(c.dispose);
-      return c;
-    }
-
-    test('locked out: SMS code + new PIN → signed in again, new local hash, lockout cleared', () async {
-      var c = await launch();
-      await c.read(authControllerProvider.notifier).login('0971234567', '123456');
-      final oldHash = store.values[SecureKeys.pinHash];
-      c = await launch(); // restart: locked
-      final ctl = c.read(authControllerProvider.notifier);
-      for (var i = 0; i < 5; i++) {
-        await expectLater(ctl.unlock('000000'), throwsA(isA<AuthFailure>()));
-      }
-      expect(await ctl.lockRemaining(), isNotNull);
-
-      await ctl.requestOtp('0971234567', OtpPurpose.reset);
-      await ctl.resetPin(rawPhone: '0971234567', otp: '654321', newPin: '246810');
-
-      expect(auth.calls.skip(1), ['otp:reset:+95971234567', 'reset:+95971234567', 'login:+95971234567']);
-      expect(c.read(authControllerProvider).status, AuthStatus.unlocked);
-      expect(store.values[SecureKeys.pinHash], isNot(oldHash));
-      expect(await ctl.lockRemaining(), isNull);
-      expect(store.values.containsKey(SecureKeys.pinFailures), isFalse);
-
-      c = await launch(); // the new PIN unlocks offline
-      await c.read(authControllerProvider.notifier).unlock('246810');
-      expect(c.read(authControllerProvider).status, AuthStatus.unlocked);
-    });
-
-    test('a wrong code: the PIN is not changed and nothing is stored', () async {
-      final c = await launch();
-      auth.resetError = const ApiError(400, 'otp_invalid');
-      await expectLater(
-        c.read(authControllerProvider.notifier).resetPin(rawPhone: '0971234567', otp: '000000', newPin: '246810'),
-        throwsA(isA<AuthFailure>().having((e) => e.code, 'code', 'otp_invalid')),
-      );
-      expect(auth.calls.where((x) => x.startsWith('login')), isEmpty);
-      expect(store.values.containsKey(SecureKeys.pinHash), isFalse);
-    });
-
     test('router: the reset screen is reachable signed out and while locked', () {
       expect(authRedirect(AuthStatus.signedOut, Routes.pinReset), isNull);
       expect(authRedirect(AuthStatus.locked, Routes.pinReset), isNull);
@@ -232,66 +167,5 @@ void main() {
       expect(find.text('ပြန်ကြိုးစားမယ်'), findsOneWidget);
     });
 
-    testWidgets('locked out → "PIN မေ့နေပါသလား?" → code + new PIN → the app opens', (tester) async {
-      final db = memoryDb();
-      addTearDown(() => tester.runAsync(db.close));
-      final auth = FakeAuthApi();
-      final store = MemorySecureStore();
-      final hash = await const PinHasher(iterations: 10, useIsolate: false).hash('123456');
-      final session = testSession(auth.tenantId, pinHash: hash);
-      store.values.addAll({
-        SecureKeys.tenantId: session.tenantId,
-        SecureKeys.refreshToken: 'r',
-        SecureKeys.pinHash: hash,
-        SecureKeys.phone: session.phone,
-        SecureKeys.pinLockedUntil: DateTime.now().toUtc().add(const Duration(minutes: 10)).toIso8601String(),
-      });
-      // The phone already holds this shop (downloaded): the reset keeps the data.
-      await tester.runAsync(() async {
-        await LocalData(db).adopt(
-          tenantId: auth.tenantId,
-          phone: session.phone,
-          shopName: 'ရွှေဝါ',
-          templateId: 'grocery',
-          deviceId: 'd',
-          deviceCode: 'A',
-          deviceLastSeq: 0,
-        );
-        await db.writeState(SyncStateKeys.initialSyncDone, 'true');
-      });
-      final c = await boot(tester, [
-        appDatabaseProvider.overrideWithValue(db),
-        secureStoreProvider.overrideWithValue(store),
-        authApiProvider.overrideWithValue(auth),
-        pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
-      ], state: BootState(deviceId: newId(), session: session, initialSyncDone: true));
-      expect(find.byType(UnlockScreen), findsOneWidget);
-      await tester.pumpAndSettle();
-      expect(find.textContaining('ပိတ်ထားပါတယ်'), findsOneWidget, reason: 'locked out');
-
-      await tester.tap(find.text('PIN မေ့နေပါသလား?'));
-      await tester.pumpAndSettle();
-      expect(find.byType(PinResetScreen), findsOneWidget);
-      expect(find.byType(EditableText).evaluate().map((e) => (e.widget as EditableText).controller.text).first, '9700000001',
-          reason: 'the phone of the locked session is prefilled');
-
-      await tester.tap(find.text('ကုဒ်ပို့မယ်'));
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
-      await tester.pumpAndSettle();
-      final inputs = find.byType(EditableText);
-      await tester.enterText(inputs.at(1), '654321');
-      await tester.enterText(inputs.at(2), '246810');
-      await tester.enterText(inputs.at(3), '246810');
-      await tester.tap(find.text('PIN အသစ် သိမ်းမယ်'));
-      for (var i = 0; i < 5; i++) {
-        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
-        await tester.pumpAndSettle();
-      }
-
-      expect(auth.calls, ['otp:reset:+959700000001', 'reset:+959700000001', 'login:+959700000001']);
-      expect(c.read(authControllerProvider).status, AuthStatus.unlocked);
-      expect(find.byType(PinResetScreen), findsNothing);
-      expect(c.read(sessionProvider).tenantId, auth.tenantId);
-    });
   });
 }

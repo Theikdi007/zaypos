@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/application/auth_controller.dart';
-import '../../features/auth/data/google_auth.dart';
 import '../../features/auth/presentation/google_shop_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
-import '../../features/auth/presentation/pin_reset_screen.dart';
 import '../../features/devices/presentation/devices_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/unlock_screen.dart';
@@ -43,7 +41,7 @@ String? authRedirect(AuthStatus status, String location, {bool firstSyncDone = t
       location == Routes.chooseShop;
   return switch (status) {
     AuthStatus.signedOut => public ? null : Routes.login,
-    // A locked-out owner can reset the PIN by SMS from the unlock screen.
+    // A locked-out owner can reset the PIN with Google from the unlock screen.
     AuthStatus.locked => location == Routes.unlock || location == Routes.pinReset ? null : Routes.unlock,
     AuthStatus.unlocked when !firstSyncDone => location == Routes.firstSync ? null : Routes.firstSync,
     AuthStatus.unlocked => location == Routes.login ||
@@ -62,7 +60,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   ref.listen(authControllerProvider, (_, next) => gate.value = (next.status, gate.value.$2));
   ref.listen(firstSyncDoneProvider, (_, done) => gate.value = (gate.value.$1, done));
   ref.onDispose(gate.dispose);
-  final otpEnabled = ref.read(otpEnabledProvider);
 
   return GoRouter(
     navigatorKey: _rootKey,
@@ -74,11 +71,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.unlock, builder: (_, _) => const UnlockScreen()),
       GoRoute(path: Routes.firstSync, builder: (_, _) => const FirstSyncScreen()),
       GoRoute(path: Routes.devices, builder: (_, _) => const DevicesScreen()),
-      // Forgot PIN: Google (default) or the SMS code (AUTH_OTP_ENABLED).
-      GoRoute(
-        path: Routes.pinReset,
-        builder: (_, _) => otpEnabled ? const PinResetScreen() : const GoogleShopScreen(purpose: GoogleShopPurpose.reset),
-      ),
+      // Forgot PIN: Google again → new PIN (also while locked out).
+      GoRoute(path: Routes.pinReset, builder: (_, _) => const GoogleShopScreen(purpose: GoogleShopPurpose.reset)),
       GoRoute(path: Routes.chooseShop, builder: (_, _) => const GoogleShopScreen()),
       GoRoute(
         path: Routes.syncReview,

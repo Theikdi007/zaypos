@@ -101,12 +101,11 @@ abstract interface class AuthApi {
   /// `POST /auth/google/shops`.
   Future<GoogleShops> googleShops(String idToken);
 
-  /// `POST /auth/google`: a shop of this Google account ([tenantId]) or, to link a shop registered by
-  /// phone before Google, [phone]; plus the shop's PIN.
+  /// `POST /auth/google`: a shop of this Google account ([tenantId]) plus the user's PIN. This is the
+  /// only way a new phone signs in (there is no phone + PIN sign-in).
   Future<AuthResult> googleSignIn({
     required String idToken,
-    String? tenantId,
-    String? phone,
+    required String tenantId,
     required String pin,
     required String deviceId,
     String? deviceName,
@@ -141,11 +140,7 @@ abstract interface class AuthApi {
     String? deviceName,
   });
 
-  Future<AuthResult> login({required String phone, required String pin, required String deviceId, String? deviceName});
-
   Future<AuthResult> refresh(String refreshToken);
-
-  Future<void> resetPin({required String phone, required String otp, required String newPin});
 }
 
 /// Plain dio (no auth interceptor): these endpoints are anonymous.
@@ -171,16 +166,14 @@ class DioAuthApi implements AuthApi {
   @override
   Future<AuthResult> googleSignIn({
     required String idToken,
-    String? tenantId,
-    String? phone,
+    required String tenantId,
     required String pin,
     required String deviceId,
     String? deviceName,
   }) async =>
       AuthResult.fromJson(await _post('/google', {
         'idToken': idToken,
-        'tenantId': ?tenantId,
-        'phone': ?phone,
+        'tenantId': tenantId,
         'pin': pin,
         'device': _device(deviceId, deviceName),
       }));
@@ -239,17 +232,8 @@ class DioAuthApi implements AuthApi {
       }));
 
   @override
-  Future<AuthResult> login({required String phone, required String pin, required String deviceId, String? deviceName}) async =>
-      AuthResult.fromJson(await _post('/login', {'phone': phone, 'pin': pin, 'device': _device(deviceId, deviceName)}));
-
-  @override
   Future<AuthResult> refresh(String refreshToken) async =>
       AuthResult.fromJson(await _post('/refresh', {'refreshToken': refreshToken}));
-
-  @override
-  Future<void> resetPin({required String phone, required String otp, required String newPin}) async {
-    await _post('/pin/reset', {'phone': phone, 'otp': otp, 'newPin': newPin});
-  }
 }
 
 /// Dio for anonymous calls (auth, limits). Every dio in the app is built here

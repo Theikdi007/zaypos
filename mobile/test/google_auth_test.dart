@@ -62,7 +62,6 @@ void main() {
         'google_unavailable',
         'shop_not_found',
         'google_shop_limit',
-        'google_linked_elsewhere',
         'otp_disabled',
       ]) {
         expect(apiErrorMessage(code), isNot(generic), reason: code);
@@ -216,16 +215,6 @@ void main() {
           auth(c).registerWithGoogle(shopName: 'x', rawOwnerPhone: '0979091704', templateId: 'grocery', pin: '123456'),
           throwsA(isA<AuthFailure>().having((f) => f.code, 'code', 'google_again')));
       expect(api.calls, isEmpty);
-    });
-
-    test('link a phone shop: phone + PIN go with the Google token; the login phone is kept', () async {
-      final c = await launch();
-      await auth(c).googleSignIn();
-
-      await auth(c).linkPhoneShop('09 7123 4567', '123456');
-
-      expect(api.calls.last, 'google:link:+95971234567:123456');
-      expect(c.read(sessionProvider).phone, '+95971234567');
     });
 
     test('forgot PIN: Google → reset → signs in with the NEW PIN; the local lockout is cleared', () async {

@@ -142,22 +142,16 @@ public sealed class AuthService(
         return Respond(user, tenant, device, refresh, token, now);
     }
 
-    // ---------------------------------------------------------------- Login
+    // ---------------------------------------------------------------- Sign in
 
-    public async Task<AuthResponse> LoginAsync(LoginRequest req, CancellationToken ct)
-    {
-        var phone = PhoneNumbers.Normalize(req.Phone) ?? throw AuthException.InvalidCredentials();
-        var deviceName = RequireDevice(req.Device);
-        var user = await repo.FindUserByPhoneAsync(phone, ct);
-        if (user is null) throw UnknownPhone(req.Pin);
-        return await SignInAsync(user, req.Pin, req.Device, deviceName, onPinVerified: null, ct);
-    }
+    // There is no phone + PIN sign-in (POST /auth/login was removed): a new phone signs in only with
+    // Google + the PIN (GoogleSignInAsync). The PIN alone never proves who someone is.
 
     /// <summary>
     /// The shared sign-in once "who" is known: lockout, PIN check (5 wrong → 15 min), then this device
     /// (same device = its old sessions end; new device = next free code) and fresh tokens.
     /// <paramref name="onPinVerified"/> runs after a right PIN, before anything is saved (Google: remember
-    /// the email, or link the account); it may throw to refuse.
+    /// the email); it may throw to refuse.
     /// </summary>
     private async Task<AuthResponse> SignInAsync(
         User user, string? pin, DeviceInfo deviceInfo, string? deviceName, Action<User>? onPinVerified, CancellationToken ct)
@@ -340,30 +334,17 @@ public sealed class AuthService(
             mine.Select(r => new GoogleShop(r.Tenant.Id, r.Tenant.Name, r.Tenant.TemplateId, r.User.Role)).ToList());
     }
 
-    /// <summary>
-    /// Sign in on this phone: a shop of this Google account (tenantId) + its PIN, or a shop registered by
-    /// phone before Google (phone + PIN, exactly like /login), which links the Google account to it.
-    /// </summary>
+    /// <summary>Sign in on this phone: a shop of this Google account (tenantId) + the user's PIN.</summary>
     public async Task<AuthResponse> GoogleSignInAsync(GoogleSignInRequest req, CancellationToken ct)
     {
         var deviceName = RequireDevice(req.Device);
-        var hasPhone = !string.IsNullOrWhiteSpace(req.Phone);
-        if (req.TenantId is not null && hasPhone) throw AuthException.Validation("Send tenantId or phone, not both.");
-        if (req.TenantId is null && !hasPhone) throw AuthException.Validation("tenantId (or phone, to link a shop) is required.");
+        if (req.TenantId is not { } tenantId || tenantId == Guid.Empty)
+            throw AuthException.Validation("tenantId is required.");
 
         var id = await google.VerifyAsync(req.IdToken, ct);
         var mine = await repo.FindGoogleUsersAsync(id.Subject, ct);
-
-        if (req.TenantId is { } tenantId)
-        {
-            var user = mine.FirstOrDefault(r => r.Tenant.Id == tenantId).User ?? throw AuthException.ShopNotFound();
-            return await SignInAsync(user, req.Pin, req.Device, deviceName, u => RememberEmail(u, id), ct);
-        }
-
-        var phone = PhoneNumbers.Normalize(req.Phone) ?? throw AuthException.InvalidCredentials();
-        var legacy = await repo.FindUserByPhoneAsync(phone, ct);
-        if (legacy is null) throw UnknownPhone(req.Pin);
-        return await SignInAsync(legacy, req.Pin, req.Device, deviceName, u => Link(u, id, mine), ct);
+        var user = mine.FirstOrDefault(r => r.Tenant.Id == tenantId).User ?? throw AuthException.ShopNotFound();
+        return await SignInAsync(user, req.Pin, req.Device, deviceName, u => RememberEmail(u, id), ct);
     }
 
     /// <summary>Find-or-create's "create": a new shop owned by this Google account.</summary>
@@ -403,25 +384,6 @@ public sealed class AuthService(
         var email = Email(id);
         if (email is null || user.GoogleEmail == email) return;
         user.GoogleEmail = email;
-        user.UpdatedAt = Now;
-    }
-
-    /// <summary>Attaches the Google account to a phone-registered user (after its PIN was right).</summary>
-    private void Link(User user, GoogleIdentity id, IReadOnlyList<(User User, Tenant Tenant)> mine)
-    {
-        if (user.GoogleSubject == id.Subject)
-        {
-            RememberEmail(user, id);
-            return;
-        }
-        if (user.GoogleSubject is not null)
-            throw new AuthException(409, "google_linked_elsewhere",
-                "This shop is already linked to another Google account. Sign in with that account.");
-        if (mine.Any(r => r.Tenant.Id == user.TenantId))
-            throw new AuthException(409, "google_linked_elsewhere", "This Google account already has a user in this shop.");
-        if (mine.Count >= AuthRules.GoogleShopsPerAccount) throw ShopLimit();
-        user.GoogleSubject = id.Subject;
-        user.GoogleEmail = Email(id);
         user.UpdatedAt = Now;
     }
 
@@ -512,13 +474,6 @@ public sealed class AuthService(
     private void RequireOtpEnabled()
     {
         if (!settings.OtpEnabled) throw AuthException.OtpDisabled();
-    }
-
-    /// <summary>Same PBKDF2 cost as a real user, so response time does not reveal which phones exist.</summary>
-    private AuthException UnknownPhone(string? pin)
-    {
-        if (Pins.IsValid(pin)) pins.VerifyDummy(pin!);
-        return AuthException.InvalidCredentials();
     }
 
     private static AuthException ShopLimit() =>

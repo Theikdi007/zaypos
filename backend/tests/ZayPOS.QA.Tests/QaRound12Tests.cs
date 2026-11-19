@@ -49,10 +49,7 @@ public class QaRound12Tests(SqlServerFixture sql)
         reg.StatusCode.Should().Be(HttpStatusCode.OK, await reg.Content.ReadAsStringAsync());
         var tenant = (await reg.Content.ReadFromJsonAsync<AuthResponse>(Json))!.Tenant.Id;
 
-        var login = await _http.PostAsJsonAsync("/api/v1/auth/login",
-            new LoginRequest(Spaced(phone), Pin, new DeviceInfo(Guid.CreateVersion7(), "B")), Json);
-        login.StatusCode.Should().Be(HttpStatusCode.OK, await login.Content.ReadAsStringAsync());
-        (await login.Content.ReadFromJsonAsync<AuthResponse>(Json))!.Tenant.Id.Should().Be(tenant);
+        // (Phone + PIN sign-in "+95 9 …" was removed with POST /auth/login; the other forms are still checked below.)
 
         // a second shop for the same number in another form is refused at the OTP step (README: 409 phone_registered)
         var again = await _http.PostAsJsonAsync("/api/v1/auth/otp", new OtpRequest("959-" + phone[4..], OtpPurpose.Register), Json);
@@ -65,9 +62,6 @@ public class QaRound12Tests(SqlServerFixture sql)
         var reset = await _http.PostAsJsonAsync("/api/v1/auth/pin/reset",
             new ResetPinRequest(Dotted(phone), sql.Api.Sms.LastCode(phone), "246802"), Json);
         reset.IsSuccessStatusCode.Should().BeTrue(await reset.Content.ReadAsStringAsync());
-        var newLogin = await _http.PostAsJsonAsync("/api/v1/auth/login",
-            new LoginRequest(phone, "246802", new DeviceInfo(Guid.CreateVersion7(), "D")), Json);
-        newLogin.StatusCode.Should().Be(HttpStatusCode.OK, await newLogin.Content.ReadAsStringAsync());
 
         // the 3-per-hour OTP limit counts every form as one number: 2 sent above, a 3rd (spaced) is sent, a 4th (dashed) refused
         (await _http.PostAsJsonAsync("/api/v1/auth/otp", new OtpRequest(Spaced(phone), OtpPurpose.Reset), Json))

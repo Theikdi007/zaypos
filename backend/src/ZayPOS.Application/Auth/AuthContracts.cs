@@ -12,8 +12,6 @@ public sealed record OtpResponse(DateTime ExpiresAt);
 public sealed record RegisterRequest(
     string Phone, string Otp, string ShopName, string TemplateId, string? Township, string Pin, DeviceInfo Device);
 
-public sealed record LoginRequest(string Phone, string Pin, DeviceInfo Device);
-
 public sealed record RefreshRequest(string RefreshToken);
 
 public sealed record ResetPinRequest(string Phone, string Otp, string NewPin);
@@ -25,11 +23,8 @@ public sealed record GoogleShopsResponse(string? Email, IReadOnlyList<GoogleShop
 
 public sealed record GoogleShop(Guid TenantId, string Name, string TemplateId, UserRole Role);
 
-/// <summary>
-/// POST /auth/google: sign in on this phone. Either <see cref="TenantId"/> (a shop of this Google account) or
-/// <see cref="Phone"/> (a shop registered by phone before Google: links the account to it), plus the shop's PIN.
-/// </summary>
-public sealed record GoogleSignInRequest(string IdToken, Guid? TenantId, string? Phone, string Pin, DeviceInfo Device);
+/// <summary>POST /auth/google: sign in on this phone to <see cref="TenantId"/> (a shop of this Google account) with the user's PIN.</summary>
+public sealed record GoogleSignInRequest(string IdToken, Guid? TenantId, string Pin, DeviceInfo Device);
 
 /// <summary>POST /auth/google/register. <see cref="OwnerPhone"/> is a contact number (Tenants.Phone), NOT verified.</summary>
 public sealed record GoogleRegisterRequest(
@@ -60,7 +55,7 @@ public sealed class AuthException(int status, string code, string detail, TimeSp
 
     public static AuthException Validation(string detail) => new(400, "validation", detail);
     public static AuthException OtpInvalid() => new(400, "otp_invalid", "The code is wrong or has expired.");
-    public static AuthException InvalidCredentials() => new(401, "invalid_credentials", "Phone or PIN is wrong.");
+    public static AuthException InvalidCredentials() => new(401, "invalid_credentials", "The PIN is wrong.");
     public static AuthException InvalidRefreshToken() => new(401, "invalid_refresh_token", "Sign in again.");
     public static AuthException OtpDisabled() =>
         new(403, "otp_disabled", "Phone verification by SMS is turned off. Sign in with Google.");

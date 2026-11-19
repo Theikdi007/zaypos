@@ -46,3 +46,9 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Firebase / Google Sign-In config of the real project (docs/backend/auth-google.md §6): never in git.
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist
+/ios/Flutter/GoogleSignIn.local.xcconfig
+/google.json

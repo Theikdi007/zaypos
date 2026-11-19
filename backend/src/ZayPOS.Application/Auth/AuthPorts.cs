@@ -78,8 +78,6 @@ public interface IPinHasher
 {
     string Hash(User user, string pin);
     PinCheck Verify(User user, string hash, string pin);
-    /// <summary>Burns the same time as <see cref="Verify"/> against a fixed dummy hash (unknown phone).</summary>
-    void VerifyDummy(string pin);
 }
 
 public enum PinCheck { Failed, Success, SuccessRehashNeeded }

@@ -22,7 +22,6 @@ import 'package:zaypos_app/features/auth/data/session.dart';
 import 'package:zaypos_app/features/auth/domain/pin_hasher.dart';
 import 'package:zaypos_app/features/auth/presentation/google_shop_screen.dart';
 import 'package:zaypos_app/features/auth/presentation/login_screen.dart';
-import 'package:zaypos_app/features/auth/presentation/pin_reset_screen.dart';
 import 'package:zaypos_app/features/auth/presentation/register_screen.dart';
 import 'package:zaypos_app/features/auth/presentation/unlock_screen.dart';
 import 'package:zaypos_app/features/sync/presentation/first_sync_screen.dart';
@@ -215,20 +214,18 @@ void main() {
     expect(find.text('ဘယ်လိုဆိုင်လဲ?'), findsOneWidget, reason: 'step 2');
   });
 
-  testWidgets('a shop registered by phone before Google: link it with phone + PIN once', (tester) async {
-    final c = await boot(tester);
+  testWidgets('no shop on the Google account: open a new one or try another account; no phone + PIN sign-in', (tester) async {
+    await boot(tester);
     await tester.tap(find.text('Google နဲ့ ဝင်မယ်'));
     await settle(tester);
-    await tapText(tester, 'ဖုန်းနံပါတ်နဲ့ ဖွင့်ထားတဲ့ ဆိုင် ရှိတယ်');
-    await tester.pumpAndSettle();
 
-    await tester.enterText(find.byType(EditableText).at(0), '9 7123 4567');
-    await tester.enterText(find.byType(EditableText).at(1), '123456');
-    await tapText(tester, 'ချိတ်ပြီး ဝင်မယ်');
-    await settle(tester, animating: true);
-
-    expect(api.calls.last, 'google:link:+95971234567:123456');
-    expect(c.read(authControllerProvider).status, AuthStatus.unlocked);
+    expect(find.byType(GoogleShopScreen), findsOneWidget);
+    expect(find.text('ဒီ Google အကောင့်မှာ ဆိုင် မရှိသေးပါ'), findsOneWidget);
+    expect(find.text('ဆိုင်အသစ် ဖွင့်မယ်'), findsOneWidget);
+    expect(find.text('တခြားအကောင့်'), findsOneWidget);
+    expect(find.byType(EditableText), findsNothing, reason: 'no phone or PIN field to sign in with');
+    expect(find.text('ဖုန်းနံပါတ်'), findsNothing);
+    expect(api.calls, ['google:shops']);
   });
 
   testWidgets('locked out → "PIN မေ့နေပါသလား?" → Google → this phone\'s shop is chosen → new PIN twice → the app opens',
@@ -259,7 +256,6 @@ void main() {
     await tester.tap(find.text('PIN မေ့နေပါသလား?'));
     await tester.pumpAndSettle();
     expect(find.byType(GoogleShopScreen), findsOneWidget);
-    expect(find.byType(PinResetScreen), findsNothing, reason: 'the SMS reset screen is not in the default flow');
 
     await tapText(tester, 'Google နဲ့ အတည်ပြုမယ်');
     await settle(tester);

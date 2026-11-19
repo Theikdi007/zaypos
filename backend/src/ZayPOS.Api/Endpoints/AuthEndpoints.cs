@@ -18,9 +18,8 @@ public static class AuthEndpoints
                 Results.Ok(await svc.RegisterAsync(req, ct)))
             .Produces<AuthResponse>();
 
-        auth.MapPost("/login", async (LoginRequest req, AuthService svc, CancellationToken ct) =>
-                Results.Ok(await svc.LoginAsync(req, ct)))
-            .Produces<AuthResponse>();
+        // No POST /login: phone + PIN never signs in a new phone (docs/backend/auth-google.md §3).
+        // The PIN unlocks a signed-in phone offline, and is checked with Google in POST /google.
 
         auth.MapPost("/refresh", async (RefreshRequest req, AuthService svc, CancellationToken ct) =>
                 Results.Ok(await svc.RefreshAsync(req, ct)))

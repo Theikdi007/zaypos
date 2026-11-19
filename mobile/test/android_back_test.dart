@@ -162,7 +162,7 @@ void main() {
 
       await tester.binding.handlePopRoute();
       await tester.pump(const Duration(milliseconds: 500));
-      expect(find.text('ဝင်မယ်'), findsWidgets, reason: 'step 1 back leaves the wizard (Login)');
+      expect(find.text('Google နဲ့ ဝင်မယ်'), findsWidgets, reason: 'step 1 back leaves the wizard (Login)');
       // The resend countdown timer of step 1 ends with the screen.
       await tester.pump(const Duration(seconds: 61));
     });

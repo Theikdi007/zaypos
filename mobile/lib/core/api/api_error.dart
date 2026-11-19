@@ -63,7 +63,6 @@ String apiErrorMessage(String code, {Duration? retryAfter}) => switch (code) {
       'google_unavailable' => 'Google နဲ့ အခု စစ်လို့ မရပါ။ ခဏနေ ပြန်ကြိုးစားပါ။',
       'shop_not_found' => 'ဒီ Google အကောင့်မှာ ဒီဆိုင် မရှိပါ။ ဆိုင်ဖွင့်တုန်းက Google အကောင့်နဲ့ ဝင်ပါ။',
       'google_shop_limit' => 'Google အကောင့်တစ်ခုမှာ ဆိုင် ၁၀ ဆိုင်ထက် ပိုဖွင့်လို့ မရပါ။',
-      'google_linked_elsewhere' => 'ဒီဆိုင်ကို တခြား Google အကောင့်နဲ့ ချိတ်ထားပြီးပါပြီ။ အဲဒီအကောင့်နဲ့ ဝင်ပါ။',
       'otp_disabled' => 'SMS ကုဒ်နဲ့ ဝင်တာ ပိတ်ထားပါတယ်။ Google အကောင့်နဲ့ ဝင်ပါ။',
       'invalid_credentials' => 'ဖုန်းနံပါတ် (သို့) PIN မှားနေပါတယ်။',
       'pin_locked' => retryAfter == null

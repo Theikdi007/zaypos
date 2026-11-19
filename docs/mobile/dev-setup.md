@@ -53,26 +53,27 @@ dotnet run --project src/ZayPOS.Api --urls http://0.0.0.0:5076
 
 If macOS asks whether `dotnet` may accept incoming network connections, click **Allow**.
 
-**Google Sign-In** is the default (docs/backend/auth-google.md). The API needs the client ids
-once (user-secrets, never appsettings):
+**Google Sign-In** is the only way to sign in on a phone (docs/backend/auth-google.md; there is no
+phone + PIN sign-in). The API needs the client ids once (user-secrets, never appsettings):
 
 ```sh
-dotnet user-secrets set Auth:Google:ClientIds "<web id>,<android debug id>,<ios id>" --project src/ZayPOS.Api
+dotnet user-secrets set Auth:Google:ClientIds "<web id>,<android id>,<ios id>" --project src/ZayPOS.Api
 ```
 
-and every app run below adds:
+The app reads its ids from gitignored files (auth-google.md §6 lists them and where each id comes
+from): `mobile/google.json` for the Dart side and `ios/Flutter/GoogleSignIn.local.xcconfig` for the
+iOS URL scheme. Every app run below adds:
 
 ```sh
-  --dart-define=GOOGLE_SERVER_CLIENT_ID=<web client id> \
-  --dart-define=GOOGLE_IOS_CLIENT_ID=<ios client id>       # iOS only; also set ios/Flutter/GoogleSignIn.xcconfig
+  --dart-define-from-file=google.json
 ```
 
-Without them the app says Google is not configured ("…ပြင်ဆင်ထားခြင်း မရှိသေးပါ"). The Android debug
+Without it the app says Google is not configured ("…ပြင်ဆင်ထားခြင်း မရှိသေးပါ"). The Android
 client must carry the SHA-1 of `~/.android/debug.keystore`; the emulator needs a Google Play system
-image with a Google account added.
+image (`Pixel_9a`) with a Google account added (Settings → Passwords & accounts).
 
-**SMS OTP** (off by default): run the API with `--Auth:OtpEnabled=true` and the app with
-`--dart-define=AUTH_OTP_ENABLED=true`. OTP codes are then printed here:
+**SMS OTP** (off by default; SMS registration only): run the API with `--Auth:OtpEnabled=true` and
+the app with `--dart-define=AUTH_OTP_ENABLED=true`. OTP codes are then printed here:
 `DEV SMS to +959…: ZayPOS code: 123456`.
 
 **Terminal 2 — the app on the iPhone**, pointed at the Mac's Wi-Fi IP:
@@ -141,6 +142,11 @@ HTTPS_URL=https://<api-host> tool/release_https_check.sh
 ```
 
 ## Live tests against the running API
+
+> These tests register by SMS OTP (run the API with `--Auth:OtpEnabled=true`). Every step that signed
+> a **second phone** in by phone + PIN, or reset the PIN by SMS, now stops with "Phone + PIN sign-in was
+> removed" (`test/live_removed_phone_sign_in.dart`): those flows no longer exist. Rewriting them for
+> Google needs a real Google ID token for the local API.
 
 ```sh
 # 1. ask for a register OTP for a NEW phone number; read the code in terminal 1

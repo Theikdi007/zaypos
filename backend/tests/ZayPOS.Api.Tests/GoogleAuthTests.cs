@@ -57,7 +57,7 @@ public class GoogleAuthTests : IAsyncLifetime
     {
         var device = new DeviceInfo(Guid.CreateVersion7(), null);
         await ShouldBeProblem(await Post("/api/v1/auth/google/shops", new GoogleShopsRequest(token)), status, code);
-        await ShouldBeProblem(await Post("/api/v1/auth/google", new GoogleSignInRequest(token, Guid.NewGuid(), null, Pin, device)), status, code);
+        await ShouldBeProblem(await Post("/api/v1/auth/google", new GoogleSignInRequest(token, Guid.NewGuid(), Pin, device)), status, code);
         await ShouldBeProblem(await Post("/api/v1/auth/google/register", RegisterBody(token)), status, code);
         await ShouldBeProblem(await Post("/api/v1/auth/google/pin/reset", new GoogleResetPinRequest(token, Guid.NewGuid(), Pin)), status, code);
     }
@@ -95,15 +95,30 @@ public class GoogleAuthTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task An_unverified_owner_phone_can_not_be_used_to_sign_in_and_does_not_block_that_number()
+    public async Task Two_google_shops_may_give_the_same_unverified_owner_phone()
     {
         var phone = NewPhone();
-        await Register(FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject()), ownerPhone: phone);
-        // Two Google shops may give the same contact number.
-        await Register(FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject()), ownerPhone: phone);
+        var first = await Register(FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject()), ownerPhone: phone);
+        var second = await Register(FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject()), ownerPhone: phone);
 
-        await ShouldBeProblem(await Post("/api/v1/auth/login", new LoginRequest(phone, Pin, new DeviceInfo(Guid.CreateVersion7(), null))),
-            HttpStatusCode.Unauthorized, "invalid_credentials");
+        (await Me(first)).Tenant.Phone.Should().Be(phone);
+        (await Me(second)).Tenant.Phone.Should().Be(phone);
+    }
+
+    [Fact]
+    public async Task There_is_no_phone_and_PIN_sign_in_on_a_new_phone()
+    {
+        // Not for a Google shop's owner phone, and not even for a verified phone with the right PIN.
+        var owner = NewPhone();
+        await Register(FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject()), ownerPhone: owner);
+        var verified = NewPhone();
+        await RegisterByOtp(verified);
+
+        foreach (var phone in new[] { owner, verified })
+        {
+            var res = await Post("/api/v1/auth/login", new { phone, pin = Pin, device = new DeviceInfo(Guid.CreateVersion7(), null) });
+            res.StatusCode.Should().Be(HttpStatusCode.NotFound, "POST /auth/login no longer exists");
+        }
     }
 
     [Fact]
@@ -197,15 +212,15 @@ public class GoogleAuthTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Sign_in_needs_exactly_one_of_tenantId_or_phone()
+    public async Task Sign_in_needs_a_tenantId_and_a_device()
     {
         var token = FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject());
         var device = new DeviceInfo(Guid.CreateVersion7(), null);
-        await ShouldBeProblem(await Post("/api/v1/auth/google", new GoogleSignInRequest(token, null, null, Pin, device)),
+        await ShouldBeProblem(await Post("/api/v1/auth/google", new GoogleSignInRequest(token, null, Pin, device)),
             HttpStatusCode.BadRequest, "validation");
-        await ShouldBeProblem(await Post("/api/v1/auth/google", new GoogleSignInRequest(token, Guid.NewGuid(), NewPhone(), Pin, device)),
+        await ShouldBeProblem(await Post("/api/v1/auth/google", new GoogleSignInRequest(token, Guid.Empty, Pin, device)),
             HttpStatusCode.BadRequest, "validation");
-        await ShouldBeProblem(await Post("/api/v1/auth/google", new GoogleSignInRequest(token, Guid.NewGuid(), null, Pin, new DeviceInfo(Guid.Empty, null))),
+        await ShouldBeProblem(await Post("/api/v1/auth/google", new GoogleSignInRequest(token, Guid.NewGuid(), Pin, new DeviceInfo(Guid.Empty, null))),
             HttpStatusCode.BadRequest, "validation");
     }
 
@@ -243,72 +258,26 @@ public class GoogleAuthTests : IAsyncLifetime
             await Post("/api/v1/auth/google/pin/reset", new GoogleResetPinRequest(FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject()), Guid.NewGuid(), "12ab56")),
             HttpStatusCode.BadRequest, "validation");
 
-    // ------------------------------------------------------------ shops registered by phone before Google
+    // ------------------------------------------------------------ shops registered by phone (OTP)
 
     [Fact]
-    public async Task A_phone_shop_is_linked_to_the_google_account_with_phone_and_PIN_once()
-    {
-        var phone = NewPhone();
-        var legacy = await RegisterByOtp(phone);
-        var sub = FakeGoogleVerifier.NewSubject();
-        var token = FakeGoogleVerifier.Token(sub, "legacy@gmail.com");
-        (await Shops(token)).Shops.Should().BeEmpty();
-
-        var res = await Post("/api/v1/auth/google",
-            new GoogleSignInRequest(token, null, "09 7" + phone[5..], Pin, new DeviceInfo(Guid.CreateVersion7(), "Redmi")));
-        res.StatusCode.Should().Be(HttpStatusCode.OK, await res.Content.ReadAsStringAsync());
-        var linked = (await res.Content.ReadFromJsonAsync<AuthResponse>(Json))!;
-        linked.User.Id.Should().Be(legacy.User.Id);
-        linked.Device.Code.Should().Be("B");
-
-        (await Shops(token)).Shops.Should().ContainSingle().Which.TenantId.Should().Be(legacy.Tenant.Id);
-        await using (var db = _sql.CreateContext(legacy.Tenant.Id))
-        {
-            var user = await db.Users.SingleAsync();
-            user.GoogleSubject.Should().Be(sub);
-            user.Phone.Should().Be(phone, "the verified phone stays: phone + PIN login keeps working");
-        }
-        // From now on: Google + shop + PIN.
-        (await SignInOk(token, legacy.Tenant.Id, Pin, Guid.CreateVersion7())).Device.Code.Should().Be("C");
-        // And phone + PIN (no SMS) still works for old app builds.
-        (await Post("/api/v1/auth/login", new LoginRequest(phone, Pin, new DeviceInfo(Guid.CreateVersion7(), null))))
-            .StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    [Fact]
-    public async Task Linking_with_a_wrong_PIN_or_unknown_phone_links_nothing()
+    public async Task A_phone_and_PIN_never_attach_a_phone_shop_to_a_google_account()
     {
         var phone = NewPhone();
         var legacy = await RegisterByOtp(phone);
         var token = FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject());
-        var device = new DeviceInfo(Guid.CreateVersion7(), null);
 
-        await ShouldBeProblem(await Post("/api/v1/auth/google", new GoogleSignInRequest(token, null, phone, "999999", device)),
-            HttpStatusCode.Unauthorized, "invalid_credentials");
-        await ShouldBeProblem(await Post("/api/v1/auth/google", new GoogleSignInRequest(token, null, NewPhone(), Pin, device)),
-            HttpStatusCode.Unauthorized, "invalid_credentials");
+        // The old link body (phone + right PIN) and the shop's tenantId with a phone: neither works.
+        await ShouldBeProblem(await Post("/api/v1/auth/google",
+                new { idToken = token, phone, pin = Pin, device = new DeviceInfo(Guid.CreateVersion7(), null) }),
+            HttpStatusCode.BadRequest, "validation");
+        await ShouldBeProblem(await Post("/api/v1/auth/google",
+                new { idToken = token, tenantId = legacy.Tenant.Id, phone, pin = Pin, device = new DeviceInfo(Guid.CreateVersion7(), null) }),
+            HttpStatusCode.NotFound, "shop_not_found");
 
         (await Shops(token)).Shops.Should().BeEmpty();
         await using var db = _sql.CreateContext(legacy.Tenant.Id);
         (await db.Users.SingleAsync()).GoogleSubject.Should().BeNull();
-    }
-
-    [Fact]
-    public async Task A_shop_linked_to_one_google_account_can_not_be_linked_to_another()
-    {
-        var phone = NewPhone();
-        await RegisterByOtp(phone);
-        var device = new DeviceInfo(Guid.CreateVersion7(), null);
-        var first = FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject());
-        (await Post("/api/v1/auth/google", new GoogleSignInRequest(first, null, phone, Pin, device))).StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var second = FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject());
-        await ShouldBeProblem(await Post("/api/v1/auth/google", new GoogleSignInRequest(second, null, phone, Pin, device)),
-            HttpStatusCode.Conflict, "google_linked_elsewhere");
-        (await Shops(second)).Shops.Should().BeEmpty();
-
-        // The first account linking again is fine (idempotent).
-        (await Post("/api/v1/auth/google", new GoogleSignInRequest(first, null, phone, Pin, device))).StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     // ------------------------------------------------------------ OTP switch
@@ -338,7 +307,7 @@ public class GoogleAuthTests : IAsyncLifetime
     // ------------------------------------------------------------ rate limit
 
     [Fact]
-    public async Task Google_endpoints_are_limited_per_google_account_and_a_link_per_phone()
+    public async Task Google_endpoints_are_limited_per_google_account()
     {
         await using var api = new ApiFactory(_sql.ConnectionString, authPerPhone: 2,
             settings: new Dictionary<string, string?> { ["Auth:OtpEnabled"] = "false" });
@@ -346,7 +315,7 @@ public class GoogleAuthTests : IAsyncLifetime
         var token = FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject());
 
         (await http.PostAsJsonAsync("/api/v1/auth/google/shops", new GoogleShopsRequest(token), Json)).StatusCode.Should().Be(HttpStatusCode.OK);
-        (await http.PostAsJsonAsync("/api/v1/auth/google", new GoogleSignInRequest(token, Guid.NewGuid(), null, Pin,
+        (await http.PostAsJsonAsync("/api/v1/auth/google", new GoogleSignInRequest(token, Guid.NewGuid(), Pin,
             new DeviceInfo(Guid.CreateVersion7(), null)), Json)).StatusCode.Should().Be(HttpStatusCode.NotFound);
         // Same account, any Google endpoint: one bucket.
         await ShouldBeProblem(await http.PostAsJsonAsync("/api/v1/auth/google/pin/reset", new GoogleResetPinRequest(token, Guid.NewGuid(), Pin), Json),
@@ -354,17 +323,21 @@ public class GoogleAuthTests : IAsyncLifetime
         // Another account from the same IP is unaffected.
         (await http.PostAsJsonAsync("/api/v1/auth/google/shops", new GoogleShopsRequest(FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject())), Json))
             .StatusCode.Should().Be(HttpStatusCode.OK);
+    }
 
-        // A link attempt counts against the phone, shared with /login (PIN guessing by phone stays limited).
-        var phone = NewPhone();
-        var other = FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject());
-        (await http.PostAsJsonAsync("/api/v1/auth/login", new LoginRequest(phone, Pin, new DeviceInfo(Guid.CreateVersion7(), null)), Json))
-            .StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        (await http.PostAsJsonAsync("/api/v1/auth/google", new GoogleSignInRequest(other, null, phone, Pin, new DeviceInfo(Guid.CreateVersion7(), null)), Json))
-            .StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        await ShouldBeProblem(await http.PostAsJsonAsync("/api/v1/auth/google",
-                new GoogleSignInRequest(FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject()), null, phone, Pin, new DeviceInfo(Guid.CreateVersion7(), null)), Json),
-            HttpStatusCode.TooManyRequests, "rate_limited");
+    [Fact]
+    public async Task A_made_up_phone_in_a_google_body_does_not_buy_a_fresh_rate_limit_bucket()
+    {
+        await using var api = new ApiFactory(_sql.ConnectionString, authPerPhone: 2,
+            settings: new Dictionary<string, string?> { ["Auth:OtpEnabled"] = "false" });
+        var http = api.CreateClient();
+        var token = FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject());
+        object Body() => new { idToken = token, tenantId = Guid.NewGuid(), phone = NewPhone(), pin = Pin,
+            device = new DeviceInfo(Guid.CreateVersion7(), null) };
+
+        (await http.PostAsJsonAsync("/api/v1/auth/google", Body(), Json)).StatusCode.Should().Be(HttpStatusCode.NotFound);
+        (await http.PostAsJsonAsync("/api/v1/auth/google", Body(), Json)).StatusCode.Should().Be(HttpStatusCode.NotFound);
+        await ShouldBeProblem(await http.PostAsJsonAsync("/api/v1/auth/google", Body(), Json), HttpStatusCode.TooManyRequests, "rate_limited");
     }
 
     [Fact]
@@ -416,7 +389,7 @@ public class GoogleAuthTests : IAsyncLifetime
     }
 
     private Task<HttpResponseMessage> SignIn(string token, Guid tenantId, string pin, Guid deviceId) =>
-        Post("/api/v1/auth/google", new GoogleSignInRequest(token, tenantId, null, pin, new DeviceInfo(deviceId, "Galaxy")));
+        Post("/api/v1/auth/google", new GoogleSignInRequest(token, tenantId, pin, new DeviceInfo(deviceId, "Galaxy")));
 
     private async Task<AuthResponse> SignInOk(string token, Guid tenantId, string pin, Guid deviceId)
     {

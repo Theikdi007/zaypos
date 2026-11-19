@@ -12,16 +12,17 @@ namespace ZayPOS.Api.Auth;
 
 /// <summary>
 /// /auth/* limits. Every auth request is limited per client IP (high: Myanmar carriers put many
-/// phones behind one CGNAT address); otp/login/pin-reset are also limited per normalized phone
+/// phones behind one CGNAT address); otp/pin-reset are also limited per normalized phone
 /// from the body, so one number can't be hammered from many IPs. The Google endpoints are limited
 /// the same way per Google account: the <c>sub</c> read from the ID token's payload WITHOUT
 /// verifying it (like the phone: anyone can spend someone's partition for a minute, nobody can
-/// skip it). A Google call that carries a phone (linking a phone shop) counts against the phone.
+/// skip it). A Google call is keyed by its token only: any other body field is ignored, so a
+/// made-up "phone" can't buy a fresh partition.
 /// </summary>
 public static class AuthRateLimiting
 {
     public const string PhoneItemKey = "zaypos.auth.phone";
-    private static readonly string[] PhonePaths = ["/api/v1/auth/otp", "/api/v1/auth/login", "/api/v1/auth/pin/reset"];
+    private static readonly string[] PhonePaths = ["/api/v1/auth/otp", "/api/v1/auth/pin/reset"];
     private static readonly string[] GooglePaths =
         ["/api/v1/auth/google", "/api/v1/auth/google/shops", "/api/v1/auth/google/register", "/api/v1/auth/google/pin/reset"];
 
@@ -64,8 +65,8 @@ public static class AuthRateLimiting
     }
 
     /// <summary>
-    /// Reads "phone" (otp/login/pin-reset, and a Google link) or the ID token's unverified "sub" (Google)
-    /// from the JSON body; the body stays readable for the endpoint.
+    /// Reads "phone" (otp/pin-reset) or the ID token's unverified "sub" (Google) from the JSON body;
+    /// the body stays readable for the endpoint.
     /// </summary>
     public static IApplicationBuilder UseAuthPhonePartition(this IApplicationBuilder app) => app.Use(async (http, next) =>
     {
@@ -87,15 +88,15 @@ public static class AuthRateLimiting
                         if (phone is null && p.Name.Equals("phone", StringComparison.OrdinalIgnoreCase)) phone = p.Value.GetString();
                         else if (idToken is null && p.Name.Equals("idToken", StringComparison.OrdinalIgnoreCase)) idToken = p.Value.GetString();
                     }
-                    if (!string.IsNullOrWhiteSpace(phone))
+                    if (googlePath)
+                    {
+                        http.Items[PhoneItemKey] = "google:" + (UnverifiedSubject(idToken) ?? "none");
+                    }
+                    else if (!string.IsNullOrWhiteSpace(phone))
                     {
                         var raw = phone.Trim();
                         // Invalid numbers still get a partition, so junk input can't dodge the limit.
                         http.Items[PhoneItemKey] = PhoneNumbers.Normalize(raw) ?? "raw:" + raw[..Math.Min(raw.Length, 32)];
-                    }
-                    else if (googlePath)
-                    {
-                        http.Items[PhoneItemKey] = "google:" + (UnverifiedSubject(idToken) ?? "none");
                     }
                 }
             }

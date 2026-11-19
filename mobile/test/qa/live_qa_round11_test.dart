@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../live_removed_phone_sign_in.dart';
 import 'package:zaypos_app/app/drift_overrides.dart';
 import 'package:zaypos_app/core/api/api_config.dart';
 import 'package:zaypos_app/core/api/api_error.dart';
