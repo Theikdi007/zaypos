@@ -60,6 +60,7 @@ await app.EnsureDatabaseMigratedAsync(); // refuses to start (clear log line) if
 app.WarnAboutConsoleSms();
 
 if (useForwarding) app.UseForwardedHeaders(); // before anything reads RemoteIpAddress or the scheme
+app.UseEdgeProxyClientIp(); // App Engine fallback route: the phone's IP, only with the proxy's secret (always strips the headers)
 app.UseExceptionHandler();
 if (app.Configuration.GetValue("Https:Require", false))
 {
