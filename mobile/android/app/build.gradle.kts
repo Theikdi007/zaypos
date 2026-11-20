@@ -7,6 +7,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Firebase (Crashlytics only) needs app/google-services.json (gitignored, docs/mobile/beta-release.md).
+// Without it the app still builds and runs; crash reporting is then off (crash_reporting.dart).
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
+}
+
 // Release signing: android/key.properties (gitignored; docs/mobile/release-signing.md). Holds the upload
 // keystore path, alias and passwords; never commit it, never put the passwords anywhere else.
 val keyProperties = Properties().apply {

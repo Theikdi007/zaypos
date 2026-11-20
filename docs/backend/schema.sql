@@ -138,7 +138,7 @@ CREATE TABLE dbo.Products (
     Category        nvarchar(60)     NOT NULL,
     Unit            nvarchar(20)     NOT NULL,           -- ခု, ပြည်, ပေ ...
     Barcode         varchar(64)      NULL,
-    Cost            bigint           NOT NULL,           -- kyats
+    Cost            bigint           NULL,               -- kyats; NULL = unknown (left empty), 0 = costs nothing (BUG-61)
     Price           bigint           NOT NULL,           -- kyats
     WholesalePrice  bigint           NULL,               -- kyats (quotation)
     LowAlertMilli   bigint           NOT NULL,
@@ -345,7 +345,7 @@ CREATE TABLE dbo.SaleLines (
     Name            nvarchar(150)    NOT NULL,           -- snapshot
     QtyMilli        bigint           NOT NULL,
     Price           bigint           NOT NULL,           -- kyats per unit
-    CostSnapshot    bigint           NOT NULL,           -- kyats per unit at sale time
+    CostSnapshot    bigint           NULL,               -- kyats per unit at sale time; NULL = unknown (BUG-61)
     LineTotal       bigint           NOT NULL,           -- (Price*QtyMilli + 500) / 1000, computed by server
     CreatedAt       datetime2(3)     NOT NULL,
     UpdatedAt       datetime2(3)     NOT NULL,
