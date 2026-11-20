@@ -58,7 +58,9 @@ CREATE TABLE dbo.TenantFeatures (
 CREATE TABLE dbo.Users (
     Id              uniqueidentifier NOT NULL,
     TenantId        uniqueidentifier NOT NULL,
-    Phone           varchar(20)      NOT NULL,
+    Phone           varchar(20)      NULL,               -- VERIFIED login phone (OTP); NULL for Google users
+    GoogleSubject   varchar(255)     NULL,               -- Google "sub" (docs/backend/auth-google.md)
+    GoogleEmail     nvarchar(320)    NULL,               -- support only, never used to find a user
     Name            nvarchar(80)     NOT NULL,
     Role            varchar(10)      NOT NULL,           -- owner|staff (v1: owner only)
     PinHash         varchar(200)     NOT NULL,           -- ASP.NET Core PasswordHasher output
@@ -73,7 +75,8 @@ CREATE TABLE dbo.Users (
     CONSTRAINT CK_Users_Role CHECK (Role IN ('owner','staff'))
 );
 CREATE CLUSTERED INDEX CX_Users ON dbo.Users (TenantId, CreatedAt);
-CREATE UNIQUE INDEX UX_Users_Phone ON dbo.Users (Phone) WHERE DeletedAt IS NULL;
+CREATE UNIQUE INDEX UX_Users_Phone ON dbo.Users (Phone) WHERE Phone IS NOT NULL AND DeletedAt IS NULL;
+CREATE UNIQUE INDEX UX_Users_Google ON dbo.Users (GoogleSubject, TenantId) WHERE GoogleSubject IS NOT NULL AND DeletedAt IS NULL;
 
 /* One row per installed app. Code gives receipt numbers their prefix
    ("A-1033"); LastSeq is the highest number this device has issued

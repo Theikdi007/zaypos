@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/application/auth_controller.dart';
+import '../../features/auth/presentation/google_shop_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
-import '../../features/auth/presentation/pin_reset_screen.dart';
 import '../../features/devices/presentation/devices_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/unlock_screen.dart';
@@ -35,14 +35,22 @@ final _rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 /// the shop not downloaded yet → the first-download screen only (§5.4).
 /// Unlocked → the app (Register stays reachable for changing the template).
 String? authRedirect(AuthStatus status, String location, {bool firstSyncDone = true}) {
-  final public = location == Routes.login || location == Routes.register || location == Routes.pinReset;
+  final public = location == Routes.login ||
+      location == Routes.register ||
+      location == Routes.pinReset ||
+      location == Routes.chooseShop;
   return switch (status) {
     AuthStatus.signedOut => public ? null : Routes.login,
-    // A locked-out owner can reset the PIN by SMS from the unlock screen.
+    // A locked-out owner can reset the PIN with Google from the unlock screen.
     AuthStatus.locked => location == Routes.unlock || location == Routes.pinReset ? null : Routes.unlock,
     AuthStatus.unlocked when !firstSyncDone => location == Routes.firstSync ? null : Routes.firstSync,
-    AuthStatus.unlocked =>
-      location == Routes.login || location == Routes.unlock || location == Routes.firstSync ? Routes.dashboard : null,
+    AuthStatus.unlocked => location == Routes.login ||
+            location == Routes.unlock ||
+            location == Routes.firstSync ||
+            location == Routes.chooseShop ||
+            location == Routes.pinReset
+        ? Routes.dashboard
+        : null,
   };
 }
 
@@ -63,7 +71,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Routes.unlock, builder: (_, _) => const UnlockScreen()),
       GoRoute(path: Routes.firstSync, builder: (_, _) => const FirstSyncScreen()),
       GoRoute(path: Routes.devices, builder: (_, _) => const DevicesScreen()),
-      GoRoute(path: Routes.pinReset, builder: (_, _) => const PinResetScreen()),
+      // Forgot PIN: Google again → new PIN (also while locked out).
+      GoRoute(path: Routes.pinReset, builder: (_, _) => const GoogleShopScreen(purpose: GoogleShopPurpose.reset)),
+      GoRoute(path: Routes.chooseShop, builder: (_, _) => const GoogleShopScreen()),
       GoRoute(
         path: Routes.syncReview,
         builder: (_, _) => const SyncReviewScreen(),

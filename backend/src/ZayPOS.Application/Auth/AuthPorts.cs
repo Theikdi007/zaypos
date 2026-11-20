@@ -10,7 +10,10 @@ namespace ZayPOS.Application.Auth;
 /// </summary>
 public interface IAuthRepository
 {
+    /// <summary>Only users with a verified login phone (OTP registration) have one.</summary>
     Task<User?> FindUserByPhoneAsync(string phone, CancellationToken ct);
+    /// <summary>Active users of this Google account with their (not deleted) shops, oldest first. Tracked.</summary>
+    Task<IReadOnlyList<(User User, Tenant Tenant)>> FindGoogleUsersAsync(string googleSubject, CancellationToken ct);
     Task<User?> FindUserAsync(Guid userId, CancellationToken ct);
     Task<Tenant?> FindTenantAsync(Guid tenantId, CancellationToken ct);
     Task<Device?> FindDeviceAsync(Guid deviceId, CancellationToken ct);
@@ -47,12 +50,34 @@ public sealed class UniqueViolationException(string message, Exception inner) : 
     public bool Involves(string indexName) => Message.Contains(indexName, StringComparison.OrdinalIgnoreCase);
 }
 
+/// <summary>A verified Google ID token.</summary>
+public sealed record GoogleIdentity(string Subject, string? Email);
+
+public interface IGoogleIdTokenVerifier
+{
+    /// <summary>
+    /// Checks signature (Google's keys), issuer, audience (our client ids), expiry and subject.
+    /// </summary>
+    /// <exception cref="AuthException"><c>google_token_invalid</c> (401) or <c>google_unavailable</c> (503).</exception>
+    Task<GoogleIdentity> VerifyAsync(string? idToken, CancellationToken ct);
+}
+
+/// <summary>"Auth" config section: which sign-in methods are on.</summary>
+public sealed class AuthSettings
+{
+    public const string Section = "Auth";
+
+    /// <summary>
+    /// SMS OTP (POST /otp, /register, /pin/reset). Off by default until the SMSPoh Sender ID is approved;
+    /// env <c>AUTH_OTP_ENABLED</c> (deploy maps it to Auth__OtpEnabled). Phone + PIN /login needs no SMS and stays on.
+    /// </summary>
+    public bool OtpEnabled { get; set; }
+}
+
 public interface IPinHasher
 {
     string Hash(User user, string pin);
     PinCheck Verify(User user, string hash, string pin);
-    /// <summary>Burns the same time as <see cref="Verify"/> against a fixed dummy hash (unknown phone).</summary>
-    void VerifyDummy(string pin);
 }
 
 public enum PinCheck { Failed, Success, SuccessRehashNeeded }

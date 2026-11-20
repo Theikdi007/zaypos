@@ -8,10 +8,15 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ZayPOS.Application.Abstractions;
+using ZayPOS.Application.Auth;
 
 namespace ZayPOS.Api.Tests;
 
-/// <summary>The real API against the test container. SMS is captured instead of logged.</summary>
+/// <summary>
+/// The real API against the test container. SMS is captured instead of logged; Google ID tokens are
+/// checked by <see cref="FakeGoogle"/> (the real verifier has its own tests). SMS OTP is ON unless a test
+/// passes <c>Auth:OtpEnabled=false</c>: the OTP suites keep proving the dormant OTP path.
+/// </summary>
 public sealed class ApiFactory(
     string connectionString,
     int authPerIp = 10_000,
@@ -25,6 +30,7 @@ public sealed class ApiFactory(
     public const string SigningKey = "test-signing-key-0123456789-abcdefghijklmnopqrstuvwxyz";
 
     public CapturingSmsSender Sms { get; } = new();
+    public FakeGoogleVerifier Google { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -33,12 +39,20 @@ public sealed class ApiFactory(
         builder.UseSetting("Jwt:SigningKey", SigningKey);
         builder.UseSetting("RateLimiting:AuthPerIpPerMinute", authPerIp.ToString());
         builder.UseSetting("RateLimiting:AuthPerPhonePerMinute", authPerPhone.ToString());
+        // settings["Auth:OtpEnabled"] = null → leave it unset (the real default).
+        if (settings is null || !settings.TryGetValue("Auth:OtpEnabled", out var otp))
+            builder.UseSetting("Auth:OtpEnabled", "true");
+        else if (otp is null)
+            settings = settings.Where(kv => kv.Key != "Auth:OtpEnabled").ToDictionary();
+        builder.UseSetting("Auth:Google:ClientIds", FakeGoogleVerifier.ClientId);
         foreach (var (key, value) in settings ?? new Dictionary<string, string?>())
             builder.UseSetting(key, value);
         builder.ConfigureTestServices(s =>
         {
             s.RemoveAll<ISmsSender>();
             s.AddSingleton<ISmsSender>(Sms);
+            s.RemoveAll<IGoogleIdTokenVerifier>();
+            s.AddSingleton<IGoogleIdTokenVerifier>(Google);
             if (remoteIp is not null) s.AddSingleton<IStartupFilter>(new RemoteIpStartupFilter(remoteIp));
             services?.Invoke(s);
         });

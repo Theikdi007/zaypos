@@ -218,13 +218,28 @@ always registers as a **new** device.
 
 ## 4. Auth
 
+**Default: Google Sign-In** — full design in [auth-google.md](auth-google.md).
+
+| Step | Endpoint | Result |
+|---|---|---|
+| Who is this user | `POST /api/v1/auth/google/shops` `{ idToken }` | `{ email, shops: [{ tenantId, name, templateId, role }] }` |
+| Register | `POST /api/v1/auth/google/register` `{ idToken, shopName, templateId, township, ownerPhone, pin, device }` | Tenant (owner phone = unverified contact), owner User (Google subject), features, Device `A`; tokens |
+| Sign in on a phone | `POST /api/v1/auth/google` `{ idToken, tenantId, pin, device }` | next Device code; tokens. **The only way a new phone signs in.** |
+| Reset PIN | `POST /api/v1/auth/google/pin/reset` `{ idToken, tenantId, newPin }` | 204; every session of the user ends |
+| Refresh | `POST /api/v1/auth/refresh` `{ refreshToken }` | rotates refresh token (old one revoked) |
+
+There is **no phone + PIN sign-in** (`POST /auth/login` was removed): the PIN unlocks a phone that is
+already signed in (offline), and is checked by the server only together with Google in `/google`.
+
+**SMS OTP** — only with `Auth:OtpEnabled=true` (env `AUTH_OTP_ENABLED`, default false; otherwise
+these answer 403 `otp_disabled`). Kept for verifying a phone number later (SMSPoh Sender ID); an OTP
+shop has no Google account, so it can't be opened on another phone.
+
 | Step | Endpoint | Result |
 |---|---|---|
 | Ask OTP | `POST /api/v1/auth/otp` `{ phone, purpose }` | SMS 6-digit code (5 min, 5 attempts, rate-limit 3/hour/phone) |
 | Register | `POST /api/v1/auth/register` `{ phone, otp, shopName, templateId, township, pin, device: { id, name } }` | creates Tenant, owner User, TenantFeatures from template, Device `A`; returns tokens |
-| Login on a new phone | `POST /api/v1/auth/login` `{ phone, pin, device: { id, name } }` | registers next Device code; returns tokens |
-| Refresh | `POST /api/v1/auth/refresh` `{ refreshToken }` | rotates refresh token (old one revoked) |
-| Reset PIN | `POST /api/v1/auth/pin/reset` `{ phone, otp, newPin }` | |
+| Reset PIN | `POST /api/v1/auth/pin/reset` `{ phone, otp, newPin }` | 204; every session of the user ends |
 
 - Access token: JWT, 15 min, claims `sub` (user), `tid` (tenant), `did` (device), `role`.
 - Refresh token: random 32 bytes, stored as SHA-256, 90 days, bound to the device.
@@ -233,7 +248,8 @@ always registers as a **new** device.
   hash (flutter_secure_storage). Sync waits until a token can be refreshed.
 - SMS provider is behind `ISmsSender`. `Sms:Provider=Log` (default, dev) logs the code;
   `Sms:Provider=SmsPoh` sends it through SMSPoh (`Sms:SmsPoh:{Token,Sender,Test}`), never logging the
-  code, and a failed send answers 503 `sms_unavailable`. Production refuses to start with anything but SmsPoh.
+  code, and a failed send answers 503 `sms_unavailable`. With OTP on, Production refuses to start with anything
+  but SmsPoh (or Console on purpose). Production always needs `Auth:Google:ClientIds`.
 
 ---
 

@@ -12,13 +12,19 @@ namespace ZayPOS.Api.Auth;
 
 /// <summary>
 /// /auth/* limits. Every auth request is limited per client IP (high: Myanmar carriers put many
-/// phones behind one CGNAT address); otp/login/pin-reset are also limited per normalized phone
-/// from the body, so one number can't be hammered from many IPs.
+/// phones behind one CGNAT address); otp/pin-reset are also limited per normalized phone
+/// from the body, so one number can't be hammered from many IPs. The Google endpoints are limited
+/// the same way per Google account: the <c>sub</c> read from the ID token's payload WITHOUT
+/// verifying it (like the phone: anyone can spend someone's partition for a minute, nobody can
+/// skip it). A Google call is keyed by its token only: any other body field is ignored, so a
+/// made-up "phone" can't buy a fresh partition.
 /// </summary>
 public static class AuthRateLimiting
 {
     public const string PhoneItemKey = "zaypos.auth.phone";
-    private static readonly string[] PhonePaths = ["/api/v1/auth/otp", "/api/v1/auth/login", "/api/v1/auth/pin/reset"];
+    private static readonly string[] PhonePaths = ["/api/v1/auth/otp", "/api/v1/auth/pin/reset"];
+    private static readonly string[] GooglePaths =
+        ["/api/v1/auth/google", "/api/v1/auth/google/shops", "/api/v1/auth/google/register", "/api/v1/auth/google/pin/reset"];
 
     public static IServiceCollection AddAuthRateLimiting(this IServiceCollection services, IConfiguration config)
     {
@@ -58,10 +64,15 @@ public static class AuthRateLimiting
         return services;
     }
 
-    /// <summary>Reads "phone" from the JSON body of otp/login/pin-reset (body stays readable for the endpoint).</summary>
+    /// <summary>
+    /// Reads "phone" (otp/pin-reset) or the ID token's unverified "sub" (Google) from the JSON body;
+    /// the body stays readable for the endpoint.
+    /// </summary>
     public static IApplicationBuilder UseAuthPhonePartition(this IApplicationBuilder app) => app.Use(async (http, next) =>
     {
-        if (HttpMethods.IsPost(http.Request.Method) && IsPhonePath(http.Request.Path)
+        var phonePath = IsPhonePath(http.Request.Path);
+        var googlePath = IsGooglePath(http.Request.Path);
+        if (HttpMethods.IsPost(http.Request.Method) && (phonePath || googlePath)
             && http.Request.ContentLength is null or <= 16 * 1024)
         {
             http.Request.EnableBuffering(bufferThreshold: 16 * 1024, bufferLimit: 16 * 1024);
@@ -70,14 +81,22 @@ public static class AuthRateLimiting
                 using var doc = await JsonDocument.ParseAsync(http.Request.Body, cancellationToken: http.RequestAborted);
                 if (doc.RootElement.ValueKind == JsonValueKind.Object)
                 {
+                    string? phone = null, idToken = null;
                     foreach (var p in doc.RootElement.EnumerateObject())
                     {
-                        if (!p.Name.Equals("phone", StringComparison.OrdinalIgnoreCase) || p.Value.ValueKind != JsonValueKind.String)
-                            continue;
-                        var raw = p.Value.GetString() ?? "";
+                        if (p.Value.ValueKind != JsonValueKind.String) continue;
+                        if (phone is null && p.Name.Equals("phone", StringComparison.OrdinalIgnoreCase)) phone = p.Value.GetString();
+                        else if (idToken is null && p.Name.Equals("idToken", StringComparison.OrdinalIgnoreCase)) idToken = p.Value.GetString();
+                    }
+                    if (googlePath)
+                    {
+                        http.Items[PhoneItemKey] = "google:" + (UnverifiedSubject(idToken) ?? "none");
+                    }
+                    else if (!string.IsNullOrWhiteSpace(phone))
+                    {
+                        var raw = phone.Trim();
                         // Invalid numbers still get a partition, so junk input can't dodge the limit.
-                        http.Items[PhoneItemKey] = PhoneNumbers.Normalize(raw) ?? "raw:" + raw.Trim()[..Math.Min(raw.Trim().Length, 32)];
-                        break;
+                        http.Items[PhoneItemKey] = PhoneNumbers.Normalize(raw) ?? "raw:" + raw[..Math.Min(raw.Length, 32)];
                     }
                 }
             }
@@ -98,6 +117,34 @@ public static class AuthRateLimiting
 
     private static bool IsPhonePath(PathString path) =>
         PhonePaths.Any(p => path.Equals(p, StringComparison.OrdinalIgnoreCase));
+
+    private static bool IsGooglePath(PathString path) =>
+        GooglePaths.Any(p => path.Equals(p, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// The "sub" of a JWT's payload, NOT verified: only a rate-limit key. Null when it isn't a JWT
+    /// (every such request shares the "none" partition, so garbage can't dodge the limit).
+    /// </summary>
+    internal static string? UnverifiedSubject(string? jwt)
+    {
+        if (string.IsNullOrEmpty(jwt) || jwt.Length > 8 * 1024) return null;
+        var parts = jwt.Split('.');
+        if (parts.Length != 3) return null;
+        try
+        {
+            var payload = parts[1].Replace('-', '+').Replace('_', '/');
+            payload = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=');
+            using var doc = JsonDocument.Parse(Convert.FromBase64String(payload));
+            return doc.RootElement.ValueKind == JsonValueKind.Object
+                   && doc.RootElement.TryGetProperty("sub", out var sub) && sub.ValueKind == JsonValueKind.String
+                ? sub.GetString() is { Length: > 0 and <= 255 } s ? s : null
+                : null;
+        }
+        catch (Exception e) when (e is FormatException or JsonException)
+        {
+            return null;
+        }
+    }
 
     private static RateLimitPartition<string> Window(string key, int permits) =>
         RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions

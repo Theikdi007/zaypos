@@ -6,6 +6,9 @@ abstract final class Routes {
   static const syncReview = '/settings/sync-review';
   static const devices = '/settings/devices';
   static const pinReset = '/pin-reset';
+
+  /// Google sign-in: choose the shop of the account → PIN (or link a phone shop).
+  static const chooseShop = '/choose-shop';
   static String rejectedUnit(int seq) => '/settings/sync-review/unit/$seq';
   static const dashboard = '/';
   static const sales = '/sales';

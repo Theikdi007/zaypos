@@ -18,9 +18,8 @@ public static class AuthEndpoints
                 Results.Ok(await svc.RegisterAsync(req, ct)))
             .Produces<AuthResponse>();
 
-        auth.MapPost("/login", async (LoginRequest req, AuthService svc, CancellationToken ct) =>
-                Results.Ok(await svc.LoginAsync(req, ct)))
-            .Produces<AuthResponse>();
+        // No POST /login: phone + PIN never signs in a new phone (docs/backend/auth-google.md §3).
+        // The PIN unlocks a signed-in phone offline, and is checked with Google in POST /google.
 
         auth.MapPost("/refresh", async (RefreshRequest req, AuthService svc, CancellationToken ct) =>
                 Results.Ok(await svc.RefreshAsync(req, ct)))
@@ -29,6 +28,26 @@ public static class AuthEndpoints
         auth.MapPost("/pin/reset", async (ResetPinRequest req, AuthService svc, CancellationToken ct) =>
             {
                 await svc.ResetPinAsync(req, ct);
+                return Results.NoContent();
+            })
+            .Produces(StatusCodes.Status204NoContent);
+
+        // Google sign-in (docs/backend/auth-google.md).
+        auth.MapPost("/google/shops", async (GoogleShopsRequest req, AuthService svc, CancellationToken ct) =>
+                Results.Ok(await svc.GoogleShopsAsync(req, ct)))
+            .Produces<GoogleShopsResponse>();
+
+        auth.MapPost("/google", async (GoogleSignInRequest req, AuthService svc, CancellationToken ct) =>
+                Results.Ok(await svc.GoogleSignInAsync(req, ct)))
+            .Produces<AuthResponse>();
+
+        auth.MapPost("/google/register", async (GoogleRegisterRequest req, AuthService svc, CancellationToken ct) =>
+                Results.Ok(await svc.GoogleRegisterAsync(req, ct)))
+            .Produces<AuthResponse>();
+
+        auth.MapPost("/google/pin/reset", async (GoogleResetPinRequest req, AuthService svc, CancellationToken ct) =>
+            {
+                await svc.GoogleResetPinAsync(req, ct);
                 return Results.NoContent();
             })
             .Produces(StatusCodes.Status204NoContent);

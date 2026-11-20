@@ -44,6 +44,7 @@ const _publicRoutes = ['/login', '/register', '/register?step=2', '/register?ste
 const _allowedLatin = {
   'kbzpay', 'wavepay', 'viber', 'excel', 'imei', 'barcode', 'pin', 'otp', 'stock', 'sync', 'batch', // batch: owner 2026-11-14 (printed on medicine boxes)
   'zaypos', // brand
+  'google', // brand: Google Sign-In (2026-11-19, feat/google-signin) — confirm with the owner
   'ks', 'ml', 'l', 'kg', // currency / units
   'xx', 'xxx', // phone number placeholders (09 7xx xxx 102)
 };

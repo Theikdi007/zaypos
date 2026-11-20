@@ -74,7 +74,6 @@ public class AuthTests(SqlServerFixture sql)
 
         await using var db = sql.CreateContext(auth.Tenant.Id);
         (await db.Users.SingleAsync()).Phone.Should().Be(e164);
-        (await Login(e164, Pin, Guid.CreateVersion7())).StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]
@@ -142,20 +141,20 @@ public class AuthTests(SqlServerFixture sql)
         sql.Api.Sms.Count(phone).Should().Be(0);
     }
 
-    // ------------------------------------------------------------ login + devices
+    // ------------------------------------------------------------ sign in on another phone + devices
+    // (Google + the shop + the PIN; there is no phone + PIN sign-in.)
 
     [Fact]
-    public async Task Login_on_a_new_phone_gets_the_next_code_and_the_same_phone_keeps_it()
+    public async Task Sign_in_on_a_new_phone_gets_the_next_code_and_the_same_phone_keeps_it()
     {
-        var phone = NewPhone();
-        var owner = await Register(phone);
+        var (owner, token) = await GoogleShop();
         owner.Device.Code.Should().Be("A");
 
         var second = Guid.CreateVersion7();
-        (await LoginOk(phone, second)).Device.Code.Should().Be("B");
-        (await LoginOk(phone, second)).Device.Code.Should().Be("B");
-        (await LoginOk(phone, Guid.CreateVersion7())).Device.Code.Should().Be("C");
-        (await LoginOk(phone, owner.Device.Id)).Device.Code.Should().Be("A");
+        (await SignInOk(token, owner, second)).Device.Code.Should().Be("B");
+        (await SignInOk(token, owner, second)).Device.Code.Should().Be("B");
+        (await SignInOk(token, owner, Guid.CreateVersion7())).Device.Code.Should().Be("C");
+        (await SignInOk(token, owner, owner.Device.Id)).Device.Code.Should().Be("A");
 
         await using var db = sql.CreateContext(owner.Tenant.Id);
         (await db.Devices.OrderBy(d => d.Code).Select(d => d.Code).ToListAsync()).Should().Equal("A", "B", "C");
@@ -164,36 +163,27 @@ public class AuthTests(SqlServerFixture sql)
     [Fact]
     public async Task Device_id_of_another_shop_is_a_conflict()
     {
-        var shop1 = await Register(NewPhone());
-        var phone2 = NewPhone();
-        await Register(phone2);
+        var (shop1, _) = await GoogleShop();
+        var (shop2, token2) = await GoogleShop();
 
-        await ShouldBeProblem(await Login(phone2, Pin, shop1.Device.Id), HttpStatusCode.Conflict, "device_conflict");
-    }
-
-    [Fact]
-    public async Task Unknown_phone_and_wrong_pin_look_the_same()
-    {
-        await ShouldBeProblem(await Login(NewPhone(), Pin, Guid.CreateVersion7()),
-            HttpStatusCode.Unauthorized, "invalid_credentials");
+        await ShouldBeProblem(await SignIn(token2, shop2, Pin, shop1.Device.Id), HttpStatusCode.Conflict, "device_conflict");
     }
 
     [Fact]
     public async Task Five_wrong_pins_lock_the_account_for_15_minutes()
     {
-        var phone = NewPhone();
-        var auth = await Register(phone);
+        var (auth, token) = await GoogleShop();
         var device = Guid.CreateVersion7();
 
         for (var i = 1; i < AuthRules.PinMaxFailures; i++)
-            await ShouldBeProblem(await Login(phone, "999999", device), HttpStatusCode.Unauthorized, "invalid_credentials");
+            await ShouldBeProblem(await SignIn(token, auth, "999999", device), HttpStatusCode.Unauthorized, "invalid_credentials");
 
-        var fifth = await Login(phone, "999999", device);
+        var fifth = await SignIn(token, auth, "999999", device);
         await ShouldBeProblem(fifth, HttpStatusCode.Locked, "pin_locked");
         fifth.Headers.RetryAfter!.Delta.Should().Be(TimeSpan.FromMinutes(15));
 
         // Even the right PIN is refused while locked.
-        await ShouldBeProblem(await Login(phone, Pin, device), HttpStatusCode.Locked, "pin_locked");
+        await ShouldBeProblem(await SignIn(token, auth, Pin, device), HttpStatusCode.Locked, "pin_locked");
 
         await using (var db = sql.CreateContext(auth.Tenant.Id))
         {
@@ -203,7 +193,7 @@ public class AuthTests(SqlServerFixture sql)
             await db.SaveChangesAsync();
         }
 
-        (await Login(phone, Pin, device)).StatusCode.Should().Be(HttpStatusCode.OK);
+        (await SignIn(token, auth, Pin, device)).StatusCode.Should().Be(HttpStatusCode.OK);
         await using (var db = sql.CreateContext(auth.Tenant.Id))
         {
             var user = await db.Users.SingleAsync();
@@ -272,9 +262,8 @@ public class AuthTests(SqlServerFixture sql)
     [Fact]
     public async Task Reuse_of_a_token_revoked_without_replacement_revokes_the_device_chain()
     {
-        var phone = NewPhone();
-        var first = await Register(phone);
-        var again = await LoginOk(phone, first.Device.Id); // re-login revokes first's token (no replacement)
+        var (first, token) = await GoogleShop();
+        var again = await SignInOk(token, first, first.Device.Id); // signing in again revokes first's token (no replacement)
 
         await ShouldBeProblem(await Post("/api/v1/auth/refresh", new RefreshRequest(first.RefreshToken)),
             HttpStatusCode.Unauthorized, "invalid_refresh_token");
@@ -326,17 +315,28 @@ public class AuthTests(SqlServerFixture sql)
     {
         var phone = NewPhone();
         var auth = await Register(phone);
-        for (var i = 0; i < AuthRules.PinMaxFailures; i++)
-            await Login(phone, "999999", auth.Device.Id); // now locked
+        await using (var db = sql.CreateContext(auth.Tenant.Id))
+        {
+            var user = await db.Users.SingleAsync();
+            user.FailedPinCount = 3;
+            user.LockedUntil = DateTime.UtcNow.AddMinutes(10); // locked
+            await db.SaveChangesAsync();
+        }
 
         await RequestOtp(phone, OtpPurpose.Reset);
         var res = await Post("/api/v1/auth/pin/reset", new ResetPinRequest(phone, sql.Api.Sms.LastCode(phone), "654321"));
         res.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        await ShouldBeProblem(await Login(phone, Pin, auth.Device.Id), HttpStatusCode.Unauthorized, "invalid_credentials");
         await ShouldBeProblem(await Post("/api/v1/auth/refresh", new RefreshRequest(auth.RefreshToken)),
             HttpStatusCode.Unauthorized, "invalid_refresh_token");
-        (await Login(phone, "654321", auth.Device.Id)).StatusCode.Should().Be(HttpStatusCode.OK);
+        await using (var db = sql.CreateContext(auth.Tenant.Id))
+        {
+            var user = await db.Users.SingleAsync();
+            user.LockedUntil.Should().BeNull();
+            user.FailedPinCount.Should().Be(0);
+            new PinHasher().Verify(user, user.PinHash, "654321").Should().NotBe(PinCheck.Failed);
+            new PinHasher().Verify(user, user.PinHash, Pin).Should().Be(PinCheck.Failed);
+        }
     }
 
     [Fact]
@@ -368,24 +368,24 @@ public class AuthTests(SqlServerFixture sql)
     }
 
     [Fact]
-    public async Task Otp_login_and_pin_reset_are_also_limited_per_normalized_phone()
+    public async Task Otp_and_pin_reset_are_also_limited_per_normalized_phone()
     {
         await using var api = new ApiFactory(sql.ConnectionString, authPerPhone: 2);
         var http = api.CreateClient();
         var d = NextDigits(8);
         var e164 = $"+9597{d}";
         var local = $"09 7{d[..2]} {d[2..5]} {d[5..]}";
-        LoginRequest Login(string phone) => new(phone, Pin, new DeviceInfo(Guid.CreateVersion7(), null));
+        ResetPinRequest Reset(string phone) => new(phone, "000000", Pin);
 
-        (await http.PostAsJsonAsync("/api/v1/auth/login", Login(e164), Json)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        (await http.PostAsJsonAsync("/api/v1/auth/login", Login(local), Json)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        // Same number in either format, any of the three endpoints: one bucket.
+        (await http.PostAsJsonAsync("/api/v1/auth/pin/reset", Reset(e164), Json)).StatusCode.Should().NotBe(HttpStatusCode.TooManyRequests);
+        (await http.PostAsJsonAsync("/api/v1/auth/pin/reset", Reset(local), Json)).StatusCode.Should().NotBe(HttpStatusCode.TooManyRequests);
+        // Same number in either format, either endpoint: one bucket.
         await ShouldBeProblem(await http.PostAsJsonAsync("/api/v1/auth/otp", new OtpRequest(local, OtpPurpose.Reset), Json),
             HttpStatusCode.TooManyRequests, "rate_limited");
-        await ShouldBeProblem(await http.PostAsJsonAsync("/api/v1/auth/login", Login(e164), Json),
+        await ShouldBeProblem(await http.PostAsJsonAsync("/api/v1/auth/pin/reset", Reset(e164), Json),
             HttpStatusCode.TooManyRequests, "rate_limited");
         // Another phone from the same IP is unaffected.
-        (await http.PostAsJsonAsync("/api/v1/auth/login", Login(NewPhone()), Json)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        (await http.PostAsJsonAsync("/api/v1/auth/pin/reset", Reset(NewPhone()), Json)).StatusCode.Should().NotBe(HttpStatusCode.TooManyRequests);
     }
 
     [Fact]
@@ -414,41 +414,6 @@ public class AuthTests(SqlServerFixture sql)
             var http = api.CreateClient();
             (await http.SendAsync(Req("203.0.113.1"))).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
             (await http.SendAsync(Req("203.0.113.2"))).StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
-        }
-    }
-
-    // ------------------------------------------------------------ timing
-
-    [Fact]
-    public async Task Unknown_phone_still_pays_for_one_pin_hash()
-    {
-        var counter = new CountingPinHasher(new PinHasher());
-        await using var api = new ApiFactory(sql.ConnectionString,
-            services: s => { s.RemoveAll<IPinHasher>(); s.AddSingleton<IPinHasher>(counter); });
-        var http = api.CreateClient();
-
-        var res = await http.PostAsJsonAsync("/api/v1/auth/login",
-            new LoginRequest(NewPhone(), Pin, new DeviceInfo(Guid.CreateVersion7(), null)), Json);
-
-        await ShouldBeProblem(res, HttpStatusCode.Unauthorized, "invalid_credentials");
-        counter.DummyVerifications.Should().Be(1);
-        counter.RealVerifications.Should().Be(0);
-    }
-
-    private sealed class CountingPinHasher(IPinHasher inner) : IPinHasher
-    {
-        public int DummyVerifications;
-        public int RealVerifications;
-        public string Hash(ZayPOS.Domain.Tenancy.User user, string pin) => inner.Hash(user, pin);
-        public PinCheck Verify(ZayPOS.Domain.Tenancy.User user, string hash, string pin)
-        {
-            Interlocked.Increment(ref RealVerifications);
-            return inner.Verify(user, hash, pin);
-        }
-        public void VerifyDummy(string pin)
-        {
-            Interlocked.Increment(ref DummyVerifications);
-            inner.VerifyDummy(pin);
         }
     }
 
@@ -484,12 +449,22 @@ public class AuthTests(SqlServerFixture sql)
         return (await res.Content.ReadFromJsonAsync<AuthResponse>(Json))!;
     }
 
-    private Task<HttpResponseMessage> Login(string phone, string pin, Guid deviceId) =>
-        Post("/api/v1/auth/login", new LoginRequest(phone, pin, new DeviceInfo(deviceId, "Redmi 13")));
-
-    private async Task<AuthResponse> LoginOk(string phone, Guid deviceId)
+    /// <summary>A shop registered with (fake) Google; the token is how its other phones sign in.</summary>
+    private async Task<(AuthResponse Auth, string Token)> GoogleShop()
     {
-        var res = await Login(phone, Pin, deviceId);
+        var token = FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject());
+        var res = await Post("/api/v1/auth/google/register",
+            new GoogleRegisterRequest(token, "ရွှေဆိုင်", "grocery", null, NewPhone(), Pin, new DeviceInfo(Guid.CreateVersion7(), "A15")));
+        res.StatusCode.Should().Be(HttpStatusCode.OK, await res.Content.ReadAsStringAsync());
+        return ((await res.Content.ReadFromJsonAsync<AuthResponse>(Json))!, token);
+    }
+
+    private Task<HttpResponseMessage> SignIn(string token, AuthResponse shop, string pin, Guid deviceId) =>
+        Post("/api/v1/auth/google", new GoogleSignInRequest(token, shop.Tenant.Id, pin, new DeviceInfo(deviceId, "Redmi 13")));
+
+    private async Task<AuthResponse> SignInOk(string token, AuthResponse shop, Guid deviceId)
+    {
+        var res = await SignIn(token, shop, Pin, deviceId);
         res.StatusCode.Should().Be(HttpStatusCode.OK, await res.Content.ReadAsStringAsync());
         return (await res.Content.ReadFromJsonAsync<AuthResponse>(Json))!;
     }

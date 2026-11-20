@@ -16,6 +16,7 @@ import 'package:zaypos_app/core/storage/secure_store.dart';
 import 'package:zaypos_app/core/sync/sync_limits.dart';
 import 'package:zaypos_app/core/utils/ids.dart';
 import 'package:zaypos_app/features/auth/data/auth_api.dart';
+import 'package:zaypos_app/features/auth/data/google_auth.dart';
 import 'package:zaypos_app/features/auth/data/boot_state.dart';
 import 'package:zaypos_app/features/auth/domain/pin_hasher.dart';
 import 'package:zaypos_app/main.dart';
@@ -41,7 +42,11 @@ Future<ProviderContainer> _bootShop(WidgetTester tester) async {
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final c = ProviderContainer(
-      overrides: [...fakeRepositoryOverrides, initialLimitsProvider.overrideWithValue(bundledLimits())]);
+      overrides: [
+    ...fakeRepositoryOverrides,
+    initialLimitsProvider.overrideWithValue(bundledLimits()),
+    otpEnabledProvider.overrideWithValue(true), // BUG-51 is about the SMS OTP register wizard
+  ]);
   addTearDown(c.dispose);
   await tester.pumpWidget(UncontrolledProviderScope(container: c, child: const ZayPosApp()));
   await tester.pumpAndSettle();
@@ -129,6 +134,7 @@ void main() {
         appDatabaseProvider.overrideWithValue(db),
         secureStoreProvider.overrideWithValue(MemorySecureStore()),
         authApiProvider.overrideWithValue(FakeAuthApi()),
+        otpEnabledProvider.overrideWithValue(true),
         pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
       ]);
       addTearDown(c.dispose);
@@ -156,7 +162,7 @@ void main() {
 
       await tester.binding.handlePopRoute();
       await tester.pump(const Duration(milliseconds: 500));
-      expect(find.text('ဝင်မယ်'), findsWidgets, reason: 'step 1 back leaves the wizard (Login)');
+      expect(find.text('Google နဲ့ ဝင်မယ်'), findsWidgets, reason: 'step 1 back leaves the wizard (Login)');
       // The resend countdown timer of step 1 ends with the screen.
       await tester.pump(const Duration(seconds: 61));
     });

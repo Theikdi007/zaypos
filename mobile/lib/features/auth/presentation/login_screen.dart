@@ -7,12 +7,9 @@ import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text.dart';
 import '../../../core/widgets/app_icons.dart';
-import '../../../core/widgets/common.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../application/auth_controller.dart';
 import 'widgets/auth_message.dart';
-import 'widgets/phone_field.dart';
-import '../../../core/utils/digit_input.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -21,18 +18,11 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
+/// Signed out: Google → choose the shop → PIN (docs/backend/auth-google.md §5). There is no phone + PIN
+/// sign-in: the PIN only unlocks a phone that is already signed in (or is checked together with Google).
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _phone = TextEditingController();
-  final _pin = TextEditingController();
   bool _busy = false;
   String? _error;
-
-  @override
-  void dispose() {
-    _phone.dispose();
-    _pin.dispose();
-    super.dispose();
-  }
 
   /// Runs [action]; failures show as a message. Success changes the auth
   /// status, and the router guard moves on to the app.
@@ -73,7 +63,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         AuthMessage(notice, isError: false),
                       ],
                       const SizedBox(height: 28),
-                      _form(context),
+                      _googleForm(context),
                       const SizedBox(height: 28),
                       _orDivider(),
                       const SizedBox(height: 28),
@@ -131,26 +121,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _form(BuildContext context) {
+  /// Default sign-in (docs/backend/auth-google.md §5): Google → choose the shop → PIN.
+  Widget _googleForm(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        LabeledField(label: 'ဖုန်းနံပါတ်', child: PhoneField(controller: _phone)),
+        Text('ဆိုင်ဖွင့်တုန်းက သုံးခဲ့တဲ့ Google အကောင့်နဲ့ ဝင်ပါ။', style: AppText.s(14, color: AppColors.muted)),
+        if (_error != null) ...[
+          const SizedBox(height: 12),
+          AuthMessage(_error!),
+        ],
         const SizedBox(height: 16),
-        LabeledField(
-          label: 'PIN နံပါတ် (၆ လုံး)',
-          child: AppInput(
-            controller: _pin,
-            height: 52,
-            radius: 14,
-            fontSize: 16,
-            horizontalPadding: 14,
-            hint: '••••••',
-            obscure: true,
-            keyboardType: TextInputType.number,
-            semanticLabel: 'PIN နံပါတ်',
-            inputFormatters: digitInput(maxLength: 6),
-          ),
+        PrimaryButton(
+          label: _busy ? 'ဝင်နေသည်…' : 'Google နဲ့ ဝင်မယ်',
+          height: 54,
+          radius: 14,
+          onPressed: _busy
+              ? null
+              : () => _run((c) async {
+                    await c.googleSignIn();
+                    if (context.mounted) await context.push(Routes.chooseShop);
+                  }),
         ),
         const SizedBox(height: 16),
         Align(
@@ -160,17 +151,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Text('PIN မေ့နေပါသလား?',
                 style: AppText.s(13, weight: AppText.w600, color: AppColors.primary)),
           ),
-        ),
-        if (_error != null) ...[
-          const SizedBox(height: 12),
-          AuthMessage(_error!),
-        ],
-        const SizedBox(height: 16),
-        PrimaryButton(
-          label: _busy ? 'ဝင်နေသည်…' : 'ဝင်မယ်',
-          height: 54,
-          radius: 14,
-          onPressed: _busy ? null : () => _run((c) => c.login(_phone.text, _pin.text)),
         ),
       ],
     );

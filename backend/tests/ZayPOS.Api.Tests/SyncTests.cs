@@ -715,7 +715,8 @@ public class SyncTests(SqlServerFixture sql)
 
     // ================================================================ helpers: shops
 
-    private sealed record Shop(HttpClient Http, AuthResponse Auth, string Phone)
+    /// <param name="GoogleToken">The owner's (fake) Google ID token: how another phone of the shop signs in.</param>
+    private sealed record Shop(HttpClient Http, AuthResponse Auth, string GoogleToken)
     {
         public Guid TenantId => Auth.Tenant.Id;
         public Guid DeviceId => Auth.Device.Id;
@@ -724,26 +725,25 @@ public class SyncTests(SqlServerFixture sql)
     private async Task<Shop> NewShop(string template = "grocery")
     {
         var http = sql.Api.CreateClient();
-        var phone = "+9596" + Interlocked.Increment(ref _seq).ToString("D8");
-        (await http.PostAsJsonAsync("/api/v1/auth/otp", new OtpRequest(phone, OtpPurpose.Register), Json)).EnsureSuccessStatusCode();
-        var res = await http.PostAsJsonAsync("/api/v1/auth/register",
-            new RegisterRequest(phone, sql.Api.Sms.LastCode(phone), "Sync shop", template, null, "123456",
-                new DeviceInfo(Guid.CreateVersion7(), "A15")), Json);
+        var ownerPhone = "+9596" + Interlocked.Increment(ref _seq).ToString("D8");
+        var token = FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject());
+        var res = await http.PostAsJsonAsync("/api/v1/auth/google/register",
+            new GoogleRegisterRequest(token, "Sync shop", template, null, ownerPhone, "123456", new DeviceInfo(Guid.CreateVersion7(), "A15")), Json);
         res.EnsureSuccessStatusCode();
         var auth = (await res.Content.ReadFromJsonAsync<AuthResponse>(Json))!;
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-        return new Shop(http, auth, phone);
+        return new Shop(http, auth, token);
     }
 
     private async Task<Shop> SecondDevice(Shop shop)
     {
         var http = sql.Api.CreateClient();
-        var res = await http.PostAsJsonAsync("/api/v1/auth/login",
-            new LoginRequest(shop.Phone, "123456", new DeviceInfo(Guid.CreateVersion7(), "Redmi")), Json);
+        var res = await http.PostAsJsonAsync("/api/v1/auth/google",
+            new GoogleSignInRequest(shop.GoogleToken, shop.TenantId, "123456", new DeviceInfo(Guid.CreateVersion7(), "Redmi")), Json);
         res.EnsureSuccessStatusCode();
         var auth = (await res.Content.ReadFromJsonAsync<AuthResponse>(Json))!;
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-        return new Shop(http, auth, shop.Phone);
+        return new Shop(http, auth, shop.GoogleToken);
     }
 
     // ================================================================ helpers: units

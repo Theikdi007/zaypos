@@ -1,0 +1,79 @@
+Name|FailedPinCount|LockedUntil
+----|--------------|-----------
+QA R18 Shop A|2|NULL
+QA R18 Shop B with a very long name for the 320px check|0|NULL
+Name|FailedPinCount|LockedUntil
+----|--------------|-----------
+QA R18 Shop A|3|NULL
+QA R18 Shop B with a very long name for the 320px check|0|NULL
+### after iOS forgot-PIN reset of Shop A (10:43:20)
+Name|FailedPinCount|LockedUntil
+----|--------------|-----------
+QA R18 Shop A|0|NULL
+QA R18 Shop B with a very long name for the 320px check|0|NULL
+Shop|Code|DevName|CreatedAt|LastSyncAt|live|lastRevoked
+----|----|-------|---------|----------|----|-----------
+QA R18 Shop A|A|Android|2026-11-19 10:06:26.961|2026-11-19 10:06:27.903|0|2026-11-19 11:31:07.521
+QA R18 Shop A|B|Android|2026-11-19 11:20:36.251|NULL|0|2026-11-19 11:31:07.521
+QA R18 Shop A|C|Android|2026-11-19 11:23:20.172|NULL|0|2026-11-19 11:31:07.521
+QA R18 Shop A|D|Android|2026-11-19 11:28:08.967|NULL|0|2026-11-20 04:12:46.503
+QA R18 Shop A|E|iPhone|2026-11-20 04:12:46.846|NULL|1|NULL
+QA R18 Shop B|A|Android|2026-11-19 11:24:58.366|NULL|0|2026-11-19 12:12:35.472
+QA R18 Shop B|B|Android|2026-11-19 12:12:35.577|NULL|1|2026-11-19 15:27:36.134
+### after TC-PIN-03 iOS reset (10:49:13)
+Name|FailedPinCount|LockedUntil
+----|--------------|-----------
+QA R18 Shop A|0|NULL
+Code|live|lastRevoked
+----|----|-----------
+A|0|2026-11-19 11:31:07.521
+B|0|2026-11-19 11:31:07.521
+C|0|2026-11-19 11:31:07.521
+D|0|2026-11-20 04:12:46.503
+E|1|2026-11-20 04:18:52.763
+### iOS sign out + Google again to Shop A (10:55:10)
+Code|Name|live
+----|----|----
+A|Android|0
+B|Android|0
+C|Android|0
+D|Android|0
+E|iPhone|1
+### after iOS register QA R19 iOS Shop (11:01:26)
+Name|TenantPhone|TemplateId|GoogleSubject|UserPhone|Role
+----|-----------|----------|-------------|---------|----
+QA R19 iOS Shop|+959790917041|grocery|set(len 21)|NULL|owner
+Code|Name
+----|----
+A|iPhone
+products
+--------
+20
+### after Android wrong PIN x2 (11:09:40)
+Name|FailedPinCount
+----|--------------
+QA R19 iOS Shop|2
+### after Android right PIN (11:10:06)
+Name|FailedPinCount|LockedUntil
+----|--------------|-----------
+QA R19 iOS Shop|0|NULL
+Code|Name
+----|----
+A|iPhone
+B|Android
+### sale on the server (11:10:54)
+No|Method|Total|CreatedAt|ReceivedAt
+--|------|-----|---------|----------
+B-0001|cash|200|2026-11-20 04:40:48.420|2026-11-20 04:40:51.019
+Code|LastSeq|LastSyncAt
+----|-------|----------
+A|0|2026-11-20 04:30:45.510
+B|1|2026-11-20 04:40:51.305
+### after Android forgot PIN from Login, QA R19 iOS Shop (11:13:14)
+Name|FailedPinCount|LockedUntil
+----|--------------|-----------
+QA R19 iOS Shop|0|NULL
+Code|Name|live|lastRevoked
+----|----|----|-----------
+A|iPhone|0|2026-11-20 04:43:07.404
+B|Android|1|2026-11-20 04:43:07.404

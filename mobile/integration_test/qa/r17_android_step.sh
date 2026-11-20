@@ -8,7 +8,7 @@
 # Env: API_CTL, API_LOG, EVD_DIR (as for run_qa_android.sh), REBUILD=1 to build the APK again, QA_SHOP
 set -u
 SERIAL=$1; STEP=$2; RUN=$3; EXPECT=${4:-}
-PKG=com.zaypos.zaypos_app
+PKG=app.zaypos
 APP_QA=/data/user/0/$PKG/cache/qa
 cd ${0:A:h:h:h}
 APK=build/r17/app-profile.apk

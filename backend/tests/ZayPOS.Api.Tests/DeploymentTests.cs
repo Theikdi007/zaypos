@@ -61,6 +61,7 @@ public class DeploymentTests(SqlServerFixture sql)
         ["Sms:Provider"] = "SmsPoh",
         ["Sms:SmsPoh:Token"] = "test-token",
         ["ForwardedHeaders:TrustedNetworksOverride"] = Caddy + "/32",
+        ["Auth:Google:ClientIds"] = FakeGoogleVerifier.ClientId,
     };
 
     // ------------------------------------------------------------ migrate step
@@ -234,6 +235,35 @@ public class DeploymentTests(SqlServerFixture sql)
 
         var start = () => api.CreateClient();
         start.Should().Throw<InvalidOperationException>().WithMessage($"*{expected}*");
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" , ")]
+    public async Task Production_refuses_to_start_without_google_client_ids(string clientIds)
+    {
+        var (_, app) = await MigratedDatabase();
+        var settings = ProductionSettings(app);
+        settings["Auth:Google:ClientIds"] = clientIds;
+        await using var api = new ApiFactory(app, settings: settings, environment: "Production");
+
+        var start = () => api.CreateClient();
+        start.Should().Throw<InvalidOperationException>().WithMessage("*Auth:Google:ClientIds*");
+    }
+
+    [Theory]
+    [InlineData("SmsPoh")]
+    [InlineData("SmsPho")]
+    public async Task Production_with_OTP_off_needs_no_SMS_settings(string provider)
+    {
+        var (_, app) = await MigratedDatabase();
+        var settings = ProductionSettings(app);
+        settings["Auth:OtpEnabled"] = "false";
+        settings["Sms:Provider"] = provider;
+        settings["Sms:SmsPoh:Token"] = "";
+        await using var api = new ApiFactory(app, remoteIp: IPAddress.Loopback, settings: settings, environment: "Production");
+
+        (await api.CreateClient().GetAsync("/health")).StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Theory]

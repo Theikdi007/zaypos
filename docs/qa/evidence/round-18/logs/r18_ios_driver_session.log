@@ -1,0 +1,52 @@
+QA round 18, iOS part. iPhone 18 Pro simulator 7C1A4352-E11F-495C-A59C-34FB90FF2EF7, debug build
+(`flutter run --dart-define-from-file=google.json`, API http://localhost:5076). Driven from the host by the XCUITest driver
+mobile/integration_test/qa/r18_ios_driver/ (r18_ios_ui.sh dump / tap). The driver auto-taps "Continue" on the system alert
+'"zaypos_app" Wants to Use "accounts.google.com" to Sign In'. Email addresses → <google-account>; the Google Cloud project
+number → <project-number>. Format: process | XCUIElement.ElementType raw value | label | value | [frame in points].
+
+Which simulator has a Google session: only the iPhone 18 Pro has Google cookies
+(SafariViewService.binarycookies); the iPhone Duo has none. Neither shows an account chooser (see step 4).
+
+--- 1. TC-GAUTH-01: Login (r18_ios_01_login.png) ---
+app | 48 | ZayPOS | [24,214,130,259]
+app | 48 | ဆိုင်စာရင်းကို ဖုန်းတစ်လုံးနဲ့ လွယ်လွယ်ကူကူ စီမံပါ | [24,263,352,289]
+app | 48 | ဆိုင်ဖွင့်တုန်းက သုံးခဲ့တဲ့ Google အကောင့်နဲ့ ဝင်ပါ။ | [24,317,378,341]
+app | 48 | Google နဲ့ ဝင်မယ် | [24,357,378,411]
+app | 48 | PIN မေ့နေပါသလား? | [256,427,378,450]
+app | 48 | သို့မဟုတ် | [173,478,228,499]
+app | 48 | ဆိုင်အသစ် စာရင်းသွင်းမယ် | [24,527,378,581]
+app | 48 | စမ်းသပ်ဆိုင် (အင်တာနက်မလို) | [24,593,378,639]
+app | 48 | အင်တာနက်မရှိလည်း ရောင်းလို့ရပါတယ်။ လိုင်းပြန်ရတာနဲ့ အလိုအလျောက် sync လုပ်ပေးပါမယ်။ | [68,748,364,794]
+
+--- 2. TC-GAUTH-09 offline: the Mac had no internet at this moment ---
+host: curl https://accounts.google.com/ → 000 after 15.0 s; https://www.googleapis.com/oauth2/v3/certs → 000; https://1.1.1.1/ → 000
+tap 'Google နဲ့ ဝင်မယ်' → (system alert auto-continued) → the Google sheet opens and shows Safari's error page:
+sheet | 9 | Cancel | [16,78,60,122]
+sheet | 9 | Address | ‎accounts.google.com | [26,78,376,122]
+sheet | 1 | Address | ‎accounts.google.com | [115,87,286,107]
+sheet | 9 | Page Menu | [342,78,386,122]
+sheet | 1 | Can’t Open Page | [0,132,402,798]
+No "အင်တာနက် မရပါ…" message: the app opened the sheet. The user has to close it (next step), which reports "cancelled".
+
+--- 3. TC-GAUTH-09 cancel: tap the sheet's "Cancel" (r18_ios_09_cancel.png) ---
+app | 48 | ZayPOS | [24,214,130,259]
+app | 48 | ဆိုင်စာရင်းကို ဖုန်းတစ်လုံးနဲ့ လွယ်လွယ်ကူကူ စီမံပါ | [24,263,352,289]
+app | 48 | ဆိုင်ဖွင့်တုန်းက သုံးခဲ့တဲ့ Google အကောင့်နဲ့ ဝင်ပါ။ | [24,317,378,341]
+app | 1 | Google နဲ့ ဝင်တာကို ရပ်လိုက်ပါတယ်။ | [24,353,378,400]
+app | 48 | Google နဲ့ ဝင်မယ် | [24,416,378,470]
+API log: 0 new lines during steps 2–3.
+
+--- 4. Sign-in, Mac online again (accounts.google.com 302) ---
+tap 'Google နဲ့ ဝင်မယ်' → alert auto-continued → Google page:
+app | 1 | Sign in - Google Accounts | [0,132,402,919]
+app | 1 | Sign in | 1 | [24,228,378,268]
+app | 49 | Email or phone | [26,350,376,402]
+app | 48 | Sign in | Sign in | [24,230,122,266]
+app | 48 | to continue to | to continue to  | [24,286,125,306]
+app | 9 | project-<project-number> | [124,286,289,306]
+app | 9 | Forgot email? | [24,414,113,432]
+app | 9 | Next | [301,506,378,546]
+app | 9 | Create account | [8,506,135,546]
+→ Google asks for an email (then a password): no signed-in account on this simulator. STOP (QA has no credentials).
+Cancel → back on Login with 'Google နဲ့ ဝင်တာကို ရပ်လိုက်ပါတယ်။'.
+Note: the page says "to continue to project-<project-number>", not "ZayPOS" (Android's sheet says "to continue to ZayPOS").

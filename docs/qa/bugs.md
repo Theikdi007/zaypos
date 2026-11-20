@@ -1177,7 +1177,7 @@ Device: Android emulator `emulator-5554` (sdk_gphone64_arm64, Android 16 / API 3
 ## BUG-57 · TC-UX-NEW-18 · Low · An open cart / checkout is silently lost when Android reclaims the app in the background
 - Found in: round 15 · emulator (2 GB RAM). evd/logs/r15_lmk_kill_logcat.log:
   `lowmemorykiller: Kill 'com.zaypos.zaypos_app' (11305), uid 10226, oom_score_adj 900 … reason: low watermark is breached`
-- Steps to reproduce: POS → 2 items → "ငွေရှင်းမယ်" → home → open Chrome, Photos, YouTube (or `adb shell am kill com.zaypos.zaypos_app`) →
+- Steps to reproduce: POS → 2 items → "ငွေရှင်းမယ်" → home → open Chrome, Photos, YouTube (or `adb shell am kill app.zaypos`; before Nov 2026 the package was `com.zaypos.zaypos_app`) →
   reopen ZayPOS. A realistic trigger: the cashier opens KBZPay to check a transfer.
 - Expected: the cart / checkout is still there, or the app says it was lost.
 - Actual: PIN screen → dashboard → POS with "ပစ္စည်း 0 ခု". No half sale (TC-UX-05 holds); the items must be added again. While the process
@@ -1284,6 +1284,62 @@ Device: Android emulator `emulator-5554` (sdk_gphone64_arm64, Android 16 / API 3
   ("ဖယောင်းတို / င်"). BUG-59 / BUG-63 were found with font AND display size at max; this happens with the font alone.
 - Suspected area: `core/widgets/primary_button.dart` (one line + ellipsis), `pos/presentation/pos_screen.dart` `_CartBar`, POS product tile.
 - Blocks beta: no (BUG-59 family).
+
+## BUG-67 · TC-GAUTH-NEW-1 · Low · iOS: the Google sign-in system prompt calls the app "zaypos_app"
+- Found in: round 18 · branch `feat/google-signin` · iPhone 18 Pro simulator, debug build, `--dart-define-from-file=google.json`.
+  `evidence/round-18/r18_ios_google_alert_bundle_name.png`, `logs/r18_ios_probe.log` (m/integration_test/qa/r18_ios_google_probe_test.dart).
+- Steps to reproduce: fresh install on iOS → Login → "Google နဲ့ ဝင်မယ်".
+- Expected: the prompt names the app as the shop owner knows it: "ZayPOS" (home-screen name, Android label, Google's own sheet on
+  Android says "to continue to ZayPOS").
+- Actual: `“zaypos_app” Wants to Use “accounts.google.com” to Sign In`. `ios/Runner/Info.plist`: `CFBundleDisplayName` = ZayPOS but
+  `CFBundleName` = zaypos_app (iOS uses the bundle name in this ASWebAuthenticationSession alert). It is the first thing every iPhone
+  user sees when they sign in, and it looks like a different app.
+- Suspected area: `mobile/ios/Runner/Info.plist` `CFBundleName` (no fix proposed here).
+- Re-run (round 18, iOS pass with the XCUITest driver `mobile/integration_test/qa/r18_ios_driver/`): still "“zaypos_app” Wants to
+  Use…". The next screen, Google's own sign-in page, also says "Sign in **to continue to project-&lt;number&gt;**" instead of
+  "ZayPOS" (`logs/r18_ios_driver_session.log` step 4); Android's Google sheet says "to continue to ZayPOS". Suspected area for
+  that half: the Google Cloud OAuth consent screen / branding of the iOS client (configuration, not app code).
+- Blocks beta: no (cosmetic; the beta shops are Android first). Fix before an iPhone shop joins.
+- **Round 19 (2026-11-20): app half FIXED-VERIFIED, consent-screen half STILL OPEN.** `Info.plist` `CFBundleName` = ZayPOS
+  (working tree of `feat/google-signin`); fresh debug install on the iPhone 18 Pro: "“ZayPOS” Wants to Use “accounts.google.com”
+  to Sign In" (`evidence/round-19/r19_ios_gauth_new1_alert.png`). Google's own page still says "Choose an account **to continue
+  to project-&lt;number&gt;**" and "You're signing back in to project-&lt;number&gt;" (`evidence/round-19/logs/r19_ios_driver_session.log`
+  steps 2–4): Google Cloud OAuth consent screen / branding (app name) for the iOS client, configuration only. Android's sheet says
+  "to continue to ZayPOS" (`logs/r19_android_session.log` A1).
+
+## BUG-68 · TC-GAUTH-NEW-2 (TC-AUTH-07) · Low · A phone that switches to another shop and back gets a NEW device code; the old code stays as a stale phone
+- Found in: round 18 · Android emulator, profile build of `feat/google-signin`, local API. `evidence/round-18/logs/r18_db_after_deviceC.txt`,
+  `r18_db_after_shopB.txt`, `r18_tokens_final.txt`.
+- Steps to reproduce: one Google account; phone signs in to Shop A (gets code C) → Settings → ထွက်မယ် → Register a 2nd shop (Shop B,
+  gets A) → ထွက်မယ် → Login → Google → Shop A + PIN.
+- Expected: the phone is still **C** in Shop A (docs/mobile/phase3-sync.md:170 "`deviceId` is a UUID v7 generated **once per install**";
+  TC-AUTH-07 "the same phone keeps its code").
+- Actual: Shop A devices: A, B, C, **D** (D = this phone; C left behind with a live session until the PIN reset). Going back to Shop B
+  the same way gave Shop B a new **B** for the phone that was its A. Each switch adds a phone to "ဖုန်းများ" and a new receipt prefix.
+- Suspected area: `Devices.Id` is the client's device id and is global (another shop's id → `device_conflict`), and
+  `auth_controller.dart` `_withDevice` (~line 132–138) replaces the install's device id on `device_conflict`. Not new with Google
+  Sign-In (the local-data guard path is the same), but one Google account owning several shops (TC-GAUTH-05) makes the switch common.
+- Blocks beta: no (the shops keep working; the owner can remove stale phones). Decide whether to keep a device id per (install, shop).
+
+## BUG-69 · TC-GAUTH-NEW-3 (TC-GAUTH-09 offline, iOS) · Low · iOS without internet: Google sign-in opens Safari's English "Can’t Open Page" and then says "cancelled", not "no internet"
+- Found in: round 18 · iPhone 18 Pro simulator, debug build, while the Mac had no internet (curl to accounts.google.com, googleapis.com
+  and 1.1.1.1 all timed out). `evidence/round-18/logs/r18_ios_driver_session.log` steps 2–3, `r18_ios_09_cancel.png`.
+- Steps to reproduce: iPhone offline → Login → "Google နဲ့ ဝင်မယ်" → "Continue" on the system prompt → close the sheet.
+- Expected (TC-GAUTH-09, auth-google.md §5 `network`): "အင်တာနက် မရပါ။ လိုင်းရမှ ပြန်ကြိုးစားပါ။", stays on Login, no API call.
+- Actual: the system prompt, then Google's sheet showing Safari's error page "Can’t Open Page" (English); after "Cancel" the app shows
+  "Google နဲ့ ဝင်တာကို ရပ်လိုက်ပါတယ်။" (the cancelled message). It stays on Login and makes no API call. Android is right (TC-GAUTH-09:
+  "အင်တာနက် မရပါ…" without opening anything).
+- Suspected area: `features/auth/data/google_auth.dart` (iOS path: no connectivity check before starting the web sign-in, and the
+  plugin reports the closed sheet as a cancel). No fix proposed.
+- Blocks beta: no (the shop owner still lands on Login and can retry). Owner: confirm on a real iPhone in airplane mode.
+- **Round 19 (2026-11-20): FIXED (verified at unit level; live iOS check left to the owner).** `google_auth.dart` now probes
+  accounts.google.com:443 before opening Google (`canReachGoogle`) and again when the plugin says "canceled".
+  `m/test/google_auth_test.dart` "BUG-69: …" (offline before the sheet) and the QA test `m/test/qa/qa_round19_bug69_test.dart`
+  (fake Google plugin: sheet opened, then unreachable + "canceled" → `network` 'အင်တာနက် မရပါ။ လိုင်းရမှ ပြန်ကြိုးစားပါ။'; online
+  cancel still 'Google နဲ့ ဝင်တာကို ရပ်လိုက်ပါတယ်။') PASS. Live: Android airplane mode → the Burmese no-internet message, no Google UI,
+  0 API calls; online cancel on iOS and Android still the cancelled message. The iOS simulator was not taken offline (it shares the
+  Mac's network, which this session had to keep). Note: when the network is up but slow, the probe waits up to 4 s before
+  Google's sheet opens, and a probe that times out on a very slow line shows "no internet" (by design; worth watching in the beta).
 
 ---
 

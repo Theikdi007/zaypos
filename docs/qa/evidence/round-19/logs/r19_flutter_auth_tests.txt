@@ -1,0 +1,42 @@
+00:00 +0: loading /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_test.dart
+00:00 +0: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_test.dart: Google errors → Burmese cancelled / no account / Play services / offline / other each have their own Burmese message
+00:00 +1: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/api_client_test.dart: 3 parallel 401s cause ONE /auth/refresh, then every request is retried and succeeds
+00:00 +2: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/api_client_test.dart: 3 parallel 401s cause ONE /auth/refresh, then every request is retried and succeeds
+00:00 +3: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/api_client_test.dart: 3 parallel 401s cause ONE /auth/refresh, then every request is retried and succeeds
+00:00 +4: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/api_client_test.dart: 3 parallel 401s cause ONE /auth/refresh, then every request is retried and succeeds
+00:00 +5: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/api_client_test.dart: 3 parallel 401s cause ONE /auth/refresh, then every request is retried and succeeds
+00:00 +6: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_test.dart: AuthController with Google "who is this user": the picker, then the shops of that account; the ID token is kept only in memory
+00:00 +7: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_test.dart: AuthController with Google "who is this user": the picker, then the shops of that account; the ID token is kept only in memory
+00:00 +8: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_test.dart: AuthController with Google "who is this user": the picker, then the shops of that account; the ID token is kept only in memory
+00:00 +9: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_test.dart: AuthController with Google "who is this user": the picker, then the shops of that account; the ID token is kept only in memory
+00:00 +10: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_test.dart: AuthController with Google "who is this user": the picker, then the shops of that account; the ID token is kept only in memory
+00:00 +11: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_test.dart: AuthController with Google "who is this user": the picker, then the shops of that account; the ID token is kept only in memory
+00:00 +12: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_test.dart: AuthController with Google "who is this user": the picker, then the shops of that account; the ID token is kept only in memory
+00:00 +13: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_test.dart: AuthController with Google "who is this user": the picker, then the shops of that account; the ID token is kept only in memory
+00:00 +14: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_test.dart: AuthController with Google "who is this user": the picker, then the shops of that account; the ID token is kept only in memory
+00:00 +15: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_test.dart: AuthController with Google "who is this user": the picker, then the shops of that account; the ID token is kept only in memory
+00:01 +16: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: Login shows Google only: no phone field, no SMS code anywhere
+00:01 +17: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/auth_screens_test.dart: register: send code, enter it, name the shop, set a PIN → dashboard
+00:01 +18: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/auth_screens_test.dart: register: send code, enter it, name the shop, set a PIN → dashboard
+00:01 +19: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/auth_screens_test.dart: register: send code, enter it, name the shop, set a PIN → dashboard
+00:01 +20: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/auth_screens_test.dart: register: send code, enter it, name the shop, set a PIN → dashboard
+00:01 +21: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/auth_screens_test.dart: register: send code, enter it, name the shop, set a PIN → dashboard
+00:01 +22: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/auth_screens_test.dart: register: send code, enter it, name the shop, set a PIN → dashboard
+00:01 +23: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/auth_screens_test.dart: register: send code, enter it, name the shop, set a PIN → dashboard
+00:01 +24: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/auth_screens_test.dart: register: send code, enter it, name the shop, set a PIN → dashboard
+00:01 +25: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/auth_screens_test.dart: register: send code, enter it, name the shop, set a PIN → dashboard
+00:01 +26: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/auth_screens_test.dart: register: send code, enter it, name the shop, set a PIN → dashboard
+00:02 +27: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: a wrong PIN shows the server message in Burmese, clears the dots and stays
+00:02 +28: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/auth_screens_test.dart: a stored, downloaded session opens on the PIN pad; the right PIN opens the app
+00:02 +29: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: cancelled / no account / offline on the picker: Burmese message on Login, nothing else happens
+00:02 +30: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: cancelled / no account / offline on the picker: Burmese message on Login, nothing else happens
+00:02 +31: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: cancelled / no account / offline on the picker: Burmese message on Login, nothing else happens
+00:02 +32: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: cancelled / no account / offline on the picker: Burmese message on Login, nothing else happens
+00:02 +33: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: no shop yet → "ဆိုင်အသစ် ဖွင့်မယ်" → register with the Google step done: name, owner phone, PIN
+00:03 +34: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: register straight from Login: step 1 opens Google, then the shop steps
+00:03 +35: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: no shop on the Google account: open a new one or try another account; no phone + PIN sign-in
+00:03 +36: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: locked out → "PIN မေ့နေပါသလား?" → Google → this phone's shop is chosen → new PIN twice → the app opens
+00:04 +37: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: reset: two different new PINs are refused before any call
+00:04 +38: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: the new screens fit 320 px wide with no overflow
+00:04 +39: /Users/theikdinyunt/Developer/ZayPOS/mobile/test/google_auth_screens_test.dart: (tearDownAll)
+00:04 +39: All tests passed!

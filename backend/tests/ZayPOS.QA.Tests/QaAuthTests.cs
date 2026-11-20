@@ -84,7 +84,7 @@ public class QaAuthTests(SqlServerFixture sql)
     [Fact]
     public async Task TC_AUTH_06_registered_phone_cannot_register_again_and_no_second_shop()
     {
-        var shop = await NewShop(sql.Api);
+        var shop = await NewOtpShop(sql.Api);
 
         var otp = await _http.PostAsJsonAsync("/api/v1/auth/otp", new OtpRequest(shop.Phone, OtpPurpose.Register), Json);
         otp.StatusCode.Should().Be(HttpStatusCode.Conflict);
@@ -103,23 +103,18 @@ public class QaAuthTests(SqlServerFixture sql)
             .Should().Be(1);
     }
 
-    // TC-AUTH-09: unknown phone and wrong PIN give the SAME response (status, code, title, detail).
+    // TC-AUTH-09 (was: unknown phone looks like a wrong PIN on /login). Phone + PIN sign-in was removed:
+    // /login answers 404 for every phone, registered or not, right PIN or not, so nothing can be told apart.
     [Fact]
-    public async Task TC_AUTH_09_unknown_phone_looks_exactly_like_a_wrong_pin()
+    public async Task TC_AUTH_09_there_is_no_phone_and_PIN_sign_in_for_any_phone()
     {
-        var shop = await NewShop(sql.Api);
-        var wrongPin = await _http.PostAsJsonAsync("/api/v1/auth/login",
-            new LoginRequest(shop.Phone, "999999", new DeviceInfo(Guid.CreateVersion7(), "x")), Json);
-        var unknown = await _http.PostAsJsonAsync("/api/v1/auth/login",
-            new LoginRequest(NewPhone(), "999999", new DeviceInfo(Guid.CreateVersion7(), "x")), Json);
-
-        unknown.StatusCode.Should().Be(wrongPin.StatusCode);
-        var a = await Problem(wrongPin);
-        var b = await Problem(unknown);
-        foreach (var field in new[] { "code", "title", "detail", "status" })
-            b.TryGetProperty(field, out var bv).Should().Be(a.TryGetProperty(field, out var av));
-        b.GetProperty("code").GetString().Should().Be(a.GetProperty("code").GetString());
-        b.GetProperty("detail").GetString().Should().Be(a.GetProperty("detail").GetString());
+        var shop = await NewOtpShop(sql.Api);
+        foreach (var (phone, pin) in new[] { (shop.Phone, Pin), (shop.Phone, "999999"), (NewPhone(), "999999") })
+        {
+            var res = await _http.PostAsJsonAsync("/api/v1/auth/login",
+                new { phone, pin, device = new DeviceInfo(Guid.CreateVersion7(), "x") }, Json);
+            res.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
     }
 
     // TC-FEAT-01: one shop per template; server feature flags = ShopTemplates mapping (which a Domain test ties to shop_template.dart).

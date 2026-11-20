@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'live_removed_phone_sign_in.dart';
 import 'package:zaypos_app/core/api/api_client.dart';
 import 'package:zaypos_app/core/api/api_error.dart';
 import 'package:zaypos_app/core/storage/secure_store.dart';

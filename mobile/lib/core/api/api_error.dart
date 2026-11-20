@@ -3,12 +3,13 @@ import 'package:dio/dio.dart';
 /// A failed API call: a server ProblemDetails (stable [code]) or a network
 /// failure ([isNetwork], code `network`).
 class ApiError implements Exception {
-  const ApiError(this.status, this.code, {this.detail, this.retryAfter});
+  const ApiError(this.status, this.code, {this.detail, this.retryAfter, this.attemptsLeft});
 
   const ApiError.network([this.detail])
       : status = 0,
         code = 'network',
-        retryAfter = null;
+        retryAfter = null,
+        attemptsLeft = null;
 
   /// HTTP status; 0 = no response.
   final int status;
@@ -16,10 +17,13 @@ class ApiError implements Exception {
   final String? detail;
   final Duration? retryAfter;
 
+  /// `invalid_credentials`: wrong PINs still allowed before the 15-minute lock.
+  final int? attemptsLeft;
+
   bool get isNetwork => status == 0;
 
   /// Burmese message for the user.
-  String get message => apiErrorMessage(code, retryAfter: retryAfter);
+  String get message => apiErrorMessage(code, retryAfter: retryAfter, attemptsLeft: attemptsLeft);
 
   factory ApiError.fromDio(DioException e) {
     final r = e.response;
@@ -35,6 +39,7 @@ class ApiError implements Exception {
       code ?? (status >= 500 ? 'server' : status == 403 ? 'forbidden' : 'unknown'),
       detail: data is Map ? data['detail']?.toString() : null,
       retryAfter: retry == null ? null : Duration(seconds: retry),
+      attemptsLeft: data is Map ? (data['attemptsLeft'] as num?)?.toInt() : null,
     );
   }
 
@@ -51,14 +56,26 @@ int minutesUp(Duration d) {
   return m < 1 ? 1 : m;
 }
 
+/// A wrong PIN, on the server (Google + PIN) and offline (unlock). Only the PIN is checked:
+/// there is no phone number in either, so the message names the PIN alone.
+String wrongPinMessage(int? attemptsLeft) => attemptsLeft == null || attemptsLeft < 1
+    ? 'PIN မှားနေပါတယ်။'
+    : 'PIN မှားနေပါတယ်။ နောက်ထပ် ${mmNumber(attemptsLeft)} ကြိမ် ကြိုးစားလို့ရပါတယ်။';
+
 /// Server ProblemDetails codes (docs/backend/README.md §4) → Burmese.
-String apiErrorMessage(String code, {Duration? retryAfter}) => switch (code) {
+String apiErrorMessage(String code, {Duration? retryAfter, int? attemptsLeft}) => switch (code) {
       'otp_invalid' => 'ကုဒ် မှားနေပါတယ် (သို့) သက်တမ်းကုန်သွားပါပြီ။',
       'otp_rate_limited' => 'ကုဒ်တောင်းတာ များသွားပါပြီ။ နောက်မှ ပြန်ကြိုးစားပါ။',
       // 503 from POST /auth/otp when the SMS provider (SMSPoh) is down or refuses the message.
       'sms_unavailable' => 'SMS ပို့မရပါ။ ခဏနေ ထပ်ကြိုးစားပါ။',
       'phone_registered' => 'ဒီဖုန်းနံပါတ်နဲ့ ဆိုင်ရှိပြီးသားပါ။ "ဝင်မယ်" ကနေ ဝင်ပါ။',
-      'invalid_credentials' => 'ဖုန်းနံပါတ် (သို့) PIN မှားနေပါတယ်။',
+      // Google sign-in (docs/backend/auth-google.md §3).
+      'google_token_invalid' => 'Google အကောင့်နဲ့ ပြန်ဝင်ပေးပါ။',
+      'google_unavailable' => 'Google နဲ့ အခု စစ်လို့ မရပါ။ ခဏနေ ပြန်ကြိုးစားပါ။',
+      'shop_not_found' => 'ဒီ Google အကောင့်မှာ ဒီဆိုင် မရှိပါ။ ဆိုင်ဖွင့်တုန်းက Google အကောင့်နဲ့ ဝင်ပါ။',
+      'google_shop_limit' => 'Google အကောင့်တစ်ခုမှာ ဆိုင် ၁၀ ဆိုင်ထက် ပိုဖွင့်လို့ မရပါ။',
+      'otp_disabled' => 'SMS ကုဒ်နဲ့ ဝင်တာ ပိတ်ထားပါတယ်။ Google အကောင့်နဲ့ ဝင်ပါ။',
+      'invalid_credentials' => wrongPinMessage(attemptsLeft),
       'pin_locked' => retryAfter == null
           ? 'PIN မှားတာ များသွားလို့ ခဏပိတ်ထားပါတယ်။'
           : 'PIN မှားတာ များသွားလို့ ခဏပိတ်ထားပါတယ်။ ${mmNumber(minutesUp(retryAfter))} မိနစ်နေမှ ပြန်ကြိုးစားပါ။',

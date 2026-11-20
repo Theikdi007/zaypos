@@ -11,6 +11,7 @@ import 'package:zaypos_app/core/utils/ids.dart';
 import 'package:zaypos_app/features/auth/application/auth_controller.dart';
 import 'package:zaypos_app/features/auth/data/auth_api.dart';
 import 'package:zaypos_app/features/auth/data/boot_state.dart';
+import 'package:zaypos_app/features/auth/data/google_auth.dart';
 import 'package:zaypos_app/features/auth/data/session.dart';
 import 'package:zaypos_app/features/auth/domain/pin_hasher.dart';
 import 'package:zaypos_app/features/customers/application/customer_service.dart';
@@ -23,13 +24,19 @@ void main() {
   late AppDatabase db;
   late MemorySecureStore store;
   late FakeAuthApi api;
+  late FakeGoogleAuth google;
   late DateTime now;
   final containers = <ProviderContainer>[];
+
+  // Two shops of the Google account. A new phone signs in only with Google + the shop + the PIN.
+  const shopA = 'tenant-a';
+  const shopB = 'tenant-b';
 
   setUp(() {
     db = memoryDb();
     store = MemorySecureStore();
     api = FakeAuthApi();
+    google = FakeGoogleAuth();
     now = DateTime.utc(2026, 11, 12, 9);
   });
   tearDown(() async {
@@ -46,6 +53,7 @@ void main() {
     final c = ProviderContainer(overrides: [
       ...driftOverrides(db, boot, store),
       authApiProvider.overrideWithValue(api),
+      googleAuthProvider.overrideWithValue(google),
       pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
       clockProvider.overrideWithValue(() => now),
       isReleaseBuildProvider.overrideWithValue(release),
@@ -57,6 +65,13 @@ void main() {
   AuthController auth(ProviderContainer c) => c.read(authControllerProvider.notifier);
   AuthStatus status(ProviderContainer c) => c.read(authControllerProvider).status;
 
+  /// Sign in on this phone: Google → [tenantId] → [pin].
+  Future<void> signIn(ProviderContainer c, String tenantId, String pin) async {
+    api.googleShopList = [GoogleShop(tenantId: tenantId, name: 'ရွှေဝါ', templateId: 'pharmacy')];
+    await auth(c).googleSignIn();
+    await auth(c).signInToShop(tenantId, pin);
+  }
+
   Future<void> addCustomerUnit(ProviderContainer c) async {
     final t = nowUtc();
     await c.read(customerServiceProvider).create(
@@ -67,16 +82,16 @@ void main() {
   Future<int> rows(TableInfo<Table, Object?> t) async => (await db.select(t).get()).length;
 
   group('sign-in and local data', () {
-    test('first login on a fresh install: session stored, this device row from the server, unlocked', () async {
+    test('first sign-in on a fresh install: session stored, this device row from the server, unlocked', () async {
       final c = await launch();
       expect(status(c), AuthStatus.signedOut);
 
-      await auth(c).login('09 7123 4567', '123456');
+      await signIn(c, shopA, '123456');
 
       expect(status(c), AuthStatus.unlocked);
-      expect(api.calls, ['login:+95971234567']);
+      expect(api.calls, ['google:shops', 'google:signIn:$shopA:123456']);
       final s = c.read(sessionProvider);
-      expect((s.tenantId, s.shopName, s.templateId, s.phone), (api.tenantId, 'ရွှေဝါ', 'pharmacy', '+95971234567'));
+      expect((s.tenantId, s.shopName, s.templateId, s.phone), (shopA, 'ရွှေဝါ', 'pharmacy', ''));
       final device = await db.select(db.devices).getSingle();
       expect((device.id, device.code, device.lastSeq), (c.read(deviceIdProvider), 'B', 7));
       expect(await LocalData(db).owner(), isA<LocalOwner>().having((o) => o.tenantId, 'tenant', api.tenantId));
@@ -85,20 +100,21 @@ void main() {
       expect(store.values.values, isNot(contains('123456')), reason: 'the PIN itself is never stored');
     });
 
-    test('another shop while the outbox has units: refused BEFORE any network call, nothing changes', () async {
+    test('another shop while the outbox has units: refused BEFORE signing in to it, nothing changes', () async {
       final c = await launch();
-      await auth(c).login('0971234567', '123456');
+      await signIn(c, shopA, '123456');
       await addCustomerUnit(c);
       await auth(c).signOut();
+      api.calls.clear();
 
       await expectLater(
-        auth(c).login('0979999999', '654321'),
+        signIn(c, shopB, '654321'),
         throwsA(isA<AuthFailure>()
             .having((e) => e.code, 'code', 'outbox_not_empty')
             .having((e) => e.message, 'message', contains('၁ ခု'))),
       );
       await expectLater(auth(c).requestOtp('0979999999', OtpPurpose.register), throwsA(isA<AuthFailure>()));
-      expect(api.calls, ['login:+95971234567'], reason: 'no login / otp for the other shop was sent');
+      expect(api.calls, ['google:shops'], reason: 'no sign-in / otp for the other shop was sent');
       expect(await rows(db.customers), 1);
       expect(await outbox(db), hasLength(1));
       expect(status(c), AuthStatus.signedOut);
@@ -110,7 +126,7 @@ void main() {
       expect(await rows(db.sales), greaterThan(500));
       final c = await launch();
 
-      await auth(c).login('0979999999', '654321');
+      await signIn(c, shopB, '654321');
 
       for (final t in db.allTables) {
         final n = await rows(t);
@@ -133,12 +149,12 @@ void main() {
 
     test('the same shop signing in again keeps the data and the outbox (lastSeq never moves back)', () async {
       final c = await launch();
-      await auth(c).login('0971234567', '123456');
+      await signIn(c, shopA, '123456');
       await addCustomerUnit(c);
       await (db.update(db.devices)).write(const DevicesCompanion(lastSeq: Value(40)));
       await auth(c).signOut();
 
-      await auth(c).login('09 7123 4567', '123456');
+      await signIn(c, shopA, '123456');
 
       expect(status(c), AuthStatus.unlocked);
       expect(await rows(db.customers), 1);
@@ -151,7 +167,7 @@ void main() {
       final oldId = c.read(deviceIdProvider);
       api.nextError = const ApiError(409, 'device_conflict');
 
-      await auth(c).login('0971234567', '123456');
+      await signIn(c, shopA, '123456');
 
       expect(api.deviceIds, hasLength(2));
       expect(api.deviceIds.first, oldId);
@@ -174,10 +190,19 @@ void main() {
       expect(status(c), AuthStatus.unlocked);
     });
 
-    test('bad phone / PIN fail locally without a network call', () async {
+    test('a bad PIN fails locally without a sign-in call', () async {
       final c = await launch();
-      await expectLater(auth(c).login('12345', '123456'), throwsA(isA<AuthFailure>()));
-      await expectLater(auth(c).login('0971234567', '12'), throwsA(isA<AuthFailure>()));
+      api.googleShopList = const [GoogleShop(tenantId: shopA, name: 'ရွှေဝါ', templateId: 'pharmacy')];
+      await auth(c).googleSignIn();
+      await expectLater(auth(c).signInToShop(shopA, '12'), throwsA(isA<AuthFailure>()));
+      expect(api.calls, ['google:shops']);
+    });
+
+    test('there is no phone + PIN sign-in on a new phone', () async {
+      // The API has no /auth/login and the controller no phone sign-in: the only way in is Google + shop + PIN.
+      final c = await launch();
+      await expectLater(auth(c).signInToShop(shopA, '123456'),
+          throwsA(isA<AuthFailure>().having((e) => e.code, 'code', 'google_again')));
       expect(api.calls, isEmpty);
     });
   });
@@ -185,7 +210,7 @@ void main() {
   group('offline PIN unlock', () {
     Future<ProviderContainer> signedInThenRestart() async {
       final c = await launch();
-      await auth(c).login('0971234567', '123456');
+      await signIn(c, shopA, '123456');
       return launch(); // app restart: opens locked
     }
 
@@ -233,7 +258,7 @@ void main() {
   group('session end', () {
     test('refresh refused (device_revoked): signed out, tokens gone, local data and outbox kept, warning shown', () async {
       final c = await launch();
-      await auth(c).login('0971234567', '123456');
+      await signIn(c, shopA, '123456');
       await addCustomerUnit(c);
 
       await c.read(tokenRefresherProvider).onSessionEnded('device_revoked');
@@ -261,7 +286,7 @@ void main() {
 
     test('a stored session whose shop does not own the local data is dropped', () async {
       final c = await launch();
-      await auth(c).login('0971234567', '123456');
+      await signIn(c, shopA, '123456');
       await db.writeState(LocalStateKeys.ownerTenantId, 'someone-else');
       expect((await bootstrap(db, store)).session, isNull);
       expect(store.values.containsKey(SecureKeys.refreshToken), isFalse);
@@ -304,9 +329,9 @@ void main() {
       expect(await rows(db.customers), greaterThan(7));
       await auth(c).signOut();
 
-      await expectLater(auth(c).login('0971234567', '123456'),
+      await expectLater(signIn(c, shopA, '123456'),
           throwsA(isA<AuthFailure>().having((e) => e.code, 'code', 'outbox_not_empty')));
-      expect(api.calls, isEmpty);
+      expect(api.calls, ['google:shops'], reason: 'the sign-in itself was never sent');
     });
   });
 }

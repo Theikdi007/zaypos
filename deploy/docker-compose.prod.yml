@@ -83,8 +83,12 @@ services:
       <<: *app-connection
       ASPNETCORE_ENVIRONMENT: Production
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?set JWT_SIGNING_KEY in .env}
+      # Google sign-in: comma-separated OAuth client ids (web, Android debug/release, iOS). The API refuses to start without them.
+      Auth__Google__ClientIds: ${GOOGLE_CLIENT_IDS:-}
+      # SMS OTP (phone verification). false until the SMSPoh Sender ID is approved; then the SMS settings below apply.
+      Auth__OtpEnabled: ${AUTH_OTP_ENABLED:-false}
       Sms__Provider: ${SMS_PROVIDER:-SmsPoh}
-      # SmsPoh needs API key + secret (or the ready base64 token); the API refuses to start without them.
+      # With AUTH_OTP_ENABLED=true, SmsPoh needs API key + secret (or the ready base64 token); the API refuses to start without them.
       Sms__SmsPoh__ApiKey: ${SMSPOH_API_KEY:-}
       Sms__SmsPoh__ApiSecret: ${SMSPOH_API_SECRET:-}
       Sms__SmsPoh__Token: ${SMSPOH_TOKEN:-}

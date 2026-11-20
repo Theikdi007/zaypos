@@ -3,15 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaypos_app/app/fake_overrides.dart';
 import 'package:zaypos_app/core/api/api_config.dart';
-import 'package:zaypos_app/core/api/api_error.dart';
 import 'package:zaypos_app/core/db/app_database.dart';
 import 'package:zaypos_app/core/db/database_provider.dart';
 import 'package:zaypos_app/core/storage/secure_store.dart';
-import 'package:zaypos_app/core/sync/sync_providers.dart';
 import 'package:zaypos_app/features/sync/presentation/first_sync_screen.dart';
 import 'package:zaypos_app/core/utils/ids.dart';
 import 'package:zaypos_app/features/auth/application/auth_controller.dart';
 import 'package:zaypos_app/features/auth/data/auth_api.dart';
+import 'package:zaypos_app/features/auth/data/google_auth.dart';
 import 'package:zaypos_app/features/auth/data/boot_state.dart';
 import 'package:zaypos_app/features/auth/domain/pin_hasher.dart';
 import 'package:zaypos_app/features/dashboard/presentation/dashboard_screen.dart';
@@ -47,6 +46,7 @@ void main() {
       appDatabaseProvider.overrideWithValue(db),
       secureStoreProvider.overrideWithValue(store),
       authApiProvider.overrideWithValue(api),
+      otpEnabledProvider.overrideWithValue(true), // these are the SMS OTP screens (AUTH_OTP_ENABLED)
       pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
       isReleaseBuildProvider.overrideWithValue(release),
     ]);
@@ -74,37 +74,8 @@ void main() {
   /// phone, code; step 2: shop name).
   Finder input(int i) => find.byType(EditableText).at(i);
 
-  testWidgets('signed out → Login; a first login downloads the shop, then opens the dashboard', (tester) async {
-    final c = await boot(tester);
-    expect(find.byType(LoginScreen), findsOneWidget);
-
-    await tester.enterText(input(0), '9 7123 4567');
-    await tester.enterText(input(1), '123456');
-    await tester.tap(find.text('ဝင်မယ်'));
-    await settle(tester, animating: true);
-
-    expect(api.calls, ['login:+95971234567']);
-    expect(c.read(authControllerProvider).status, AuthStatus.unlocked);
-    expect(find.byType(FirstSyncScreen), findsOneWidget, reason: 'an empty phone downloads the shop first (§5.4)');
-    expect(find.byType(DashboardScreen), findsNothing);
-
-    c.read(firstSyncDoneProvider.notifier).set(true); // what the engine does when the download completes
-    await settle(tester);
-    expect(find.byType(DashboardScreen), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('a wrong PIN shows the server message in Burmese and stays on Login', (tester) async {
-    await boot(tester);
-    api.nextError = const ApiError(401, 'invalid_credentials');
-    await tester.enterText(input(0), '0971234567');
-    await tester.enterText(input(1), '000000');
-    await tester.tap(find.text('ဝင်မယ်'));
-    await settle(tester);
-
-    expect(find.text('ဖုန်းနံပါတ် (သို့) PIN မှားနေပါတယ်။'), findsOneWidget);
-    expect(find.byType(LoginScreen), findsOneWidget);
-  });
+  // Signing in on a new phone (first download, wrong PIN) is Google → shop → PIN:
+  // test/google_auth_screens_test.dart. Login has no phone + PIN form any more.
 
   testWidgets('register: send code, enter it, name the shop, set a PIN → dashboard', (tester) async {
     final c = await boot(tester);
@@ -176,7 +147,7 @@ void main() {
   testWidgets('release build: no demo shop button', (tester) async {
     await boot(tester, release: true);
     expect(find.textContaining('စမ်းသပ်ဆိုင်'), findsNothing);
-    expect(find.text('ဝင်မယ်'), findsOneWidget);
+    expect(find.text('Google နဲ့ ဝင်မယ်'), findsOneWidget);
   });
 
   testWidgets('signed out with unpushed units: Login shows the kept-outbox warning', (tester) async {

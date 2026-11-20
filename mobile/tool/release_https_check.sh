@@ -16,7 +16,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-PKG=com.zaypos.zaypos_app
+PKG=app.zaypos
 HTTP_URL=${HTTP_URL:-http://10.0.2.2:5076}
 HOST_PORT=${HOST_PORT:-5076}
 ADB=(adb ${ADB_SERIAL:+-s "$ADB_SERIAL"})

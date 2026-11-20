@@ -20,6 +20,7 @@ import 'package:zaypos_app/core/widgets/app_switch_tile.dart';
 import 'package:zaypos_app/core/widgets/product_tile.dart';
 import 'package:zaypos_app/features/auth/application/auth_controller.dart';
 import 'package:zaypos_app/features/auth/data/auth_api.dart';
+import 'package:zaypos_app/features/auth/data/google_auth.dart';
 import 'package:zaypos_app/features/auth/data/boot_state.dart';
 import 'package:zaypos_app/features/auth/domain/pin_hasher.dart';
 import 'package:zaypos_app/features/customers/application/customer_service.dart';
@@ -69,6 +70,7 @@ void main() {
         appDatabaseProvider.overrideWithValue(db),
         secureStoreProvider.overrideWithValue(MemorySecureStore()),
         authApiProvider.overrideWithValue(api),
+        otpEnabledProvider.overrideWithValue(true), // the SMS OTP screens (AUTH_OTP_ENABLED)
         pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
       ]);
       addTearDown(c.dispose);
@@ -160,6 +162,7 @@ void main() {
       final c = ProviderContainer(overrides: [
         ...driftOverrides(db, await bootstrap(db, store), store),
         authApiProvider.overrideWithValue(api),
+        googleAuthProvider.overrideWithValue(FakeGoogleAuth()),
         pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
         clockProvider.overrideWithValue(() => now),
       ]);
@@ -167,10 +170,18 @@ void main() {
       return c;
     }
 
+    /// Sign in on this phone: Google → the shop → PIN (there is no phone + PIN sign-in).
+    Future<void> signIn(ProviderContainer c, String pin) async {
+      api.googleShopList = [GoogleShop(tenantId: api.tenantId, name: 'ရွှေဝါ', templateId: 'pharmacy')];
+      final ctl = c.read(authControllerProvider.notifier);
+      await ctl.googleSignIn();
+      await ctl.signInToShop(api.tenantId, pin);
+    }
+
     // ---------------------------------------------------------------- TC-AUTH-12 (app half)
     test('TC-AUTH-12 refresh refused as replay (401 invalid_refresh_token) → Login, outbox kept and warned', () async {
       final c = await launch();
-      await c.read(authControllerProvider.notifier).login('0971234567', '123456');
+      await signIn(c, '123456');
       final t = nowUtc();
       await c.read(customerServiceProvider).create(
           Customer(id: newId(), tenantId: c.read(tenantIdProvider), name: 'x', phone: '', createdAt: t, updatedAt: t));
@@ -188,14 +199,15 @@ void main() {
     // ---------------------------------------------------------------- TC-PIN-03
     test('TC-PIN-03 after a PIN reset the OLD PIN is refused offline, the new one works, no lockout', () async {
       var c = await launch();
-      await c.read(authControllerProvider.notifier).login('0971234567', '123456');
+      await signIn(c, '123456');
       c = await launch();
       final ctl = c.read(authControllerProvider.notifier);
       for (var i = 0; i < 5; i++) {
         await expectLater(ctl.unlock('000000'), throwsA(isA<AuthFailure>()));
       }
-      await ctl.requestOtp('0971234567', OtpPurpose.reset);
-      await ctl.resetPin(rawPhone: '0971234567', otp: '654321', newPin: '246810');
+      // Forgot PIN = Google again → new PIN (the SMS reset is gone with phone + PIN sign-in).
+      await ctl.googleSignIn();
+      await ctl.resetPinWithGoogle(tenantId: api.tenantId, newPin: '246810');
 
       c = await launch(); // restart, offline (no API call expected)
       api.calls.clear();

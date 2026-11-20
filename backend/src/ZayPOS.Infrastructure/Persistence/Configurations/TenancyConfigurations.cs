@@ -46,6 +46,8 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         b.HasIndex(x => new { x.TenantId, x.CreatedAt }).HasDatabaseName("CX_Users").IsClustered();
 
         b.Property(x => x.Phone).Varchar(20);
+        b.Property(x => x.GoogleSubject).Varchar(255);
+        b.Property(x => x.GoogleEmail).Nvarchar(320);
         b.Property(x => x.Name).Nvarchar(80);
         b.Property(x => x.Role).CamelString(10);
         b.Property(x => x.PinHash).Varchar(200);
@@ -53,7 +55,11 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         b.Property(x => x.Version).IsRowVersion();
 
         b.HasOne<Tenant>().WithMany().HasForeignKey(x => x.TenantId).HasConstraintName("FK_Users_Tenant");
-        b.HasIndex(x => x.Phone).HasDatabaseName("UX_Users_Phone").IsUnique().HasFilter("[DeletedAt] IS NULL");
+        b.HasIndex(x => x.Phone).HasDatabaseName("UX_Users_Phone").IsUnique()
+            .HasFilter("[Phone] IS NOT NULL AND [DeletedAt] IS NULL");
+        // One user per Google account per shop; the leading column serves "every shop of this account".
+        b.HasIndex(x => new { x.GoogleSubject, x.TenantId }).HasDatabaseName("UX_Users_Google").IsUnique()
+            .HasFilter("[GoogleSubject] IS NOT NULL AND [DeletedAt] IS NULL");
     }
 }
 

@@ -17,6 +17,7 @@ import 'package:zaypos_app/core/storage/secure_store.dart';
 import 'package:zaypos_app/core/sync/sync_limits.dart';
 import 'package:zaypos_app/core/utils/ids.dart';
 import 'package:zaypos_app/features/auth/data/auth_api.dart';
+import 'package:zaypos_app/features/auth/data/google_auth.dart';
 import 'package:zaypos_app/features/auth/data/boot_state.dart';
 import 'package:zaypos_app/features/auth/domain/pin_hasher.dart';
 import 'package:zaypos_app/core/widgets/common.dart' show AppInput;
@@ -37,7 +38,11 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final c = ProviderContainer(
-      overrides: [...fakeRepositoryOverrides, initialLimitsProvider.overrideWithValue(bundledLimits())],
+      overrides: [
+        ...fakeRepositoryOverrides,
+        initialLimitsProvider.overrideWithValue(bundledLimits()),
+        otpEnabledProvider.overrideWithValue(true), // TC-AUTH-NEW-4 is the SMS OTP register wizard
+      ],
     );
     addTearDown(c.dispose);
     if (template != null) c.read(shopTemplateProvider.notifier).select(template);
@@ -70,6 +75,7 @@ void main() {
               appDatabaseProvider.overrideWithValue(db),
               secureStoreProvider.overrideWithValue(MemorySecureStore()),
               authApiProvider.overrideWithValue(FakeAuthApi()),
+              otpEnabledProvider.overrideWithValue(true),
               pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
             ],
           );

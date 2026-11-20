@@ -25,7 +25,11 @@ public sealed class ManualClock(DateTimeOffset start) : TimeProvider
     public override DateTimeOffset GetUtcNow() => Now;
 }
 
-public sealed record QaShop(HttpClient Http, AuthResponse Auth, string Phone)
+/// <summary>
+/// <see cref="Phone"/>: the owner's contact phone (Google shop) or the verified login phone (<see cref="QaApi.NewOtpShop"/>).
+/// <see cref="GoogleToken"/>: the owner's (fake) Google ID token; null for an OTP shop.
+/// </summary>
+public sealed record QaShop(HttpClient Http, AuthResponse Auth, string Phone, string? GoogleToken = null)
 {
     public Guid TenantId => Auth.Tenant.Id;
     public Guid DeviceId => Auth.Device.Id;
@@ -45,7 +49,22 @@ public static class QaApi
 
     public static string NewPhone() => "+9598" + Interlocked.Increment(ref _seq).ToString("D8");
 
+    /// <summary>A shop registered with Google (the default flow); <paramref name="phone"/> is the owner's contact phone.</summary>
     public static async Task<QaShop> NewShop(ApiFactory api, string template = "grocery", string? phone = null)
+    {
+        var http = api.CreateClient();
+        phone ??= NewPhone();
+        var token = FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject(), "qa@example.com");
+        var res = await http.PostAsJsonAsync("/api/v1/auth/google/register",
+            new GoogleRegisterRequest(token, "QA shop", template, null, phone, Pin, new DeviceInfo(Guid.CreateVersion7(), "QA A")), Json);
+        res.StatusCode.Should().Be(HttpStatusCode.OK, await res.Content.ReadAsStringAsync());
+        var auth = (await res.Content.ReadFromJsonAsync<AuthResponse>(Json))!;
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
+        return new QaShop(http, auth, phone, token);
+    }
+
+    /// <summary>A shop registered with SMS OTP (needs an API with Auth:OtpEnabled=true, as the shared factory has).</summary>
+    public static async Task<QaShop> NewOtpShop(ApiFactory api, string template = "grocery", string? phone = null)
     {
         var http = api.CreateClient();
         phone ??= NewPhone();
@@ -59,15 +78,17 @@ public static class QaApi
         return new QaShop(http, auth, phone);
     }
 
+    /// <summary>Another phone of the shop: Google (the owner's account) + the shop + the PIN.</summary>
     public static async Task<QaShop> Login(ApiFactory api, QaShop shop, Guid? deviceId = null)
     {
         var http = api.CreateClient();
-        var res = await http.PostAsJsonAsync("/api/v1/auth/login",
-            new LoginRequest(shop.Phone, Pin, new DeviceInfo(deviceId ?? Guid.CreateVersion7(), "QA other")), Json);
+        var token = shop.GoogleToken ?? throw new InvalidOperationException("An OTP shop can't sign in on another phone (no phone + PIN sign-in).");
+        var res = await http.PostAsJsonAsync("/api/v1/auth/google",
+            new GoogleSignInRequest(token, shop.TenantId, Pin, new DeviceInfo(deviceId ?? Guid.CreateVersion7(), "QA other")), Json);
         res.StatusCode.Should().Be(HttpStatusCode.OK, await res.Content.ReadAsStringAsync());
         var auth = (await res.Content.ReadFromJsonAsync<AuthResponse>(Json))!;
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-        return new QaShop(http, auth, shop.Phone);
+        return new QaShop(http, auth, shop.Phone, token);
     }
 
     public static DateTime Now() => SyncJson.ToUtcMs(DateTime.UtcNow);

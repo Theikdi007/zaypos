@@ -1,0 +1,53 @@
+success | Google errors → Burmese cancelled / no account / Play services / offline / other each have their own Burmese message
+success | Google errors → Burmese every new server code has its own Burmese message (not the generic one)
+success | Google errors → Burmese a build without client ids says "not configured" instead of crashing
+success | Google errors → Burmese the OTP flow is off unless AUTH_OTP_ENABLED is set
+success | AuthController with Google "who is this user": the picker, then the shops of that account; the ID token is kept only in memory
+success | AuthController with Google cancel on the picker: a Burmese failure, no API call, nothing stored
+success | AuthController with Google new phone: choose the shop + PIN → session stored, unlocked, the token dropped
+success | sign-in and local data first sign-in on a fresh install: session stored, this device row from the server, unlocked
+success | AuthController with Google the same shop again with unsent units: allowed and kept (the guard compares the tenant id)
+success | AuthController with Google another shop while the outbox has units: refused BEFORE the sign-in call
+success | sign-in and local data another shop while the outbox has units: refused BEFORE signing in to it, nothing changes
+success | AuthController with Google register: Google → shop + owner phone (normalized) + PIN; device A comes from the server
+success | AuthController with Google register refuses a bad owner phone, a short PIN or a missing Google step without calling the API
+success | AuthController with Google forgot PIN: Google → reset → signs in with the NEW PIN; the local lockout is cleared
+success | AuthController with Google an expired Google token from the server drops the flow so the screen asks for Google again
+success | sign-in and local data another shop with an empty outbox: every local table except the outbox is wiped
+success | sign-in and local data the same shop signing in again keeps the data and the outbox (lastSeq never moves back)
+success | sign-in and local data device_conflict when replacing local data: retried once with a new install id
+success | sign-in and local data register: guard, then /auth/register with the template; server errors become Burmese failures
+success | sign-in and local data a bad PIN fails locally without a sign-in call
+success | sign-in and local data there is no phone + PIN sign-in on a new phone
+success | offline PIN unlock a restart opens locked; the right PIN unlocks with no network
+success | offline PIN unlock 5 wrong PINs lock for 15 minutes, across restarts; then the right PIN works again
+success | session end refresh refused (device_revoked): signed out, tokens gone, local data and outbox kept, warning shown
+success | install a fresh install (no marker in the database) wipes Keychain leftovers and makes a new device id
+success | install a stored session whose shop does not own the local data is dropped
+success | sample data is impossible in release builds seedSampleShop refuses (assert in debug, StateError at runtime) and writes nothing
+success | sample data is impossible in release builds LocalData.openDemo throws in release mode
+success | sample data is impossible in release builds the demo shop cannot be opened from a release build
+success | sample data is impossible in release builds debug: the demo shop is seeded once, never pushed, and its unpushed units block a real sign-in
+success | Login shows Google only: no phone field, no SMS code anywhere
+success | new phone: Google → choose one of two shops → PIN → first download, signed in to THAT shop
+success | auth screens TC-AUTH-01 "ကုဒ်ပို့မယ်" → OTP boxes and a 1:00 resend timer that counts down, then resend works
+success | auth screens TC-FEAT-NEW-1 register step 2: the v2 restaurant template cannot be chosen
+success | auth screens TC-PROD-NEW-2 register step 3 (grocery) only promises the presets the server has (20)
+success | auth screens TC-PROD-NEW-2 register step 3 (pharmacy) only promises the presets the server has (0)
+success | auth screens TC-PROD-NEW-2 register step 3 (phone) only promises the presets the server has (0)
+success | a wrong PIN shows the server message in Burmese, clears the dots and stays
+success | auth screens TC-PROD-NEW-2 register step 3 (hardware) only promises the presets the server has (0)
+success | session TC-AUTH-12 refresh refused as replay (401 invalid_refresh_token) → Login, outbox kept and warned
+success | session TC-PIN-03 after a PIN reset the OLD PIN is refused offline, the new one works, no lockout
+success | cancelled / no account / offline on the picker: Burmese message on Login, nothing else happens
+success | shop screens TC-PROD-01 new grocery shop with the 20 server presets: unpriced, untracked, Dashboard card 20
+success | shop screens TC-FEAT-02 Settings toggle "သက်တမ်းကုန်ရက် / Batch" → Add Product shows batch + expiry; TC-FEAT-04 restaurant disabled
+success | no shop yet → "ဆိုင်အသစ် ဖွင့်မယ်" → register with the Google step done: name, owner phone, PIN
+success | shop screens TC-FEAT-03 turning expiryBatch off keeps the batch data and hides the fields; on again shows them
+success | register straight from Login: step 1 opens Google, then the shop steps
+success | shop screens TC-PROD-NEW-1 an existing product can be edited (price / cost / name)
+success | no shop on the Google account: open a new one or try another account; no phone + PIN sign-in
+success | locked out → "PIN မေ့နေပါသလား?" → Google → this phone's shop is chosen → new PIN twice → the app opens
+success | reset: two different new PINs are refused before any call
+success | the new screens fit 320 px wide with no overflow
+52

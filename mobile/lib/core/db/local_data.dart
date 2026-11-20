@@ -80,11 +80,15 @@ class LocalData {
   }
 
   /// Decided BEFORE any network call, so a refused sign-in never registers
-  /// this phone with another shop. [phone] is E.164; null = a new shop
+  /// this phone with another shop. The shop is known by [tenantId] (Google:
+  /// the chosen shop) or by its login [phone] (E.164); both null = a new shop
   /// (register) or the demo shop.
-  Future<SignInCheck> check(String? phone) async {
+  Future<SignInCheck> check(String? phone, {String? tenantId}) async {
     final o = await owner();
-    if (o != null && !o.isDemo && phone != null && samePhone(o.phone, phone)) return SignInCheck.sameShop;
+    if (o != null && !o.isDemo) {
+      if (tenantId != null && o.tenantId == tenantId) return SignInCheck.sameShop;
+      if (phone != null && o.phone.isNotEmpty && samePhone(o.phone, phone)) return SignInCheck.sameShop;
+    }
     return await pendingUnits() > 0 ? SignInCheck.refuse : SignInCheck.replace;
   }
 

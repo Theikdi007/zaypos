@@ -10,9 +10,9 @@ import 'package:zaypos_app/core/storage/secure_store.dart';
 import 'package:zaypos_app/core/utils/digit_input.dart';
 import 'package:zaypos_app/core/utils/ids.dart';
 import 'package:zaypos_app/features/auth/data/auth_api.dart';
+import 'package:zaypos_app/features/auth/data/google_auth.dart';
 import 'package:zaypos_app/features/auth/data/boot_state.dart';
 import 'package:zaypos_app/features/auth/domain/pin_hasher.dart';
-import 'package:zaypos_app/features/auth/presentation/pin_reset_screen.dart';
 import 'package:zaypos_app/main.dart';
 
 import 'drift_helpers.dart';
@@ -77,6 +77,7 @@ void main() {
         appDatabaseProvider.overrideWithValue(db),
         secureStoreProvider.overrideWithValue(MemorySecureStore()),
         authApiProvider.overrideWithValue(api),
+        otpEnabledProvider.overrideWithValue(true), // the SMS OTP screens (AUTH_OTP_ENABLED)
         pinHasherProvider.overrideWithValue(const PinHasher(iterations: 10, useIsolate: false)),
       ]);
       addTearDown(c.dispose);
@@ -95,16 +96,7 @@ void main() {
     Finder input(int i) => find.byType(EditableText).at(i);
     String textOf(WidgetTester tester, int i) => (tester.widget<EditableText>(input(i))).controller.text;
 
-    testWidgets('Login: Myanmar phone and PIN reach the sign-in as 0-9', (tester) async {
-      await boot(tester);
-      await tester.enterText(input(0), '၉ ၇၁၂၃ ၄၅၆၇');
-      await tester.enterText(input(1), '၁၂၃၄၅၆');
-      expect(textOf(tester, 0), '9 7123 4567');
-      expect(textOf(tester, 1), '123456');
-      await tester.tap(find.text('ဝင်မယ်'));
-      await settle(tester);
-      expect(api.calls.first, 'login:+95971234567');
-    });
+    // (Login has no phone/PIN fields any more: Google → shop → PIN on the keypad.)
 
     testWidgets('Register: Myanmar phone and SMS code are kept', (tester) async {
       await boot(tester);
@@ -117,27 +109,6 @@ void main() {
       expect(api.calls, ['otp:register:+95971234567']);
       await tester.enterText(input(1), '၄၈၂၉၁၃');
       expect(textOf(tester, 1), '482913');
-    });
-
-    testWidgets('PIN reset: Myanmar phone, SMS code and new PIN (QA\'s inputs) are kept and used', (tester) async {
-      await boot(tester);
-      await tester.tap(find.text('PIN မေ့နေပါသလား?'));
-      await tester.pumpAndSettle();
-      expect(find.byType(PinResetScreen), findsOneWidget);
-
-      await tester.enterText(input(0), '၀၉ ၇၉၀ ၉၁၇ ၀၅၁');
-      expect(textOf(tester, 0), '09 790 917 051');
-      await tester.tap(find.text('ကုဒ်ပို့မယ်'));
-      await settle(tester);
-      expect(api.calls, ['otp:reset:+959790917051']);
-
-      await tester.enterText(input(1), '၀၀၇၄၈၀');
-      await tester.enterText(input(2), '၂၂၂၂၂၂');
-      await tester.enterText(input(3), '၂၂၂၂၂၂');
-      expect([textOf(tester, 1), textOf(tester, 2), textOf(tester, 3)], ['007480', '222222', '222222']);
-      await tester.tap(find.text('PIN အသစ် သိမ်းမယ်'));
-      await settle(tester);
-      expect(api.calls.sublist(1, 3), ['reset:+959790917051', 'login:+959790917051']);
     });
   });
 }

@@ -1,0 +1,80 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  ZayPOS.Domain -> /Users/theikdinyunt/Developer/ZayPOS/backend/src/ZayPOS.Domain/bin/Debug/net10.0/ZayPOS.Domain.dll
+  ZayPOS.Application -> /Users/theikdinyunt/Developer/ZayPOS/backend/src/ZayPOS.Application/bin/Debug/net10.0/ZayPOS.Application.dll
+  ZayPOS.Domain.Tests -> /Users/theikdinyunt/Developer/ZayPOS/backend/tests/ZayPOS.Domain.Tests/bin/Debug/net10.0/ZayPOS.Domain.Tests.dll
+Test run for /Users/theikdinyunt/Developer/ZayPOS/backend/tests/ZayPOS.Domain.Tests/bin/Debug/net10.0/ZayPOS.Domain.Tests.dll (.NETCoreApp,Version=v10.0)
+  ZayPOS.Infrastructure -> /Users/theikdinyunt/Developer/ZayPOS/backend/src/ZayPOS.Infrastructure/bin/Debug/net10.0/ZayPOS.Infrastructure.dll
+A total of 1 test files matched the specified pattern.
+  ZayPOS.Api -> /Users/theikdinyunt/Developer/ZayPOS/backend/src/ZayPOS.Api/bin/Debug/net10.0/ZayPOS.Api.dll
+
+Passed!  - Failed:     0, Passed:    20, Skipped:     0, Total:    20, Duration: 106 ms - ZayPOS.Domain.Tests.dll (net10.0)
+  ZayPOS.Api.Tests -> /Users/theikdinyunt/Developer/ZayPOS/backend/tests/ZayPOS.Api.Tests/bin/Debug/net10.0/ZayPOS.Api.Tests.dll
+Test run for /Users/theikdinyunt/Developer/ZayPOS/backend/tests/ZayPOS.Api.Tests/bin/Debug/net10.0/ZayPOS.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   352, Skipped:     0, Total:   352, Duration: 3 m 23 s - ZayPOS.Api.Tests.dll (net10.0)
+  ZayPOS.QA.Tests -> /Users/theikdinyunt/Developer/ZayPOS/backend/tests/ZayPOS.QA.Tests/bin/Debug/net10.0/ZayPOS.QA.Tests.dll
+Test run for /Users/theikdinyunt/Developer/ZayPOS/backend/tests/ZayPOS.QA.Tests/bin/Debug/net10.0/ZayPOS.QA.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:23.80]     ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(input: "09７９００１１００２") [FAIL]
+[xUnit.net 00:00:23.80]     ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(input: "09႗႙႐႐႑႑႐႐႒") [FAIL]
+[xUnit.net 00:00:23.80]     ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(input: "+959٧٩٠٠١١٠٠٢") [FAIL]
+  Failed ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(input: "09７９００１１００２") [12 ms]
+  Error Message:
+   Expected (n is null || Regex.IsMatch(n, "^\\+959[0-9]{7,9}$")) to be True because Normalize("09７９００１１００２") returned "+959７９００１１００２", but found False.
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+   at FluentAssertions.Primitives.BooleanAssertions`1.BeTrue(String because, Object[] becauseArgs)
+   at ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(String input) in /Users/theikdinyunt/Developer/ZayPOS/backend/tests/ZayPOS.QA.Tests/QaRound12Tests.cs:line 92
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+  Failed ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(input: "09႗႙႐႐႑႑႐႐႒") [< 1 ms]
+  Error Message:
+   Expected (n is null || Regex.IsMatch(n, "^\\+959[0-9]{7,9}$")) to be True because Normalize("09႗႙႐႐႑႑႐႐႒") returned "+959႗႙႐႐႑႑႐႐႒", but found False.
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+   at FluentAssertions.Primitives.BooleanAssertions`1.BeTrue(String because, Object[] becauseArgs)
+   at ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(String input) in /Users/theikdinyunt/Developer/ZayPOS/backend/tests/ZayPOS.QA.Tests/QaRound12Tests.cs:line 92
+   at InvokeStub_QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+  Failed ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(input: "+959٧٩٠٠١١٠٠٢") [< 1 ms]
+  Error Message:
+   Expected (n is null || Regex.IsMatch(n, "^\\+959[0-9]{7,9}$")) to be True because Normalize("+959٧٩٠٠١١٠٠٢") returned "+959٧٩٠٠١١٠٠٢", but found False.
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+   at FluentAssertions.Primitives.BooleanAssertions`1.BeTrue(String because, Object[] becauseArgs)
+   at ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(String input) in /Users/theikdinyunt/Developer/ZayPOS/backend/tests/ZayPOS.QA.Tests/QaRound12Tests.cs:line 92
+   at InvokeStub_QaRound12Tests.TC_AUTH_NEW_2_other_script_digits_never_become_a_non_ASCII_phone_number(Object, Span`1)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+[xUnit.net 00:00:24.01]     ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_api_an_otp_for_a_Shan_digit_number_sends_no_SMS_to_a_non_ASCII_number [FAIL]
+  Failed ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_api_an_otp_for_a_Shan_digit_number_sends_no_SMS_to_a_non_ASCII_number [5 ms]
+  Error Message:
+   Expected sentToRaw to be 0 because no SMS to the non-ASCII number "+959႗႙႐႐႑႑႐႐႒" (status 202), but found 1 (difference of 1).
+  Stack Trace:
+     at FluentAssertions.Execution.LateBoundTestFramework.Throw(String message)
+   at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+   at FluentAssertions.Numeric.NumericAssertions`2.Be(T expected, String because, Object[] becauseArgs)
+   at ZayPOS.QA.Tests.QaRound12Tests.TC_AUTH_NEW_2_api_an_otp_for_a_Shan_digit_number_sends_no_SMS_to_a_non_ASCII_number() in /Users/theikdinyunt/Developer/ZayPOS/backend/tests/ZayPOS.QA.Tests/QaRound12Tests.cs:line 103
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     4, Passed:    39, Skipped:     0, Total:    43, Duration: 7 s - ZayPOS.QA.Tests.dll (net10.0)

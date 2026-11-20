@@ -144,6 +144,15 @@ void main() {
       expect(e.message, contains('၁၅ မိနစ်'));
     });
 
+    test('wrong PIN names the PIN only (no phone) and says how many tries are left', () {
+      final e = ApiError.fromDio(problem(401, {'code': 'invalid_credentials', 'attemptsLeft': 3}));
+      expect(e.attemptsLeft, 3);
+      expect(e.message, 'PIN မှားနေပါတယ်။ နောက်ထပ် ၃ ကြိမ် ကြိုးစားလို့ရပါတယ်။');
+      expect(e.message, isNot(contains('ဖုန်းနံပါတ်')));
+      // An older API without attemptsLeft: still the PIN alone.
+      expect(ApiError.fromDio(problem(401, {'code': 'invalid_credentials'})).message, 'PIN မှားနေပါတယ်။');
+    });
+
     test('no response = network; 5xx without code = server', () {
       expect(ApiError.fromDio(DioException(requestOptions: RequestOptions(path: '/x'))).isNetwork, isTrue);
       expect(ApiError.fromDio(problem(502, {})).code, 'server');

@@ -6,6 +6,8 @@ gradle-wrapper.jar
 /local.properties
 GeneratedPluginRegistrant.java
 .cxx/
+# Gradle output of android/ itself (e.g. a stopped release build's reports); app output is mobile/build/.
+/build/
 
 # Remember to never publicly share your keystore.
 # See https://flutter.dev/to/reference-keystore

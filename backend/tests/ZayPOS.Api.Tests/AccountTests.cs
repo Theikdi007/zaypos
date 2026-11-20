@@ -41,7 +41,9 @@ public class AccountTests(SqlServerFixture sql)
         var me = await shop.Http.GetFromJsonAsync<MeResponse>("/api/v1/me", Json);
 
         me!.User.Id.Should().Be(shop.Auth.User.Id);
-        me.User.Phone.Should().Be(shop.Phone);
+        me.User.Phone.Should().BeNull("a Google user has no login phone");
+        me.User.GoogleEmail.Should().Be("account@example.com");
+        me.Tenant.Phone.Should().Be(shop.Phone, "the owner phone is the shop's contact number");
         me.User.Role.Should().Be(UserRole.Owner);
         me.Tenant.Id.Should().Be(shop.TenantId);
         me.Tenant.TemplateId.Should().Be("pharmacy");
@@ -317,7 +319,9 @@ public class AccountTests(SqlServerFixture sql)
 
     // ================================================================ helpers
 
-    private sealed record Shop(HttpClient Http, AuthResponse Auth, string Phone)
+    /// <param name="Phone">The owner's contact phone (Tenants.Phone, not a login phone).</param>
+    /// <param name="GoogleToken">The owner's (fake) Google ID token: how another phone of the shop signs in.</param>
+    private sealed record Shop(HttpClient Http, AuthResponse Auth, string Phone, string GoogleToken)
     {
         public Guid TenantId => Auth.Tenant.Id;
         public Guid DeviceId => Auth.Device.Id;
@@ -396,24 +400,23 @@ public class AccountTests(SqlServerFixture sql)
     {
         var http = api.CreateClient();
         var phone = "+9597" + Interlocked.Increment(ref _seq).ToString("D8");
-        (await http.PostAsJsonAsync("/api/v1/auth/otp", new OtpRequest(phone, OtpPurpose.Register), Json)).EnsureSuccessStatusCode();
-        var res = await http.PostAsJsonAsync("/api/v1/auth/register",
-            new RegisterRequest(phone, api.Sms.LastCode(phone), "Account shop", template, null, "123456",
-                new DeviceInfo(Guid.CreateVersion7(), "A15")), Json);
+        var token = FakeGoogleVerifier.Token(FakeGoogleVerifier.NewSubject(), "account@example.com");
+        var res = await http.PostAsJsonAsync("/api/v1/auth/google/register",
+            new GoogleRegisterRequest(token, "Account shop", template, null, phone, "123456", new DeviceInfo(Guid.CreateVersion7(), "A15")), Json);
         res.EnsureSuccessStatusCode();
         var auth = (await res.Content.ReadFromJsonAsync<AuthResponse>(Json))!;
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-        return new Shop(http, auth, phone);
+        return new Shop(http, auth, phone, token);
     }
 
     private static async Task<Shop> SecondDevice(ApiFactory api, Shop shop)
     {
         var http = api.CreateClient();
-        var res = await http.PostAsJsonAsync("/api/v1/auth/login",
-            new LoginRequest(shop.Phone, "123456", new DeviceInfo(Guid.CreateVersion7(), "Redmi")), Json);
+        var res = await http.PostAsJsonAsync("/api/v1/auth/google",
+            new GoogleSignInRequest(shop.GoogleToken, shop.TenantId, "123456", new DeviceInfo(Guid.CreateVersion7(), "Redmi")), Json);
         res.EnsureSuccessStatusCode();
         var auth = (await res.Content.ReadFromJsonAsync<AuthResponse>(Json))!;
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
-        return new Shop(http, auth, shop.Phone);
+        return new Shop(http, auth, shop.Phone, shop.GoogleToken);
     }
 }
