@@ -24,7 +24,7 @@ domain="${API_DOMAIN:-api.zaypos.app}"
 
 # --- one shared SSH connection ---------------------------------------------------------------
 # %C = hash of user/host/port: short enough for macOS's 104-byte socket path limit.
-ssh_opts=(-o ControlMaster=auto -o "ControlPath=$HOME/.ssh/zaypos-%C" -o ControlPersist=120
+ssh_opts=(-o ControlMaster=auto -o "ControlPath=$HOME/.ssh/zaypos-%C" -o ControlPersist=300
           -o ServerAliveInterval=30 -o ConnectTimeout=15)
 remote() { ssh "${ssh_opts[@]}" "$target" "$@"; }
 copy() { scp -q "${ssh_opts[@]}" "$@"; }
@@ -32,12 +32,17 @@ master_pid() { ssh "${ssh_opts[@]}" -O check "$target" 2>&1 | sed -n 's/.*pid=\(
 close_master() { ssh "${ssh_opts[@]}" -O exit "$target" > /dev/null 2>&1 || true; }
 trap close_master EXIT
 
-# Open it now (one TCP connection, one login); every later call reuses it.
-close_master # a stale socket from an aborted run must not be reused
-remote true || { echo "cannot log in as $target (key? rate limit: wait a minute)" >&2; exit 1; }
-pid=$(master_pid)
-[[ -n "$pid" ]] || { echo "SSH connection sharing did not start (ControlMaster)" >&2; exit 1; }
-echo "==> SSH: one shared connection to $target (pid $pid)"
+# One TCP connection, one login; every later call reuses it. A real deploy opens it only AFTER the
+# image is built: the master closes after ControlPersist idle seconds, and a slow build (NuGet
+# retries took > 2 min on 2026-11-20) used to outlive it, so the next call opened a 2nd connection.
+pid=""
+open_connection() {
+  close_master # a stale socket from an aborted run must not be reused
+  remote true || { echo "cannot log in as $target (key? rate limit: wait a minute)" >&2; exit 1; }
+  pid=$(master_pid)
+  [[ -n "$pid" ]] || { echo "SSH connection sharing did not start (ControlMaster)" >&2; exit 1; }
+  echo "==> SSH: one shared connection to $target (pid $pid)"
+}
 
 same_connection() { # fail loudly if a call opened its own connection
   [[ "$(master_pid)" == "$pid" ]] || { echo "SSH connection sharing broke (master pid changed)" >&2; exit 1; }
@@ -53,6 +58,7 @@ tag=$(git rev-parse --short=12 HEAD)
 [[ -z "$(git status --porcelain -- backend deploy)" ]] || tag="$tag-dirty-$(date +%s)"
 
 if ((dry)); then
+  open_connection
   echo "==> DRY RUN for zaypos-api:$tag: nothing is built, copied, uploaded or released"
   remote 'test -f zaypos/.env && test -d zaypos/certs && echo "    server: zaypos/.env and zaypos/certs/ present"'
   # Copy the deploy files to a throw-away folder (exercises scp on the shared connection) and compare.
@@ -82,6 +88,8 @@ fi
 
 echo "==> Building zaypos-api:$tag (linux/amd64)"
 docker buildx build --platform linux/amd64 -t "zaypos-api:$tag" --load backend
+
+open_connection # now, not before the build (see open_connection)
 
 echo "==> Copying deploy files to $target:zaypos/"
 remote 'mkdir -p zaypos/certs zaypos/backups && chmod 700 zaypos/certs'
