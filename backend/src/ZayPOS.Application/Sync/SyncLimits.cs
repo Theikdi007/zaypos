@@ -59,6 +59,9 @@ public sealed record NumberLimit(string Field, long? Min = null, long? Max = nul
         if (Max is { } max && value > max) throw new SyncRejectException($"{Field} must be <= {max}.", RejectCodes.FieldTooLarge, F(("max", max.ToString())));
         return value;
     }
+
+    /// <summary>An optional number: null passes (e.g. an unknown cost), a value is checked.</summary>
+    public long? Apply(long? value) => value is { } v ? Apply(v) : null;
 }
 
 /// <summary>

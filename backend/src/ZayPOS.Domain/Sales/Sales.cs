@@ -42,8 +42,8 @@ public class SaleLine : ISyncedRow
     public long QtyMilli { get; set; }
     /// <summary>Kyats per unit.</summary>
     public long Price { get; set; }
-    /// <summary>Kyats per unit at sale time.</summary>
-    public long CostSnapshot { get; set; }
+    /// <summary>Kyats per unit at sale time; null = unknown (no cost, or a quick sale), 0 = a real zero cost.</summary>
+    public long? CostSnapshot { get; set; }
     /// <summary><see cref="Ledger.LineTotal"/>(Price, QtyMilli), computed by the server.</summary>
     public long LineTotal { get; set; }
     public DateTime CreatedAt { get; set; }

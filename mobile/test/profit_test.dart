@@ -44,7 +44,7 @@ void main() {
     final c = makeContainer();
     addTearDown(c.dispose);
     final today = (await val(c, salesProvider)).where((s) => s.createdAt.toLocal().day == DateTime.now().day && !s.voided);
-    final expected = today.fold(0, (a, s) => a + s.lines.fold(0, (b, l) => b + Qty.lineTotal(l.price - l.costSnapshot, l.qtyMilli)));
+    final expected = today.fold(0, (a, s) => a + s.lines.fold(0, (b, l) => b + l.profit));
     final r = await val(c, reportProvider(ReportPeriod.today));
     expect(r.summary.profit, expected);
     expect(r.summary.count, today.length);

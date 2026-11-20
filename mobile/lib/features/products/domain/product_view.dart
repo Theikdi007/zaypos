@@ -14,7 +14,7 @@ class ProductView {
 
   String get id => product.id;
   String get name => product.name;
-  int get cost => product.cost;
+  int? get cost => product.cost; // null = unknown (BUG-61)
   int get price => product.price;
   String get category => product.category;
   int get tint => product.tint;

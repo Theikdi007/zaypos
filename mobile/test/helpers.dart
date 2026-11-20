@@ -24,7 +24,7 @@ Future<void> loadAppFonts() async {
 }
 
 /// Sale line draft for tests.
-SaleLineDraft draft({String? productId, String name = 'x', int qtyMilli = 1000, int price = 100, int cost = 0}) => (
+SaleLineDraft draft({String? productId, String name = 'x', int qtyMilli = 1000, int price = 100, int? cost}) => (
       productId: productId,
       variantId: null,
       batchId: null,

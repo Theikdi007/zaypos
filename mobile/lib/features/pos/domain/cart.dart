@@ -20,7 +20,7 @@ class CartLine {
     required this.name,
     required this.price,
     required this.qtyMilli,
-    this.cost = 0,
+    this.cost,
     this.productId,
     this.variantId,
     this.batchId,
@@ -39,8 +39,8 @@ class CartLine {
   final String name;
   final int price;
 
-  /// Unit cost snapshot (kyats); 0 for Quick Sale items (cost unknown).
-  final int cost;
+  /// Unit cost snapshot (kyats); null = unknown (Quick Sale items, products without a cost).
+  final int? cost;
   final int qtyMilli;
 
   int get total => Qty.lineTotal(price, qtyMilli);

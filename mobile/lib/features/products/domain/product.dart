@@ -26,8 +26,8 @@ class Product {
   final String tenantId;
   final String name;
 
-  /// Kyats.
-  final int cost;
+  /// Kyats. null = unknown (the owner left ဝယ်ဈေး empty); 0 = really costs nothing (BUG-61).
+  final int? cost;
 
   /// Kyats.
   final int price;
@@ -73,7 +73,7 @@ class Product {
 
   Product copyWith({
     String? name,
-    int? cost,
+    int? Function()? cost,
     int? price,
     int? Function()? wholesalePrice,
     int? lowAlertMilli,
@@ -91,7 +91,7 @@ class Product {
         id: id,
         tenantId: tenantId,
         name: name ?? this.name,
-        cost: cost ?? this.cost,
+        cost: cost != null ? cost() : this.cost,
         price: price ?? this.price,
         wholesalePrice: wholesalePrice != null ? wholesalePrice() : this.wholesalePrice,
         lowAlertMilli: lowAlertMilli ?? this.lowAlertMilli,

@@ -116,7 +116,7 @@ List<Product> productsFromPresets(
           id: newId(),
           tenantId: tenantId,
           name: i.name.trim(),
-          cost: 0,
+          cost: null, // unknown until the owner types one (BUG-61)
           price: 0,
           category: i.category.trim().isEmpty ? 'အထွေထွေ' : i.category.trim(),
           unit: i.unit.trim(),

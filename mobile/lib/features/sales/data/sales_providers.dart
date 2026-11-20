@@ -12,7 +12,7 @@ typedef SaleLineDraft = ({
   String name,
   int qtyMilli,
   int price,
-  int cost,
+  int? cost,
 });
 
 /// All sales (live). Writes go through CheckoutService / VoidSaleService.

@@ -56,7 +56,7 @@ Future<Product> _save(WidgetTester tester, ProviderContainer c, String name, {St
   return p!;
 }
 
-SaleLine _line(int price, int cost, {int qty = 1000}) => SaleLine(
+SaleLine _line(int price, int? cost, {int qty = 1000}) => SaleLine(
       id: 'l$price$cost',
       tenantId: 't',
       saleId: 's',
@@ -82,10 +82,10 @@ void main() {
         expect(find.byKey(const ValueKey('priceLaterNote')), findsOneWidget);
       });
 
-      testWidgets('only a name typed → saved with cost 0 (unknown) and price 0 (POS asks)', (tester) async {
+      testWidgets('only a name typed → saved with cost unknown (null) and price 0 (POS asks)', (tester) async {
         final c = await _boot(tester, t.id);
         final p = await _save(tester, c, 'BUG53 ${t.id} name only');
-        expect((p.cost, p.price), (0, 0), reason: 'never the sample ${t.sampleCost} / ${t.samplePrice}');
+        expect((p.cost, p.price), (null, 0), reason: 'never the sample ${t.sampleCost} / ${t.samplePrice}');
         // price 0 = ProductView.needsPrice: POS asks for it at the first sale (needs_price_test.dart).
       });
 
@@ -96,7 +96,7 @@ void main() {
         expect(find.descendant(of: find.byKey(const ValueKey('costUnknown')), matching: find.text(costUnknownLabel)),
             findsOneWidget);
         final p = await _save(tester, c, 'BUG53 ${t.id} price only');
-        expect((p.cost, p.price), (0, 1000));
+        expect((p.cost, p.price), (null, 1000));
       });
 
       testWidgets('typed cost and price are saved as typed', (tester) async {
@@ -104,20 +104,34 @@ void main() {
         final p = await _save(tester, c, 'BUG53 ${t.id} both', price: '1000', cost: '700');
         expect((p.cost, p.price), (700, 1000));
       });
+
+      testWidgets('BUG-61: a typed 0 cost is a real zero: saved as 0, the margin box shows the whole price as profit',
+          (tester) async {
+        final c = await _boot(tester, t.id);
+        await tester.enterText(_field('price'), '5000');
+        await tester.enterText(_field('cost'), '0');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('costUnknown')), findsNothing);
+        expect(tester.widget<Text>(find.byKey(const ValueKey('margin'))).data, '+${formatKs(5000)}',
+            reason: 'no "%" over a zero cost');
+        final p = await _save(tester, c, 'BUG61 ${t.id} zero', price: '5000', cost: '0');
+        expect((p.cost, p.price), (0, 5000));
+      });
     });
   }
 
   group('profit with unknown costs', () {
-    test('a line with cost 0 is left out of profit and counted', () {
+    test('a line with no cost (null) is left out of profit and counted; a typed 0 is all profit (BUG-61)', () {
       expect(_line(600, 450).costKnown, isTrue);
-      expect(_line(600, 0).costKnown, isFalse);
-      expect(_line(600, 0).profit, 0, reason: 'not 600: an unknown cost is not a zero cost');
+      expect(_line(600, null).costKnown, isFalse);
+      expect(_line(600, null).profit, 0, reason: 'not 600: an unknown cost is not a zero cost');
+      expect((_line(600, 0).costKnown, _line(600, 0).profit), (true, 600), reason: 'a service that costs nothing');
       final s = Sale(
         id: 's',
         tenantId: 't',
         no: 'A-1',
         method: PaymentMethod.cash,
-        lines: [_line(600, 450, qty: 2000), _line(1000, 0)],
+        lines: [_line(600, 450, qty: 2000), _line(1000, null)],
         createdAt: DateTime.now().toUtc(),
         updatedAt: DateTime.now().toUtc(),
       );
@@ -137,13 +151,13 @@ void main() {
           );
       final mixed = ReportBuilder.build([
         sale('a', [_line(600, 450)]),
-        sale('b', [_line(1000, 0), _line(500, 0)]),
+        sale('b', [_line(1000, null), _line(500, null)]),
       ], const {}, ReportPeriod.today).summary;
       expect((mixed.sales, mixed.profit, mixed.unknownCostLines, mixed.profitUnknown), (2100, 150, 2, false));
       expect(formatProfit(mixed.profit, unknown: mixed.profitUnknown), '150 Ks');
       expect(unknownCostNote(mixed.unknownCostLines), 'အရင်းမသိ 2 ခု မပါ');
 
-      final none = ReportBuilder.build([sale('c', [_line(1000, 0)])], const {}, ReportPeriod.today).summary;
+      final none = ReportBuilder.build([sale('c', [_line(1000, null)])], const {}, ReportPeriod.today).summary;
       expect((none.profit, none.profitUnknown), (0, true));
       expect(formatProfit(none.profit, unknown: none.profitUnknown), costUnknownLabel);
 
@@ -158,7 +172,7 @@ void main() {
       // One known-cost line and one unknown-cost line, sold today.
       await tester.runAsync(() => sell(c, [
             draft(name: 'known', price: 600, cost: 450),
-            draft(name: 'unknown', price: 1000, cost: 0, qtyMilli: Qty.units(1)),
+            draft(name: 'unknown', price: 1000, cost: null, qtyMilli: Qty.units(1)),
           ]));
       await tester.pumpAndSettle();
       expect(find.text('အရင်းမသိ 1 ခု မပါ'), findsWidgets);

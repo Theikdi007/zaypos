@@ -32,7 +32,7 @@ class DriftCartStore implements CartStore {
 Future<SavedCart?> loadOpenCart(AppDatabase db) async => decodeCart(await db.readState(CartStateKeys.openCart));
 
 String encodeCart(String tenantId, Cart cart) => jsonEncode({
-      'v': 1,
+      'v': 2, // 2: an unknown cost is null (BUG-61); 1 wrote 0
       'tenantId': tenantId,
       'lines': [
         for (final l in cart.lines)
@@ -54,7 +54,8 @@ SavedCart? decodeCart(String? json) {
   if (json == null || json.isEmpty) return null;
   try {
     final m = jsonDecode(json) as Map<String, dynamic>;
-    if (m['v'] != 1) return null;
+    final v = m['v'];
+    if (v != 1 && v != 2) return null;
     final lines = [
       for (final l in (m['lines'] as List).cast<Map<String, dynamic>>())
         CartLine(
@@ -65,7 +66,8 @@ SavedCart? decodeCart(String? json) {
           serialId: l['serialId'] as String?,
           name: l['name'] as String,
           price: l['price'] as int,
-          cost: l['cost'] as int,
+          // v1 (before BUG-61) saved an unknown cost as 0; v2 saves null.
+          cost: switch ((l['cost'] as num?)?.toInt()) { 0 when v == 1 => null, final c => c },
           qtyMilli: l['qtyMilli'] as int,
         ),
     ];

@@ -19,7 +19,7 @@ void main() {
   test('v1 → v2: the schema matches a fresh v2 database', () async {
     final schema = await verifier.schemaAt(1);
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 2);
+    await verifier.migrateAndValidate(db, db.schemaVersion); // v1 → v2 → … current
     await db.close();
   });
 
@@ -33,11 +33,53 @@ void main() {
         "INSERT INTO outbox (unitId, kind, rowsJson, clientTime, status, rejectReason) "
         "VALUES ('u1', 'upsertProduct', '{}', 1, 'rejected', 'products.name is required.')");
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 2);
+    await verifier.migrateAndValidate(db, db.schemaVersion); // v1 → v2 → … current
     final issue = await db.select(db.syncIssues).getSingle();
     expect((issue.kind, issue.data), ('duplicateBarcode', null));
     final unit = await db.select(db.outbox).getSingle();
     expect((unit.rejectReason, unit.rejectCode, unit.rejectData), ('products.name is required.', null, null));
+    await db.close();
+  });
+
+  // ---------------------------------------------------------------- BUG-61: unknown cost = NULL (v3)
+
+  test('v2 → v3: the schema matches a fresh v3 database', () async {
+    final schema = await verifier.schemaAt(2);
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 3);
+    await db.close();
+  });
+
+  test('v2 → v3: a 0 cost (meant "unknown") becomes NULL, a real cost stays; unsent units are fixed too', () async {
+    final schema = await verifier.schemaAt(2);
+    final old = schema.rawDatabase;
+    for (final (id, cost) in [('p0', 0), ('p1', 1500)]) {
+      old.execute("INSERT INTO products (id, tenantId, createdAt, updatedAt, name, category, cost, price, lowAlertMilli, tint, initial) "
+          "VALUES ('$id', 't1', 1, 1, 'n', 'c', $cost, 2000, 0, 0, 'n')");
+    }
+    for (final (id, cost) in [('l0', 0), ('l1', 1500)]) {
+      old.execute("INSERT INTO saleLines (id, tenantId, createdAt, updatedAt, saleId, name, qtyMilli, price, costSnapshot, lineTotal) "
+          "VALUES ('$id', 't1', 1, 1, 's1', 'n', 1000, 2000, $cost, 2000)");
+    }
+    final unsent = jsonEncode({
+      'products': [{'id': 'p0', 'cost': 0}, {'id': 'p1', 'cost': 1500}],
+      'saleLines': [{'id': 'l0', 'costSnapshot': 0}],
+    });
+    old.execute("INSERT INTO outbox (unitId, kind, rowsJson, clientTime) VALUES ('u1', 'checkout', '$unsent', 1)");
+    old.execute("INSERT INTO outbox (unitId, kind, rowsJson, clientTime) VALUES ('u2', 'upsertCustomer', '{\"customers\":[]}', 1)");
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 3);
+    final costs = {for (final p in await db.select(db.products).get()) p.id: p.cost};
+    expect(costs, {'p0': null, 'p1': 1500});
+    final lineCosts = {for (final l in await db.select(db.saleLines).get()) l.id: l.costSnapshot};
+    expect(lineCosts, {'l0': null, 'l1': 1500});
+    final units = {for (final o in await db.select(db.outbox).get()) o.unitId: jsonDecode(o.rowsJson)};
+    expect(units['u1'], {
+      'products': [{'id': 'p0', 'cost': null}, {'id': 'p1', 'cost': 1500}],
+      'saleLines': [{'id': 'l0', 'costSnapshot': null}],
+    });
+    expect(units['u2'], {'customers': []}, reason: 'other units untouched');
     await db.close();
   });
 
@@ -49,7 +91,7 @@ void main() {
     old.execute("INSERT INTO syncState (key, value) VALUES ('pullCursor', '00000000000a1b2c')");
     old.execute("INSERT INTO syncState (key, value) VALUES ('initialSyncDone', 'true')");
     final db = AppDatabase(schema.newConnection());
-    await verifier.migrateAndValidate(db, 2);
+    await verifier.migrateAndValidate(db, db.schemaVersion); // v1 → v2 → … current
     expect(await db.readState(SyncStateKeys.pullCursor), '0');
     expect(await SyncStore(db, tenantId: 't1', deviceId: 'd1').cursor(), '0');
     expect(await db.readState(SyncStateKeys.initialSyncDone), 'true', reason: 'only the cursor is reset');

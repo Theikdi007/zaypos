@@ -301,7 +301,7 @@ class _ProductRow extends StatelessWidget {
                     const Padding(padding: EdgeInsets.only(top: 2), child: NeedsPriceBadge())
                   else
                     Text(
-                      '${p.cost > 0 ? 'ဝယ်ဈေး ${formatMoney(p.cost)}' : costUnknownLabel} · ရောင်းဈေး ${formatMoney(p.price)}',
+                      '${p.cost == null ? costUnknownLabel : 'ဝယ်ဈေး ${formatMoney(p.cost!)}'} · ရောင်းဈေး ${formatMoney(p.price)}',
                       style: AppText.s(12, color: AppColors.muted),
                     ),
                 ],
