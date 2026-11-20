@@ -321,16 +321,19 @@ public class DeploymentTests(SqlServerFixture sql)
             (await direct.CreateClient().SendAsync(spoof)).StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
 
-        // Through Caddy (trusted, sends X-Forwarded-Proto: https): served; Swagger is off.
+        // Through Caddy (trusted; it REPLACES X-Forwarded-For / -Proto with the real peer and https): served;
+        // Swagger is off.
         await using (var viaCaddy = new ApiFactory(app, authPerIp: 1, remoteIp: IPAddress.Parse(Caddy),
                          settings: ProductionSettings(app), environment: "Production"))
         {
             var http = viaCaddy.CreateClient();
-            HttpRequestMessage Req(HttpMethod method, string path, string clientIp)
+            HttpRequestMessage Req(HttpMethod method, string path, string clientIp, string? spoofedCfIp = null)
             {
                 var m = new HttpRequestMessage(method, path);
                 m.Headers.Add("X-Forwarded-Proto", "https");
-                m.Headers.Add("CF-Connecting-IP", clientIp);
+                m.Headers.Add("X-Forwarded-For", clientIp);
+                // Caddy strips it; even if it got through, the API must not read it.
+                if (spoofedCfIp is not null) m.Headers.Add("CF-Connecting-IP", spoofedCfIp);
                 m.Headers.Host = "api.zaypos.app"; // HSTS is never sent for "localhost"
                 if (method == HttpMethod.Post) m.Content = JsonContent.Create(new RefreshRequest("garbage"), options: Json);
                 return m;
@@ -342,10 +345,12 @@ public class DeploymentTests(SqlServerFixture sql)
             (await http.SendAsync(Req(HttpMethod.Get, "/swagger/v1/swagger.json", "203.0.113.1"))).StatusCode.Should().Be(HttpStatusCode.NotFound);
             (await http.SendAsync(Req(HttpMethod.Get, "/swagger/index.html", "203.0.113.1"))).StatusCode.Should().Be(HttpStatusCode.NotFound);
 
-            // Rate limits key on the real client IP that Caddy passes on (CF-Connecting-IP).
+            // Rate limits key on the real client IP that Caddy passes on (X-Forwarded-For); CF-Connecting-IP changes
+            // nothing.
             (await http.SendAsync(Req(HttpMethod.Post, "/api/v1/auth/refresh", "203.0.113.1"))).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
             (await http.SendAsync(Req(HttpMethod.Post, "/api/v1/auth/refresh", "203.0.113.2"))).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-            (await http.SendAsync(Req(HttpMethod.Post, "/api/v1/auth/refresh", "203.0.113.1"))).StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+            (await http.SendAsync(Req(HttpMethod.Post, "/api/v1/auth/refresh", "203.0.113.1", spoofedCfIp: "198.51.100.99")))
+                .StatusCode.Should().Be(HttpStatusCode.TooManyRequests, "the bucket is X-Forwarded-For's, whatever CF-Connecting-IP says");
         }
 
         // Container health check: plain HTTP on loopback is allowed.
@@ -357,7 +362,19 @@ public class DeploymentTests(SqlServerFixture sql)
     }
 
     [Fact]
-    public async Task With_the_override_cloudflare_addresses_are_no_longer_trusted_directly()
+    public async Task Production_refuses_to_start_without_caddy_as_the_trusted_proxy()
+    {
+        // Without it every phone would share Caddy's rate-limit bucket (and Https:Require would refuse all).
+        var (_, app) = await MigratedDatabase();
+        var settings = ProductionSettings(app);
+        settings.Remove("ForwardedHeaders:TrustedNetworksOverride");
+        await using var api = new ApiFactory(app, settings: settings, environment: "Production");
+        var start = () => api.CreateClient();
+        start.Should().Throw<InvalidOperationException>().WithMessage("*ForwardedHeaders*TrustedNetworksOverride*");
+    }
+
+    [Fact]
+    public async Task With_the_override_cloudflare_addresses_are_not_trusted()
     {
         var settings = new Dictionary<string, string?> { ["ForwardedHeaders:TrustedNetworksOverride"] = Caddy + "/32" };
         await using var api = new ApiFactory(sql.ConnectionString, authPerIp: 1, remoteIp: IPAddress.Parse("173.245.48.10"), settings: settings);
@@ -365,6 +382,7 @@ public class DeploymentTests(SqlServerFixture sql)
         HttpRequestMessage Req(string ip)
         {
             var m = new HttpRequestMessage(HttpMethod.Post, "/api/v1/auth/refresh") { Content = JsonContent.Create(new RefreshRequest("garbage"), options: Json) };
+            m.Headers.Add("X-Forwarded-For", ip);
             m.Headers.Add("CF-Connecting-IP", ip);
             return m;
         }

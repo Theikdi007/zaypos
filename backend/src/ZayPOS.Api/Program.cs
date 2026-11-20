@@ -53,7 +53,7 @@ builder.Services.AddZayPosHealthChecks();
 
 // /auth/*: per client IP + per phone. The OTP limit (3/hour/phone) also lives in AuthService.
 builder.Services.AddAuthRateLimiting(builder.Configuration);
-var useForwarding = builder.Services.AddCloudflareForwarding(builder.Configuration, builder.Environment);
+var useForwarding = builder.Services.AddProxyForwarding(builder.Configuration, builder.Environment); // client IP + scheme from Caddy only
 
 var app = builder.Build();
 await app.EnsureDatabaseMigratedAsync(); // refuses to start (clear log line) if migrations are pending

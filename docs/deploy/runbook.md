@@ -1,19 +1,25 @@
 # ZayPOS production runbook
 
-One Vultr server (Ubuntu 24.04, 4 GB, Singapore; production: `45.32.114.207`). The API is at **https://api.zaypos.app** behind Cloudflare
-(proxied, SSL/TLS mode **Full (strict)**).
+One Vultr server (Ubuntu 24.04, 4 GB, Singapore; production: `45.32.114.207`). The API is at **https://api.zaypos.app**,
+**straight to the server** (Cloudflare DNS only, no proxy), with a Let's Encrypt certificate that Caddy gets and renews
+itself.
 
 ```
-phone ──https──▶ Cloudflare ──https :443 (origin cert + Authenticated Origin Pulls)──▶ Caddy ──▶ API :8080 ──▶ SQL Server
-                                                                                 (only Caddy has a port; SQL Server has none)
+phone ──https :443 / http :80 (→ https)──▶ Caddy (Let's Encrypt) ──▶ API :8080 ──▶ SQL Server
+                                     (only Caddy has ports; SQL Server has none)
 ```
+
+**Why not behind Cloudflare (2026-11-20):** Myanmar networks without a VPN cut TLS connections to Cloudflare-proxied
+hosts (`ERR_CONNECTION_CLOSED` in Chrome on a phone on home Wi-Fi, also `www.cloudflare.com`; `www.google.com` worked),
+so the app could not sign in. A Mac with a VPN (Outline) does not see this: test with the VPN **off**. The website
+`zaypos.app` stays on Cloudflare Pages (docs/deploy/website.md); only the `api` record is DNS only.
 
 Where things live:
 
 | What | Where |
 |---|---|
 | Deploy files (in git) | `deploy/` in this repo |
-| On the server | `/home/deploy/zaypos/`: `docker-compose.prod.yml`, `Caddyfile`, `*.sh`, **`.env`** (secrets), `certs/`, `backups/`, `releases.log` |
+| On the server | `/home/deploy/zaypos/`: `docker-compose.prod.yml`, `Caddyfile`, `*.sh`, **`.env`** (secrets), `caddy-data/` (Let's Encrypt account + certificate, 0700), `backups/`, `releases.log` |
 | Secrets | only `/home/deploy/zaypos/.env` on the server (chmod 600) and your password manager. Never in git |
 | Database | Docker volume `zaypos_mssql-data`. Nightly backup (02:00 Myanmar time) to Cloudflare R2, bucket `zaypos-backups`, kept 30 days; the 7 newest are never deleted, even if backups stopped for a while. Plus one before every deploy |
 | Logs | `docker compose logs <service>` (JSON lines; 5 × 10 MB per container, then rotated) |
@@ -28,12 +34,9 @@ Commands on the server are run as **deploy** in `~/zaypos` unless it says otherw
 
 Do these before touching the server. Keep every secret in your password manager.
 
-1. **Cloudflare origin certificate.** Cloudflare dashboard → zaypos.app → SSL/TLS → Origin Server → **Create Certificate**.
-   RSA 2048, hostnames `api.zaypos.app` (and `*.zaypos.app` if you like), 15 years. Save the two boxes on your Mac as
-   `origin.pem` (certificate) and `origin.key` (private key). The key is shown **only once**.
-2. **Cloudflare origin-pull CA.** Download Cloudflare's Authenticated Origin Pulls CA certificate
-   (developers.cloudflare.com → SSL/TLS → Origin configuration → Authenticated Origin Pulls → "zone-level" →
-   `authenticated_origin_pull_ca.pem`). Save it as `cloudflare-origin-pull-ca.pem`.
+1. **TLS certificate:** nothing to prepare. Caddy gets one from Let's Encrypt on its first start once DNS points at the
+   server and ports 80/443 are open (§1.2), and renews it itself (about 30 days before it expires).
+2. *(removed: the Cloudflare origin certificate and origin-pull CA are no longer used.)*
 3. **R2 backup bucket.** Cloudflare → R2 → Create bucket `zaypos-backups` (location hint: Asia-Pacific).
    Then R2 → Manage API tokens → Create **Account API token**: permission **Object Read & Write**, applied to
    **only** `zaypos-backups`. Note the **Access Key ID**, **Secret Access Key** and your **Account ID**.
@@ -48,26 +51,24 @@ Do these before touching the server. Keep every secret in your password manager.
 
 ### 1.2 DNS and Cloudflare settings
 
-Cloudflare → zaypos.app:
+Cloudflare → zaypos.app → DNS (the domain's DNS stays at Cloudflare; the website `zaypos.app` stays proxied):
 
-- DNS → Add record: **A**, name `api`, IPv4 `<ip>`, **Proxied (orange cloud)**.
-- SSL/TLS → Overview → **Full (strict)**.
-- SSL/TLS → Edge Certificates → **Always Use HTTPS: On**, **Minimum TLS Version: 1.2**.
-- SSL/TLS → Origin Server → **Authenticated Origin Pulls: On**.
-  Caddy refuses every TLS connection that does not present Cloudflare's client certificate. If this switch is off,
-  the site answers Cloudflare error **525/526** instead of the API.
+- Record **A**, name `api`, IPv4 `<ip>`, **DNS only (grey cloud)**. Not proxied: see the top of this file.
+- No AAAA record for `api` unless the server's IPv6 is also open in the Vultr firewall.
+- Cloudflare's SSL/TLS settings (Full strict, Always Use HTTPS, Authenticated Origin Pulls) don't apply to a DNS-only
+  record; Caddy does all of it (redirect, TLS 1.2+, HSTS).
 
-Vultr → Network → **Firewall** → Add Firewall Group `zaypos`, then link it to the server (server → Settings →
-Firewall):
+Vultr → Network → **Firewall** → Firewall Group `zaypos`, linked to the server (server → Settings → Firewall). Rules
+for **IPv4 and IPv6**:
 
 | Protocol | Port | Source |
 |---|---|---|
 | SSH | 22 | your IP (or "Anywhere" if your IP changes; fail2ban and key-only login still protect it) |
-| HTTPS | 443 | **Cloudflare** (Vultr's built-in Cloudflare list, kept up to date by Vultr) |
+| HTTP | 80 | **Anywhere** (http→https redirect, and Let's Encrypt's HTTP-01 check) |
+| HTTPS | 443 | **Anywhere** (phones; Let's Encrypt's TLS-ALPN check) |
 
-This is the only place where 443 can be limited to Cloudflare: Docker opens published ports past ufw, so a ufw rule on
-the server would not work. Without this group the server still refuses non-Cloudflare visitors, during the TLS
-handshake (Authenticated Origin Pulls), but they can reach Caddy.
+Docker opens published ports past ufw, so this group is what really filters; ufw (server-setup.sh) allows 22, 80, 443
+too. If 80 and 443 are both closed, Caddy can't renew the certificate (renewal starts ~30 days before expiry).
 
 ### 1.3 Harden the server
 
@@ -84,7 +85,7 @@ Without a terminal it skips that: daily work needs no sudo.)
 Step 1 of the script:
 - installs updates, ufw, fail2ban and unattended-upgrades;
 - creates the user **deploy** with your SSH key (sudo password: store it in your password manager);
-- opens the firewall (ufw) for 22 (rate-limited) and 443 only;
+- opens the firewall (ufw) for 22 (rate-limited), 80 and 443 only;
 - adds 2 GB swap, installs Docker, copies the deploy files to `/home/deploy/zaypos/`;
 - installs the nightly backup timer (02:00 Myanmar time).
 
@@ -108,15 +109,9 @@ the Vultr dashboard, then `rm /etc/ssh/sshd_config.d/00-zaypos.conf && systemctl
 
 `/root/deploy` holds no secrets (only the files that are in git); it can stay.
 
-### 1.4 Certificates and secrets
+### 1.4 Secrets
 
-From your Mac:
-
-```bash
-scp origin.pem origin.key cloudflare-origin-pull-ca.pem deploy@<ip>:zaypos/certs/
-ssh deploy@<ip> 'chmod 600 zaypos/certs/*'
-```
-
+No certificate files to copy: Caddy gets the certificate itself into `caddy-data/` (release.sh creates it 0700).
 On the server:
 
 ```bash
@@ -147,24 +142,31 @@ deploy/deploy.sh deploy@<ip>
 It builds the API image, uploads it, runs `release.sh` on the server (start SQL Server → apply migrations and
 create the API's SQL login → start the API → start Caddy) and finally calls `https://api.zaypos.app/health`.
 Success ends with `{"status":"healthy","checks":{"database":"healthy"}}` and `Deployed zaypos-api:<tag>`.
+On the very first start Caddy needs a few seconds for the Let's Encrypt certificate (DNS must already point at the
+server and 80/443 be open, §1.2): `docker compose logs caddy | grep -i certificate` shows "certificate obtained
+successfully".
 
 ### 1.6 Check it
 
-1. `curl https://api.zaypos.app/health` → `healthy`.
+1. `curl https://api.zaypos.app/health` → `healthy`. **With the Mac's VPN off**, and from a phone on Myanmar Wi-Fi /
+   mobile data without a VPN (Chrome, or `adb shell curl`): that's the path shops use.
 2. `curl -I https://api.zaypos.app/swagger/index.html` → **404** (Swagger is off).
-3. `curl -k https://<ip>/health` (straight to the server, skipping Cloudflare) → a TLS error (Caddy wants Cloudflare's
-   client certificate). That is correct.
-4. **SMS smoke test** (no real SMS, no credit). In `.env`: `SMS_PROVIDER=SmsPoh`, `SMSPOH_API_KEY=`, `SMSPOH_API_SECRET=`
+3. `curl -I http://api.zaypos.app/health` → **308** to `https://` ; `curl -sI https://api.zaypos.app/health | grep -i strict`
+   → `Strict-Transport-Security`.
+4. Certificate: `openssl s_client -connect api.zaypos.app:443 -servername api.zaypos.app </dev/null 2>/dev/null |
+   openssl x509 -noout -issuer -dates` → issuer Let's Encrypt (R1x / E…, chained to ISRG Root X1, trusted from
+   Android 7.1.1).
+5. **SMS smoke test** (no real SMS, no credit). In `.env`: `SMS_PROVIDER=SmsPoh`, `SMSPOH_API_KEY=`, `SMSPOH_API_SECRET=`
    (pasted from the SMSPoh dashboard), `SMSPOH_TEST=true`; re-release (`./release.sh <current tag>`). Ask an OTP for
    your own number (counts 1 of the 3 per hour):
    `curl -sS https://api.zaypos.app/api/v1/auth/otp -H 'Content-Type: application/json' -d '{"phone":"+959…","purpose":"register"}'`
    → HTTP 204/200 and, in `docker compose logs api | grep SMSPoh`, `SMS accepted in TEST mode (not delivered) … HTTP 200`.
    A refusal logs `SMSPoh refused SMS to … HTTP <status> <SMSPoh's reply>` (digits masked, never the credential) and the
    app gets 503 `sms_unavailable`: 401 = key/secret wrong, 403 = IP not whitelisted (must be the server's IPv4).
-5. Set `SMSPOH_TEST=false` in `.env`, then `./release.sh $(grep ^API_TAG= .env | cut -d= -f2)` (re-deploys the same
+6. Set `SMSPOH_TEST=false` in `.env`, then `./release.sh $(grep ^API_TAG= .env | cut -d= -f2)` (re-deploys the same
    version with the new setting). Register again: the SMS must arrive.
-6. Run a backup now and a restore test (§3): `./backup.sh` then `./restore.sh latest`.
-7. Build the release app with `--dart-define=API_BASE_URL=https://api.zaypos.app` (docs/mobile/dev-setup.md).
+7. Run a backup now and a restore test (§3): `./backup.sh` then `./restore.sh latest`.
+8. Build the release app with `--dart-define=API_BASE_URL=https://api.zaypos.app` (docs/mobile/dev-setup.md).
 
 ---
 
@@ -265,8 +267,9 @@ if the IP changed.
 
 | Symptom | Look at |
 |---|---|
-| Cloudflare 525 / 526 | Authenticated Origin Pulls off, or wrong/expired files in `certs/`. `docker compose logs caddy` |
-| Cloudflare 521 / 522 | Caddy not running or port 443 closed: `docker compose ps`, `sudo ufw status` |
+| App: "အင်တာနက် မရပါ" but other apps work; Chrome on the phone: `ERR_CONNECTION_CLOSED` | the `api` DNS record was switched back to **Proxied**: Myanmar networks cut Cloudflare-proxied connections. Cloudflare → DNS → `api` → **DNS only** |
+| TLS error / certificate warning on `api.zaypos.app` | Caddy has no valid certificate: `docker compose logs caddy | grep -iE "certificate|acme|challenge"`. Usual causes: DNS not pointing at the server yet, or 80 **and** 443 closed in the Vultr firewall (§1.2). Let's Encrypt allows 5 failed checks per hour: fix, then `docker compose restart caddy` |
+| Connection refused / timeout on 443 | Caddy not running or the Vultr firewall closed: `docker compose ps`, Vultr → Firewall → `zaypos` |
 | 502 from Caddy | API not healthy: `docker compose ps`, `docker compose logs --tail 100 api` |
 | API log: `pending EF migration(s)` | the migrate step did not run: `docker compose run --rm migrate` |
 | API log: `Unsafe production configuration` | the listed `.env` value (SMS provider/token, sa login, HTTPS) |
@@ -274,7 +277,7 @@ if the IP changed.
 | OTP never arrives | `docker compose logs api | grep -i sms`: `refused HTTP 401` = token, `unreachable` = network; `SMSPOH_TEST` must be `false` |
 | Backup failed | `journalctl -u zaypos-backup --since today`; run `./backup.sh` by hand to see the error |
 | `ssh` suddenly says "Connection closed" | ufw allows only 6 new SSH connections per 30 s from one IP (and fail2ban bans for 1 h after 5 failed logins). Wait a minute; for scripts, reuse one connection (`ControlMaster auto` in `~/.ssh/config`) |
-| `ssh` hangs: "Connection timed out during banner exchange" | something drops your address in front of the server, and a VPN on your Mac (Outline, WARP, …) hides it: its client accepts every connection itself, so a blocked port looks "connected, then silent". The server sees the VPN's exit address (`curl https://api.ipify.org`). Check the Vultr Firewall group: port 22 must be allowed in the **IPv4** rules (0.0.0.0/0, or that exit address). `/health` through Cloudflare keeps working meanwhile |
+| `ssh` hangs: "Connection timed out during banner exchange" | something drops your address in front of the server, and a VPN on your Mac (Outline, WARP, …) hides it: its client accepts every connection itself, so a blocked port looks "connected, then silent". The server sees the VPN's exit address (`curl https://api.ipify.org`). Check the Vultr Firewall group: port 22 must be allowed in the **IPv4** rules (0.0.0.0/0, or that exit address). `/health` (port 443) keeps working meanwhile |
 | Disk full | `df -h`, `docker system df`; old images: `docker image prune`; local backups are kept 3 days in `backups/` |
 
 Useful commands:
@@ -294,7 +297,7 @@ sudo fail2ban-client status sshd          # banned SSH attackers
 | `MSSQL_SA_PASSWORD` | SQL Server only reads it on the very first start. Change it inside first: `source lib.sh && load_env && sql -Q "ALTER LOGIN sa WITH PASSWORD = N'<new>'"`, then put the same value in `.env` and `docker compose up -d mssql` |
 | `JWT_SIGNING_KEY` | change in `.env`, re-release. Every phone must sign in again with its PIN on the next sync |
 | `SMSPOH_TOKEN`, R2 keys | create the new one, put it in `.env`, re-release (R2 backup keys: no re-release needed), then revoke the old one |
-| Origin certificate | new one in Cloudflare (§1.1), copy to `certs/`, `docker compose restart caddy` |
+| TLS certificate | nothing to do: Caddy renews it about 30 days before it expires (needs 80 or 443 open, §1.2). Check: `openssl s_client -connect api.zaypos.app:443 -servername api.zaypos.app </dev/null 2>/dev/null \| openssl x509 -noout -dates` |
 
 ## 8. Monthly checklist (about 15 minutes)
 
