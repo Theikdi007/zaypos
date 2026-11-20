@@ -112,12 +112,15 @@ class PrimaryButton extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
             child: LayoutBuilder(
               builder: (context, c) {
-                final text = Text(
-                  label,
+                // One line that shrinks to the button instead of ending in "…": at the largest font
+                // sizes the whole label stays readable ("မလုပ်တော့ပါ", "အတည်ပြုပြီး ပြေစာ…": BUG-59 / BUG-66).
+                final label = Text(
+                  this.label,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
                   style: AppText.s(fontSize, weight: fontWeight, color: fg),
                 );
+                final text = c.hasBoundedWidth ? FittedBox(fit: BoxFit.scaleDown, child: label) : label;
                 return Row(
                   mainAxisSize: c.hasBoundedWidth
                       ? MainAxisSize.max

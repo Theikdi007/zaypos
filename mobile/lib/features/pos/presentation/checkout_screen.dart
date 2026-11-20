@@ -285,7 +285,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('စုစုပေါင်း', style: AppText.s(15, color: AppColors.textSecondary)),
-                    MoneyText(cart.total, size: 26),
+                    const SizedBox(width: 12),
+                    // Flexible: a big total shrinks instead of overflowing at the largest font (BUG-59).
+                    Flexible(child: MoneyText(cart.total, size: 26, textAlign: TextAlign.right)),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -328,7 +330,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               children: [
                 Container(width: 10, height: 10, decoration: BoxDecoration(color: m.color, shape: BoxShape.circle)),
                 const SizedBox(width: 8),
-                Text(m.label, style: AppText.s(14, weight: AppText.w700)),
+                // Shrinks to the button at the largest font instead of overflowing it (BUG-59).
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(m.label, maxLines: 1, softWrap: false, style: AppText.s(14, weight: AppText.w700)),
+                  ),
+                ),
               ],
             ),
           ),
@@ -359,20 +367,16 @@ class _LineRow extends ConsumerWidget {
       if (q != null) cart.setQty(line.key, q);
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(line.name, style: AppText.s(14, weight: AppText.w600)),
-                Text(formatKs(line.price), style: AppText.s(12, color: AppColors.muted)),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
+    final info = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(line.name, style: AppText.s(14, weight: AppText.w600)),
+        Text(formatKs(line.price), style: AppText.s(12, color: AppColors.muted)),
+      ],
+    );
+    final controls = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
           Container(
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(color: AppColors.fill, borderRadius: AppRadius.inputR),
@@ -412,8 +416,19 @@ class _LineRow extends ConsumerWidget {
             width: 70,
             child: MoneyText(line.total, showUnit: false, textAlign: TextAlign.right),
           ),
-        ],
-      ),
+      ],
+    );
+    // Above text ×1.5 the name, the stepper and the total don't fit one row on a narrow phone: the
+    // stepper and total go under the name, which gets the full width ("So / da", "ရေသန့ / ်": BUG-59).
+    final large = MediaQuery.textScalerOf(context).scale(14) > 14 * 1.5;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: large
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [info, const SizedBox(height: 8), Align(alignment: AlignmentDirectional.centerEnd, child: controls)],
+            )
+          : Row(children: [Expanded(child: info), const SizedBox(width: 10), controls]),
     );
   }
 

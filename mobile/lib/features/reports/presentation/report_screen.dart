@@ -214,7 +214,11 @@ class _WeekChart extends StatelessWidget {
               ? 'နောက်ဆုံး ၇ ရက် နေ့စဉ်ရောင်းရငွေ ဇယား၊ ရောင်းအား မရှိသေးပါ'
               : 'နောက်ဆုံး ၇ ရက် နေ့စဉ်ရောင်းရငွေ ဇယား၊ အမြင့်ဆုံးက ${peak.day}နေ့ ${(max / 1000).round()}K',
           excludeSemantics: true,
-          child: SizedBox(
+          // The chart is a fixed 170 tall (120 for the bars): its two label rows fit up to text ×1.3.
+          // Above that they wrapped and overflowed the bars (BUG-59). The screen reader gets the label above.
+          child: MediaQuery.withClampedTextScaling(
+            maxScaleFactor: 1.3,
+            child: SizedBox(
             height: 170,
             child: Stack(children: [
               Positioned.fill(
@@ -227,7 +231,11 @@ class _WeekChart extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
+                            // One line (it wrapped and pushed the bars down, BUG-59).
                             Text('${(days[i].amount / 1000).round()}',
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.visible,
                                 style: AppText.s(11, weight: AppText.w600, color: AppColors.textSecondary, height: 1.4)),
                             const SizedBox(height: 4),
                             Container(
@@ -258,6 +266,7 @@ class _WeekChart extends StatelessWidget {
                       style: AppText.s(14, weight: AppText.w600, color: AppColors.muted)),
                 ),
             ]),
+          ),
           ),
         ),
       ],
