@@ -60,7 +60,7 @@ tag=$(git rev-parse --short=12 HEAD)
 if ((dry)); then
   open_connection
   echo "==> DRY RUN for zaypos-api:$tag: nothing is built, copied, uploaded or released"
-  remote 'test -f zaypos/.env && test -d zaypos/certs && echo "    server: zaypos/.env and zaypos/certs/ present"'
+  remote 'test -f zaypos/.env && echo "    server: zaypos/.env present"; test -d zaypos/caddy-data && echo "    server: zaypos/caddy-data present (Let'"'"'s Encrypt)" || echo "    server: zaypos/caddy-data not there yet (release.sh creates it)"'
   # Copy the deploy files to a throw-away folder (exercises scp on the shared connection) and compare.
   tmp=$(remote 'mktemp -d zaypos-dryrun.XXXXXX')
   copy "${files[@]}" "$target:$tmp/"
@@ -92,7 +92,7 @@ docker buildx build --platform linux/amd64 -t "zaypos-api:$tag" --load backend
 open_connection # now, not before the build (see open_connection)
 
 echo "==> Copying deploy files to $target:zaypos/"
-remote 'mkdir -p zaypos/certs zaypos/backups && chmod 700 zaypos/certs'
+remote 'mkdir -p zaypos/backups zaypos/caddy-data && chmod 700 zaypos/caddy-data'
 copy "${files[@]}" "$target:zaypos/"
 remote 'chmod +x zaypos/*.sh'
 

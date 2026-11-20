@@ -21,9 +21,9 @@ fi
 docker image inspect "zaypos-api:$tag" > /dev/null 2>&1 \
   || die "image zaypos-api:$tag is not on this server. Run deploy/deploy.sh from your Mac (it uploads the image)."
 
-for f in origin.pem origin.key cloudflare-origin-pull-ca.pem; do
-  [[ -s "$ZAYPOS_DIR/certs/$f" ]] || die "certs/$f is missing (runbook §1.4)"
-done
+# Caddy's Let's Encrypt account and certificates (Caddyfile). Created here as the deploy user: if Docker
+# created the bind-mount source it would be root's, and Caddy (running as deploy) could not save a certificate.
+mkdir -p "$ZAYPOS_DIR/caddy-data" && chmod 700 "$ZAYPOS_DIR/caddy-data"
 
 # 1. Safety backup before touching the schema (not on the very first deploy: no database yet).
 if [[ "${SKIP_BACKUP:-0}" == 1 ]]; then

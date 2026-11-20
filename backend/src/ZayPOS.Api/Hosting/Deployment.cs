@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using ZayPOS.Api.Auth;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using ZayPOS.Application.Auth;
 using ZayPOS.Infrastructure.Auth;
@@ -104,6 +105,12 @@ public static class DeploymentExtensions
 
         if (!config.GetValue("Https:Require", false))
             errors.Add("Https:Require must be true in Production.");
+
+        // Behind Caddy the TCP peer is always Caddy: without its address as the one trusted proxy every client
+        // would share one rate-limit partition (and Https:Require would refuse everything).
+        var forwarding = ProxyForwarding.Read(config);
+        if (!forwarding.Enabled || !forwarding.Networks().Any())
+            errors.Add("ForwardedHeaders: set Enabled=true and TrustedNetworksOverride to Caddy's address (docker-compose).");
 
         if (errors.Count > 0)
             throw new InvalidOperationException("Unsafe production configuration:\n - " + string.Join("\n - ", errors));

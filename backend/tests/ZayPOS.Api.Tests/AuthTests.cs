@@ -389,31 +389,26 @@ public class AuthTests(SqlServerFixture sql)
     }
 
     [Fact]
-    public async Task CF_Connecting_IP_is_trusted_only_from_cloudflare_addresses()
+    public async Task A_client_never_chooses_its_rate_limit_key_with_forwarded_headers_not_even_from_a_cloudflare_address()
     {
+        // Phones connect straight to Caddy now (api.zaypos.app is not proxied): no address outside the configured
+        // proxy (Caddy) is trusted, Cloudflare's included. Spoofed headers must not buy new per-IP buckets.
         var body = new RefreshRequest("garbage");
-        HttpRequestMessage Req(string clientIp)
+        HttpRequestMessage Req(string header, string clientIp)
         {
             var m = new HttpRequestMessage(HttpMethod.Post, "/api/v1/auth/refresh") { Content = JsonContent.Create(body, options: Json) };
-            m.Headers.Add("CF-Connecting-IP", clientIp);
+            m.Headers.Add(header, clientIp);
             return m;
         }
 
-        // From a Cloudflare edge: each real client IP gets its own bucket.
-        await using (var api = new ApiFactory(sql.ConnectionString, authPerIp: 1, remoteIp: IPAddress.Parse("173.245.48.10")))
+        foreach (var peer in new[] { "173.245.48.10" /* a Cloudflare edge */, "198.51.100.7" /* a phone */ })
+        foreach (var header in new[] { "CF-Connecting-IP", "X-Forwarded-For" })
         {
+            await using var api = new ApiFactory(sql.ConnectionString, authPerIp: 1, remoteIp: IPAddress.Parse(peer));
             var http = api.CreateClient();
-            (await http.SendAsync(Req("203.0.113.1"))).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-            (await http.SendAsync(Req("203.0.113.2"))).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-            (await http.SendAsync(Req("203.0.113.1"))).StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
-        }
-
-        // From anywhere else the header is ignored: spoofing it does not buy new buckets.
-        await using (var api = new ApiFactory(sql.ConnectionString, authPerIp: 1, remoteIp: IPAddress.Parse("198.51.100.7")))
-        {
-            var http = api.CreateClient();
-            (await http.SendAsync(Req("203.0.113.1"))).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-            (await http.SendAsync(Req("203.0.113.2"))).StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+            (await http.SendAsync(Req(header, "203.0.113.1"))).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            (await http.SendAsync(Req(header, "203.0.113.2"))).StatusCode.Should().Be(HttpStatusCode.TooManyRequests,
+                $"{header} from {peer} must be ignored: the bucket is the TCP peer's");
         }
     }
 

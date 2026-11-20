@@ -97,17 +97,17 @@ if passwd -S "$DEPLOY_USER" | awk '{exit !($2 == "L" || $2 == "NP")}'; then
   fi
 fi
 
-log "Firewall (ufw): 22 and 443 only"
+log "Firewall (ufw): 22, 80 and 443 only"
 ufw --force reset > /dev/null
 ufw default deny incoming
 ufw default allow outgoing
 ufw limit 22/tcp comment 'SSH (rate-limited)'
-ufw allow 443/tcp comment 'HTTPS from Cloudflare (Caddy)'
-# Port 80 stays closed: Cloudflare connects to the origin on 443 only (Full strict), and the
-# origin certificate needs no ACME challenge.
-# NOTE: Docker-published ports (Caddy's 443) bypass ufw. Limiting 443 to Cloudflare's addresses is
-# done in front of the server (Vultr Firewall group, source "Cloudflare"; runbook §1.2). Caddy also
-# refuses any TLS client without Cloudflare's origin-pull certificate.
+# Phones connect straight to Caddy (api.zaypos.app is DNS only, not proxied by Cloudflare: Myanmar networks
+# cut connections to Cloudflare-proxied hosts). 80 = http→https redirect + Let's Encrypt HTTP-01.
+ufw allow 80/tcp comment 'HTTP (Caddy: redirect + ACME)'
+ufw allow 443/tcp comment 'HTTPS (Caddy)'
+# NOTE: Docker-published ports (Caddy's 80 and 443) bypass ufw; what really filters them is the Vultr
+# Firewall group in front of the server (runbook §1.2: 80 and 443 from anywhere).
 ufw --force enable
 ufw status verbose
 
@@ -176,7 +176,7 @@ usermod -aG docker "$DEPLOY_USER"
 
 log "App folder $APP_DIR"
 install -d -m 750 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$APP_DIR" "$APP_DIR/backups"
-install -d -m 700 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$APP_DIR/certs"
+install -d -m 700 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$APP_DIR/caddy-data"   # Caddy's Let's Encrypt account + certificates
 for f in docker-compose.prod.yml Caddyfile lib.sh release.sh backup.sh restore.sh .env.example; do
   install -m 640 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$HERE/$f" "$APP_DIR/$f"
 done

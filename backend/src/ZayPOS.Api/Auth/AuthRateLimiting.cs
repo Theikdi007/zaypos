@@ -154,13 +154,15 @@ public static class AuthRateLimiting
 }
 
 /// <summary>
-/// The API sits behind Cloudflare. Trust CF-Connecting-IP (client IP) and X-Forwarded-Proto only
-/// when the TCP peer is a trusted proxy. Default list: Cloudflare (https://www.cloudflare.com/ips/),
-/// for Kestrel facing Cloudflare directly. Production puts Caddy in between: Caddy checks the
-/// Cloudflare ranges itself and the API trusts only Caddy (ForwardedHeaders:TrustedNetworksOverride,
-/// comma-separated, replaces the list). Disabled in Development.
+/// The client IP (rate limits) and scheme (Https:Require) behind Caddy. Phones connect straight to Caddy
+/// (api.zaypos.app is not proxied by Cloudflare: Myanmar networks cut connections to Cloudflare-proxied
+/// hosts). Caddy replaces any X-Forwarded-For / X-Forwarded-Proto a client sent with the real peer address
+/// and https, and drops CF-Connecting-IP. The API believes X-Forwarded-For / -Proto ONLY when the TCP peer is
+/// in ForwardedHeaders:TrustedNetworks(Override): in production Caddy's fixed address alone. Nothing from
+/// Cloudflare is trusted any more (a client could send CF-Connecting-IP to dodge the per-IP limit).
+/// Disabled in Development.
 /// </summary>
-public static class CloudflareForwarding
+public static class ProxyForwarding
 {
     public sealed class Settings
     {
@@ -175,15 +177,24 @@ public static class CloudflareForwarding
             : TrustedNetworksOverride.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 
-    public static bool AddCloudflareForwarding(this IServiceCollection services, IConfiguration config, IHostEnvironment env)
+    public const string Section = "ForwardedHeaders";
+
+    public static Settings Read(IConfiguration config) => config.GetSection(Section).Get<Settings>() ?? new Settings();
+
+    public static bool AddProxyForwarding(this IServiceCollection services, IConfiguration config, IHostEnvironment env)
     {
-        var settings = config.GetSection("ForwardedHeaders").Get<Settings>() ?? new Settings();
-        if (!settings.Enabled || env.IsDevelopment()) return false;
+        var settings = Read(config);
+        // No trusted proxy configured = no forwarding at all. NOT an empty list: with no known proxies or
+        // networks ASP.NET's middleware believes X-Forwarded-For from ANY client (seen in AuthTests), and a
+        // phone could pick its own rate-limit bucket. Production refuses to start without one (Deployment.cs).
+        if (!settings.Enabled || env.IsDevelopment() || !settings.Networks().Any()) return false;
 
         services.Configure<ForwardedHeadersOptions>(o =>
         {
             o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-            o.ForwardedForHeaderName = "CF-Connecting-IP";
+            // The standard X-Forwarded-For (from Caddy), not Cloudflare's CF-Connecting-IP.
+            o.ForwardedForHeaderName = ForwardedHeadersDefaults.XForwardedForHeaderName;
+            // Only the last hop, the one Caddy wrote: Caddy replaces the header, so there is only one.
             o.ForwardLimit = 1;
             o.KnownProxies.Clear();
             o.KnownIPNetworks.Clear();
