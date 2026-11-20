@@ -1606,9 +1606,9 @@ class $ProductsTable extends Products
   late final GeneratedColumn<int> cost = GeneratedColumn<int>(
     'cost',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _priceMeta = const VerificationMeta('price');
   @override
@@ -1761,8 +1761,6 @@ class $ProductsTable extends Products
         _costMeta,
         cost.isAcceptableOrUnknown(data['cost']!, _costMeta),
       );
-    } else if (isInserting) {
-      context.missing(_costMeta);
     }
     if (data.containsKey('price')) {
       context.handle(
@@ -1880,7 +1878,7 @@ class $ProductsTable extends Products
       cost: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}cost'],
-      )!,
+      ),
       price: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}price'],
@@ -1937,7 +1935,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
   final String category;
   final String unit;
   final String? barcode;
-  final int cost;
+  final int? cost;
   final int price;
   final int? wholesalePrice;
   final int lowAlertMilli;
@@ -1955,7 +1953,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
     required this.category,
     required this.unit,
     this.barcode,
-    required this.cost,
+    this.cost,
     required this.price,
     this.wholesalePrice,
     required this.lowAlertMilli,
@@ -1990,7 +1988,9 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
     if (!nullToAbsent || barcode != null) {
       map['barcode'] = Variable<String>(barcode);
     }
-    map['cost'] = Variable<int>(cost);
+    if (!nullToAbsent || cost != null) {
+      map['cost'] = Variable<int>(cost);
+    }
     map['price'] = Variable<int>(price);
     if (!nullToAbsent || wholesalePrice != null) {
       map['wholesalePrice'] = Variable<int>(wholesalePrice);
@@ -2022,7 +2022,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
       barcode: barcode == null && nullToAbsent
           ? const Value.absent()
           : Value(barcode),
-      cost: Value(cost),
+      cost: cost == null && nullToAbsent ? const Value.absent() : Value(cost),
       price: Value(price),
       wholesalePrice: wholesalePrice == null && nullToAbsent
           ? const Value.absent()
@@ -2054,7 +2054,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
       category: serializer.fromJson<String>(json['category']),
       unit: serializer.fromJson<String>(json['unit']),
       barcode: serializer.fromJson<String?>(json['barcode']),
-      cost: serializer.fromJson<int>(json['cost']),
+      cost: serializer.fromJson<int?>(json['cost']),
       price: serializer.fromJson<int>(json['price']),
       wholesalePrice: serializer.fromJson<int?>(json['wholesalePrice']),
       lowAlertMilli: serializer.fromJson<int>(json['lowAlertMilli']),
@@ -2077,7 +2077,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
       'category': serializer.toJson<String>(category),
       'unit': serializer.toJson<String>(unit),
       'barcode': serializer.toJson<String?>(barcode),
-      'cost': serializer.toJson<int>(cost),
+      'cost': serializer.toJson<int?>(cost),
       'price': serializer.toJson<int>(price),
       'wholesalePrice': serializer.toJson<int?>(wholesalePrice),
       'lowAlertMilli': serializer.toJson<int>(lowAlertMilli),
@@ -2098,7 +2098,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
     String? category,
     String? unit,
     Value<String?> barcode = const Value.absent(),
-    int? cost,
+    Value<int?> cost = const Value.absent(),
     int? price,
     Value<int?> wholesalePrice = const Value.absent(),
     int? lowAlertMilli,
@@ -2116,7 +2116,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
     category: category ?? this.category,
     unit: unit ?? this.unit,
     barcode: barcode.present ? barcode.value : this.barcode,
-    cost: cost ?? this.cost,
+    cost: cost.present ? cost.value : this.cost,
     price: price ?? this.price,
     wholesalePrice: wholesalePrice.present
         ? wholesalePrice.value
@@ -2238,7 +2238,7 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
   final Value<String> category;
   final Value<String> unit;
   final Value<String?> barcode;
-  final Value<int> cost;
+  final Value<int?> cost;
   final Value<int> price;
   final Value<int?> wholesalePrice;
   final Value<int> lowAlertMilli;
@@ -2277,7 +2277,7 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
     required String category,
     this.unit = const Value.absent(),
     this.barcode = const Value.absent(),
-    required int cost,
+    this.cost = const Value.absent(),
     required int price,
     this.wholesalePrice = const Value.absent(),
     required int lowAlertMilli,
@@ -2292,7 +2292,6 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
        updatedAt = Value(updatedAt),
        name = Value(name),
        category = Value(category),
-       cost = Value(cost),
        price = Value(price),
        lowAlertMilli = Value(lowAlertMilli),
        tint = Value(tint),
@@ -2349,7 +2348,7 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
     Value<String>? category,
     Value<String>? unit,
     Value<String?>? barcode,
-    Value<int>? cost,
+    Value<int?>? cost,
     Value<int>? price,
     Value<int?>? wholesalePrice,
     Value<int>? lowAlertMilli,
@@ -7123,9 +7122,9 @@ class $SaleLinesTable extends SaleLines
   late final GeneratedColumn<int> costSnapshot = GeneratedColumn<int>(
     'costSnapshot',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _lineTotalMeta = const VerificationMeta(
     'lineTotal',
@@ -7245,8 +7244,6 @@ class $SaleLinesTable extends SaleLines
           _costSnapshotMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_costSnapshotMeta);
     }
     if (data.containsKey('lineTotal')) {
       context.handle(
@@ -7326,7 +7323,7 @@ class $SaleLinesTable extends SaleLines
       costSnapshot: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}costSnapshot'],
-      )!,
+      ),
       lineTotal: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}lineTotal'],
@@ -7363,7 +7360,7 @@ class SaleLineRow extends DataClass implements Insertable<SaleLineRow> {
   final String name;
   final int qtyMilli;
   final int price;
-  final int costSnapshot;
+  final int? costSnapshot;
   final int lineTotal;
   const SaleLineRow({
     required this.id,
@@ -7379,7 +7376,7 @@ class SaleLineRow extends DataClass implements Insertable<SaleLineRow> {
     required this.name,
     required this.qtyMilli,
     required this.price,
-    required this.costSnapshot,
+    this.costSnapshot,
     required this.lineTotal,
   });
   @override
@@ -7418,7 +7415,9 @@ class SaleLineRow extends DataClass implements Insertable<SaleLineRow> {
     map['name'] = Variable<String>(name);
     map['qtyMilli'] = Variable<int>(qtyMilli);
     map['price'] = Variable<int>(price);
-    map['costSnapshot'] = Variable<int>(costSnapshot);
+    if (!nullToAbsent || costSnapshot != null) {
+      map['costSnapshot'] = Variable<int>(costSnapshot);
+    }
     map['lineTotal'] = Variable<int>(lineTotal);
     return map;
   }
@@ -7448,7 +7447,9 @@ class SaleLineRow extends DataClass implements Insertable<SaleLineRow> {
       name: Value(name),
       qtyMilli: Value(qtyMilli),
       price: Value(price),
-      costSnapshot: Value(costSnapshot),
+      costSnapshot: costSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(costSnapshot),
       lineTotal: Value(lineTotal),
     );
   }
@@ -7472,7 +7473,7 @@ class SaleLineRow extends DataClass implements Insertable<SaleLineRow> {
       name: serializer.fromJson<String>(json['name']),
       qtyMilli: serializer.fromJson<int>(json['qtyMilli']),
       price: serializer.fromJson<int>(json['price']),
-      costSnapshot: serializer.fromJson<int>(json['costSnapshot']),
+      costSnapshot: serializer.fromJson<int?>(json['costSnapshot']),
       lineTotal: serializer.fromJson<int>(json['lineTotal']),
     );
   }
@@ -7493,7 +7494,7 @@ class SaleLineRow extends DataClass implements Insertable<SaleLineRow> {
       'name': serializer.toJson<String>(name),
       'qtyMilli': serializer.toJson<int>(qtyMilli),
       'price': serializer.toJson<int>(price),
-      'costSnapshot': serializer.toJson<int>(costSnapshot),
+      'costSnapshot': serializer.toJson<int?>(costSnapshot),
       'lineTotal': serializer.toJson<int>(lineTotal),
     };
   }
@@ -7512,7 +7513,7 @@ class SaleLineRow extends DataClass implements Insertable<SaleLineRow> {
     String? name,
     int? qtyMilli,
     int? price,
-    int? costSnapshot,
+    Value<int?> costSnapshot = const Value.absent(),
     int? lineTotal,
   }) => SaleLineRow(
     id: id ?? this.id,
@@ -7528,7 +7529,7 @@ class SaleLineRow extends DataClass implements Insertable<SaleLineRow> {
     name: name ?? this.name,
     qtyMilli: qtyMilli ?? this.qtyMilli,
     price: price ?? this.price,
-    costSnapshot: costSnapshot ?? this.costSnapshot,
+    costSnapshot: costSnapshot.present ? costSnapshot.value : this.costSnapshot,
     lineTotal: lineTotal ?? this.lineTotal,
   );
   SaleLineRow copyWithCompanion(SaleLinesCompanion data) {
@@ -7628,7 +7629,7 @@ class SaleLinesCompanion extends UpdateCompanion<SaleLineRow> {
   final Value<String> name;
   final Value<int> qtyMilli;
   final Value<int> price;
-  final Value<int> costSnapshot;
+  final Value<int?> costSnapshot;
   final Value<int> lineTotal;
   final Value<int> rowid;
   const SaleLinesCompanion({
@@ -7663,7 +7664,7 @@ class SaleLinesCompanion extends UpdateCompanion<SaleLineRow> {
     required String name,
     required int qtyMilli,
     required int price,
-    required int costSnapshot,
+    this.costSnapshot = const Value.absent(),
     required int lineTotal,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -7674,7 +7675,6 @@ class SaleLinesCompanion extends UpdateCompanion<SaleLineRow> {
        name = Value(name),
        qtyMilli = Value(qtyMilli),
        price = Value(price),
-       costSnapshot = Value(costSnapshot),
        lineTotal = Value(lineTotal);
   static Insertable<SaleLineRow> custom({
     Expression<String>? id,
@@ -7728,7 +7728,7 @@ class SaleLinesCompanion extends UpdateCompanion<SaleLineRow> {
     Value<String>? name,
     Value<int>? qtyMilli,
     Value<int>? price,
-    Value<int>? costSnapshot,
+    Value<int?>? costSnapshot,
     Value<int>? lineTotal,
     Value<int>? rowid,
   }) {
@@ -10887,7 +10887,7 @@ typedef $$ProductsTableCreateCompanionBuilder = ProductsCompanion Function({
   required String category,
   Value<String> unit,
   Value<String?> barcode,
-  required int cost,
+  Value<int?> cost,
   required int price,
   Value<int?> wholesalePrice,
   required int lowAlertMilli,
@@ -10907,7 +10907,7 @@ typedef $$ProductsTableUpdateCompanionBuilder = ProductsCompanion Function({
   Value<String> category,
   Value<String> unit,
   Value<String?> barcode,
-  Value<int> cost,
+  Value<int?> cost,
   Value<int> price,
   Value<int?> wholesalePrice,
   Value<int> lowAlertMilli,
@@ -11220,7 +11220,7 @@ class $$ProductsTableTableManager
                 Value<String> category = const Value.absent(),
                 Value<String> unit = const Value.absent(),
                 Value<String?> barcode = const Value.absent(),
-                Value<int> cost = const Value.absent(),
+                Value<int?> cost = const Value.absent(),
                 Value<int> price = const Value.absent(),
                 Value<int?> wholesalePrice = const Value.absent(),
                 Value<int> lowAlertMilli = const Value.absent(),
@@ -11260,7 +11260,7 @@ class $$ProductsTableTableManager
                 required String category,
                 Value<String> unit = const Value.absent(),
                 Value<String?> barcode = const Value.absent(),
-                required int cost,
+                Value<int?> cost = const Value.absent(),
                 required int price,
                 Value<int?> wholesalePrice = const Value.absent(),
                 required int lowAlertMilli,
@@ -13593,7 +13593,7 @@ typedef $$SaleLinesTableCreateCompanionBuilder = SaleLinesCompanion Function({
   required String name,
   required int qtyMilli,
   required int price,
-  required int costSnapshot,
+  Value<int?> costSnapshot,
   required int lineTotal,
   Value<int> rowid,
 });
@@ -13611,7 +13611,7 @@ typedef $$SaleLinesTableUpdateCompanionBuilder = SaleLinesCompanion Function({
   Value<String> name,
   Value<int> qtyMilli,
   Value<int> price,
-  Value<int> costSnapshot,
+  Value<int?> costSnapshot,
   Value<int> lineTotal,
   Value<int> rowid,
 });
@@ -13890,7 +13890,7 @@ class $$SaleLinesTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<int> qtyMilli = const Value.absent(),
                 Value<int> price = const Value.absent(),
-                Value<int> costSnapshot = const Value.absent(),
+                Value<int?> costSnapshot = const Value.absent(),
                 Value<int> lineTotal = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SaleLinesCompanion(
@@ -13926,7 +13926,7 @@ class $$SaleLinesTableTableManager
                 required String name,
                 required int qtyMilli,
                 required int price,
-                required int costSnapshot,
+                Value<int?> costSnapshot = const Value.absent(),
                 required int lineTotal,
                 Value<int> rowid = const Value.absent(),
               }) => SaleLinesCompanion.insert(

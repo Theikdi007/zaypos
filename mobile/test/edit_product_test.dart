@@ -75,7 +75,7 @@ void main() {
     await c.read(productServiceProvider).create(p);
     await db.delete(db.outbox).go();
 
-    await c.read(productServiceProvider).update(p.copyWith(name: 'ပဲဆီ', price: 1200, cost: 1000));
+    await c.read(productServiceProvider).update(p.copyWith(name: 'ပဲဆီ', price: 1200, cost: () => 1000));
 
     final unit = (await outbox(db)).single;
     expect(unit.kind, 'upsertProduct');

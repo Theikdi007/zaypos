@@ -11,7 +11,8 @@ public class Product : ISyncedRow
     public string Category { get; set; } = "";
     public string Unit { get; set; } = "";
     public string? Barcode { get; set; }
-    public long Cost { get; set; }
+    /// <summary>Kyats per unit; null = the owner left it empty (unknown), 0 = really costs nothing (a service).</summary>
+    public long? Cost { get; set; }
     public long Price { get; set; }
     public long? WholesalePrice { get; set; }
     public long LowAlertMilli { get; set; }

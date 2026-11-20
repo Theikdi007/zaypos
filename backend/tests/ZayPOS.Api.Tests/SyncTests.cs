@@ -458,6 +458,39 @@ public class SyncTests(SqlServerFixture sql)
     }
 
     [Fact]
+    public async Task An_empty_cost_is_unknown_null_and_a_typed_0_is_a_real_zero_in_products_and_sale_lines()
+    {
+        // BUG-61: null = the owner left ဝယ်ဈေး empty (or a quick sale); 0 = a service that costs nothing.
+        var shop = await NewShop();
+        var unknown = Guid.CreateVersion7();
+        var free = Guid.CreateVersion7();
+        var t = Now();
+        object Row(Guid id, string name, long? cost) => new
+        {
+            id, name, category = "General", unit = "ခု", cost, price = 5000, lowAlertMilli = 0, tint = 0, initial = "က",
+            createdAt = t, updatedAt = t,
+        };
+        (await PushOne(shop, Unit("upsertProduct", new { products = new[] { Row(unknown, "ဆပ်ပြာ", null), Row(free, "ဆံပင်ညှပ်", 0) } })))
+            .Outcome.Should().Be(UnitOutcome.Applied);
+        (await LoadProduct(shop, unknown)).Cost.Should().BeNull();
+        (await LoadProduct(shop, free)).Cost.Should().Be(0);
+
+        var raw = await (await shop.Http.GetAsync("/api/v1/sync/pull?cursor=0&limit=1000")).Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(raw);
+        var products = doc.RootElement.GetProperty("changes").GetProperty("products").EnumerateArray().ToList();
+        var pulledUnknown = products.Single(r => r.GetProperty("id").GetGuid() == unknown);
+        pulledUnknown.TryGetProperty("cost", out var nullCost).Should().BeTrue("an unknown cost is an explicit null, not omitted");
+        nullCost.ValueKind.Should().Be(JsonValueKind.Null);
+        products.Single(r => r.GetProperty("id").GetGuid() == free).GetProperty("cost").GetInt64().Should().Be(0);
+
+        var stocked = await AddProduct(shop, stock: 10_000);
+        var sale = Checkout(shop, "A-0001", [(stocked, 1000, 1500)], unknownCost: true);
+        (await PushOne(shop, sale)).Outcome.Should().Be(UnitOutcome.Applied);
+        await using var db = sql.CreateContext(shop.TenantId);
+        (await db.SaleLines.SingleAsync(l => l.SaleId == sale.SaleId)).CostSnapshot.Should().BeNull();
+    }
+
+    [Fact]
     public void Issue_data_caps_the_other_names_and_always_fits_the_column()
     {
         var names = Enumerable.Range(1, 40).Select(i => new string('က', 150) + i).ToList();
@@ -769,7 +802,8 @@ public class SyncTests(SqlServerFixture sql)
         Checkout(shop, no, lines, method: "cash");
 
     private static TestUnit Checkout(Shop shop, string no, (Guid Product, long Qty, long Price)[] lines,
-        string method = "cash", Guid? customer = null, Guid? serialId = null, long? clientTotal = null)
+        string method = "cash", Guid? customer = null, Guid? serialId = null, long? clientTotal = null,
+        bool unknownCost = false)
     {
         var t = Now();
         var saleId = Guid.CreateVersion7();
@@ -784,7 +818,7 @@ public class SyncTests(SqlServerFixture sql)
             lineRows.Add(new
             {
                 id = lineId, tenantId = shop.TenantId, saleId, productId = product, serialId, name = "item",
-                qtyMilli = qty, price, costSnapshot = price / 2, lineTotal = Ledger.LineTotal(price, qty),
+                qtyMilli = qty, price, costSnapshot = unknownCost ? (long?)null : price / 2, lineTotal = Ledger.LineTotal(price, qty),
                 createdAt = t, updatedAt = t,
             });
             unit.Movements.Add(Movement(product, -qty, "sale", saleId));

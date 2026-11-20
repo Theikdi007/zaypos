@@ -41,7 +41,7 @@ void main() {
     test('productsFromPresets: no prices, default category, barcodes like the server, blank names skipped', () {
       final products = productsFromPresets(presets, tenantId: 't', tint: 0xFFDCFCE7, limits: limits);
       expect(products.map((p) => p.name), ['ကိုကာကိုလာ 330ml', 'ဆား']);
-      expect(products.every((p) => p.price == 0 && p.cost == 0), isTrue, reason: 'the owner fills prices');
+      expect(products.every((p) => p.price == 0 && p.cost == null), isTrue, reason: 'the owner fills prices');
       expect(products[0].barcode, '8850999320014');
       expect(products[1].barcode, isNull, reason: 'a barcode the server would refuse is dropped, not the product');
       expect(products[1].category, isNotEmpty);

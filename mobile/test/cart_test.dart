@@ -4,7 +4,7 @@ import 'package:zaypos_app/core/utils/qty.dart';
 import 'package:zaypos_app/features/pos/domain/cart.dart';
 import 'package:zaypos_app/features/products/domain/product.dart';
 
-Product _product(String id, int price, {int cost = 0}) {
+Product _product(String id, int price, {int? cost}) {
   final t = DateTime.utc(2026);
   return Product(
     id: id,
@@ -76,7 +76,7 @@ void main() {
     expect(d.first.qtyMilli, 1000);
     expect(d.first.price, 600);
     expect(d.first.cost, 450);
-    expect(d.last.cost, 0); // quick sale: cost unknown
+    expect(d.last.cost, isNull); // quick sale: cost unknown
     expect(d.last.productId, isNull);
     expect(d.last.name, 'ဆပ်ပြာ');
   });

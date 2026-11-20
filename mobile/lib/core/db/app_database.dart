@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 import '../../features/customers/domain/debt_entry.dart';
@@ -87,7 +89,7 @@ class Products extends Table with SyncedColumns {
   TextColumn get category => text()();
   TextColumn get unit => text().withDefault(const Constant(''))();
   TextColumn get barcode => text().nullable()();
-  IntColumn get cost => integer()();
+  IntColumn get cost => integer().nullable()(); // null = unknown (BUG-61, schema 3)
   IntColumn get price => integer()();
   IntColumn get wholesalePrice => integer().nullable()();
   IntColumn get lowAlertMilli => integer()();
@@ -212,7 +214,7 @@ class SaleLines extends Table with SyncedColumns {
   TextColumn get name => text()();
   IntColumn get qtyMilli => integer()();
   IntColumn get price => integer()();
-  IntColumn get costSnapshot => integer()();
+  IntColumn get costSnapshot => integer().nullable()(); // null = unknown (BUG-61, schema 3)
   IntColumn get lineTotal => integer()();
 }
 
@@ -322,7 +324,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// Tables that live only on this phone (never pulled from the server).
   static const localOnlyTables = {'outbox', 'syncState'};
@@ -351,11 +353,43 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(outbox, outbox.rejectCode);
             await m.addColumn(outbox, outbox.rejectData);
           }
+          if (from < 3) {
+            // v3 (BUG-61): an unknown cost is NULL, a typed 0 is a real zero. Until now 0 meant unknown,
+            // so 0 → NULL (the server's UnknownCostIsNull migration does the same; no re-download needed).
+            await m.alterTable(TableMigration(products));
+            await m.alterTable(TableMigration(saleLines));
+            await customStatement('UPDATE products SET cost = NULL WHERE cost = 0');
+            await customStatement('UPDATE saleLines SET costSnapshot = NULL WHERE costSnapshot = 0');
+            await _unknownCostInUnsentUnits();
+          }
           if (pullResetVersions.any((v) => v > from && v <= to)) {
             await writeState(pullCursorStateKey, '0');
           }
         },
       );
+
+  /// v3: units written before the upgrade but not yet sent carry `cost: 0` for "unknown";
+  /// the server now reads 0 as a real zero, so send null instead.
+  Future<void> _unknownCostInUnsentUnits() async {
+    const fields = {'products': 'cost', 'saleLines': 'costSnapshot'};
+    for (final row in await customSelect('SELECT seq, rowsJson FROM outbox').get()) {
+      final rows = (jsonDecode(row.read<String>('rowsJson')) as Map).cast<String, dynamic>();
+      var changed = false;
+      fields.forEach((table, field) {
+        for (final r in (rows[table] as List? ?? const []).cast<Map<String, dynamic>>()) {
+          if (r[field] == 0) {
+            r[field] = null;
+            changed = true;
+          }
+        }
+      });
+      if (changed) {
+        await customUpdate('UPDATE outbox SET rowsJson = ? WHERE seq = ?',
+            variables: [Variable.withString(jsonEncode(rows)), Variable.withInt(row.read<int>('seq'))],
+            updates: {outbox});
+      }
+    }
+  }
 
   // ---------------------------------------------------------------- syncState
 

@@ -83,7 +83,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   // BUG-53: the template's sample cost / price are hints (placeholder text),
   // never values. Empty cost = unknown (left out of profit); an empty price on
   // a new product saves 0 and POS asks for it at the first sale.
-  late final _cost = TextEditingController(text: (_p?.cost ?? 0) > 0 ? '${_p!.cost}' : '');
+  late final _cost = TextEditingController(text: _p?.cost == null ? '' : '${_p!.cost}'); // 0 stays "0" (BUG-61)
   late final _price = TextEditingController(text: (_p?.price ?? 0) > 0 ? '${_p!.price}' : '');
   late final _wholesale = TextEditingController(text: _p?.wholesalePrice?.toString() ?? '');
   final _stock = TextEditingController();
@@ -299,7 +299,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       await ref.read(productServiceProvider).update(
             editing.copyWith(
             name: name,
-            cost: int.tryParse(_cost.text) ?? 0,
+            cost: () => int.tryParse(_cost.text), // empty = unknown (BUG-61)
             price: price,
             wholesalePrice: () => features.quotation ? int.tryParse(_wholesale.text) : editing.wholesalePrice,
             // A cleared field = no low-stock alert (0), not the old value.
@@ -422,7 +422,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             id: productId,
             tenantId: tenantId,
             name: name,
-            cost: int.tryParse(_cost.text) ?? 0,
+            cost: int.tryParse(_cost.text), // empty = unknown, 0 = costs nothing (BUG-61)
             price: price,
             wholesalePrice: features.quotation ? int.tryParse(_wholesale.text) : null,
             lowAlertMilli: Qty.parse(_alert.text, decimal: features.decimalQty) ?? Qty.units(5),
@@ -540,12 +540,14 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     }
     final openingQty = _unbatchedNow(f);
     if (f.serialWarranty) ref.watch(knownSerialsProvider); // duplicate-IMEI check stays loaded
-    final cost = int.tryParse(_cost.text) ?? 0;
+    // BUG-61: empty = unknown (no profit shown); a typed 0 = costs nothing (all of the price is profit).
+    final typedCost = int.tryParse(_cost.text);
+    final cost = typedCost ?? 0;
     final price = int.tryParse(_price.text) ?? 0;
-    final costUnknown = cost <= 0;
+    final costUnknown = typedCost == null;
     final margin = price - cost;
-    // Integer percent, rounded half away from zero.
-    final pct = cost > 0 ? (margin * 200 + (margin >= 0 ? cost : -cost)) ~/ (2 * cost) : 0;
+    // Integer percent over cost, rounded half away from zero; none for a zero cost.
+    final pct = cost > 0 ? (margin * 200 + (margin >= 0 ? cost : -cost)) ~/ (2 * cost) : null;
     final ok = margin >= 0;
     final serialMode = f.serialWarranty && _serial;
     final showStockInputs = _track && !serialMode && !f.variants;
@@ -732,7 +734,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                                 style: AppText.s(14, weight: AppText.w600, color: ok ? AppColors.success : AppColors.danger)),
                           ),
                           const SizedBox(width: 8),
-                          Text('${ok ? '+' : '-'}${formatKs(margin.abs())} ($pct%)',
+                          Text('${ok ? '+' : '-'}${formatKs(margin.abs())}${pct == null ? '' : ' ($pct%)'}',
+                              key: const ValueKey('margin'),
                               style: AppText.s(14, weight: AppText.w600, color: ok ? AppColors.success : AppColors.danger)),
                         ],
                       ),

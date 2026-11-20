@@ -92,7 +92,7 @@ void main() {
 
       // Supplier raises the price: cost 450 -> 590 on the product master.
       final i = db.products.indexWhere((p) => p.id == SeedIds.water);
-      db.products[i] = db.products[i].copyWith(cost: 590);
+      db.products[i] = db.products[i].copyWith(cost: () => 590);
       expect(report.report(ReportPeriod.today).summary.profit, afterSale);
     });
   });

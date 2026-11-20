@@ -97,7 +97,7 @@ class WireDecoder {
         category: _s(j, 'category', 'products'),
         unit: _so(j, 'unit') ?? '',
         barcode: _so(j, 'barcode'),
-        cost: _i(j, 'cost', 'products'),
+        cost: _io(j, 'cost'), // null = unknown (BUG-61)
         price: _i(j, 'price', 'products'),
         wholesalePrice: _io(j, 'wholesalePrice'),
         lowAlertMilli: _i(j, 'lowAlertMilli', 'products'),
@@ -185,7 +185,7 @@ class WireDecoder {
         name: _s(j, 'name', 'saleLines'),
         qtyMilli: _i(j, 'qtyMilli', 'saleLines'),
         price: _i(j, 'price', 'saleLines'),
-        costSnapshot: _i(j, 'costSnapshot', 'saleLines'),
+        costSnapshot: _io(j, 'costSnapshot'), // null = unknown (BUG-61)
         lineTotal: _i(j, 'lineTotal', 'saleLines'),
         createdAt: _t(j, 'createdAt', 'saleLines'),
         updatedAt: _t(j, 'updatedAt', 'saleLines'),

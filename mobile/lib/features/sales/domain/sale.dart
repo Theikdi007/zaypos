@@ -44,8 +44,9 @@ class SaleLine {
   final int price;
 
   /// Unit cost (kyats) at the time of sale — profit never changes when the
-  /// product's cost is edited later.
-  final int costSnapshot;
+  /// product's cost is edited later. null = unknown (no cost entered, or a Quick Sale item);
+  /// 0 = a real zero cost (a service), which counts as full profit (BUG-61).
+  final int? costSnapshot;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -53,12 +54,15 @@ class SaleLine {
   /// Kyats.
   int get total => Qty.lineTotal(price, qtyMilli);
 
-  /// False when the cost was never entered (0: a product saved without a
-  /// cost, or a Quick Sale item). Such lines are left out of profit (BUG-53).
-  bool get costKnown => costSnapshot > 0;
+  /// False when the cost was never entered (null: a product saved with ဝယ်ဈေး empty, or a
+  /// Quick Sale item). Such lines are left out of profit (BUG-53). A typed 0 is known (BUG-61).
+  bool get costKnown => costSnapshot != null;
 
   /// Kyats: (price − costSnapshot) × qty; 0 when the cost is unknown.
-  int get profit => costKnown ? Qty.lineTotal(price - costSnapshot, qtyMilli) : 0;
+  int get profit => switch (costSnapshot) {
+        final cost? => Qty.lineTotal(price - cost, qtyMilli),
+        null => 0,
+      };
 
   SaleLine copyWith({int? qtyMilli, int? price, DateTime? updatedAt, DateTime? Function()? deletedAt}) => SaleLine(
         id: id,

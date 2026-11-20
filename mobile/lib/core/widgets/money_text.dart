@@ -45,18 +45,34 @@ class MoneyText extends StatelessWidget {
         letterSpacing: letterSpacing,
         decoration: strike ? TextDecoration.lineThrough : null);
     final number = '$prefix${formatMoney(amount)}';
-    if (!showUnit) return Text(number, style: base, textAlign: textAlign);
-    if (unitSize == null) return Text('$number Ks', style: base, textAlign: textAlign);
-    return Text.rich(
-      TextSpan(text: '$number ', children: [
-        TextSpan(
-          text: 'Ks',
-          style: AppText.s(unitSize!,
-              weight: unitWeight, color: unitColor ?? color, letterSpacing: 0),
-        ),
-      ]),
-      style: base,
-      textAlign: textAlign,
-    );
+    final Widget text;
+    if (!showUnit) {
+      text = Text(number, style: base, textAlign: textAlign, maxLines: 1, softWrap: false);
+    } else if (unitSize == null) {
+      text = Text('$number Ks', style: base, textAlign: textAlign, maxLines: 1, softWrap: false);
+    } else {
+      text = Text.rich(
+        TextSpan(text: '$number ', children: [
+          TextSpan(
+            text: 'Ks',
+            style: AppText.s(unitSize!,
+                weight: unitWeight, color: unitColor ?? color, letterSpacing: 0),
+          ),
+        ]),
+        style: base,
+        textAlign: textAlign,
+        maxLines: 1,
+        softWrap: false,
+      );
+    }
+    // An amount is never split over two lines ("850 / Ks", "1,50 / 0": BUG-59 / BUG-66): one line,
+    // shrunk to the space it has at the largest font sizes. At normal sizes nothing changes.
+    return FittedBox(fit: BoxFit.scaleDown, alignment: _alignment, child: text);
   }
+
+  AlignmentGeometry get _alignment => switch (textAlign) {
+        TextAlign.right || TextAlign.end => AlignmentDirectional.centerEnd,
+        TextAlign.center => Alignment.center,
+        _ => AlignmentDirectional.centerStart,
+      };
 }

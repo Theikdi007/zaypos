@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'app/drift_overrides.dart';
 import 'core/api/api_config.dart';
+import 'core/crash/crash_reporting.dart';
 import 'core/db/app_database.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/secure_store.dart';
@@ -24,6 +25,8 @@ Future<void> main() async {
     runApp(screen);
     return;
   }
+  // Release builds only; never an error's message (lib/core/crash/crash_reporting.dart).
+  await startCrashReporting();
   await lockPhonesToPortrait();
   // Offline-first: fonts are bundled assets, never fetched at runtime.
   GoogleFonts.config.allowRuntimeFetching = false;

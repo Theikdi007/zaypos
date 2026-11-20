@@ -501,8 +501,15 @@ class _CartBar extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('ပစ္စည်း ${Qty.format(cart.countMilli)} ခု',
-                    style: AppText.s(12, color: AppColors.surface.withValues(alpha: 0.8))),
+                // One line, shrunk at the largest sizes: never "ပစ္စ / ည်း" (BUG-59).
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text('ပစ္စည်း ${Qty.format(cart.countMilli)} ခု',
+                      maxLines: 1,
+                      softWrap: false,
+                      style: AppText.s(12, color: AppColors.surface.withValues(alpha: 0.8))),
+                ),
                 MoneyText(cart.total, size: 20, color: AppColors.surface),
               ],
             ),

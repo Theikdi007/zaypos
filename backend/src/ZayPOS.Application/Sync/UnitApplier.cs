@@ -133,7 +133,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
         var barcode = SyncLimits.ProductBarcode.Apply(r.Barcode);
         if (barcode != p.Barcode || isNew) _barcodeChanged.Add(p.Id);
         p.Barcode = barcode;
-        p.Cost = SyncLimits.ProductCost.Apply(Require(r.Cost, "products.cost"));
+        p.Cost = SyncLimits.ProductCost.Apply(r.Cost); // null = unknown (BUG-61)
         p.Price = SyncLimits.ProductPrice.Apply(Require(r.Price, "products.price"));
         p.WholesalePrice = r.WholesalePrice is { } w ? SyncLimits.ProductWholesalePrice.Apply(w) : null;
         p.LowAlertMilli = Require(r.LowAlertMilli, "products.lowAlertMilli");
@@ -370,7 +370,7 @@ internal sealed class UnitApplier(IAppDb db, SyncCaller caller, PushUnit unit, U
 
         var qty = SyncLimits.SaleLineQty.Apply(Require(r.QtyMilli, "saleLines.qtyMilli"));
         var price = SyncLimits.SaleLinePrice.Apply(Require(r.Price, "saleLines.price"));
-        var cost = SyncLimits.SaleLineCost.Apply(Require(r.CostSnapshot, "saleLines.costSnapshot"));
+        var cost = SyncLimits.SaleLineCost.Apply(r.CostSnapshot); // null = unknown (BUG-61)
 
         var line = new SaleLine
         {

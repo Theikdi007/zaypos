@@ -42,7 +42,7 @@ void main() {
       final back = decodeCart(encodeCart('t1', cart))!;
       expect(back.tenantId, 't1');
       expect(encodeCart('t1', back.cart), encodeCart('t1', cart));
-      for (final bad in [null, '', '{', '{"v":2,"tenantId":"t","lines":[]}', '{"v":1,"tenantId":"t","lines":[{"key":1}]}']) {
+      for (final bad in [null, '', '{', '{"v":3,"tenantId":"t","lines":[]}', '{"v":1,"tenantId":"t","lines":[{"key":1}]}']) {
         expect(decodeCart(bad), isNull, reason: '$bad');
       }
     });

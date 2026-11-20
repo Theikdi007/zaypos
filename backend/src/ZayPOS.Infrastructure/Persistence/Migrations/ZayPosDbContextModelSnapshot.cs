@@ -393,7 +393,7 @@ namespace ZayPOS.Infrastructure.Persistence.Migrations
                         .IsUnicode(true)
                         .HasColumnType("nvarchar(60)");
 
-                    b.Property<long>("Cost")
+                    b.Property<long?>("Cost")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1066,7 +1066,7 @@ namespace ZayPOS.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("BatchId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<long>("CostSnapshot")
+                    b.Property<long?>("CostSnapshot")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")

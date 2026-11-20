@@ -151,7 +151,7 @@ void main() {
     final saleCols = (await db.customSelect('PRAGMA table_info(sales)').get()).map((r) => r.read<String>('name'));
     expect(saleCols, containsAll(['tenantId', 'customerName', 'voidedAt', 'syncedAt', 'deletedAt']));
     expect(saleCols, isNot(contains('version')));
-    expect(db.schemaVersion, 2); // v2: BUG-26 issue / reject fields (db_migration_test.dart)
+    expect(db.schemaVersion, 3); // v2: BUG-26 issue / reject fields; v3: BUG-61 nullable cost (db_migration_test.dart)
   });
 
   test('syncState read/write', () async {

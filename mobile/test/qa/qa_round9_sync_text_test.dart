@@ -222,7 +222,7 @@ void main() {
           connectivityProvider.overrideWithValue(const Stream<bool>.empty()),
         ])))!;
     addTearDown(c.dispose);
-    expect((await tester.runAsync(() => adb.customSelect('PRAGMA user_version').getSingle()))!.data.values.single, 2);
+    expect((await tester.runAsync(() => adb.customSelect('PRAGMA user_version').getSingle()))!.data.values.single, 3); // v1 → current (v3 since BUG-61)
     await tester.runAsync(() => SyncStore(adb, tenantId: shop.tenantId, deviceId: shop.deviceId).markInitialSyncDone());
     await tester.pumpWidget(UncontrolledProviderScope(container: c, child: const ZayPosApp()));
     await settle(tester);

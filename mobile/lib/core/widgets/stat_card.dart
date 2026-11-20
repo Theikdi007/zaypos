@@ -27,6 +27,9 @@ class StatCard extends StatelessWidget {
   final double valueSize;
   final EdgeInsets padding;
 
+  static Widget _oneLine(Widget text) =>
+      FittedBox(fit: BoxFit.scaleDown, alignment: AlignmentDirectional.centerStart, child: text);
+
   @override
   Widget build(BuildContext context) {
     final content = Padding(
@@ -36,10 +39,13 @@ class StatCard extends StatelessWidget {
         children: [
           Text(label, style: AppText.s(12, color: AppColors.muted)),
           if (caption != null) const SizedBox(height: 2),
-          Text(value, style: AppText.s(valueSize, weight: AppText.w700, color: valueColor)),
+          // Value and caption are short: one line, shrunk at the largest sizes, never split inside a
+          // number or a Burmese syllable ("314, / 500", "ဖောက်သ / ည်": BUG-59).
+          _oneLine(Text(value, maxLines: 1, softWrap: false,
+              style: AppText.s(valueSize, weight: AppText.w700, color: valueColor))),
           if (caption != null) ...[
             const SizedBox(height: 2),
-            Text(caption!, style: AppText.s(12, color: AppColors.muted)),
+            _oneLine(Text(caption!, maxLines: 1, softWrap: false, style: AppText.s(12, color: AppColors.muted))),
           ],
         ],
       ),

@@ -69,26 +69,7 @@ class DashboardScreen extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('မင်္ဂလာပါ', style: AppText.s(13, color: AppColors.muted)),
-                        Text(session.shopName, style: AppText.s(19, weight: AppText.w700)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const SyncChip(),
-                  AppIconButton(
-                    icon: AppIcons.settings,
-                    semanticLabel: 'ဆက်တင်',
-                    onPressed: () => context.push(Routes.settingsFeatures),
-                  ),
-                ],
-              ),
+              child: _Header(shopName: session.shopName),
             ),
             _Hero(today: today),
             Padding(
@@ -198,6 +179,46 @@ class _NeedsPriceCard extends StatelessWidget {
   }
 }
 
+/// "မင်္ဂလာပါ" + shop name, the sync chip and settings.
+class _Header extends StatelessWidget {
+  const _Header({required this.shopName});
+  final String shopName;
+
+  @override
+  Widget build(BuildContext context) {
+    final greeting = Text('မင်္ဂလာပါ', style: AppText.s(13, color: AppColors.muted));
+    final name = Text(shopName, style: AppText.s(19, weight: AppText.w700));
+    final actions = [
+      const SizedBox(width: 8),
+      const SyncChip(),
+      AppIconButton(
+        icon: AppIcons.settings,
+        semanticLabel: 'ဆက်တင်',
+        onPressed: () => context.push(Routes.settingsFeatures),
+      ),
+    ];
+    // Above text ×1.5 the chip and settings leave the name too little room on a narrow phone and a
+    // one-word name breaks inside the word ("Andr / oid": BUG-59): the name goes under them, full width.
+    if (MediaQuery.textScalerOf(context).scale(19) > 19 * 1.5) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [Expanded(child: greeting), ...actions]),
+          name,
+        ],
+      );
+    }
+    return Row(
+      children: [
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [greeting, name]),
+        ),
+        ...actions,
+      ],
+    );
+  }
+}
+
 class _Hero extends StatelessWidget {
   const _Hero({required this.today});
   final TodaySummary today;
@@ -218,12 +239,14 @@ class _Hero extends StatelessWidget {
           MoneyText(today.sales,
               size: 32, color: AppColors.surface, letterSpacing: -0.5, unitSize: 16),
           const SizedBox(height: 12),
-          Row(
+          // A Wrap, not a Row: at the largest font + display size the three metrics go on two lines
+          // instead of overflowing the card (BUG-63).
+          Wrap(
+            spacing: 20,
+            runSpacing: 8,
             children: [
               _metric('အရောင်း', '${today.count} ကြိမ်'),
-              const SizedBox(width: 20),
               _metric('အမြတ်', formatProfit(today.profit, unknown: today.profitUnknown)),
-              const SizedBox(width: 20),
               _metric('မနေ့က', '$sign${today.changePct}%'),
             ],
           ),
