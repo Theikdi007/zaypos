@@ -1,0 +1,26 @@
+# r19 2026-11-20 03:58:19 UTC local API http://127.0.0.1:5076 (pid 31212, started 10:25 local, built from the working tree)
+$ curl -sS -i -X POST http://127.0.0.1:5076/api/v1/auth/login -H 'Content-Type: application/json' -d '{"phone":"+959790917041","pin":"123456","deviceId":"0193a000-0000-7000-8000-000000000001"}'
+HTTP/1.1 404 Not Found
+Content-Length: 0
+Date: Fri, 20 Nov 2026 03:58:18 GMT
+Server: Kestrel
+
+
+$ curl -sS -i -X POST http://127.0.0.1:5076/api/v1/auth/login -H 'Content-Type: application/json' -d '{"phone":"+959111222333","pin":"000000"}'
+HTTP/1.1 404 Not Found
+Content-Length: 0
+Date: Fri, 20 Nov 2026 03:58:18 GMT
+Server: Kestrel
+
+
+$ curl -sS -i -X POST http://127.0.0.1:5076/api/v1/auth/google -H 'Content-Type: application/json' -d '{"idToken":"not-a-jwt","tenantId":"00000000-0000-0000-0000-000000000000","pin":"123456","deviceId":"0193a000-0000-7000-8000-000000000001"}'
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+Date: Fri, 20 Nov 2026 03:58:18 GMT
+Server: Kestrel
+Cache-Control: no-cache,no-store
+Expires: -1
+Pragma: no-cache
+Transfer-Encoding: chunked
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"validation","status":400,"detail":"device.id is required.","code":"validation","traceId":"00-e3478fbcef7bfe4c0e9deb681c28786e-73191260c2d38140-00"}

@@ -11,6 +11,8 @@
 //   type <text>             type into the focused field
 //   launch | activate | terminate
 //   quit                    end the test
+//   swipeup | swipedown     (round 19) scroll the app one screen
+//   auto off | auto on      (round 19) stop / resume auto-tapping "Continue", to read the alert first
 // Every "Continue" button of a system alert is tapped automatically (the Google sign-in prompt).
 import XCTest
 
@@ -18,6 +20,7 @@ final class QADriverUITests: XCTestCase {
     let app = XCUIApplication(bundleIdentifier: "app.zaypos")
     let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
     let webSheet = XCUIApplication(bundleIdentifier: "com.apple.SafariViewService")
+    var autoOn = true
 
     func testServe() throws {
         let dir = ProcessInfo.processInfo.environment["QA_IOS_DIR"] ?? "/tmp/zaypos_qa_ios"
@@ -46,6 +49,7 @@ final class QADriverUITests: XCTestCase {
 
     /// The system sign-in prompt is a SpringBoard alert; accept it whenever it shows.
     private func autoContinue() {
+        guard autoOn else { return }
         let b = springboard.alerts.buttons["Continue"]
         if b.exists { b.tap() }
     }
@@ -69,6 +73,9 @@ final class QADriverUITests: XCTestCase {
         let op = parts.first ?? ""
         let arg = parts.count > 1 ? parts[1] : ""
         switch op {
+        case "auto": autoOn = arg != "off"; return "ok auto \(autoOn ? "on" : "off")"
+        case "swipeup": app.swipeUp(); return "ok swipeup"
+        case "swipedown": app.swipeDown(); return "ok swipedown"
         case "launch": app.launch(); return "ok launch"
         case "activate": app.activate(); return "ok activate"
         case "terminate": app.terminate(); return "ok terminate"

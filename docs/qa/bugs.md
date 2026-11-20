@@ -1300,6 +1300,12 @@ Device: Android emulator `emulator-5554` (sdk_gphone64_arm64, Android 16 / API 3
   "ZayPOS" (`logs/r18_ios_driver_session.log` step 4); Android's Google sheet says "to continue to ZayPOS". Suspected area for
   that half: the Google Cloud OAuth consent screen / branding of the iOS client (configuration, not app code).
 - Blocks beta: no (cosmetic; the beta shops are Android first). Fix before an iPhone shop joins.
+- **Round 19 (2026-11-20): app half FIXED-VERIFIED, consent-screen half STILL OPEN.** `Info.plist` `CFBundleName` = ZayPOS
+  (working tree of `feat/google-signin`); fresh debug install on the iPhone 18 Pro: "“ZayPOS” Wants to Use “accounts.google.com”
+  to Sign In" (`evidence/round-19/r19_ios_gauth_new1_alert.png`). Google's own page still says "Choose an account **to continue
+  to project-&lt;number&gt;**" and "You're signing back in to project-&lt;number&gt;" (`evidence/round-19/logs/r19_ios_driver_session.log`
+  steps 2–4): Google Cloud OAuth consent screen / branding (app name) for the iOS client, configuration only. Android's sheet says
+  "to continue to ZayPOS" (`logs/r19_android_session.log` A1).
 
 ## BUG-68 · TC-GAUTH-NEW-2 (TC-AUTH-07) · Low · A phone that switches to another shop and back gets a NEW device code; the old code stays as a stale phone
 - Found in: round 18 · Android emulator, profile build of `feat/google-signin`, local API. `evidence/round-18/logs/r18_db_after_deviceC.txt`,
@@ -1326,6 +1332,14 @@ Device: Android emulator `emulator-5554` (sdk_gphone64_arm64, Android 16 / API 3
 - Suspected area: `features/auth/data/google_auth.dart` (iOS path: no connectivity check before starting the web sign-in, and the
   plugin reports the closed sheet as a cancel). No fix proposed.
 - Blocks beta: no (the shop owner still lands on Login and can retry). Owner: confirm on a real iPhone in airplane mode.
+- **Round 19 (2026-11-20): FIXED (verified at unit level; live iOS check left to the owner).** `google_auth.dart` now probes
+  accounts.google.com:443 before opening Google (`canReachGoogle`) and again when the plugin says "canceled".
+  `m/test/google_auth_test.dart` "BUG-69: …" (offline before the sheet) and the QA test `m/test/qa/qa_round19_bug69_test.dart`
+  (fake Google plugin: sheet opened, then unreachable + "canceled" → `network` 'အင်တာနက် မရပါ။ လိုင်းရမှ ပြန်ကြိုးစားပါ။'; online
+  cancel still 'Google နဲ့ ဝင်တာကို ရပ်လိုက်ပါတယ်။') PASS. Live: Android airplane mode → the Burmese no-internet message, no Google UI,
+  0 API calls; online cancel on iOS and Android still the cancelled message. The iOS simulator was not taken offline (it shares the
+  Mac's network, which this session had to keep). Note: when the network is up but slow, the probe waits up to 4 s before
+  Google's sheet opens, and a probe that times out on a very slow line shows "no internet" (by design; worth watching in the beta).
 
 ---
 

@@ -1,0 +1,6 @@
+00:00 +0: loading /Users/theikdinyunt/Developer/ZayPOS/mobile/test/qa/qa_round19_bug69_test.dart
+00:00 +0: TC-GAUTH-NEW-3 / BUG-69: iOS sheet opened, internet dropped, sheet closed ("canceled") → no-internet message
+Google sign-in failed: GoogleSignInExceptionCode.canceled The user canceled
+00:00 +1: TC-GAUTH-09: a real cancel while online is still the cancelled message, not "no internet"
+Google sign-in failed: GoogleSignInExceptionCode.canceled The user canceled
+00:00 +2: All tests passed!
