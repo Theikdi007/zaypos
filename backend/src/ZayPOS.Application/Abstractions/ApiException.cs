@@ -6,4 +6,7 @@ public class ApiException(int status, string code, string detail, TimeSpan? retr
     public int Status { get; } = status;
     public string Code { get; } = code;
     public TimeSpan? RetryAfter { get; } = retryAfter;
+
+    /// <summary>Extra ProblemDetails members (camelCase keys), e.g. <c>attemptsLeft</c>.</summary>
+    public IReadOnlyDictionary<string, object?>? Extensions { get; init; }
 }

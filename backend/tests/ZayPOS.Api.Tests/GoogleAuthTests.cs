@@ -204,7 +204,13 @@ public class GoogleAuthTests : IAsyncLifetime
         var device = Guid.CreateVersion7();
 
         for (var i = 0; i < 4; i++)
-            await ShouldBeProblem(await SignIn(token, a.Tenant.Id, "999999", device), HttpStatusCode.Unauthorized, "invalid_credentials");
+        {
+            var wrong = await SignIn(token, a.Tenant.Id, "999999", device);
+            await ShouldBeProblem(wrong, HttpStatusCode.Unauthorized, "invalid_credentials");
+            // The app says "PIN မှားနေပါတယ်။ နောက်ထပ် N ကြိမ်…": 4, 3, 2, 1 wrong PINs left before the lock.
+            JsonDocument.Parse(await wrong.Content.ReadAsStringAsync()).RootElement
+                .GetProperty("attemptsLeft").GetInt32().Should().Be(4 - i);
+        }
         var fifth = await SignIn(token, a.Tenant.Id, "999999", device);
         await ShouldBeProblem(fifth, HttpStatusCode.Locked, "pin_locked");
         fifth.Headers.RetryAfter!.Delta.Should().Be(TimeSpan.FromMinutes(15));

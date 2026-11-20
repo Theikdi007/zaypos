@@ -173,7 +173,9 @@ public sealed class AuthService(
                 user.FailedPinCount = 0;
             }
             await repo.SaveChangesAsync(ct);
-            throw lockedNow ? Locked(AuthRules.PinLockout) : AuthException.InvalidCredentials();
+            throw lockedNow
+                ? Locked(AuthRules.PinLockout)
+                : AuthException.WrongPin(AuthRules.PinMaxFailures - user.FailedPinCount);
         }
 
         if (check == PinCheck.SuccessRehashNeeded) user.PinHash = pins.Hash(user, pin!);

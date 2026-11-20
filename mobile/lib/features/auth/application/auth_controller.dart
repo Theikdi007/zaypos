@@ -56,7 +56,7 @@ abstract final class AuthMessages {
   static String outboxKept(int n) =>
       'မပို့ရသေးတဲ့ စာရင်း ${mmNumber(n)} ခု ဒီဖုန်းထဲမှာ သိမ်းထားပါတယ်။ ဒီဆိုင်နဲ့ ပြန်ဝင်ရင် ဆက်ပို့ပေးပါမယ်။';
 
-  static String wrongPin(int left) => 'PIN မှားနေပါတယ်။ နောက်ထပ် ${mmNumber(left)} ကြိမ် ကြိုးစားလို့ရပါတယ်။';
+  static String wrongPin(int left) => wrongPinMessage(left);
 
   static String locked(Duration left) =>
       'PIN မှားတာ များသွားလို့ ${mmNumber(minutesUp(left))} မိနစ် ပိတ်ထားပါတယ်။';

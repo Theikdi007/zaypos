@@ -73,6 +73,21 @@ void main() {
       expect(() => g.signIn(), throwsA(isA<AuthFailure>().having((f) => f.code, 'code', 'google_not_configured')));
     });
 
+    test('BUG-69: Google unreachable → Burmese "no internet" before Google\'s sheet opens', () async {
+      var probes = 0;
+      final g = PluginGoogleAuth(serverClientId: 'web', iosClientId: 'ios', online: () async {
+        probes++;
+        return false;
+      });
+      await expectLater(
+        g.signIn(),
+        throwsA(isA<AuthFailure>()
+            .having((f) => f.code, 'code', 'network')
+            .having((f) => f.message, 'message', GoogleMessages.offline)),
+      );
+      expect(probes, 1, reason: 'stops at the probe: GoogleSignIn is never initialized or opened');
+    });
+
     test('the OTP flow is off unless AUTH_OTP_ENABLED is set', () {
       expect(authOtpEnabled, isFalse);
       final c = ProviderContainer();

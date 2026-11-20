@@ -69,7 +69,10 @@ Verification needs the server to reach `googleapis.com`; if it can't → `503 go
 **Errors (new codes):** `google_token_invalid` 401, `google_unavailable` 503, `shop_not_found` 404
 (no shop of this Google account with that tenantId), `google_shop_limit` 409,
 `otp_disabled` 403. PIN errors are today's (`invalid_credentials`,
-`pin_locked` + Retry-After). `device_conflict` / `device_revoked` unchanged.
+`pin_locked` + Retry-After). `invalid_credentials` also carries `attemptsLeft` (wrong PINs still allowed
+before the 15-minute lock: 4, 3, 2, 1; the 5th wrong PIN is `pin_locked`); the app says
+"PIN မှားနေပါတယ်။ နောက်ထပ် N ကြိမ် ကြိုးစားလို့ရပါတယ်။", the same as the offline unlock, and never mentions
+a phone number. `device_conflict` / `device_revoked` unchanged.
 
 **Rate limits as today:** every `/auth/*` call per client IP (120/min). The per-phone partition
 (10/min) is extended to a per-account partition: for `/google*` the middleware reads the `sub`
@@ -104,7 +107,7 @@ only when `Auth:OtpEnabled=true`.
 | `google_cancelled` | the user closed the account picker | Google နဲ့ ဝင်တာကို ရပ်လိုက်ပါတယ်။ |
 | `google_no_account` | no Google account on the phone | ဒီဖုန်းမှာ Google အကောင့် မရှိသေးပါ။ ဖုန်းရဲ့ ဆက်တင်မှာ Google အကောင့် ထည့်ပြီးမှ ပြန်ကြိုးစားပါ။ |
 | `google_play_services` | Play services missing/outdated (Android) | ဒီဖုန်းမှာ Google ဝန်ဆောင်မှု မရှိ (သို့) ဗားရှင်းဟောင်း ဖြစ်နေပါတယ်။ Google ဝန်ဆောင်မှုကို အသစ်တင်ပြီးမှ ပြန်ကြိုးစားပါ။ |
-| `network` | offline | အင်တာနက် မရပါ။ လိုင်းရမှ ပြန်ကြိုးစားပါ။ |
+| `network` | offline: checked by connecting to `accounts.google.com:443` before Google's UI opens (a Wi-Fi without internet still reports "connected"), and again when the sheet comes back "cancelled" | အင်တာနက် မရပါ။ လိုင်းရမှ ပြန်ကြိုးစားပါ။ |
 | `google_failed` | anything else | Google နဲ့ ဝင်လို့ မရပါ။ ခဏနေ ပြန်ကြိုးစားပါ။ |
 
 Flows (screens):

@@ -56,6 +56,13 @@ public sealed class AuthException(int status, string code, string detail, TimeSp
     public static AuthException Validation(string detail) => new(400, "validation", detail);
     public static AuthException OtpInvalid() => new(400, "otp_invalid", "The code is wrong or has expired.");
     public static AuthException InvalidCredentials() => new(401, "invalid_credentials", "The PIN is wrong.");
+
+    /// <summary>A wrong PIN; <paramref name="attemptsLeft"/> more wrong PINs are allowed before the lock.</summary>
+    public static AuthException WrongPin(int attemptsLeft) =>
+        new(401, "invalid_credentials", "The PIN is wrong.")
+        {
+            Extensions = new Dictionary<string, object?> { ["attemptsLeft"] = attemptsLeft },
+        };
     public static AuthException InvalidRefreshToken() => new(401, "invalid_refresh_token", "Sign in again.");
     public static AuthException OtpDisabled() =>
         new(403, "otp_disabled", "Phone verification by SMS is turned off. Sign in with Google.");

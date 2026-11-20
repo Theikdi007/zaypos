@@ -130,7 +130,8 @@ flutter devices                                   # e.g. emulator-5554
 flutter run -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:5076
 ```
 
-Release APK (signed with the debug key until a release keystore exists). It needs an
+Release APK, signed with the upload key from `android/key.properties` (docs/mobile/release-signing.md;
+without that file a release build stops instead of using the debug key). It needs an
 `https://` URL: a release build with an `http://` URL (or none: the default is
 `http://localhost:5076`) shows the refusal screen and sends nothing (see the top of this file):
 

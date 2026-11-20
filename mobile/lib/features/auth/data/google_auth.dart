@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,12 +68,32 @@ AuthFailure googleFailure(GoogleSignInExceptionCode code, String? description, {
   };
 }
 
+/// Can this phone reach Google right now? A Wi-Fi without internet still reports "wifi" to
+/// connectivity_plus (always so on the iOS simulator), so open a real connection to Google's
+/// sign-in host. Without this, iOS opens Google's sheet on Safari's English "Can't Open Page"
+/// and reports the closed sheet as a cancel (BUG-69).
+Future<bool> canReachGoogle({Duration timeout = const Duration(seconds: 4)}) async {
+  if ((await Connectivity().checkConnectivity()).every((r) => r == ConnectivityResult.none)) return false;
+  try {
+    final socket = await Socket.connect('accounts.google.com', 443, timeout: timeout);
+    socket.destroy();
+    return true;
+  } catch (_) {
+    return false; // no DNS, no route, timeout
+  }
+}
+
 /// The real picker (google_sign_in 7: Credential Manager on Android, GIDSignIn on iOS).
 class PluginGoogleAuth implements GoogleAuth {
-  PluginGoogleAuth({this.serverClientId = googleServerClientId, this.iosClientId = googleIosClientId});
+  PluginGoogleAuth({
+    this.serverClientId = googleServerClientId,
+    this.iosClientId = googleIosClientId,
+    Future<bool> Function()? online,
+  }) : _online = online ?? canReachGoogle;
 
   final String serverClientId;
   final String iosClientId;
+  final Future<bool> Function() _online;
   Future<void>? _init;
 
   bool get _android => defaultTargetPlatform == TargetPlatform.android;
@@ -87,9 +109,8 @@ class PluginGoogleAuth implements GoogleAuth {
   @override
   Future<GoogleIdentity> signIn() async {
     if (!_configured) throw const AuthFailure('google_not_configured', GoogleMessages.notConfigured);
-    if ((await Connectivity().checkConnectivity()).every((r) => r == ConnectivityResult.none)) {
-      throw const AuthFailure('network', GoogleMessages.offline);
-    }
+    // Before Google's UI opens: offline gets the Burmese "no internet", not a browser error page.
+    if (!await _online()) throw const AuthFailure('network', GoogleMessages.offline);
     try {
       await _ready();
       final account = await GoogleSignIn.instance.authenticate(scopeHint: const ['email']);
@@ -100,6 +121,11 @@ class PluginGoogleAuth implements GoogleAuth {
       rethrow;
     } on GoogleSignInException catch (e) {
       debugPrint('Google sign-in failed: ${e.code} ${e.description}');
+      // iOS: the internet dropped while the sheet was open, the page failed, the user closed it,
+      // and the plugin says "canceled". Say what really happened.
+      if (e.code == GoogleSignInExceptionCode.canceled && !await _online()) {
+        throw const AuthFailure('network', GoogleMessages.offline);
+      }
       throw googleFailure(e.code, e.description, android: _android);
     } catch (e) {
       // PlatformException etc.: e.g. no Play services at all on the device.

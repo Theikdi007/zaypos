@@ -22,17 +22,22 @@ public sealed class ApiExceptionHandler(IProblemDetailsService problems) : IExce
         if (retryAfter is { } wait)
             http.Response.Headers.RetryAfter = Math.Ceiling(wait.TotalSeconds).ToString(CultureInfo.InvariantCulture);
 
+        var details = new ProblemDetails
+        {
+            Status = status,
+            Title = code,
+            Detail = detail,
+            Extensions = { ["code"] = code },
+        };
+        if (exception is ApiException { Extensions: { } extra })
+            foreach (var (key, value) in extra)
+                details.Extensions[key] = value;
+
         return await problems.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = http,
             Exception = exception,
-            ProblemDetails = new ProblemDetails
-            {
-                Status = status,
-                Title = code,
-                Detail = detail,
-                Extensions = { ["code"] = code },
-            },
+            ProblemDetails = details,
         });
     }
 }
