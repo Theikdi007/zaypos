@@ -31,8 +31,10 @@ Terms and limits were checked on the providers' own pages on 2026-11-21. Lines m
    Netlify CLI; the repo is not connected. It is a TypeScript port of PR #20's Go handler with the same rules, and
    **the API side of PR #20 (`EdgeProxy.cs`, `EDGE_PROXY_SECRETS`) is reused unchanged**. The secret is the Netlify environment
    variable `EDGE_PROXY_SECRET`, set by the owner in Netlify's UI, never in git, chat or logs.
-2. **Route 2 (later): Render Free, or Railway Free, running PR #20's Go proxy.** Both passed the network probe on all three
-   networks (made-up name on the provider's edge) and both start without a card.
+2. **Route 2: Render Free (owner decision 2026-11-21), after the beta starts.** Tracked as a follow-up task: see
+   [Follow-up tasks](#follow-up-tasks). It runs PR #20's Go proxy. Render and Railway both passed the network probe on all
+   three networks (made-up name on the provider's edge) and both start without a card; Railway is the alternative if Render
+   fails.
    - **Free instances sleep, so a cold backup needs a ~1 min (Render) wake-up.** The app's switching rule therefore needs one
      addition: when it fails over to route 2, it first sends `GET /_proxy/health` with a 70 s timeout (safe to repeat), and
      only then the real request. Otherwise the first real request after a switch would hit the receive timeout. Since that
@@ -122,6 +124,25 @@ Estimate: ≈ 440 → ≈ 260 requests a day, so the Free plan would hold about 
   removes the credit pause.
 - A card for Personal: whether a Myanmar-issued card is accepted is *unverified*. Try it on the upgrade page before relying on
   it. A rejected card there can't affect `zaypos-437e5`.
+
+### Follow-up tasks
+
+- [ ] **Route 2 on Render Free (after the beta starts).**
+  1. Go proxy changes:
+     - the secret comes from an env var when `SECRET_NAME` is empty;
+     - `CLIENT_IP_HEADER` is configurable (first check which header Render sets and that a client can't forge it; if none
+       is trustworthy, send no client IP);
+     - add a Dockerfile.
+
+     Tests as in `main_test.go`.
+  2. The owner creates the Render account (no card) and the web service from `edge-proxy/` only, not the whole repo. The
+     secret is a Render env var, the same value as Netlify's, or a second value in `EDGE_PROXY_SECRETS`.
+  3. Run `probe-site.sh` against `<name>.onrender.com` on MBT, Atom and MPT, and on phones X, i and R. Include a cold-start
+     run after 20 min idle and note the wake-up time.
+  4. App: add it as the second route. On a switch to it, call `GET /_proxy/health` with a 70 s timeout before the first
+     real request (Free sleeps after 15 min, ≈ 1 min to wake). Never replay a request that was already sent.
+- [ ] **App-side route switching** (Route order in the app, below), with the Netlify URL first and direct last.
+- [ ] **U9 and Mytel** rows with friends' SIMs, against the real Netlify site.
 
 ## Why
 
