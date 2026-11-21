@@ -58,34 +58,47 @@ npx netlify-cli@latest sites:create       # manual site, no Git. Name: something
 ```
 This links the folder to the site (`.netlify/state.json`, git-ignored). The site URL is `https://<name>.netlify.app`.
 
-**4. The secret.**
-1. Make the secret, copy it **to the clipboard only**, and print its length, never its value:
+**4. The secret.** The clipboard holds the secret during these steps. **Copying a command from a doc or chat overwrites
+it**: so run (or type) each command first, and copy the secret from the password manager only when the command waits for
+it.
+
+1. **Make it.** Generate the value to the clipboard only, and print its length and fingerprint, never the value:
    ```bash
-   openssl rand -base64 48 | tr -d '/+=\n' | cut -c1-48 | tr -d '\n' | pbcopy && pbpaste | wc -c
+   openssl rand -base64 48 | tr -d '/+=\n' | cut -c1-48 | tr -d '\n' | pbcopy && pbpaste | wc -c && pbpaste | shasum -a 256 | cut -c1-8
    ```
-   It must print `48`: letters and digits only. The last `tr -d '\n'` matters because macOS `cut` adds a newline. Save it
-   in the password manager as "ZayPOS EDGE_PROXY_SECRET".
-2. Netlify UI: project → **Manage → Keys and secrets** (older UI: Site configuration → Environment variables) →
+   - It must print `48`: letters and digits only. The last `tr -d '\n'` matters because macOS `cut` adds a newline.
+   - The second line is the **fingerprint** (first 8 hex characters of SHA-256). Write it next to the entry; it isn't
+     secret.
+   - Save the value in the password manager as "ZayPOS EDGE_PROXY_SECRET".
+2. **Netlify.** Project → **Manage → Keys and secrets** (older UI: Site configuration → Environment variables) →
    **Add a variable**:
-   - Key `EDGE_PROXY_SECRET` (singular)
-   - Mark it **Secret** if offered
-   - Scopes: at least **Functions** and **Runtime** (Builds does no harm: this site has no build)
-   - Same value for all deploy contexts, paste with ⌘V
-3. Server (VPN on from Myanmar; `ssh deploy@<server>`, `cd ~/zaypos`):
-   1. Back up `.env`.
-   2. Check there's no `EDGE_PROXY_SECRETS=` line yet.
-   3. Append the line without the value reaching the screen or shell history:
-      `read -rs S && printf 'EDGE_PROXY_SECRETS=%s\n' "$S" >> .env && unset S` (paste with ⌘V, then Enter).
-   4. Check its length: `grep '^EDGE_PROXY_SECRETS=' .env | cut -d= -f2- | tr -d '\n' | wc -c` → `48`.
+   - Key `EDGE_PROXY_SECRET` (singular).
+   - Mark it **Secret** if offered.
+   - Scopes: at least **Functions** and **Runtime**. Builds does no harm, since this site has no build.
+   - Same value for all deploy contexts. Copy the value from the password manager, then paste with ⌘V.
+3. **Server.** VPN on from Myanmar; `ssh deploy@<server>`, then `cd ~/zaypos`. Run these in order:
+   1. Back up, and check there's no line yet (must print `0`):
+      `cp -p .env .env.bak-$(date +%F) && grep -c '^EDGE_PROXY_SECRETS=' .env`
+   2. Make sure `.env` ends with a newline, so the new line isn't glued to the last one:
+      `[ -n "$(tail -c1 .env)" ] && echo >> .env`
+   3. **Type or paste this command first**: `read -rs S && printf 'EDGE_PROXY_SECRETS=%s\n' "$S" >> .env && unset S`.
+      Press Enter; it now waits and shows nothing. **Only then** copy the secret from the password manager, ⌘V, Enter.
+      `read -s` keeps the value off the screen and out of shell history.
+   4. Check its length (must print `48`) and fingerprint (must equal the one from step 1):
+      `grep '^EDGE_PROXY_SECRETS=' .env | cut -d= -f2- | tr -d '\n' | wc -c`
+      `grep '^EDGE_PROXY_SECRETS=' .env | cut -d= -f2- | tr -d '\n' | sha256sum | cut -c1-8`
 
    No restart is needed until PR #20 is deployed: before PR #20, the compose file does not read it. **PR #20 must run
    with this value before any app uses the Netlify route.** Otherwise the API sees every shop as Netlify's IP and its
    per-IP rate limit locks shops out of OTP and login.
+
+   **The backup holds every secret.** Delete it (`rm ~/zaypos/.env.bak-<date>`) once PR #20 has been deployed and the
+   API is healthy with the new `.env`.
 4. Clear the clipboard: `pbcopy </dev/null`.
 
 The proxy trims whitespace from `EDGE_PROXY_SECRET`, so a value pasted with a trailing newline still matches the server's.
 
-Never paste the secret into chat, git, a ticket or a shell command line.
+Never paste the secret into chat, git, a ticket or a shell command line. The fingerprint is safe to share.
 
 **5. Deploy.** Env var changes take effect on the next deploy.
 ```bash
@@ -97,7 +110,9 @@ Each production deploy costs 15 credits on the credit plans, so deploy only when
 
 ## Rotating the secret
 
-1. Make a new value.
+Same safety rules as step 4: command first, then the secret; length and fingerprint checked on both sides; back up `.env`.
+
+1. Make a new value (step 4.1).
 2. Server: `EDGE_PROXY_SECRETS=<old>,<new>`, then restart the API.
 3. Netlify: replace `EDGE_PROXY_SECRET`, then `deploy --prod`.
 4. Server: `EDGE_PROXY_SECRETS=<new>`, then restart the API.
