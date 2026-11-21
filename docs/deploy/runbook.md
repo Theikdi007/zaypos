@@ -298,6 +298,22 @@ sudo fail2ban-client status sshd          # banned SSH attackers
 | `JWT_SIGNING_KEY` | change in `.env`, re-release. Every phone must sign in again with its PIN on the next sync |
 | `SMSPOH_TOKEN`, R2 keys | create the new one, put it in `.env`, re-release (R2 backup keys: no re-release needed), then revoke the old one |
 | TLS certificate | nothing to do: Caddy renews it about 30 days before it expires (needs 80 or 443 open, §1.2). Check: `openssl s_client -connect api.zaypos.app:443 -servername api.zaypos.app </dev/null 2>/dev/null \| openssl x509 -noout -dates` |
+| `EDGE_PROXY_SECRET` (Netlify) / `EDGE_PROXY_SECRETS` (server) | new value to the clipboard only, length and SHA-256 fingerprint printed: `openssl rand -base64 48 \| tr -d '/+=\n' \| cut -c1-48 \| tr -d '\n' \| pbcopy && pbpaste \| wc -c && pbpaste \| shasum -a 256 \| cut -c1-8`. Must print `48`. Keep it in the password manager. On the server, run the `read -rs` command **first** and only then copy the secret (copying a command overwrites the clipboard). Check that `.env` ends with a newline, and that length and fingerprint match on both sides. Rotate in four steps so no request is ever refused: [edge-proxy-netlify/README.md → step 4 and Rotating the secret](../../edge-proxy-netlify/README.md#rotating-the-secret). Delete `.env.bak-<date>` once the API runs healthy with the new `.env` |
+
+## 7a. Netlify edge proxy (route 1): plan limits
+
+The app's first route to the API is the Netlify Edge Function in `edge-proxy-netlify/`. The setup and rules are in its
+README, and the numbers in [fallback-routes.md → Request budget](fallback-routes.md#request-budget).
+
+| What | Number |
+|---|---|
+| Free plan | 300 credits a month, hard limit. **The site pauses when they run out**, so every shop falls back to the next route |
+| Free plan capacity | about **85 average single-device shops** today, about **140 after the sync request changes**. Fewer with busy or multi-device shops |
+| **Move to Personal ($9 a month, 1000 credits)** | at about **60 shops**, before reaching the limit. Also the protection against Free being changed or removed (Netlify agreement §5.1) |
+| Visitor access | **Must be Public.** New Netlify projects start Private: a Netlify login in front of every request, so every phone request fails. Set in project → Manage; check `/_proxy/health` answers `{"status":"ok"}` from a phone with no login (README step 3b) |
+| Each production deploy | **15 credits**. Deploy the proxy only when its code or secret changes; never "just to check" (use `netlify dev` locally, README → Test) |
+
+Check: Netlify → Team → Usage, weekly during the pilot, then on the monthly checklist (§8).
 
 ## 8. Monthly checklist (about 15 minutes)
 
@@ -312,3 +328,5 @@ First Monday of the month, as deploy: `ssh deploy@<ip>`, then `cd ~/zaypos`. Wri
 - [ ] **Disk.** `df -h /` has more than 10 GB free. `docker system df`; old images: `docker image prune`.
 - [ ] **Reboot pending?** `test -f /var/run/reboot-required && echo yes`. Unattended upgrades reboot at 04:00
       Myanmar time on their own; "yes" for days means that is not happening.
+- [ ] **Netlify credits** (§7a). Netlify → Team → Usage: last month's credits and this month so far. On Free, more than
+      200 credits a month, or about 60 shops, means move to Personal now.

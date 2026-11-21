@@ -1,0 +1,4 @@
+# Deployed on its own with the Netlify CLI from this folder (README.md). The repo is NOT connected to Netlify.
+[build]
+  publish = "public"          # never served: the edge function answers every path
+  edge_functions = "netlify/edge-functions"

@@ -2,6 +2,148 @@
 
 Status: **plan only. No cloud resource created.** Evidence: [reachability.md](reachability.md). IPs masked as there.
 
+> **2026-11-21: App Engine is blocked by billing, not by the network.** Google Cloud's billing country list has no Myanmar,
+> and we won't pick another country (a mismatch could suspend `zaypos-437e5`, which holds Google Sign-In). The App Engine
+> design below is kept for reference. The current proposal is [Plan B](#plan-b-no-google-cloud-billing).
+
+## Plan B: no Google Cloud billing
+
+Evidence: [reachability.md → proxy-host candidates](reachability.md#proxy-host-candidates-without-google-cloud-billing-phone-r-adb-curl-2026-11-21).
+Terms and limits were checked on the providers' own pages on 2026-11-21. Lines marked *unverified* must be checked when signing up.
+
+### Candidates
+
+| Host | All 3 networks? | Latency (connect / TLS) | Free tier | Commercial use on free | Card | Fit for the proxy |
+|---|---|---|---|---|---|---|
+| **Netlify** Edge Function | ✅ | 0.05–0.3 / 0.13–0.4 s | 300 credits a month. Requests cost 2 credits per 10k (Edge Functions count as requests, not compute), bandwidth 20 per GB, a production deploy 15. **The site pauses when credits run out** (no auto-recharge on Free). | **Yes** (see below) | Free: none. Personal ($9 a month): yes | Good: sees `Authorization`, all methods, status passthrough, `context.ip` for the phone IP |
+| **Render** Free web service (container) | ✅ | 0.04–0.24 / 0.11–0.40 s | 750 instance hours a month. **Sleeps after 15 min idle, ≈1 min to wake.** Free bandwidth is capped; with no card, going over suspends the service for the month | Paid: yes; Free: *unverified* | Free: none (Render's own pages) | Runs PR #20's Go proxy almost unchanged |
+| **Railway** Free (container) | ✅ | 0.06–0.19 / 0.14–0.31 s | 30-day trial with $5, then Free: $1 of credit a month, 1 project, 0.5 GB RAM. Services sleep after a few minutes idle. Stops when the $1 runs out | *unverified* | **None**, neither trial nor Free (Railway docs) | Runs PR #20's Go proxy almost unchanged |
+| Fastly Compute | ✅ | 0.04–0.20 / 0.13–0.41 s | Free developer account; limits not published | *unverified* | **Required** | Good (Wasm; JS/Go SDK) |
+| Vercel | ✅ | 0.05–0.09 / 0.12–0.32 s | Hobby: 1M invocations | **No:** Hobby is "personal or non-commercial use" only | Pro $20 per seat: yes | Bodies capped at 4.5 MB |
+| Apps Script | ✅ (Google front end) | 0.06–0.19 / 0.15–0.5 s, plus a 302 every call | UrlFetch 20k a day (gmail) | *unverified* | No | **No:** can't read request headers (`Authorization`), GET/POST only, can't set status or headers |
+| Azure Front Door / App Service | ✅ / flaky TLS | Front Door total ≈ 4 s | Front Door: no free tier. App Service F1: "not supported for production" | | Yes | Slow or flaky |
+| Deno Deploy | ✅ | TLS up to 1.5 s | | | | Shutting down ~April 2027 |
+| Cloudflare Workers/Pages, bunny.net, CloudFront, GitHub Pages | ❌ | | | | | Blocked on one or more networks |
+
+### Decision (owner, 2026-11-21)
+
+1. **Route 1: Netlify Edge Function**, in [`edge-proxy-netlify/`](../../edge-proxy-netlify). It is deployed on its own with the
+   Netlify CLI; the repo is not connected. It is a TypeScript port of PR #20's Go handler with the same rules, and
+   **the API side of PR #20 (`EdgeProxy.cs`, `EDGE_PROXY_SECRETS`) is reused unchanged**. The secret is the Netlify environment
+   variable `EDGE_PROXY_SECRET`, set by the owner in Netlify's UI, never in git, chat or logs.
+2. **Route 2: Render Free (owner decision 2026-11-21), after the beta starts.** Tracked as a follow-up task: see
+   [Follow-up tasks](#follow-up-tasks). It runs PR #20's Go proxy. Render and Railway both passed the network probe on all
+   three networks (made-up name on the provider's edge) and both start without a card; Railway is the alternative if Render
+   fails.
+   - **Free instances sleep, so a cold backup needs a ~1 min (Render) wake-up.** The app's switching rule therefore needs one
+     addition: when it fails over to route 2, it first sends `GET /_proxy/health` with a 70 s timeout (safe to repeat), and
+     only then the real request. Otherwise the first real request after a switch would hit the receive timeout. Since that
+     request was already sent, it must not be replayed.
+   - **Go changes:**
+     - read the secret from an env var when `SECRET_NAME` is empty;
+     - make the phone-IP header configurable (`CLIENT_IP_HEADER`, *unverified* which header Render or Railway sets and
+       whether a client can forge it; if none is trustworthy, send no client IP);
+     - add a Dockerfile.
+3. **Last: direct** `api.zaypos.app`.
+4. App route order and switching rules: as in [Route order in the app](#route-order-in-the-app), with
+   `<site>.netlify.app` first, then route 2 (once it exists), then direct.
+
+### Netlify terms and limits (checked 2026-11-21)
+
+- **Commercial use on Free: allowed.**
+  - Netlify's [web applications page](https://www.netlify.com/solutions/web-applications/): "Netlify's Free plan has no
+    restriction on commercial use".
+  - The [Self-Serve Subscription Agreement](https://www.netlify.com/legal/self-serve-subscription-agreement/) (updated
+    2026-11-04) has no commercial-use restriction. Its §2.5(a) only forbids reselling the Services "as a standalone service,
+    except that Customer may use the Services to build, deploy, and host sites and applications for third parties".
+  - The [AUP](https://www.netlify.com/legal/acceptable-use-policy/) bans "operating open proxies or VPNs". Ours forwards only to
+    our own API, so it is a closed proxy.
+- **Free tier can change or end.** Agreement §4.1: "Netlify may pause the affected Services if that use exceeds the capacity
+  included in the Free Usage Tier". §5.1: Netlify "may suspend, disable, or remove any site or application on the Free Usage
+  Tier at any time, with or without notice", with no SLA. This is the main reason to have route 2 and to move to a paid plan
+  before shops depend on it.
+- **[Edge Functions limits](https://docs.netlify.com/build/edge-functions/limits/):**
+  - 50 ms CPU per request. Time spent waiting for the upstream does not count.
+  - 512 MB memory and 20 MB code.
+  - **40 s response header timeout.** The proxy gives the upstream 35 s, then answers 502.
+- **Body size limits: not stated** on the Edge Functions limits page. The proxy caps bodies at 32 MB (same as Caddy). The real
+  limit is measured against the live site (step 7, a 10 MB and a 30 MB POST to `/health`).
+- **Billing:** [Edge Functions count as web requests](https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/how-credits-work/),
+  not compute. [Pricing](https://www.netlify.com/pricing/): web requests 2 credits per 10k, bandwidth 20 per GB, production
+  deploy 15 each. Free 300 credits a month (hard limit), Personal 1000.
+
+### Request budget
+
+From the app's sync code (`mobile/lib/core/sync/sync_lifecycle.dart`, `sync_engine.dart`, `core/api/api_client.dart`;
+server `AccessTokenMinutes: 15`):
+
+| What the app does | Trigger | Requests per device per day |
+|---|---|---|
+| Pull (`GET /sync/pull`, +1 per 500 changed rows) | timer every **5 min** while in the foreground; 12 h open | 144 |
+| Push + pull | each committed unit (sale, stock change, customer edit), 2 s debounce; 100 units a day | 200 |
+| Pull | each return to the foreground (~30 a day) and each network-back (~10) | 40 |
+| Token refresh | access token lasts 15 min, refreshed 60 s before expiry while requests run | 48 |
+| `/sync/limits` per unlock, devices, sign-in, presets | rare | ~5 |
+| Push retries | backoff 5 s / 30 s / 2 min / 10 min, only while pushes fail | ~0 normally |
+| **Total** | | **≈ 440** (busy shop with 300 units a day: ≈ 840) |
+
+**Assumptions to replace with real numbers:** 12 h a day in the foreground, 100 units a day, 30 resumes, and about 2 KB per
+request with headers. Netlify's Usage page gives the real figures after the first week.
+
+**Credits per device per month:** 13.2k requests = 2.6 credits, plus about 26 MB = 0.5 credits, so **≈ 3.1 credits** (busy:
+≈ 6). Production deploys cost 15 each; budget 2 a month = 30.
+
+| Shops (1 device each) | Credits a month | Free plan (300) |
+|---|---|---|
+| 20 average | 62 + 30 deploys = **92** | 31 % ✅ |
+| 20 busy, or 20 × 2 devices | 120–124 + 30 = **≈ 154** | 51 % ✅ |
+| 100 average | 310 + 30 = **340** | **113 % ❌ pauses in week 4** |
+| 100 busy | ≈ 600 + 30 = **630** | ❌ (Personal's 1000: 63 %) |
+
+**Conclusion:** Free fits the pilot (20 shops) with room. The limit is about **85 average single-device shops**, and fewer
+with busy or multi-device shops. Above ~60 shops, move to Personal ($9 a month); that is the plan regardless, because of §5.1.
+
+**Sync changes (separate PR, proposed, not started)** would cut about 40 % of requests:
+1. **Skip the timer pull** if a cycle finished less than 5 min ago. In busy hours the sales' own cycles already pull.
+2. **Idle timer of 15 min** after 30 min without a local change (back to 5 min on the next change or on resume).
+   - Trade-off: another device's change can take up to 15 min to show on an idle phone.
+   - Pull-to-refresh stays instant.
+3. **Skip the resume pull** if the last sync is less than 60 s old.
+
+Leave the debounce and token lifetime as they are; the token lifetime is a security setting, not a sync one.
+
+Estimate: ≈ 440 → ≈ 260 requests a day, so the Free plan would hold about 140 average shops.
+
+### Risks
+
+- Netlify serves from shared addresses (13.215.x.x today, AWS Singapore). Another shop's resolver may get other Netlify
+  addresses, and those could be in a blocked range. Re-run the probe against the real site (step 7) on all networks and
+  phones, plus U9 and Mytel.
+- Blocking changes per operator and per day (CloudFront: MBT ✗, Atom/MPT ✓). Keep a second provider (route 2) in the list.
+- Netlify Free can be paused (credits) or removed (§5.1) without notice. Route 2 plus the Usage page alert cover this; Personal
+  removes the credit pause.
+- A card for Personal: whether a Myanmar-issued card is accepted is *unverified*. Try it on the upgrade page before relying on
+  it. A rejected card there can't affect `zaypos-437e5`.
+
+### Follow-up tasks
+
+- [ ] **Route 2 on Render Free (after the beta starts).**
+  1. Go proxy changes:
+     - the secret comes from an env var when `SECRET_NAME` is empty;
+     - `CLIENT_IP_HEADER` is configurable (first check which header Render sets and that a client can't forge it; if none
+       is trustworthy, send no client IP);
+     - add a Dockerfile.
+
+     Tests as in `main_test.go`.
+  2. The owner creates the Render account (no card) and the web service from `edge-proxy/` only, not the whole repo. The
+     secret is a Render env var, the same value as Netlify's, or a second value in `EDGE_PROXY_SECRETS`.
+  3. Run `probe-site.sh` against `<name>.onrender.com` on MBT, Atom and MPT, and on phones X, i and R. Include a cold-start
+     run after 20 min idle and note the wake-up time.
+  4. App: add it as the second route. On a switch to it, call `GET /_proxy/health` with a 70 s timeout before the first
+     real request (Free sleeps after 15 min, ≈ 1 min to wake). Never replay a request that was already sent.
+- [ ] **App-side route switching** (Route order in the app, below), with the Netlify URL first and direct last.
+- [ ] **U9 and Mytel** rows with friends' SIMs, against the real Netlify site.
+
 ## Why
 
 Phone R (Redmi Note 13 Pro, Android 16), 2026-11-20, with no VPN:
