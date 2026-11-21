@@ -92,6 +92,55 @@ Functions and API Gateway URLs.
 How R is probed (Wi-Fi/data switched by hand, everything else over adb; output IPs masked to two octets): the scripts push to
 `/data/local/tmp` and run `curl -m 10–12 --connect-timeout 7–8` against each host, plus `ping -c2` to the API.
 
+### Proxy-host candidates without Google Cloud billing (phone R, adb curl, 2026-11-21)
+
+Why: App Engine and Cloud Functions need billing on `zaypos-437e5`, and Google Cloud's billing country list has no Myanmar.
+We will **not** pick another country (a card/country mismatch could suspend the project that holds Google Sign-In). So Plan B
+is a host outside Google Cloud.
+
+Setup: VPN off and checked over adb (no `VPN` network agent, no always-on VPN). MBT = Wi-Fi only (09:28). Atom = LTE only,
+APN `ATOM` (09:31). MPT = HSPA only, APN `mptnet` (09:33). Script: `probe4.sh` in `/data/local/tmp`. It sends 3 requests to
+each host that answers and retries a failing host once. Connect timeout is 8 s, total timeout 12 s.
+
+Cells: `OK` + median **TCP connect / TLS done** in seconds, or the failure.
+- **Made-up name:** a made-up subdomain on the provider's shared domain, so the provider's own edge answers 404/500. This
+  stands for any site we would deploy there.
+- **3rd-party site:** a public site on that platform (random names don't resolve there). It proves the address range is
+  reachable, not the exact range our site would get.
+
+| Host (what was probed) | Test name | MBT Wi-Fi | Atom 4.5G | MPT 3G | All 3? |
+|---|---|---|---|---|---|
+| control: google.com | | OK 0.08 / 0.15 | OK 0.36 / 0.44 | OK 0.11 / 0.26 (one 5 s connect) | ✅ |
+| control: api.zaypos.app (Vultr) | | **refused** | **refused** | **refused** | ❌ |
+| Apps Script `script.google.com` | real | OK 0.07 / 0.15 (302) | OK 0.06 / 0.16 | OK 0.19 / 0.31 | ✅ |
+| Apps Script `script.googleusercontent.com` | real | OK 0.05 / 0.12 | OK 0.07 / 0.50 (one 3.2 s TLS) | OK 0.09 / 0.46 | ✅ |
+| Vercel `*.vercel.app` (216.198 / 64.29) | made-up name | OK 0.05 / 0.12 | OK 0.05 / 0.17 | OK 0.09 / 0.32 | ✅ |
+| Netlify `*.netlify.app` (13.215, AWS Singapore) | made-up name | OK 0.05 / 0.13 | OK 0.28 / 0.38 (one 3.3 s) | OK 0.16 / 0.27 | ✅ |
+| Deno Deploy `*.deno.dev` | 3rd-party site | OK 0.28 / 0.65 | OK 0.22 / 1.51 | OK 0.27 / 0.58 | ✅ (slow TLS) |
+| Cloudflare Pages `pages.dev` | apex | **reset** | **reset** | **reset** | ❌ |
+| Cloudflare Workers `workers.dev` | apex | **reset** | **reset** | **reset** | ❌ |
+| AWS CloudFront `*.cloudfront.net` | 3rd-party site | **refused** | OK 0.48 / 0.59 (one 5 s) | OK 0.07 / 0.17 | ❌ |
+| Azure App Service `*.azurewebsites.net` (US West) | 3rd-party site | OK 0.39 / 0.95, 1 of 3 TLS error | OK 0.80 / 1.32, 1 of 3 TLS error | OK 0.25 / 0.83 | ⚠️ flaky |
+| Azure Front Door `*.azurefd.net` | made-up name | OK 0.27 / 1.35, total ~4 s | OK 0.44 / 0.61 | OK 0.17 / 0.38, total ~4.4 s | ✅ (slow) |
+| Fastly Compute `*.edgecompute.app` | made-up name | OK 0.06 / 0.13 | OK 0.04 / 0.15 | OK 0.20 / 0.41 | ✅ |
+| Fastly CDN (`pypi.org`) | 3rd-party site | OK 0.06 / 0.14 | OK 0.06 / 0.14 | OK 0.10 / 0.22 | ✅ |
+| bunny.net `*.b-cdn.net` | made-up name | **timeout** | **timeout** | **timeout** | ❌ |
+| Render `*.onrender.com` | made-up name | OK 0.05 / 0.11 | OK 0.04 / 0.12 | OK 0.24 / 0.40 | ✅ |
+| Fly.io `*.fly.dev` | 3rd-party site | OK 0.05 / 0.11 | OK 0.12 / 0.21 | **reset**, then OK 0.13 / 0.25 | ⚠️ |
+| Railway `*.up.railway.app` | made-up name | OK 0.11 / 0.18 | OK 0.06 / 0.14 | OK 0.19 / 0.31 | ✅ |
+| Hugging Face `*.hf.space` | made-up name | OK 0.26 / 0.58 | OK 0.29 / 0.64 | OK 0.29 / 0.62 | ✅ |
+| GitHub Pages `*.github.io` | made-up name | OK 0.06 / 0.12 (one 4 s) | OK 0.07 / 0.13 | **timeout** | ❌ |
+| AWS Singapore (`lambda.ap-southeast-1.amazonaws.com`) | AWS endpoint | OK 0.05 / 0.12 | OK 0.06 / 0.21 | OK 0.09 / 0.22 | ✅ |
+
+**Reading (11-21):** the block is per provider, not "all hosting".
+- **Blocked on all three:** Vultr, Cloudflare, bunny.net, and (11-20) Google Cloud's customer ranges.
+- **Blocked on one network:** CloudFront (MBT) and GitHub Pages (MPT). Fly got one reset on MPT.
+- **The lists differ per operator and change between days,** so the app needs **two routes on different providers** in its
+  list, and the probe should be re-run before each beta.
+
+Not covered yet: U9, Mytel, phones X and i, and a VPN-on row for these hosts. The proposal is in
+[fallback-routes.md](fallback-routes.md#plan-b-no-google-cloud-billing).
+
 A row is **covered** when at least one column works on every phone. QA round 21 starts only when every row is covered with the
 app build that has the fallback.
 

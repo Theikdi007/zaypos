@@ -1,0 +1,5 @@
+# Netlify CLI state (site link) and local env files: never committed. The real secret lives only in Netlify's UI.
+.netlify/
+.env
+.env.*
+node_modules/
