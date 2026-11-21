@@ -50,7 +50,8 @@ export async function handle(request: Request, opts: ProxyOptions): Promise<Resp
   if (url.pathname === "/_proxy/health") {
     return json(200, { status: "ok" });
   }
-  const secret = opts.secret ?? "";
+  // Trimmed: a value pasted with a trailing newline (macOS `cut` adds one) must equal the server's EDGE_PROXY_SECRETS.
+  const secret = (opts.secret ?? "").trim();
   if (secret.length < MIN_SECRET_LENGTH) {
     log(`config: EDGE_PROXY_SECRET missing or shorter than ${MIN_SECRET_LENGTH} chars`);
     return problem(503, "edge_not_configured");

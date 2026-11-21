@@ -59,18 +59,31 @@ npx netlify-cli@latest sites:create       # manual site, no Git. Name: something
 This links the folder to the site (`.netlify/state.json`, git-ignored). The site URL is `https://<name>.netlify.app`.
 
 **4. The secret.**
-1. Make the secret and copy it **to the clipboard only**; it is never printed:
+1. Make the secret, copy it **to the clipboard only**, and print its length, never its value:
    ```bash
-   openssl rand -base64 32 | tr -d '\n' | pbcopy
+   openssl rand -base64 48 | tr -d '/+=\n' | cut -c1-48 | tr -d '\n' | pbcopy && pbpaste | wc -c
    ```
-2. Netlify UI: Site → Site configuration → Environment variables → **Add a variable**:
-   - Key `EDGE_PROXY_SECRET`
-   - Value: paste
-   - Scopes: **Functions** (Edge Functions read it from there). If your plan shows **"Contains secret values"**, tick it.
-   - Deploy contexts: Production.
-3. Server: put the same value in `deploy/.env` on the API server as `EDGE_PROXY_SECRETS=<value>`, then restart the API (PR #20).
-   Until then, requests still work but are counted as Netlify's IP.
+   It must print `48`: letters and digits only. The last `tr -d '\n'` matters because macOS `cut` adds a newline. Save it
+   in the password manager as "ZayPOS EDGE_PROXY_SECRET".
+2. Netlify UI: project → **Manage → Keys and secrets** (older UI: Site configuration → Environment variables) →
+   **Add a variable**:
+   - Key `EDGE_PROXY_SECRET` (singular)
+   - Mark it **Secret** if offered
+   - Scopes: at least **Functions** and **Runtime** (Builds does no harm: this site has no build)
+   - Same value for all deploy contexts, paste with ⌘V
+3. Server (VPN on from Myanmar; `ssh deploy@<server>`, `cd ~/zaypos`):
+   1. Back up `.env`.
+   2. Check there's no `EDGE_PROXY_SECRETS=` line yet.
+   3. Append the line without the value reaching the screen or shell history:
+      `read -rs S && printf 'EDGE_PROXY_SECRETS=%s\n' "$S" >> .env && unset S` (paste with ⌘V, then Enter).
+   4. Check its length: `grep '^EDGE_PROXY_SECRETS=' .env | cut -d= -f2- | tr -d '\n' | wc -c` → `48`.
+
+   No restart is needed until PR #20 is deployed: before PR #20, the compose file does not read it. **PR #20 must run
+   with this value before any app uses the Netlify route.** Otherwise the API sees every shop as Netlify's IP and its
+   per-IP rate limit locks shops out of OTP and login.
 4. Clear the clipboard: `pbcopy </dev/null`.
+
+The proxy trims whitespace from `EDGE_PROXY_SECRET`, so a value pasted with a trailing newline still matches the server's.
 
 Never paste the secret into chat, git, a ticket or a shell command line.
 

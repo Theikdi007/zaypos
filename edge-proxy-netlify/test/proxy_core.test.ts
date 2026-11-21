@@ -117,6 +117,15 @@ test("a missing or short secret refuses to forward (503), so shops never share o
   }
 });
 
+test("a secret stored with surrounding whitespace or a trailing newline is sent trimmed", async () => {
+  const up = fakeUpstream();
+  await handle(new Request("https://e.netlify.app/health"), { secret: `${SECRET}\n`, clientIp: "203.0.113.7", fetch: up.fetchImpl, log: quiet });
+  assert.equal(up.calls[0].headers.get("x-zaypos-edge"), SECRET);
+  const short = fakeUpstream();
+  const res = await handle(new Request("https://e.netlify.app/health"), { secret: `  ${"s".repeat(31)}\n`, clientIp: "203.0.113.7", fetch: short.fetchImpl, log: quiet });
+  assert.equal(res.status, 503, "whitespace does not count towards the 32-char minimum");
+});
+
 test("upstream down gives 502 without details, and the log has no secret, token or query", async () => {
   const logs: string[] = [];
   const failing = (async () => { throw new TypeError("connect ECONNREFUSED 45.32.1.2:443"); }) as unknown as typeof fetch;

@@ -298,7 +298,7 @@ sudo fail2ban-client status sshd          # banned SSH attackers
 | `JWT_SIGNING_KEY` | change in `.env`, re-release. Every phone must sign in again with its PIN on the next sync |
 | `SMSPOH_TOKEN`, R2 keys | create the new one, put it in `.env`, re-release (R2 backup keys: no re-release needed), then revoke the old one |
 | TLS certificate | nothing to do: Caddy renews it about 30 days before it expires (needs 80 or 443 open, §1.2). Check: `openssl s_client -connect api.zaypos.app:443 -servername api.zaypos.app </dev/null 2>/dev/null \| openssl x509 -noout -dates` |
-| `EDGE_PROXY_SECRET` (Netlify) / `EDGE_PROXY_SECRETS` (server) | in four steps, so no request is ever refused: [edge-proxy-netlify/README.md → Rotating the secret](../../edge-proxy-netlify/README.md#rotating-the-secret) |
+| `EDGE_PROXY_SECRET` (Netlify) / `EDGE_PROXY_SECRETS` (server) | new value, to the clipboard only, length printed (must be `48`): `openssl rand -base64 48 \| tr -d '/+=\n' \| cut -c1-48 \| tr -d '\n' \| pbcopy && pbpaste \| wc -c`. Put it in the password manager, then rotate in four steps so no request is ever refused: [edge-proxy-netlify/README.md → Rotating the secret](../../edge-proxy-netlify/README.md#rotating-the-secret) |
 
 ## 7a. Netlify edge proxy (route 1): plan limits
 
