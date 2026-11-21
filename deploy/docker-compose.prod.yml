@@ -97,6 +97,9 @@ services:
       AllowedHosts: "${API_DOMAIN:?set API_DOMAIN in .env};localhost"
       # Only Caddy may set X-Forwarded-For / -Proto (Caddy replaces whatever a client sent with the real peer).
       ForwardedHeaders__TrustedNetworksOverride: "172.30.0.10/32"
+      # App Engine edge proxy (docs/deploy/fallback-routes.md): the secret(s) it sends in X-ZayPOS-Edge. Empty = no
+      # edge proxy (its headers are stripped, never believed). Two during a rotation: current,next.
+      EdgeProxy__Secrets: ${EDGE_PROXY_SECRETS:-}
       # Subscription screenshots (optional; without them those endpoints answer 503).
       Storage__R2__AccountId: ${APP_R2_ACCOUNT_ID:-}
       Storage__R2__AccessKeyId: ${APP_R2_ACCESS_KEY_ID:-}

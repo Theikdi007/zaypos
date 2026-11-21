@@ -112,6 +112,8 @@ public static class DeploymentExtensions
         if (!forwarding.Enabled || !forwarding.Networks().Any())
             errors.Add("ForwardedHeaders: set Enabled=true and TrustedNetworksOverride to Caddy's address (docker-compose).");
 
+        if (EdgeProxy.ConfigError(config) is { } edge) errors.Add(edge);
+
         if (errors.Count > 0)
             throw new InvalidOperationException("Unsafe production configuration:\n - " + string.Join("\n - ", errors));
     }

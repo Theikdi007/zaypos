@@ -1,0 +1,16 @@
+# ZayPOS edge proxy on App Engine standard (docs/deploy/fallback-routes.md).
+# NO SECRET IN THIS FILE: only the secret's *name*. The value lives in Secret Manager (and the server's .env).
+runtime: go123            # newest Go runtime App Engine offers; code needs Go >= 1.23 (go.mod)
+instance_class: F1
+automatic_scaling:
+  min_instances: 0
+  max_instances: 2        # hard ceiling on instance cost (with the $10/month budget alert)
+  max_concurrent_requests: 80
+  target_cpu_utilization: 0.8
+env_variables:
+  UPSTREAM: https://api.zaypos.app
+  SECRET_NAME: projects/zaypos-437e5/secrets/edge-proxy-secret/versions/latest
+handlers:
+  - url: /.*
+    script: auto
+    secure: always        # http → https redirect

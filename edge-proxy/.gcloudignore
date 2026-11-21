@@ -1,0 +1,3 @@
+.gcloudignore
+*_test.go
+README.md

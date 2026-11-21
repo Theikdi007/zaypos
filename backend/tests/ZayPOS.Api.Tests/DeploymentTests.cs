@@ -238,6 +238,20 @@ public class DeploymentTests(SqlServerFixture sql)
     }
 
     [Theory]
+    [InlineData("short")]
+    [InlineData("edge-secret-0123456789-abcdefghijklmnop,short")] // the second of a rotation pair too
+    public async Task Production_refuses_a_short_edge_proxy_secret(string secrets)
+    {
+        var (_, app) = await MigratedDatabase();
+        var settings = ProductionSettings(app);
+        settings["EdgeProxy:Secrets"] = secrets;
+        await using var api = new ApiFactory(app, settings: settings, environment: "Production");
+
+        var start = () => api.CreateClient();
+        start.Should().Throw<InvalidOperationException>().WithMessage("*EdgeProxy:Secrets*");
+    }
+
+    [Theory]
     [InlineData("")]
     [InlineData(" , ")]
     public async Task Production_refuses_to_start_without_google_client_ids(string clientIds)
