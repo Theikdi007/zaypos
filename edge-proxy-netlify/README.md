@@ -58,6 +58,14 @@ npx netlify-cli@latest sites:create       # manual site, no Git. Name: something
 ```
 This links the folder to the site (`.netlify/state.json`, git-ignored). The site URL is `https://<name>.netlify.app`.
 
+**3b. Make the site public (required).** New Netlify projects are **private by default**, which means a Netlify login in
+front of every request. Phones can't get through that, so every request would fail.
+1. Netlify UI: project → **Manage** → switch the project's visitor access from **Private** to **Public**.
+2. Check after the deploy, from a phone with no Netlify login (incognito, VPN off): `https://<name>.netlify.app/_proxy/health`
+   must answer `{"status":"ok"}`, not a Netlify login page or 401.
+
+Re-check this after any Netlify plan or team change.
+
 **4. The secret.** The clipboard holds the secret during these steps. **Copying a command from a doc or chat overwrites
 it**: so run (or type) each command first, and copy the secret from the password manager only when the command waits for
 it.

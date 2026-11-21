@@ -310,6 +310,7 @@ README, and the numbers in [fallback-routes.md → Request budget](fallback-rout
 | Free plan | 300 credits a month, hard limit. **The site pauses when they run out**, so every shop falls back to the next route |
 | Free plan capacity | about **85 average single-device shops** today, about **140 after the sync request changes**. Fewer with busy or multi-device shops |
 | **Move to Personal ($9 a month, 1000 credits)** | at about **60 shops**, before reaching the limit. Also the protection against Free being changed or removed (Netlify agreement §5.1) |
+| Visitor access | **Must be Public.** New Netlify projects start Private: a Netlify login in front of every request, so every phone request fails. Set in project → Manage; check `/_proxy/health` answers `{"status":"ok"}` from a phone with no login (README step 3b) |
 | Each production deploy | **15 credits**. Deploy the proxy only when its code or secret changes; never "just to check" (use `netlify dev` locally, README → Test) |
 
 Check: Netlify → Team → Usage, weekly during the pilot, then on the monthly checklist (§8).
