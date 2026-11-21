@@ -67,7 +67,9 @@ class SyncEngine {
     this.debounce = const Duration(seconds: 2),
     this.pullLimit = 500,
   })  : clock = clock ?? (() => DateTime.now().toUtc()),
-        enabled = true;
+        enabled = true {
+    _activeAt = this.clock(); // a just-unlocked shop counts as active (§5.1)
+  }
 
   /// Demo shop / signed out: every call is a no-op.
   SyncEngine.disabled()
@@ -102,6 +104,17 @@ class SyncEngine {
 
   static Duration backoffFor(int failures) => backoff[(failures.clamp(1, backoff.length)) - 1];
 
+  /// Timer and resume pulls are skipped when a recent pull already covered them (§5.1, fewer requests through the
+  /// edge proxy). The ages are a little under the 5 / 15 min marks so a tick that lands right on schedule still pulls.
+  static const activePullAge = Duration(minutes: 4, seconds: 30);
+  static const idlePullAge = Duration(minutes: 14, seconds: 30);
+
+  /// No committed unit, resume or manual sync for this long = idle.
+  static const idleAfter = Duration(minutes: 30);
+
+  /// Returning to the foreground pulls only if the last pull is older than this.
+  static const resumePullAge = Duration(seconds: 60);
+
   SyncSnapshot _snapshot = const SyncSnapshot();
   final _changes = StreamController<SyncSnapshot>.broadcast();
   Future<void>? _running;
@@ -111,11 +124,45 @@ class SyncEngine {
   DateTime? _pushAfter;
   bool _disposed = false;
 
+  /// Start of the last cycle whose pull completed (null = none yet). The start, not the end: what the server had
+  /// after that moment may not have been pulled.
+  DateTime? _pulledAt;
+
+  /// Last local change (committed unit), resume or manual sync.
+  DateTime? _activeAt;
+
   SyncSnapshot get snapshot => _snapshot;
   Stream<SyncSnapshot> get changes => _changes.stream;
 
   /// When automatic pushes resume after failures (null = now).
   DateTime? get pushAfter => _pushAfter;
+
+  /// No local change, resume or manual sync for [idleAfter].
+  bool get idle => _activeAt == null || !clock().isBefore(_activeAt!.add(idleAfter));
+
+  /// The 5-minute foreground timer (§5.1): every tick while active, every third tick (15 min) when idle, and only
+  /// when no other cycle pulled in the meantime. Units waiting to go up always run (unless backing off).
+  Future<void> onTimer() => _syncIfDue(idle ? idlePullAge : activePullAge);
+
+  /// Back in the foreground: counts as activity; pulls unless the last pull is under a minute old.
+  Future<void> onResume() {
+    if (!enabled || _disposed) return Future.value();
+    _activeAt = clock();
+    return _syncIfDue(resumePullAge);
+  }
+
+  Future<void> _syncIfDue(Duration maxAge) async {
+    if (!enabled || _disposed) return;
+    final pulled = _pulledAt;
+    final stale = pulled == null || !clock().isBefore(pulled.add(maxAge));
+    if (stale || await _pushDue()) await syncNow();
+  }
+
+  /// A unit is waiting to go up and the backoff (if any) is over.
+  Future<bool> _pushDue() async {
+    if (_pushAfter != null && clock().isBefore(_pushAfter!)) return false;
+    return (await store!.nextBatch(1)).isNotEmpty;
+  }
 
   void _emit(SyncSnapshot s) {
     _snapshot = s;
@@ -127,7 +174,10 @@ class SyncEngine {
   /// waiting for the next timer). [manual] ignores the backoff.
   Future<void> syncNow({bool manual = false}) {
     if (!enabled || _disposed) return Future.value();
-    if (manual) _pushAfter = null;
+    if (manual) {
+      _pushAfter = null;
+      _activeAt = clock();
+    }
     final running = _running;
     if (running != null) {
       _again = true;
@@ -149,12 +199,14 @@ class SyncEngine {
   /// 2 s after a committed unit (debounced, §5.1).
   void scheduleSoon() {
     if (!enabled || _disposed) return;
+    _activeAt = clock();
     _debounceTimer?.cancel();
     _debounceTimer = Timer(debounce, () => unawaited(syncNow()));
   }
 
   Future<void> _cycle(bool manual) async {
     final store = this.store!;
+    final started = clock();
     _emit(_snapshot.copyWith(running: true));
     String? error;
     var online = true;
@@ -170,6 +222,7 @@ class SyncEngine {
       }
       if (online) {
         await _pull(initial: initial);
+        _pulledAt = started;
         if (initial) {
           await store.markInitialSyncDone();
           onInitialSyncDone?.call();

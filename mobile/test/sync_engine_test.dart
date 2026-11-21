@@ -547,6 +547,149 @@ void main() {
     });
   });
 
+  // ================================================================ when it runs (§5.1): fewer requests
+
+  group('timer and resume skip pulls a recent cycle already made', () {
+    Future<void> minutes(int m) async => now = now.add(Duration(minutes: m));
+
+    test('active: the 5-minute timer pulls on each tick, but not right after another pull', () async {
+      final e = engine();
+      await e.syncNow(); // unlock
+      expect(api.pullCursors, hasLength(1));
+
+      await e.onTimer(); // same moment: just pulled
+      expect(api.pullCursors, hasLength(1));
+
+      await minutes(5);
+      await e.onTimer();
+      expect(api.pullCursors, hasLength(2), reason: '5 min since the last pull');
+    });
+
+    test("a sale's own cycle counts: the next tick is skipped, the one after pulls", () async {
+      final e = engine();
+      await e.syncNow(); // t = 0
+      await minutes(3);
+      await sale();
+      await e.syncNow(); // the sale's cycle at t = 3 (push + pull)
+      expect((api.pushes.length, api.pullCursors.length), (1, 2));
+
+      await minutes(2);
+      await e.onTimer(); // t = 5: last pull 2 min ago
+      expect(api.pullCursors, hasLength(2));
+
+      await minutes(5);
+      await e.onTimer(); // t = 10: 7 min ago
+      expect(api.pullCursors, hasLength(3));
+    });
+
+    test('idle after 30 min without a change: the timer pulls every 15 min (every third tick)', () async {
+      final e = engine();
+      await e.syncNow();
+      for (var i = 0; i < 5; i++) {
+        await minutes(5);
+        await e.onTimer(); // t = 5 … 25, active: every tick pulls
+      }
+      expect(api.pullCursors, hasLength(6));
+      expect(e.idle, isFalse);
+
+      // t = 30 … 55: idle from t = 30 (30 min since unlock, no change). Last pull t = 25.
+      final pulledAt = <int>[];
+      for (var t = 30; t <= 55; t += 5) {
+        await minutes(5);
+        final n = api.pullCursors.length;
+        await e.onTimer();
+        if (api.pullCursors.length > n) pulledAt.add(t);
+      }
+      expect(e.idle, isTrue);
+      expect(pulledAt, [40, 55], reason: 'idle: one pull per 15 min');
+    });
+
+    test('a committed unit ends idle: the next 5-minute tick pulls again', () async {
+      final e = engine(debounce: const Duration(hours: 1)); // the debounced sync itself is not under test here
+      addTearDown(e.dispose);
+      await e.syncNow();
+      await minutes(40);
+      expect(e.idle, isTrue);
+
+      await sale();
+      e.scheduleSoon();
+      expect(e.idle, isFalse);
+      await e.onTimer(); // the unit is waiting: it goes up now, with a pull
+      expect((api.pushes.length, api.pullCursors.length), (1, 2));
+
+      await minutes(5);
+      await e.onTimer();
+      expect(api.pullCursors, hasLength(3), reason: 'active again: 5-minute pulls');
+    });
+
+    test('resume: pulls only if the last pull is over a minute old, and counts as activity', () async {
+      final e = engine();
+      await e.syncNow();
+      now = now.add(const Duration(seconds: 30));
+      await e.onResume();
+      expect(api.pullCursors, hasLength(1), reason: 'pulled 30 s ago');
+
+      now = now.add(const Duration(seconds: 31));
+      await e.onResume();
+      expect(api.pullCursors, hasLength(2));
+
+      await minutes(40);
+      expect(e.idle, isTrue);
+      await e.onResume();
+      expect(e.idle, isFalse);
+      expect(api.pullCursors, hasLength(3));
+    });
+
+    test('a unit waiting to go up runs on the tick even right after a pull; not while backing off', () async {
+      final e = engine();
+      await e.syncNow();
+      await sale(); // committed, but the debounced sync has not run
+      await e.onTimer();
+      expect(api.pushes, hasLength(1), reason: 'the outbox is not left waiting for freshness');
+
+      await sale();
+      api.pushErrors.add(const ApiError(503, 'server'));
+      await e.syncNow(); // push fails (the fake records the attempt) → backoff 5 s; the pull still runs
+      expect(e.pushAfter, isNotNull);
+      final pulls = api.pullCursors.length;
+      await e.onTimer();
+      expect((api.pushes.length, api.pullCursors.length), (2, pulls), reason: 'backing off and just pulled: nothing to do');
+
+      now = now.add(const Duration(seconds: 6));
+      await e.onTimer();
+      expect(api.pushes, hasLength(3), reason: 'backoff over: the unit goes up');
+      expect(await outbox(db), isEmpty);
+    });
+
+    test('a failed pull does not count: the next tick pulls again', () async {
+      final e = engine();
+      api.pullErrors[0] = const ApiError.network();
+      await e.syncNow();
+      expect(e.snapshot.online, isFalse);
+      await e.onTimer();
+      expect(api.pullCursors, hasLength(2), reason: 'no pull has completed yet');
+    });
+
+    test('manual sync always runs and counts as activity; network-back and unlock are unchanged (syncNow)', () async {
+      final e = engine();
+      await e.syncNow();
+      await minutes(40);
+      expect(e.idle, isTrue);
+      await e.syncNow(manual: true);
+      expect(api.pullCursors, hasLength(2));
+      expect(e.idle, isFalse);
+      await e.syncNow(manual: true);
+      expect(api.pullCursors, hasLength(3), reason: 'pull-to-refresh is never skipped');
+    });
+
+    test('the disabled engine ignores timer and resume', () async {
+      final e = SyncEngine.disabled();
+      await e.onTimer();
+      await e.onResume();
+      expect(api.pullCursors, isEmpty);
+    });
+  });
+
   test('provider wiring: a committed unit schedules a push through the real UoW hook', () async {
     final (c2, _) = await driftContainer(db, store: shop.store, overrides: [syncApiProvider.overrideWithValue(api)]);
     addTearDown(c2.dispose);
