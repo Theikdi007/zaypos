@@ -112,10 +112,23 @@ Writes outside a unit of work are a bug: repositories assert a recorder is prese
 ## 5. Sync engine
 
 ### 5.1 When it runs
-- App start (after unlock), and every 5 minutes while in the foreground
+- App start (after unlock): always
 - 2 s after any committed unit (debounced)
-- When connectivity returns
-- Pull-to-refresh on Dashboard and Sales history, and a "ယခု sync လုပ်မယ်" button in Settings
+- When connectivity returns: always
+- Pull-to-refresh on Dashboard and Sales history, and a "ယခု sync လုပ်မယ်" button in Settings: always
+- **Timer, every 5 minutes while in the foreground** (`SyncEngine.onTimer`). It pulls only if the last completed pull
+  is older than 4 min 30 s while **active**, or older than 14 min 30 s when **idle**. Idle means no committed unit,
+  resume or manual sync for 30 min. So a tick right after a sale's own cycle is skipped, and an idle phone pulls every
+  third tick. A unit waiting in the outbox always runs on the tick unless the push backoff is still on.
+- **Returning to the foreground** (`SyncEngine.onResume`): counts as activity, and pulls unless the last pull is under
+  60 s old.
+
+"Last pull" is the **start** of the last cycle whose pull completed: a failed pull never counts, so the next tick tries
+again. Why: every request goes through the edge proxy, whose plan is priced per request (docs/deploy/fallback-routes.md
+§Request budget). This cuts about 40 % of requests.
+
+**Trade-off:** on a phone that has been idle for 30 min, a change made on *another* device can take up to 15 min to
+appear, instead of 5. Pull-to-refresh, unlock, network-back and any local sale still sync at once.
 
 Only one sync runs at a time (single-flight). No background sync in v1.
 

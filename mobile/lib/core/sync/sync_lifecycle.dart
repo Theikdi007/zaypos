@@ -8,10 +8,11 @@ import 'sync_limits.dart';
 import 'sync_providers.dart';
 
 /// When sync runs (docs/mobile/phase3-sync.md §5.1): as soon as the shop is
-/// unlocked, every 5 minutes while in the foreground, on returning to the
-/// foreground, and when the network comes back. (Committed units schedule
-/// their own sync, 2 s later; pull-to-refresh and Settings call it too.)
-/// No background sync in v1.
+/// unlocked and when the network comes back (always); on the 5-minute
+/// foreground timer and on returning to the foreground only when a recent
+/// pull hasn't already covered it (SyncEngine.onTimer / onResume: 5 min while
+/// active, 15 min when idle). Committed units schedule their own sync, 2 s
+/// later; pull-to-refresh and Settings call it too. No background sync in v1.
 class SyncLifecycle extends ConsumerStatefulWidget {
   const SyncLifecycle({super.key, required this.child, this.interval = const Duration(minutes: 5)});
 
@@ -35,7 +36,7 @@ class _SyncLifecycleState extends ConsumerState<SyncLifecycle> {
   void _startTimer() {
     _timer?.cancel();
     if (!_foreground || !_engine.enabled) return;
-    _timer = Timer.periodic(widget.interval, (_) => _kick());
+    _timer = Timer.periodic(widget.interval, (_) => unawaited(_engine.onTimer()));
   }
 
   @override
@@ -44,7 +45,7 @@ class _SyncLifecycleState extends ConsumerState<SyncLifecycle> {
     _life = AppLifecycleListener(
       onResume: () {
         _foreground = true;
-        _kick();
+        unawaited(_engine.onResume());
         _startTimer();
       },
       onHide: () {
